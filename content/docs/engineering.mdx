@@ -1,0 +1,49 @@
+---
+title: Engineering
+description: Harness, loop, context and prompt — the rules Kun follows, and where each one lives in the engine
+---
+
+Four kinds of engineering decide what an agent costs and how far it can be trusted: the harness around the model, the loops that run without you, the context the model carries, and the way a task is asked. Each rule below names the file that enforces it, so it can be checked rather than believed.
+
+## Harness — what surrounds the model
+
+| Rule | Where it lives |
+| --- | --- |
+| One table decides the model. Nobody sets one by hand. | `engine.json → lanes`, stamped by `compile-lanes.mjs`, failed by the lint if it drifts ([Lanes](/docs/lanes)) |
+| The cheapest thing that can do the job does it: a script, then a Haiku fork, then a Sonnet agent, then an Opus judgment. Fable is used by hand only. | the lane table; `kun-claude.sh` refuses Fable in any unattended run |
+| A subagent is a cost, not a default. Anthropic's own measurement is that a multi-agent run costs about fifteen times a chat, so work fans out only when it is parallel and worth it. | Workflows run only when asked for; `route-guard.sh` keeps unnamed subagent calls off the session's model |
+| The one who makes a thing does not judge it. | `media-qa` measures and looks but never edits; `/qa` verifies in a separate stage |
+| A guard is a hook, not a request. A rule the model can forget is not a rule. | `block-destructive-bash.sh`, `mandate-guard.sh`, `route-guard.sh` |
+| Every unattended run leaves a line: its job, its lane, and the model that actually ran. | `~/.claude/logs/runs.jsonl`, written by `kun-claude.sh` |
+
+## Loop — work that runs without you
+
+| Rule | Where it lives |
+| --- | --- |
+| One piece of work per run, and it ends clean and committed. This follows Anthropic's guidance for long-running agents: one feature per session, a progress log, a clean end. | the run contract in `gabriel run` ([Gabriel](/docs/gabriel)) |
+| A run has a budget in turns and minutes. When it stops, it writes what is done, what is next and the evidence; the next run reads that note and the last commits before anything else. | `~/.claude/state/gabriel/notes/` |
+| Unattended never means unbounded. Publishing, production deploys, spending, messages to people and deletes always wait for a person. | `engine.json → mandate` |
+| A scheduled loop has a lock, a kill switch, one log a day and its policy in `engine.json`. | `.claude/templates/loop.sh` |
+| A job that exits 0 and writes a fresh log is not thereby working. The supervisor judges by what the run recorded, re-fires what was missed, and escalates what stays broken. | `runs.sh`, `supervise.mjs` |
+| A headless run carries no skills and no MCP servers unless its job needs them. | `kun-claude.sh` lean mode; `engine.json → jobs.$full` lists the exceptions |
+
+## Context — what the model carries
+
+| Rule | Where it lives |
+| --- | --- |
+| Context is a finite budget. What loads in every session is small and works as an index: it points, it does not explain. | `CLAUDE.md` files, path-scoped rules, the memory index |
+| What can be computed is never asked of a model. Routing, live state, usage and the ledger cost zero tokens. | `resolve.mjs`, `aware.mjs`, `usage.mjs`, `ledger.mjs` |
+| A name lands in its place before the model starts guessing: a repository, a block, a skill's own trigger phrase. | the `<kun-route>` hint ([Places](/docs/places)) |
+| A cheap keyword runs as a fork with no conversation history. The model is never switched in the middle of a conversation, because the prompt cache belongs to one model and a switch throws it away. | fork lanes in the lane table |
+| Haiku compacts at 100K tokens: above that it costs five times as much. | `autoCompactWindow` on Haiku-lane agents |
+| Measure before cutting. What a session carries at its first turn, and which servers, agents and skills are ever used, are read from the transcripts. | `preamble.mjs`, `usage.mjs` |
+
+## Prompt — how a task is asked
+
+| Rule | Where it lives |
+| --- | --- |
+| Depth of thinking is set by the effort level, not by telling the model to think hard. | `effort` in every lane |
+| A brief is the only context a subagent has. It states the goal, what is already ruled out, which files to read, the scope, and what to send back. | the dispatch paragraph in `.claude/CLAUDE.md`; the stage table in the `feature` skill |
+| Say what done looks like and what evidence is wanted. Ask what was not verified. | the run contract; every skill's exit gate |
+| Ask the few questions whose answers change the work, before starting, and no others. | `spec` (the one human gate), `gabriel` |
+| People speak in plain words. A skill is reached by the phrases written in its own `when_to_use`, never by a command someone has to remember. | each `SKILL.md`; [Keywords](/docs/keywords) |
