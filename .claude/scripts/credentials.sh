@@ -200,8 +200,8 @@ case "${1:-help}" in
       IFS='|' read -r url name <<< "$entry"
       echo -e "  Opening $name in Playwright browser..."
       echo "  Log in, then press Enter here."
-      # The browser-headed MCP handles persistence
-      echo "  Use Claude Code: browser-headed MCP → navigate to $url → log in"
+      # The session-vault Chrome keeps the login (one logged-in browser, since 2026-11-14)
+      echo "  Run: bash ~/.claude/bin/chrome-debug.sh 9222 $url   then log in there"
       read -p "  Press Enter when done with $name..."
     done
 

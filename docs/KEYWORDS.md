@@ -603,7 +603,7 @@ Casts end-to-end tests — the full Patronus, testing every path a user might wa
 > **The Order:**
 > **Familiar:** `test` | **Portal:** Browser MCP (headless + headed) | **Ward:** `testing`
 >
-> Playwright across all browsers. Uses `browser-headed` MCP for auth flows that need visible Chromium.
+> Playwright across all browsers. Auth flows that need a saved login use the session Chrome through `chrome-devtools`, in the background.
 
 ### `coverage`
 
@@ -1120,7 +1120,7 @@ Each MCP server is a permanent portal to an external realm — like the Floo Net
 | Realm           | Portal                                       |
 | --------------- | -------------------------------------------- |
 | **UI & Design** | shadcn, figma, tailwind, a11y, storybook     |
-| **Testing**     | browser (headless), browser-headed (visible) |
+| **Testing**     | browser (headless), chrome-devtools (logged-in) |
 | **DevOps**      | github, vercel, sentry, gcloud               |
 | **Data**        | neon, postgres, stripe, keychain             |
 | **Knowledge**   | ref, context7, linear                        |

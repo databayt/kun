@@ -28,6 +28,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { chromium } from 'playwright-core';
+import { quietPage } from './lib/vault-page.mjs';
 import { home, loadPack, log, lastChat, plan, print, saveAs } from './lib/media-pack.mjs';
 
 const CDP = process.env.KUN_VAULT_CDP || 'http://127.0.0.1:9222';
@@ -240,9 +241,10 @@ try {
   print({ status: 'stopped', error: `no vault Chrome on ${CDP}: run bash ~/.claude/bin/chrome-debug.sh` });
   process.exit(2);
 }
-const page = await browser.contexts()[0].newPage();
-// a new tab over CDP can open at phone width, and Gemini then serves its phone layout
-await page.setViewportSize({ width: 1440, height: 900 });
+// A hidden page in the vault: it has the vault's Google login, never shows in the tab strip and
+// takes no focus (KUN_BROWSER_SHOW=1 opens an ordinary tab to watch it work). The fixed size
+// matters: a page over CDP can open at phone width, and Gemini then serves its phone layout.
+const page = await quietPage(browser, { width: 1440, height: 900 });
 let code = 0;
 try {
   if (a.fix || a.fetch) {

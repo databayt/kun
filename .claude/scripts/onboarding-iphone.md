@@ -45,7 +45,7 @@ bash ~/.claude/scripts/devices.sh --status    # everything should be ✓
 
 - **Presence** holds pushes while you're at the Mac (input in the last 3 minutes, screen unlocked), so the phone buzzes only when you're away.
 - **kun-rc** keeps one `claude remote-control` server alive in tmux. It shows up in the Code tab as **Mac · kun**, where you can start new sessions on the Mac without leaving a terminal open.
-- Keep the Mac **on power with the lid open** (or docked to a display). A closed lid sleeps it, and a sleeping Mac is unreachable.
+- Keep the Mac **on power**. In server mode (`bash ~/kun/.claude/scripts/keepawake-admin.sh apply`, once) it stays awake with the lid open or shut and the screen dark; without it a closed lid sleeps the Mac, and a sleeping Mac is unreachable. `gabriel status` shows which it is.
 
 ---
 

@@ -67,7 +67,7 @@ Pass 4: RTL + i18n — Arabic layout mirrors, no LTR remnants
 Pass 5: Translation — no hardcoded English, no missing keys
 
 Environments: localhost:3000 (default) or --env staging
-Tool: browser-headed MCP (visible Playwright)
+Tool: browser MCP (headless Playwright)
 Report: .claude/handover-reports/<block>-<timestamp>/
 Loop: --fix flag for translation + RTL automated fixes
 

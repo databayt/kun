@@ -58,7 +58,7 @@ Default: the `opus` alias → Opus 5.5 (`claude-opus-5-5`, since 2026-09-26; can
 - **Package manager**: `Bash(pnpm *)`, `Bash(npx *)` — package operations
 - **Node**: `Bash(node *)` — runtime execution
 - **File tools**: Read, Edit, Write, Glob, Grep, Agent, WebFetch, WebSearch
-- **MCP wildcards** (17): shadcn, github, browser, browser-headed, Neon, Vercel, Figma, ref, context7, sentry, linear, stripe, postgres, a11y, storybook, Indeed, design-system-analyzer
+- **MCP wildcards** (17): shadcn, github, browser, chrome-devtools, Neon, Vercel, Figma, ref, context7, sentry, linear, stripe, postgres, a11y, storybook, Indeed, design-system-analyzer
 
 ### Permission Deny Rules (4)
 
@@ -255,7 +255,7 @@ Operational configuration:
 | Server         | Purpose                       |
 | -------------- | ----------------------------- |
 | browser        | Headless Chromium (1920x1080) |
-| browser-headed | Visible Chromium (auth flows) |
+| chrome-devtools | The session Chrome with saved logins, used in the background |
 
 #### DevOps & Infra (4)
 

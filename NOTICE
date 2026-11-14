@@ -1,0 +1,32 @@
+Kun (كن) - the Kun Engine
+Copyright (c) 2025-present databayt
+
+This product is licensed under the Server Side Public License v1 (SSPL-1.0).
+See the LICENSE file for the full license text.
+
+A commercial license is available from Databayt for uses the SSPL does not
+permit, such as offering the software as a hosted service without releasing
+the service's own source code.
+
+This product includes software developed by third parties under their
+respective licenses:
+
+---
+
+shadcn/ui
+Copyright (c) 2023 shadcn
+License: MIT
+Location: src/components/ui/
+https://github.com/shadcn-ui/ui
+
+---
+
+Radix UI
+Copyright (c) 2022 WorkOS
+License: MIT
+https://github.com/radix-ui/primitives
+
+---
+
+Every other dependency is listed in package.json and carries its own license
+in node_modules/<package>/.

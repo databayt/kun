@@ -40,8 +40,8 @@ Every Playwright error is debugged **once**, then guarded forever. The catalog o
 
 - **Package**: `@playwright/mcp` (Anthropic's official). NEVER `@executeautomation/playwright-mcp-server` or `@anthropic-ai/mcp-server-playwright` (the latter doesn't exist on npm).
 - **Version pin**: exact, never `@latest`. Current pin: `0.0.75`. Update only by re-registering the server (`claude mcp add-json -s user`, which writes `~/.claude.json`) AND editing `~/.claude/skills/mcp-doctor/SKILL.md` in lock-step.
-- **Config home**: the user-scope registration in `~/.claude.json` is authoritative — Claude Code never reads `~/.claude/mcp.json`. Project-level `.mcp.json` files **must not** define `browser` or `browser-headed` — they shadow user-level by name.
-- **Profile dirs**: headless `browser` runs `--isolated` (in-memory profile, **no** `--user-data-dir`) so every concurrent session gets its own ephemeral Chromium — this is the permanent fix for **E8** (multi-session "Browser is already in use"). Headed `browser-headed` → `~/.playwright-auth` (persistent login) and is **single-session-at-a-time**. Never point two servers/sessions at the same persistent dir; for parallel authenticated runs use `--isolated --storage-state <file>`.
+- **Config home**: the user-scope registration in `~/.claude.json` is authoritative — Claude Code never reads `~/.claude/mcp.json`. Project-level `.mcp.json` files **must not** define `browser` (or bring back `browser-headed`) — they shadow user-level by name.
+- **Profile dirs**: headless `browser` runs `--isolated` (in-memory profile, **no** `--user-data-dir`) so every concurrent session gets its own ephemeral Chromium — this is the permanent fix for **E8** (multi-session "Browser is already in use"). There is **no second logged-in browser**: `browser-headed` and its `~/.playwright-auth` profile were removed on 2026-11-14 (a duplicate of the session-vault Chrome, and a visible one). Anything that needs a login goes through `chrome-devtools` on the vault (`new_page` with `background: true`).
 - **CLI flag owns `--user-data-dir`.** The config file at `~/.claude/playwright-mcp.config.json` must NOT contain a `userDataDir` key.
 - **Runtime config is the tuning surface.** `~/.claude/playwright-mcp.config.json` carries the schema-validated `Config` (nested `browser.launchOptions` / `browser.contextOptions`, `timeouts.{action,navigation,expect}`, `outputDir`, `snapshot.mode`, `console.level`, `testIdAttribute`). It is enriched for deterministic QA — `reducedMotion: reduce`, `serviceWorkers: block`, fixed `colorScheme` / `locale` / `timezoneId`. Per-server differences (headless on/off, profile dir, isolation) stay on the CLI, and `--caps vision,pdf` stays on the CLI (the config-file `capabilities` enum may _replace_ rather than _augment_ the core toolset). RTL is exercised per-call via `/ar/` routes, not a hardcoded context locale. Still **no `userDataDir`**.
 
@@ -73,7 +73,7 @@ find ~ -maxdepth 5 \( -name "mcp.json" -o -name ".mcp.json" \) \
 
 # 5. User-level config sanity
 echo "[5] user-level config:"
-python3 -c "import json,os; d=json.load(open(os.path.expanduser('~/.claude.json')))['mcpServers']; [print(' ',k,d[k].get('command'),' '.join(d[k].get('args',[]))) for k in ('browser','browser-headed') if k in d]"
+python3 -c "import json,os; d=json.load(open(os.path.expanduser('~/.claude.json')))['mcpServers']; [print(' ',k,d[k].get('command'),' '.join(d[k].get('args',[]))) for k in ('browser','browser-headed','chrome-devtools') if k in d]"
 
 # 6. Pinned MCP package resolvable
 echo "[6] @playwright/mcp@0.0.75 resolvable:"
@@ -104,7 +104,7 @@ rm -f ~/.playwright-auth-headless/Singleton{Lock,Cookie,Socket}
 
 ### C. Project-level browser shadow (the most common cause)
 
-Open the file printed by diagnostic step [4]. Delete the `"browser"` and `"browser-headed"` entries. The user-scope registration in `~/.claude.json` will now apply.
+Open the file printed by diagnostic step [4]. Delete any `"browser"` or `"browser-headed"` entry. The user-scope registration in `~/.claude.json` will now apply.
 
 ### D. Cache bloat (optional, recovers disk)
 

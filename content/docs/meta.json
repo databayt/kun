@@ -2,6 +2,7 @@
   "title": "Documentation",
   "pages": [
     "index",
+    "philosophy",
     "onboarding",
     "---Engine---",
     "claude-md",

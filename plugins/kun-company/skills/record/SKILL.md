@@ -66,8 +66,10 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
   `tell application "Google Chrome" to set bounds of window 1 to {0,0,1512,982}`
   (`System Events set size` throws -1719 here). Screenshots with relative filenames
   land in the REPO ROOT — always pass absolute paths into `_work/`.
-- **browser-headed MCP** (Playwright, `~/.playwright-auth` profile) — carries SAVED
-  logins; use for flows that need an existing session (dashboards, admin).
+- **Flows that need an existing session** (dashboards, admin) also use chrome-devtools on
+  the session-vault Chrome: it is the one browser that holds saved logins. The separate
+  `browser-headed` server and its profile were removed on 2026-11-14. A take is the one time
+  the vault is brought to the front on purpose (`chrome-debug.sh 9222 <url>`).
 - **`browser` MCP is HEADLESS — it CANNOT be recorded.** Nothing renders on screen. It is
   excellent for VERIFYING a flow end to end (e.g. confirming a deployed fix), never for a take.
 - **If a browser MCP dies mid-session, the take is over.** MCP servers cannot be restarted

@@ -209,8 +209,8 @@ MCP servers providing external tool integration:
 │                            Data & Auth                           │
 │  Testing                   ├── neon (Postgres)                  │
 │  ├── browser (headless)    ├── postgres (queries)               │
-│  └── browser-headed        ├── stripe (payments)                │
-│      (visual testing)      └── keychain (credentials)           │
+│  └── chrome-devtools       ├── stripe (payments)                │
+│      (logged-in, silent)   └── keychain (credentials)           │
 │                                                                  │
 │  Knowledge                 Project Management                   │
 │  ├── ref (tech docs)       └── linear (issues)                  │

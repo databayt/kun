@@ -62,4 +62,8 @@ node .claude/scripts/ledger.mjs --test            # the sharing rule
 
 Everything lands on `main`: no branches, no pull requests. Commits are small and conventional, and each one names its paths. A change to the fleet (an agent, a skill, a rule) carries its counts and its regenerated plugin in the same commit.
 
+## Licence
+
+Kun is licensed under the [Server Side Public License v1](LICENSE) (SSPL-1.0). A commercial licence is available from Databayt for uses the SSPL does not permit.
+
 Databayt builds in the open and shares what it earns by a public rule. ([Share economy](https://kun.databayt.org/en/docs/share-economy))

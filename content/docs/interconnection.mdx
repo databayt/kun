@@ -137,8 +137,23 @@ noon). Four pieces make every scheduled job finish once the Mac is really up —
 | `supervise.mjs` (every 5 min, and within 15 s of a real wake) | **heals** what jobs need (Hermes gateway, Colima + Twenty, the vault Chrome, daemons, plists an installer unwrapped); **re-runs** a missed or failed slot through the job's own entry, by policy (`engine.json → jobs.<job>.resume`: auto · tick · alert · heal), never a live run, never twice; **escalates** what stays broken — one `job-health` issue (the record) + one Slack line (the push), closed when it recovers. It also checks the cloud schedules hourly: GitHub Actions crons (a fresh failure re-runs once) and every Cloudflare Worker cron route (Workers Logs) |
 | the `mkan-watchdog` Worker | outside eyes: the supervisor writes a beat every 15 min; when the beat goes quiet *and* a job's deadline passes, the Worker opens the issue — the one case no check on the Mac can report |
 
-Plugged in, the Mac now stays awake with the lid shut, so the jobs run on time; on battery it
-sleeps as before (`devices.sh --keepawake-setup` prints the one-time sudo rule). Healing,
+In **server mode** the Mac sleeps or shuts down only when Abdout does it by hand, and looks
+switched off while it works (policy: `engine.json → devices.power`; the presence loop in
+`devices.sh` enforces it):
+
+| Situation | What happens |
+|---|---|
+| On mains, lid open or shut | Never sleeps. The display goes dark after two idle minutes. |
+| Mains lost while it was working | Keeps working on battery and tells his phone at once. |
+| Battery at 10% | Sleeps on purpose, so the sessions stay in memory until power returns. |
+| Lid shut after mains was already lost | Sleeps: a laptop being carried. |
+| `gabriel sleep` · `gabriel dark` | The manual way to sleep it · screen off now, still working. |
+
+It is switched on once with `bash .claude/scripts/keepawake-admin.sh apply` (macOS asks for the
+password in its own dialog; `rollback` undoes it). The same step stops macOS installing updates
+by itself and puts a line on the lock screen, because a locked screen over the wallpaper looks
+like a machine that stopped — it has not. `gabriel status` prints the power line: source,
+battery, whether it is held awake, and since when it has been up. Healing,
 re-runs and alerts are live for every job (`jobs.$supervise`); to stage a change, set `live` false
 and list owners in `live_owners` — the rest then log *would-fire* instead.
 
