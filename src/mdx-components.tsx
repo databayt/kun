@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { isValidElement, type ComponentProps, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -57,6 +57,21 @@ import {
 } from "@/components/docs/intro";
 
 // This file is required to use MDX in `app` directory.
+
+// The first letter decides the direction of a quote, as dir="auto" would — but resolved here,
+// so the element also gets lang="ar" (screen readers, and Arabic never set in italics).
+function plainText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(plainText).join("");
+  if (isValidElement<{ children?: ReactNode }>(node))
+    return plainText(node.props.children);
+  return "";
+}
+
+function opensInArabic(node: ReactNode): boolean {
+  const first = plainText(node).match(/[A-Za-z\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/);
+  return first !== null && !/[A-Za-z]/.test(first[0]);
+}
 
 const mdxComponents = {
   // Allows customizing built-in components, e.g. to add styling.
@@ -152,13 +167,25 @@ const mdxComponents = {
   ),
   blockquote: ({
     className,
+    children,
     ...props
-  }: React.HTMLAttributes<HTMLQuoteElement>) => (
-    <blockquote
-      className={cn("mt-6 border-s-2 ps-6 italic", className)}
-      {...props}
-    />
-  ),
+  }: React.HTMLAttributes<HTMLQuoteElement>) => {
+    // A quote that opens in Arabic reads right to left on an English page, border on the right.
+    const arabic = opensInArabic(children);
+    return (
+      <blockquote
+        {...(arabic ? { dir: "rtl" as const, lang: "ar" } : {})}
+        className={cn(
+          "mt-6 border-s-2 ps-6",
+          arabic ? "text-lg [&_p]:leading-loose" : "italic",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </blockquote>
+    );
+  },
   img: ({
     className,
     alt,
