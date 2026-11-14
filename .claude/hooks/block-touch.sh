@@ -4,6 +4,8 @@
 # registered block must come with record/docs updates).
 # Installed at ~/.claude/hooks/block-touch.sh; canonical copy in kun.
 
+[ -n "${KUN_HEADLESS:-}" ] && exit 0   # block-guard.sh skips headless runs, so there is nothing to log for
+
 input=$(cat)
 proj="${CLAUDE_PROJECT_DIR:-$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)}"
 [ -f "$proj/.claude/blocks.json" ] || exit 0

@@ -2,9 +2,12 @@
 # UserPromptSubmit — kun's router: names in a prompt → repos and blocks.
 # Since 2026-11-01 the work is done by .claude/scripts/resolve.mjs, one node process over
 # a prebuilt index (~/.claude/kun-index.json) instead of ~150 jq/grep calls per prompt:
-#   - a block of THIS repo (its .claude/blocks.json) → the block protocol below, byte for byte
-#   - another repo by name (hogwarts, mkan, balqalam…) or a curated global block
-#     (engine.json → resolver.global_blocks) → a one-line <kun-route> pointer
+#   - a block of THIS repo (its .claude/blocks.json) → the block protocol below, byte for byte;
+#     a repo on the light protocol (blocks.json → protocol: "light") gets one <kun-route> line,
+#     and only for a block that already has records
+#   - another repo by name (hogwarts, mkan, balqalam…) or a block whose class is `unique`
+#     (computed when the index is built; engine.json → resolver.always_bare promotes a plain
+#     word) → a one-line <kun-route> pointer
 # Without node or the index, the original bash logic below still runs. Always exits 0.
 # Installed at ~/.claude/hooks/block-context.sh; canonical copy in kun.
 
@@ -19,6 +22,7 @@ fi
 proj="${CLAUDE_PROJECT_DIR:-$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)}"
 reg="$proj/.claude/blocks.json"
 [ -f "$reg" ] || exit 0
+[ "$(jq -r '.protocol // "full"' "$reg" 2>/dev/null)" = "light" ] && exit 0   # light repos get their one-liners from resolve.mjs only
 
 prompt=$(printf '%s' "$input" | jq -r '.prompt // empty' 2>/dev/null | tr '[:upper:]' '[:lower:]')
 [ -n "$prompt" ] || exit 0

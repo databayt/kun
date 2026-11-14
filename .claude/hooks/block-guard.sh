@@ -8,6 +8,11 @@
 # Threshold via BLOCK_GUARD_MIN_FILES (default 2) — single-file quick fixes pass.
 # Installed at ~/.claude/hooks/block-guard.sh; canonical copy in kun.
 
+# Headless `claude -p` (kun-claude.sh) is exempt: an unattended run has no one to read the
+# nudge and would pay a turn for it. Since 2026-11-14 most active repos carry a blocks.json,
+# so without this every sprint-runner pass would be stopped once.
+[ -n "${KUN_HEADLESS:-}" ] && exit 0
+
 export HOOK_INPUT="$(cat)"
 
 python3 - <<'PY'
@@ -27,7 +32,11 @@ touched = [l.strip() for l in open(log_path) if l.strip()]
 if not touched:
     sys.exit(0)
 
-blocks = json.load(open(reg_path)).get("blocks", {})
+registry = json.load(open(reg_path))
+blocks = registry.get("blocks", {})
+# Light protocol (blocks.json → protocol: "light"): the repo has not adopted block records,
+# so only a block that already HAS records is held to keeping them current.
+light = registry.get("protocol") == "light"
 min_files = int(os.environ.get("BLOCK_GUARD_MIN_FILES", "2"))
 RECORDS = ("README.md", "ISSUE.md", "CLAUDE.md")
 
@@ -47,6 +56,8 @@ for t in touched:
 violations = []
 for name, files in by_block.items():
     b = blocks[name]
+    if light and not b.get("context"):
+        continue
     code = [t for t in files if os.path.basename(t) not in RECORDS]
     if len(code) < min_files:
         continue

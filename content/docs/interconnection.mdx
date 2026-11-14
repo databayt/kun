@@ -74,12 +74,17 @@ sync, bench, dirty files.
 
 ### THINK — the router and the dispatch table
 
-`resolve.mjs` turns names into places before the model guesses: a **block of the current repo**
-gets the block protocol; **another repo by name** (hogwarts, mkan, souq, shifa — and aliases like
-balqalam, بالقلم, mkan.sd) gets a one-line pointer; a **curated global block** (admission,
-attendance, timetable, parent-portal, …) gets a one-line hint from any session. Generic words
-(docs, table, finance, grades, listings) never route across repos; `kun` and `codebase` never
-route bare. Policy: `engine.json → resolver`; registry: `.claude/memory/repositories.json`.
+`resolve.mjs` turns names into places before the model guesses. Every repository and every
+feature block is a keyword: a **block of the current repo** gets the block protocol (hogwarts)
+or a one-line pointer to its records (repos on the light protocol); **another repo by name**
+(hogwarts, mkan, souq, shifa — and aliases like balqalam, بالقلم, mkan.sd, any production
+domain) gets a one-line pointer, and so does one of its blocks named beside it (`mkan booking`,
+`food kitchen`); a **unique block** (admission, timetable, parent-portal, …) gets a one-line
+hint from any session. Each block key's class — unique, shared or common — is computed when the
+index is built; plain words (docs, table, finance, grades, listings) never route across repos
+alone, and `kun`, `codebase` and `marketing` never route bare. The full list is
+[Places](/docs/places). Policy: `engine.json → resolver`; registry:
+`.claude/memory/repositories.json`; per-repo block lists: `<repo>/.claude/blocks.json`.
 
 Then the session picks a lane — **the dispatch table** (`engine.json → delegation`):
 

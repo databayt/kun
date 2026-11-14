@@ -11,14 +11,38 @@
  * The registry powers the block protocol hooks (~/.claude/hooks/block-*.sh):
  * read records + related GitHub issue before work, update them after.
  *
- * Usage: node generate-blocks.mjs <repo-root>
+ * Usage: node generate-blocks.mjs <repo-root> [--containers a,b] [--protocol full|light] [--print]
+ *
+ *   --containers a,b   depth-1 dirs whose children are feature blocks too (kun: root;
+ *                      space: site,dashboard). Saved in blocks.json → containers, so a
+ *                      later run with no flag reproduces the same registry.
+ *   --protocol light   keywords without the ceremony, for a repo that has not adopted block
+ *                      records: only a block that already has records gets a one-line
+ *                      pointer on prompt and the Stop nudge; the rest stay silent in their
+ *                      own repo. `full` (the default, hogwarts) injects the whole protocol
+ *                      for every key. Saved in blocks.json → protocol.
+ *   --print            write the registry to stdout instead of the repo (a dry run).
  */
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from "node:fs";
 import { join, relative } from "node:path";
 
-const root = process.argv[2];
+const argv = process.argv.slice(2);
+let root = null;
+let containersArg = null;
+let protocolArg = null;
+let PRINT = false;
+for (let i = 0; i < argv.length; i++) {
+  if (argv[i] === "--containers") containersArg = (argv[++i] || "").split(",").map((x) => x.trim()).filter(Boolean);
+  else if (argv[i] === "--protocol") protocolArg = argv[++i];
+  else if (argv[i] === "--print") PRINT = true;
+  else if (!root) root = argv[i];
+}
 if (!root || !existsSync(join(root, "src/components"))) {
-  console.error("usage: generate-blocks.mjs <repo-root>  (must contain src/components)");
+  console.error("usage: generate-blocks.mjs <repo-root> [--containers a,b] [--protocol full|light] [--print]  (must contain src/components)");
+  process.exit(1);
+}
+if (protocolArg && !["full", "light"].includes(protocolArg)) {
+  console.error("generate-blocks: --protocol takes full or light");
   process.exit(1);
 }
 
@@ -28,11 +52,21 @@ const target = join(root, ".claude/blocks.json");
 // Routes + context + docs are derived from the tree and always recomputed; `qa`
 // is written by .claude/workflows/qa.js and must survive a regen.
 let priorBlocks = {};
+let priorContainers = [];
+let priorProtocol = null;
 try {
-  if (existsSync(target)) priorBlocks = JSON.parse(readFileSync(target, "utf8")).blocks || {};
+  if (existsSync(target)) {
+    const prior = JSON.parse(readFileSync(target, "utf8"));
+    priorBlocks = prior.blocks || {};
+    priorContainers = prior.containers || [];
+    priorProtocol = prior.protocol || null;
+  }
 } catch {
   priorBlocks = {};
 }
+// Declared containers: the flag wins, else what the last run saved.
+const CONTAINERS = containersArg || priorContainers;
+const PROTOCOL = protocolArg || priorProtocol || "full";
 
 const CONTEXT_FILES = ["README.md", "ISSUE.md", "CLAUDE.md"];
 const DOCS_DIRS = ["content/docs-en", "content/docs-ar", "content/docs"].filter((d) =>
@@ -99,25 +133,28 @@ const contextOf = (p) => CONTEXT_FILES.filter((f) => existsSync(join(root, p, f)
 const docsOf = (name) =>
   DOCS_DIRS.map((d) => `${d}/${name}.mdx`).filter((f) => existsSync(join(root, f)));
 
-// Collect candidate blocks: depth-1 dirs, plus children of dashboard-like dirs.
+// Collect candidate blocks: depth-1 dirs, plus children of dashboard-like dirs and of
+// the declared containers.
 const candidates = [];
 for (const name of dirsOf("src/components")) {
   const path = `src/components/${name}`;
   candidates.push({ name, path });
   const children = dirsOf(path);
   const dashboardLike = children.filter((c) => contextOf(`${path}/${c}`).includes("README.md"));
-  if (dashboardLike.length >= 3) {
+  if (dashboardLike.length >= 3 || CONTAINERS.includes(name)) {
     for (const c of children) candidates.push({ name: c, path: `${path}/${c}` });
   }
 }
+const missing = CONTAINERS.filter((c) => !existsSync(join(root, "src/components", c)));
+if (missing.length) console.error(`generate-blocks: container(s) not found under src/components: ${missing.join(", ")}`);
 
 // Resolve keyword collisions: most context records wins; tie → deeper path
 // (the dashboard feature, which is what "optimize <block>" usually means).
 const blocks = {};
+const pathsOf = {}; // keyword → every dir that carries it (the winner + the rest)
 for (const { name, path } of candidates) {
+  (pathsOf[name] ||= []).push(path);
   const entry = { path, context: contextOf(path), docs: docsOf(name), routes: routesOf(name) };
-  // Preserve runtime QA state written by qa.js — never derived from the tree.
-  if (priorBlocks[name] && priorBlocks[name].qa) entry.qa = priorBlocks[name].qa;
   const prev = blocks[name];
   if (
     !prev ||
@@ -127,15 +164,29 @@ for (const { name, path } of candidates) {
     blocks[name] = entry;
   }
 }
+for (const [name, entry] of Object.entries(blocks)) {
+  // The same keyword in a second place (space: dashboard/cafe + site/cafe) — one path owns
+  // the protocol, the others are listed so a pointer can name both sides.
+  const siblings = pathsOf[name].filter((p) => p !== entry.path).sort();
+  if (siblings.length) entry.siblings = siblings;
+  // Preserve runtime QA state written by qa.js — never derived from the tree.
+  if (priorBlocks[name] && priorBlocks[name].qa) entry.qa = priorBlocks[name].qa;
+}
 
 const sorted = Object.fromEntries(Object.entries(blocks).sort(([a], [b]) => a.localeCompare(b)));
 const out = {
   description:
     "Block keyword registry — generated by kun/.claude/scripts/generate-blocks.mjs. Powers the block protocol hooks: read context + related GitHub issue before work, update records + docs after.",
   docsDirs: DOCS_DIRS,
+  ...(PROTOCOL !== "full" ? { protocol: PROTOCOL } : {}),
+  ...(CONTAINERS.length ? { containers: CONTAINERS } : {}),
   blocks: sorted,
 };
 
+if (PRINT) {
+  process.stdout.write(JSON.stringify(out, null, 2) + "\n");
+  process.exit(0);
+}
 mkdirSync(join(root, ".claude"), { recursive: true });
 writeFileSync(target, JSON.stringify(out, null, 2) + "\n");
 console.log(

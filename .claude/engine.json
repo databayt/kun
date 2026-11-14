@@ -230,9 +230,9 @@
   "approver": "abdout"
  },
  "resolver": {
-  "$comment": "Declared POLICY for .claude/scripts/resolve.mjs (the UserPromptSubmit router, 2026-11-01). global_blocks: hogwarts blocks distinctive enough to hint from ANY session (curated by Abdout's choice: curated list, one-line hint) — generic ones (docs, table, finance, grades, listings, dashboard, settings) stay local. never_bare: repo names too common in prose to route without an explicit form.",
-  "global_blocks": ["admission", "attendance", "timetable", "parent-portal", "my-fees", "transportation", "school-dashboard", "teaching-scope", "school-switcher", "qbank-automation"],
-  "never_bare": ["kun", "codebase"]
+  "$comment": "Declared POLICY for .claude/scripts/resolve.mjs (the UserPromptSubmit router). Since 2026-11-14 every block key gets a class when the index is built — unique (bare from any session), shared (several repos own it, or it is already a repo, skill, agent or spell), common (a plain single word) — so the hand-kept global_blocks list is gone. always_bare: plain single words promoted to unique (Abdout's curated four from the old list; the six hyphenated ones are unique by computation). never_bare: repo names too common in prose to route without an explicit form — they also get no repo-before-block match ('marketing video' is not the marketing repo). The public list: content/docs/places.mdx (resolve.mjs --page).",
+  "always_bare": ["admission", "attendance", "timetable", "transportation"],
+  "never_bare": ["kun", "codebase", "marketing"]
  },
  "aware": {
   "$comment": "Declared POLICY for the SENSE layer (.claude/scripts/aware.mjs, 2026-11-01). Measured state lives in ~/.claude/state/aware.json, never here. Alerts fire on transitions only (two refreshes in a row), once each, at most alert_cap_per_day; spend, sync, bench and dirty files are shown, never alerted.",

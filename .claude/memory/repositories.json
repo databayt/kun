@@ -1,7 +1,7 @@
 {
   "$schema": "repository-registry-schema",
   "description": "Track all databayt organization repositories for deep reference",
-  "lastUpdated": "2026-09-27",
+  "lastUpdated": "2026-11-14",
   "organization": {
     "name": "databayt",
     "url": "https://github.com/databayt",
@@ -37,6 +37,9 @@
           "src/components/",
           "src/registry/",
           ".claude/"
+        ],
+        "aliases": [
+          "cb.databayt.org"
         ]
       },
       {
@@ -110,6 +113,9 @@
         "watchPaths": [
           ".claude/",
           "content/docs/"
+        ],
+        "aliases": [
+          "kun.databayt.org"
         ]
       },
       {
@@ -184,7 +190,8 @@
         "aliases": [
           "balqalam",
           "balqalam.com",
-          "بالقلم"
+          "بالقلم",
+          "هوغورتس"
         ],
         "bareMatch": true
       },
@@ -474,6 +481,10 @@
         "watchPaths": [
           "src/components/",
           "src/app/"
+        ],
+        "aliases": [
+          "databayt.org",
+          "www.databayt.org"
         ]
       },
       {
@@ -501,7 +512,10 @@
         "priority": 3,
         "status": "active",
         "lastSync": null,
-        "watchPaths": []
+        "watchPaths": [],
+        "aliases": [
+          "apple.databayt.org"
+        ]
       },
       {
         "id": "lab",
@@ -534,6 +548,57 @@
         "status": "active",
         "lastSync": null,
         "watchPaths": []
+      }
+    ],
+    "sites": [
+      {
+        "id": "space",
+        "name": "Space",
+        "url": "https://github.com/databayt/space",
+        "local": "/Users/abdout/space",
+        "description": "Space — Port Sudan coworking hub: bookings, cafe, events, membership",
+        "status": "active",
+        "visibility": "private",
+        "aliases": [
+          "spacehub",
+          "spacehub.sd",
+          "space.databayt.org",
+          "سبيس"
+        ]
+      },
+      {
+        "id": "food",
+        "name": "Food",
+        "url": "https://github.com/databayt/food",
+        "local": "/Users/abdout/food",
+        "description": "Restaurant ordering — cashier, kitchen, QR menu, order tracking",
+        "status": "active",
+        "aliases": [
+          "bu.databayt.org"
+        ]
+      },
+      {
+        "id": "farm",
+        "name": "Farm",
+        "url": "https://github.com/databayt/farm",
+        "local": "/Users/abdout/farm",
+        "description": "Digital farm site",
+        "status": "active",
+        "aliases": [
+          "farm.databayt.org"
+        ]
+      },
+      {
+        "id": "leader",
+        "name": "Leader",
+        "url": "https://github.com/databayt/leader",
+        "local": "/Users/abdout/leader",
+        "description": "Garment manufacturer and exporter site",
+        "status": "active",
+        "visibility": "private",
+        "aliases": [
+          "leader.databayt.org"
+        ]
       }
     ]
   },
@@ -671,5 +736,5 @@
     "fallbackToGitHub": true,
     "cachePatterns": true
   },
-  "$aliases_comment": "aliases + bareMatch feed .claude/scripts/resolve.mjs (2026-11-01): a bareMatch repo routes from its bare name in a prompt; every other repo needs an explicit form (in X, X repo, ~/X, databayt/X). Aliases must be unambiguous — Arabic مكان/سوق/شفاء are everyday words (place/market/healing), so they are NOT aliases."
+  "$aliases_comment": "aliases + bareMatch + visibility feed .claude/scripts/resolve.mjs. A bareMatch repo routes from its bare name in a prompt; every other repo needs an explicit form (in X, X repo, ~/X, databayt/X), one of its aliases, or its name right before one of its own blocks (food kitchen). Aliases must be unambiguous — Arabic مكان/سوق/شفاء are everyday words (place/market/healing), so they are NOT aliases; a production domain is always safe (it never matches inside a longer host name). visibility: \"private\" keeps a repo and its blocks off the public page (content/docs/places.mdx); the local index still routes it."
 }
