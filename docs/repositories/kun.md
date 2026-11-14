@@ -22,11 +22,11 @@
 Kun is the configuration engine that transforms Anthropic's product suite into a unified operating system for Databayt. It contains:
 
 - **CLAUDE.md hierarchy** — Context that shapes all AI output
-- **28 agents** — Specialized expertise (stack, design, UI, DevOps, VCS, specialized)
-- **17 skills** — Keyword-triggered workflows (/dev, /build, /deploy, /test, etc.)
+- **55 agents** — Specialized expertise (stack, design, UI, DevOps, VCS, specialized)
+- **85 skills** — Keyword-triggered workflows (/dev, /build, /deploy, /test, etc.)
 - **18 MCP servers** — External tool integrations (GitHub, Vercel, Neon, Stripe, Figma, etc.)
 - **8 rules** — Path-scoped guardrails (auth, i18n, prisma, tailwind, testing)
-- **5 hooks** — Automation (auto-format, port management, session logging)
+- **19 hooks** — Automation (auto-format, port management, session logging)
 - **6 memory files** — Cross-session learning
 - **100+ keywords** — One word → complete workflow
 - **Documentation** — MDX-based docs site via fumadocs

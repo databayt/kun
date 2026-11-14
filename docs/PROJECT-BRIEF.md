@@ -57,10 +57,10 @@ We are starting the company. Not in survival mode — in building mode.
 
 | Expense | Monthly Cost |
 |---------|-------------|
-| Claude Code (Max plan) | $200 |
+| Claude Code (Max plan) | $100 |
 | Services (Neon, Vercel, AWS, Namecheap) | ~$300 |
 | Team salary | $0 (equity/sweat phase) |
-| **Total monthly burn** | **~$500** |
+| **Total monthly burn** | **~$400** |
 
 ### Current Budget
 
@@ -188,7 +188,7 @@ Ahmed Baha is an interested client. The pitch is partnership, not sales:
 
 | Product | Role | Cost |
 |---------|------|------|
-| Claude Code (Max) | Primary development interface | $200/month |
+| Claude Code (Max) | Primary development interface | $100/month |
 | Claude Desktop | Team access (Windows/Mac) | Included |
 | Claude iOS | Mobile access | Included |
 | Cowork | Business operations | Included |
@@ -214,7 +214,7 @@ Kun is the operating system of Databayt. It doesn't write code — it **coordina
 
 | Domain | How |
 |--------|-----|
-| **Development** | 28 agents, 17 skills, 100+ keywords |
+| **Development** | 55 agents, 85 skills, 240 keywords |
 | **Code quality** | Rules, hooks, automated review |
 | **Deployment** | Vercel MCP, deploy skills |
 | **Database** | Neon MCP, Prisma agents |

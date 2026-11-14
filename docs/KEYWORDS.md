@@ -9,7 +9,7 @@ Every witch and wizard knows that magic begins with a word. Not a paragraph. Not
 
 **Kun** (كن) is Arabic for "Be" — the divine command of creation. Say the word, and it is. This is not metaphor. Type `dev` and your server rises. Type `deploy` and your code travels across the world. Type `auth` and an entire authentication system assembles itself from nothing.
 
-This spellbook contains **115 incantations** across 15 schools of magic. Each has been tested, refined, and proven in production. Some are gentle charms for daily work. Others are powerful enchantments that orchestrate dozens of agents and services. A few are dangerous enough to warrant warnings.
+This spellbook contains **240 incantations** across 22 schools of magic. Each has been tested, refined, and proven in production. Some are gentle charms for daily work. Others are powerful enchantments that orchestrate dozens of agents and services. A few are dangerous enough to warrant warnings.
 
 Learn them well. A wizard who knows the right word at the right moment is worth a hundred who know only how to type.
 
@@ -1208,7 +1208,7 @@ _You no longer just create — you optimize. You see the invisible chains of lat
 > _"Words are, in my not-so-humble opinion, our most inexhaustible source of magic. Capable of both inflicting injury, and remedying it."_
 > — Albus Dumbledore
 
-This spellbook contains 115 incantations. Together, they can build, test, deploy, secure, optimize, and document an entire software company.
+This spellbook contains 240 incantations. Together, they can build, test, deploy, secure, optimize, and document an entire software company.
 
 But remember: the magic is not in the words. It is in knowing _which_ word, at _which_ moment, for _which_ purpose.
 

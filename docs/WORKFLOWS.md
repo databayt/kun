@@ -58,7 +58,7 @@ Keyword: "saas billing" or "table users" or "auth"
 ### 1.7 Handover QA
 
 ```
-"handover [block]"  →  .claude/commands/handover.md
+"handover [block]"  →  .claude/skills/handover/SKILL.md
 
 Pass 1: Bug-free — navigate everything, check console
 Pass 2: Flow — complete user journeys, data persistence
@@ -84,7 +84,7 @@ Next step: "release [block]" — see 1.9
 ### 1.9 Release to client
 
 ```
-"release [block]"  →  .claude/commands/release.md
+"release [block]"  →  .claude/skills/release/SKILL.md
 
 The one-spell client handoff. Chains:
 
@@ -343,9 +343,9 @@ Ali (sales@databayt.org):
 ```
 Cowork + Stripe MCP:
   > "Monthly burn and runway report"
-  1. Track expenses: Claude ($200) + services (~$300)
-  2. Current burn: ~$500/month
-  3. Runway: $5K / $500 = 10 months
+  1. Track expenses: Claude ($100) + services (~$300)
+  2. Current burn: ~$400/month
+  3. Runway: $5K / $400 = about 12 months
   4. Revenue: track when it starts coming in
 ```
 

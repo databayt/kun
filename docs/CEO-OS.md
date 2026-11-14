@@ -91,7 +91,7 @@ Reviewed-by: [date 30/60/90 days out for Type 1; 7-14 days for Type 2]
 
 **Canonical voices**: Drucker (time is the scarcest); Buffett (returns on incremental capital); Naval (four leverages); Bezos (Day 1 frugality).
 
-**Operating practice**: Allocate by % of bandwidth per product, with runway-triggered rebalancing rules. Track every dollar against the $200/mo Anthropic and $500/mo total envelope. At 6 months runway, review burn cuts. At 3 months, wartime mode.
+**Operating practice**: Allocate by % of bandwidth per product, with runway-triggered rebalancing rules. Track every dollar against the $100/mo Anthropic and $500/mo total envelope. At 6 months runway, review burn cuts. At 3 months, wartime mode.
 
 **Skills wired**: `/captain` (synthesizes runway + spend), `/runway` (planned), `/costs`. State in `runway.json` + `revenue.json`.
 
@@ -285,7 +285,7 @@ The captain consciousness must hold accurate, dated, queryable knowledge across 
 
 ## Part IV — Directions the captain consciousness extends into
 
-Currently the captain has rich technical-execution awareness (49 agents, 57+ commands, weekly rhythm, cost discipline) and partial business awareness (revenue agent, growth agent, analyst with competitor tables, pricing tiers). After Phase A, it has identity (mission, vision, values, principles, north-star) and persistent state (10 memory files, decision journal, weekly archive structure). It is missing structural extension in seven directions — Phase B–F builds them.
+Currently the captain has rich technical-execution awareness (55 agents, 85 skills, weekly rhythm, cost discipline) and partial business awareness (revenue agent, growth agent, analyst with competitor tables, pricing tiers). After Phase A, it has identity (mission, vision, values, principles, north-star) and persistent state (10 memory files, decision journal, weekly archive structure). It is missing structural extension in seven directions — Phase B–F builds them.
 
 ### Direction 1 — Persistent memory across sessions
 

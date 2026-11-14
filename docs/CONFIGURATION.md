@@ -351,7 +351,7 @@ Every machine gets the **full config** — all skills, all MCP servers, all hook
 ### What the Installer Does
 
 1. Copies agents to `~/.claude/agents/`
-2. Copies skills to `~/.claude/commands/` (role-filtered)
+2. Copies skills to `~/.claude/skills/` (role-filtered)
 3. Copies rules to `~/.claude/rules/`
 4. Installs settings into `~/.claude/settings.json` (role-specific)
 5. Sets up MCP servers in `~/.claude/mcp.json` (engineer only)

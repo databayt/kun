@@ -27,11 +27,11 @@ The agentic coding tool. Kun's primary development interface.
 | **File operations** | Read, Write, Edit across codebase       | All agents and skills           |
 | **Bash execution**  | Run commands, scripts, git              | Build, deploy, test             |
 | **MCP**             | 3,000+ tool integrations                | 18 servers configured           |
-| **Hooks**           | 21 lifecycle events                     | 5 hooks (format, port, session) |
+| **Hooks**           | 21 lifecycle events                     | 19 hooks                        |
 | **Agent Teams**     | Lead + teammate parallel (Experimental) | Parallel feature development    |
 | **Git Worktrees**   | Isolated repo copy per agent            | No merge conflicts              |
-| **Skills**          | Organized instruction folders           | 17 skills configured            |
-| **Subagents**       | Specialized agents for subtasks         | 28 agents across 6 chains       |
+| **Skills**          | Organized instruction folders           | 85 skills configured            |
+| **Subagents**       | Specialized agents for subtasks         | 55 agents                       |
 | **Remote Control**  | Continue session from another device    | Phone → Desktop handoff         |
 | **Scheduled Tasks** | Cloud, Desktop, or /loop                | Monitoring, maintenance         |
 
@@ -167,9 +167,9 @@ Posture: databayt is subscription-only (Max plan) — the API-key / per-token la
 | Architecture design         | Opus 5.5                                            | Deepest reasoning                             |
 | Complex features            | Opus 5.5                                            | Highest code quality                          |
 | Code review                 | Opus 5.5                                            | Catches subtle issues                         |
-| Routine changes             | Sonnet 5                                            | Fast, good enough                             |
-| Exploration/search          | Haiku 4.5                                           | Cheapest, fast                                |
-| Documentation               | Sonnet 5                                            | Good writing, fast                            |
+| Routine changes             | Sonnet 5.5                                          | Fast, good enough                             |
+| Exploration/search          | Haiku 5.5                                           | Cheapest, fast                                |
+| Documentation               | Sonnet 5.5                                          | Good writing, fast                            |
 
 ### By Kun Agent
 
@@ -177,7 +177,7 @@ Posture: databayt is subscription-only (Max plan) — the API-key / per-token la
 | ----------------------------------------------- | ------------------------------------------------- |
 | Captain (CEO brain), long-horizon orchestration | `opus` → Opus 5.5                                 |
 | Stack, Design, UI, DevOps, VCS                  | `opus` / `sonnet` per `engine.json → model_tiers` |
-| Explore subagents                               | Haiku 4.5                                         |
+| Explore subagents                               | Haiku 5.5                                         |
 
 ---
 

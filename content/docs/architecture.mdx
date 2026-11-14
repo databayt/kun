@@ -26,7 +26,7 @@ Layer 2: Developer Surfaces (Anthropic-provided)
   CLI | VS Code | JetBrains | Desktop | Web | iOS
 
 Layer 1: Foundation (Anthropic-provided)
-  Opus 5.5 | Fable 5.1 | Sonnet 5 | Haiku 4.5 | 1M Context | Subscription
+  Opus 5.5 | Fable 5.2 | Sonnet 5.5 | Haiku 5.5 | 1M Context | Subscription
 ```
 
 ## Team Roles
@@ -54,7 +54,7 @@ Priority (High → Low):
 4. Pattern library /Users/abdout/codebase/     — Core patterns
 ```
 
-### Agent Fleet (53 agents, two plugins)
+### Agent Fleet (55 agents, two plugins)
 
 ```
 captain (company brain — allocates, decides, never writes code)
@@ -68,7 +68,7 @@ captain (company brain — allocates, decides, never writes code)
 
 | Fleet | Plugin | Agents |
 |-------|--------|--------|
-| **Company** (26) | `kun-company` | captain, revenue, growth, support, analyst, lead, funnel, product, tech-lead, ops, guardian, cloudflare, pwa, quality, record, report, analyze, learn, package, clone, transcribe, adjudicate, hogwarts, souq, mkan, shifa |
+| **Company** (28) | `kun-company` | captain, revenue, growth, support, analyst, lead, funnel, product, tech-lead, ops, guardian, cloudflare, pwa, quality, record, report, analyze, learn, package, clone, transcribe, adjudicate, hogwarts, souq, mkan, shifa |
 | **Stack** (27) | `kun-stack` | nextjs, react, typescript, tailwind, prisma, shadcn, authjs, architecture, orchestration, pattern, structure, atom, template, block, icon, semantic, build, deploy, test, git, github, middleware, internationalization, sse, optimize, performance, comment |
 
 Full breakdown: [Agents](/docs/agents).
@@ -91,7 +91,7 @@ Plus the claude.ai connectors (Gmail, Calendar, Drive, PlanetScale, Vercel). Reg
 
 Domain rules auto-load via a `paths` glob: `react-perf` (8), `next-16` (6), `react-19` (5), `prisma-6` (4), `tailwind-v4` (4), `typescript-strict` (4), `authjs` (3), `neon` (2), `s3` (2). Five more load unconditionally: `github-workflow`, `block-protocol`, `patterns`, `cowork-bridge`, `engine-parity`.
 
-### Hook Automation (10 hooks)
+### Hook Automation (19 hooks)
 
 | Event | Action |
 |-------|--------|

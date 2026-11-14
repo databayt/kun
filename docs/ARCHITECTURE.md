@@ -26,8 +26,8 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 3: KUN CONFIGURATION ENGINE (core value)                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ CLAUDE.md   │ 22 Agents  │  0 Commands │ 17 MCP Servers   │ │
-│  │ 5 Rules     │ 14 Hooks   │ 11 Cards   │ 193 Keywords     │ │
+│  │ CLAUDE.md   │ 55 Agents  │  0 Commands │ 18 MCP Servers   │ │
+│  │ 5 Rules     │ 19 Hooks   │ 11 Cards   │ 240 Keywords     │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
 │  Layer 2: Developer Surfaces (Anthropic-provided)               │
@@ -37,7 +37,7 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 1: Foundation (Anthropic-provided)                       │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ Opus 5.5 │ Sonnet 5 │ Haiku 4.5 │ 1M Context │ Subscr.  │ │
+│  │ Opus 5.5 │ Sonnet 5.5 │ Haiku 5.5 │ 1M Context │ Subscr. │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -54,8 +54,8 @@ The models and API that power everything. Kun selects optimally within this laye
 | Model         | Use Case                                          | Kun Usage                                        |
 | ------------- | ------------------------------------------------- | ------------------------------------------------ |
 | **Opus 5.5**  | Main loop, architecture, complex features, review | Session default + `opus`-tier agents and skills  |
-| **Sonnet 5**  | Fast iteration, routine changes                   | Quick fixes, standard build agents               |
-| **Haiku 4.5** | Search, lookups, simple queries                   | Explore subagent type, routine/formatting agents |
+| **Sonnet 5.5** | Fast iteration, routine changes                   | Quick fixes, standard build agents               |
+| **Haiku 5.5** | Search, lookups, simple queries                   | Explore subagent type, routine/formatting agents |
 
 ### Cost Context
 
@@ -181,7 +181,7 @@ Priority (High → Low):
 
 ### 4.3 Skill Library
 
-17 skills triggered by keywords or slash commands:
+85 skills triggered by keywords or slash commands:
 
 | Category          | Skills                               | Trigger Keywords                 |
 | ----------------- | ------------------------------------ | -------------------------------- |
@@ -193,7 +193,7 @@ Priority (High → Low):
 
 ### 4.4 MCP Ecosystem
 
-25 project + 19 user MCP servers providing external tool integration:
+MCP servers providing external tool integration:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐

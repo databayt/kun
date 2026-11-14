@@ -226,7 +226,9 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
     else
         check pass "engine model refs" "$(jq -r '.model_label' "$ENGINE_JSON") canonical"
     fi
-    if grep -q "28 Agents\|17 Skills\|18 MCP Servers" "$KUN_ROOT/docs/ARCHITECTURE.md" 2>/dev/null; then
+    # The count box must carry engine.json's numbers (a fixed list of old strings went stale itself:
+    # it flagged "18 MCP Servers" the day that became the true count).
+    if ! grep -q "$EC_AGENTS Agents" "$KUN_ROOT/docs/ARCHITECTURE.md" 2>/dev/null || ! grep -q "$EC_MCP MCP Servers" "$KUN_ROOT/docs/ARCHITECTURE.md" 2>/dev/null; then
         check warn "engine doc counts" "stale count box in ARCHITECTURE.md"
     else
         check pass "engine doc counts" "current"

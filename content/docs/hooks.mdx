@@ -7,7 +7,7 @@ description: Seventeen lifecycle automations the engine can't forget to run
 
 Hooks are the part of the engine that survives forgetting. A rule can be ignored and a skill can go uninvoked, but a hook is executed by the harness — not by Claude — so it fires whether or not anyone remembers it.
 
-**17 hooks across 7 events**, configured in `.claude/settings.json`. setup.sh merges that file into `~/.claude/settings.json` — the `hooks` key is engine territory and is replaced wholesale — so a hook wired anywhere else is wiped at the next setup. Wire new hooks here, never by hand in user settings: that is how the report and block hooks below sat unregistered until 2026-09-28.
+**19 hooks across 7 events**, configured in `.claude/settings.json`. setup.sh merges that file into `~/.claude/settings.json` — the `hooks` key is engine territory and is replaced wholesale — so a hook wired anywhere else is wiped at the next setup. Wire new hooks here, never by hand in user settings: that is how the report and block hooks below sat unregistered until 2026-09-28.
 
 ## Active hooks
 
