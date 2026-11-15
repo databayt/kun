@@ -1,0 +1,154 @@
+---
+title: Mkan and Airbnb homes
+description: Why Mkan's 4,687 Airbnb homes look good but can't be booked, how they are kept current, and the ideas for finding the person behind each one so a tenant can book end to end. A brainstorm, ranked.
+---
+
+# Mkan and Airbnb homes
+
+**Most of the homes Mkan has shown came from Airbnb, and none of them could be booked.** Airbnb gives
+a home's photos, place, nightly price and reviews. It never gives the host's phone. Mkan earns when a
+broker or landlord signs a lease with a tenant Mkan brought, so a home with nobody to call is a nice
+picture and nothing more.
+
+This page holds what was decided on 2026-11-15 and the ideas, ranked, for turning those homes into
+homes a tenant can book.
+
+## Where it stands (2026-11-15)
+
+| | Airbnb | TikTok | Broker websites |
+|---|---|---|---|
+| Homes | 4,687 | 676 | 353 |
+| Public on the site before the gate | 4,687 | 0 | 0 |
+| With someone to call | 2 hosts of 2,332 | all (the broker) | all (the broker) |
+| Priced | by the night | by the month | by the month |
+| Last checked at the source | 15 Oct, then never | daily (hygiene) | daily |
+
+- 2,332 hosts hold the 4,687 homes. **188 hosts hold 5 or more, 1,618 homes together**: these are
+  property managers and serviced-apartment companies, not people renting a spare room.
+- 905 homes have at least one review.
+
+## What was decided
+
+1. **Only what can be booked is public.** The trust gate (`mkan/src/lib/listing-gate-pure.ts`,
+   `pnpm listings:gate`) lets a home on the site only with:
+   - someone Mkan can reach
+   - a price and a place
+   - three photos with no broker number on them
+   - not gone
+
+   One run hides the Airbnb homes and publishes the broker homes that pass. The dry run showed
+   4,687 public homes becoming 699.
+2. **Airbnb homes are kept current anyway.** `pnpm listings:refresh` visits every Airbnb home
+   within 7 days (about 700 a day, in a private headless Chrome). It refreshes rating, reviews,
+   English text and photos, and after two misses in a row it marks the home `SOURCE_GONE`.
+
+   A hidden home is still worth keeping fresh: it is the list of places to find a contact for.
+   The moment one gets a contact, the gate publishes it.
+3. **New Airbnb homes come in hidden**, as contact leads for the ideas below.
+
+## Ideas for finding the person behind a home, ranked
+
+Ranked by homes reached for the effort and risk.
+
+### 1. Match them with homes Mkan already has a broker for
+
+Kigali brokers post the same apartment on TikTok, on their websites and in Facebook groups. Many of
+the Airbnb homes are probably already in Mkan with a broker attached.
+
+- **How:**
+  - Compare map pins: an Airbnb pin is approximate, about 500 m.
+  - Compare photos: a perceptual hash of each Airbnb photo against every TikTok frame and website
+    photo.
+  - A close pin and a matching photo means the same home. Link the Airbnb home to that broker's
+    `ListingBroker`.
+- **Cost:** a script and an evening. **Risk:** a wrong match, so the first 50 are checked by eye.
+- **Next step:** a dry run that only counts matches. That count tells us whether this idea is worth
+  more than the others combined.
+
+### 2. Property managers: 188 hosts, 1,618 homes
+
+A company with 20 units on Airbnb wants empty months filled.
+
+- **How:**
+  - The host name on Airbnb is usually the company or brand. Find its public business contact:
+    website, Google Business profile, Instagram, LinkedIn, or the Rwanda Development Board company
+    search.
+  - Offer monthly tenants on Mkan's terms: free for the tenant, 10% of the commission.
+  - Every unit they confirm gets a contact and passes the gate.
+- **Cost:** the lead lane (`scrape` → Twenty CRM) already does this work for schools.
+- **Risk:** low. It is ordinary B2B outreach to a business's public number.
+
+### 3. Ask the brokers Mkan already works with
+
+- **How:** send the brokers who answer the photo and the area, and ask "Do you know this home or
+  its owner?" One reply can cover a whole building.
+- **Cost:** messages on a line that is already warm. Count them in the brokers' message budget.
+- **Risk:** brokers are asked for a favour with nothing in return. Credit them as the broker on the
+  home they name.
+
+### 4. A "this is my home" page for hosts
+
+- **How:** a page where a host or manager claims their home, confirms or edits it, and leaves a
+  WhatsApp number.
+  - `Listing.claimedAt` already exists, and the gate already counts a claimed home as having
+    contact.
+  - Hosts reach the page from the TikTok page, a property-manager message, or search, once the
+    home is public.
+- **Cost:** one page and one form.
+- **Risk:** none, but it only works once hosts have a reason to look.
+
+### 5. Visit the buildings
+
+- **How:** the Mkan person who attends viewings visits clusters of homes (Kimihurura, Kacyiru,
+  Nyarutarama) and asks the guard or caretaker for the landlord's number.
+  - Kigali buildings nearly always have a caretaker.
+  - This is how local brokers work.
+- **Cost:** a person's afternoon per cluster.
+- **Risk:** low. It adds the contacts the online methods miss.
+
+### 6. Guests who have stayed there
+
+Reviews name the host, not their number. They help confirm a match from idea 1, not find a
+contact. **Low value.**
+
+### Not used
+
+- **Messaging hosts through Airbnb** to take them off the platform. Airbnb's terms forbid it and it
+  risks the account. Not used.
+- **Booking through Airbnb as an affiliate.** Airbnb has no open affiliate program to rely on, and
+  the stays are nightly, while Mkan's tenants want months. Not used.
+- **Buying contact lists.** Unknown consent, and against Rwanda's data-protection law. Not used.
+
+## The rules any contact follows
+
+- **Rwanda's data-protection law (Law No. 058/2021).**
+  - A contact found from a public business listing is kept for one purpose: offering tenants for
+    that home.
+  - It is deleted when the person says stop.
+  - A private person's number found in a review or a photo is never stored.
+- **Scraping:**
+  - Airbnb's pages are read slowly (2–6 s apart, at most 700 a day) and only for public facts.
+  - The refresh stops after three blocks in a row.
+  - If Airbnb objects, the refresh stops and the homes stay hidden.
+- **What a tenant sees:** never a host's or broker's number. Mkan stays in the middle, as it does
+  for every broker home: the [assistant](/docs/mkan-tiktok) asks, books the viewing and attends.
+
+## The booking path, once a home has a contact
+
+```
+contact found ──► ListingBroker (or the host's phone) ──► the trust gate publishes the home
+      ──► a tenant picks it in /find or on WhatsApp ──► the assistant asks the contact if it is free
+      ──► viewing booked, a Mkan person attends ──► lease ──► 10% of the commission
+```
+
+The booking side already exists for broker homes (`availability.ts`, `viewing-loop.ts`). An
+Airbnb home with a contact goes through the same path. The difference is that its price is nightly,
+so the assistant asks the host for a monthly price before it offers the home to a long-stay tenant.
+
+## Commands
+
+| | |
+|---|---|
+| `pnpm listings:refresh` | Dry run of today's slice. `--apply` writes. `--limit N`, `--ids a,b` |
+| `pnpm listings:gate` | What would be published and hidden, and why. `--apply` flips both |
+| `bash scripts/crm/install-listings-refresh-cron.sh` | Loads the 06:30 daily refresh (Abdout's step) |
