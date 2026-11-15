@@ -1,0 +1,145 @@
+---
+title: Mkan — where we stand
+description: The Mkan chatbot and marketplace on 2026-11-15, four weeks after launch. What is built, what the real numbers say, what is strong, where we disagree, and what to do next.
+---
+
+# Mkan — where we stand (2026-11-15)
+
+**The bot works. The tenants are missing.** In four weeks we built a full rental agent: web chat,
+WhatsApp, broker outreach, a deal pipeline, and a line that books viewings by itself. In 30 days it
+had one real WhatsApp tenant, no viewing and no deal. The wall is at the top of the funnel, not the
+bottom.
+
+Sources: `pnpm mkan:read funnel` and read-only prod SQL, run 11-15; `www.mkan.sd/api/health`; the
+mkan git log; the session notes on the rental agent, /monetize and the TikTok page.
+
+## What is built (10-17 to 11-15)
+
+- **/find web agent**: a chat in the ChatGPT-iOS layout, with Claude Haiku reading and writing.
+- **WhatsApp line** on Cloudflare: the same agent answers tenants on the business number.
+- **Broker directory** (238 brokers) with gated outreach. Brokers are asked about a home only when a
+  real tenant picks it.
+- **Deal pipeline**: deal sheet → viewing booked → reminders → signed → paid → revenue entry.
+- **Viewing loop**: the line agrees the time with the broker and books the viewing itself.
+- **/monetize**: a scorecard, a road to break-even, and an autonomous sprint runner.
+- **TikTok**: enhanced home videos auto-posted to @mkan.rw.
+- **Trust gate**: only homes with someone to contact stay public.
+
+About 30 deploys in four weeks.
+
+## What the numbers say
+
+Real people only. The team, test phones and personal contacts are filtered out.
+
+| Stage, last 30 days | Chats | From the stage before |
+| --- | --- | --- |
+| Wrote to Mkan | 32 (31 web, **1 WhatsApp**) | |
+| Were shown homes | 30 | 94% |
+| Picked a home | 8 | 27% |
+| A broker was asked | 7 | 88% |
+| The broker said yes | 4 | 57%, a median 25 h later |
+| Named a viewing time | **0** | 0% |
+| Viewings, deals, revenue, ever | **0** | the `Deal` table is empty |
+
+- **Volume.** Most real chats came in launch week (10-21 to 10-23). Over the last two weeks there
+  were 0 to 2 chats a day, the team included.
+- **TikTok.** 76 posts in two weeks and 2,677 views, but **no comment ever**, and no chat has ever
+  quoted a home code. As posting rose from 21 to 55 a week, views per post fell from 46 to 31.
+- **Deploys.** Production runs `5d37d76`, from 11-09. Everything since then is on main and not live:
+  - the 11-14 viewing loop;
+  - the fix for the real tenant left with "a person will check" on 11-12;
+  - the one-word deal close;
+  - the trust gate;
+  - the video homes.
+
+  That is six days of work no tenant has seen.
+- **Cost.** About 80,000 RWF ($55) a month. A deal earns Mkan 5,000–10,000 RWF, so break-even needs
+  9–16 paid deals a month, or 3–5 after the container cut ([cost study](https://github.com/databayt/mkan/blob/main/docs/cost-study-2026-11.md)).
+
+## What is strong
+
+1. **The bot itself works.** It answers in 1.3 s at the median, with no errors in 7 days. The Claude
+   reader scores 98–99%. The models cost about $1–2 a month, inside the plan's included credits.
+2. **We measure honestly.** Since 11-08 every number leaves the team out, and `mkan:read funnel`
+   reads each chat's furthest stage and who it waits on. Most startups never get here.
+3. **Supply is solved.** Mkan has 4,687 Airbnb homes and about 700 broker homes, and fetches about 70
+   fresh broker ads a day.
+4. **Mkan stays in the middle.** No phone numbers change hands, which protects the cut.
+
+## Where we disagree
+
+**A. We keep building conversion on top of no demand.** The 11-09 note already said that "a funnel
+fix with no traffic moves nothing." Then on 11-14 we built the viewing loop, the one-word close, the
+after-viewing steps and the quiet-tenant nudge, for four tenants. The wall is the top of the funnel:
+one WhatsApp tenant in 30 days.
+
+**B. Full autonomy is premature.** No human in the loop is the right end state but the wrong way to
+get the first 10 deals. All four tenants who got a broker's yes stopped before naming a time. Four
+phone calls would have told us why; another week of code cannot. Under *The Mom Test* (canon #7),
+we have not yet asked one Kigali renter how they last found a home.
+
+**C. TikTok — settled with Abdout.** Mkan is a real-time marketplace for homes, and it finds
+tenants through video. The two sides agreed on this:
+
+- **Kept:** the enhanced home videos stay exactly as they are.
+- **Changed:** fewer posts a day.
+- **Added:** other kinds of video: informative videos (how renting in Kigali works, prices by
+  neighbourhood, what a deposit covers), stories, and tenants' and brokers' experiences.
+
+The numbers this mix has to move: views per post (46 → 31 as volume rose), and comments and chats
+from TikTok (0 so far). Still open:
+
+- How many posts a day? 3–5 is the working range.
+- What share does each kind of video get?
+- Which number decides: views per post, comments, or chats that quote a code?
+
+**D. The unit economics are thin and fragile.**
+- 10% of a broker's commission comes to 5,000–10,000 RWF. One trip to a viewing can eat that, and a
+  Mkan person goes to every viewing.
+- The broker pays after the tenant already has the home. That is the easiest payment to skip: "Call
+  host" stays on listing pages, and broker numbers show in their own videos.
+- The tenant, the side with the pain, pays nothing.
+
+**E. One person is the bottleneck.** Waiting on Abdout today:
+- the deploy;
+- `MKAN_REP_WHATSAPP` and `MKAN_PAYOUT_MOMO`;
+- a dedicated business number (the line still carries personal chats);
+- the go-ahead to restart the sprint runner (parked since 11-09, mkan#65);
+- a native Kinyarwanda read of the new lines.
+
+The automation makes work for Abdout faster than he can clear it.
+
+**F. Focus.** The Drive is cash flow first, and the north star is paying schools. Hogwarts bills its
+first client on 12-19. Mkan has taken a large share of the engine's time for four weeks and earned
+0 RWF. That is fine for an experiment with an end date, and not fine without one.
+
+## What to do next
+
+1. **Deploy main today.** It is built and carries the fix for the real tenant.
+2. **No new automation until the first paid deal.** Only fix what is live.
+3. **Do the first 10 deals by hand.** Call the four tenants who got a broker's yes, go to the first
+   viewings in person, and log what each one cost and why it stalled.
+4. **Five renter interviews this week, Mom-Test style.** Ask "Walk me through how you found your
+   current place": where they looked, whom they paid, and how long it took.
+5. **TikTok as agreed above.** Fewer posts a day, the enhanced home videos kept, and informative,
+   story and experience videos added. Each post asks a question that invites a comment. Facebook and
+   WhatsApp housing groups are a second channel where Kigali renters already ask.
+6. **Test who pays.** Pick one and run it on the next 10 tenants: a small tenant fee through MoMo
+   (for a viewing, or for "we find it for you"), or a per-lead fee charged to brokers up front. Lean
+   toward homes at 700k RWF or more, where the same work earns three times as much.
+7. **Set a pivot-or-persevere date (*The Lean Startup*, canon #6).** By **2026-11-29**: at least 20
+   real WhatsApp tenants and at least one viewing done. If not, Mkan goes to maintenance (scraping and
+   the bot stay on, no new builds) and the time moves to Hogwarts.
+8. **Cut the container after demand shows.** Leaving it saves about 44,000 RWF a month, but only
+   after tenants show up.
+
+## How to re-check these numbers
+
+```bash
+cd ~/mkan && pnpm mkan:read funnel          # the chat funnel, real people only
+curl -s https://www.mkan.sd/api/health      # "build" = the sha in production
+```
+
+TikTok reach comes from the `TikTokPost` table (`views`, `likes`, `comments` by `postedAt` week).
+
+Related: [Mkan setup](/docs/mkan-setup) · [Mkan TikTok](/docs/mkan-tiktok) · [Mkan and Airbnb homes](/docs/mkan-airbnb)
