@@ -27,6 +27,7 @@
 // Spec extras:
 //   music        "bed.m4a" or { "src", "db", "fadeIn", "fadeOut", "start" } (seconds; start = source offset)
 //   canvas       { "16:9": [1920,1072], "9:16": [1080,2332] }  override an aspect's frame size
+//   master       FilmCraft file.exportMedia settings for the master (default h264, crf 12, high)
 //   a piece needs no voice, no card, no brand text: clips/stills + music (or silence) is fine.
 // Loudness has ONE owner: media.sh encode (two-pass EBU R128, true-peak safe). FilmCraft exports the
 // master un-normalised (a -4 dB limiter on the mix bus stays). `loudness` in a spec is ignored.
@@ -440,7 +441,11 @@ for (const aspect of aspects) {
     const burn = !!spec.captions && (spec.burnCaptions ?? aspect === '9:16');
     const clean = burn ? out.replace(/\.mp4$/, '.nocap.mp4') : out;
     // No loudnessLufs here: media.sh encode owns loudness (see the header).
-    fc('file.exportMedia', { path: clean, format: 'h264', sequence: seq, wait: true }, { save: false });
+    // The master is a mezzanine: media.sh encodes the deliverable from it, so it must not lose detail.
+    // FilmCraft's default h264 bitrate smears fine texture (grass, leaves: 7/255 off on a held frame),
+    // so export CRF 12 High unless the spec's `master` says otherwise.
+    const master = { format: 'h264', bitrateMode: 'crf', crf: 12, h264Profile: 'high', ...(spec.master || {}) };
+    fc('file.exportMedia', { path: clean, ...master, sequence: seq, wait: true }, { save: false });
     if (burn) {
       burnCaptions(clean, at(spec.captions), out, h > w);
       rmSync(clean, { force: true });
