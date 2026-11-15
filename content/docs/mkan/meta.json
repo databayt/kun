@@ -1,4 +1,10 @@
 {
   "title": "Mkan",
-  "pages": ["report", "setup", "tiktok", "airbnb"]
+  "pages": [
+    "report",
+    "first-ten",
+    "setup",
+    "tiktok",
+    "airbnb"
+  ]
 }

@@ -1,0 +1,106 @@
+---
+title: Mkan — the first 10 deals
+description: How Abdout runs the loop until 10 deals are paid — what reaches his phone, the viewing schedule, the words that close a deal, the numbers and what each means, Twenty as the record, and Today on Mkan on the web and in both chats.
+---
+
+# The first 10 deals
+
+**Everything runs by itself; Abdout watches it and goes to every viewing.** Until 10 deals are paid, every
+step of every deal reaches his WhatsApp as one line, the line books viewings inside his hours, and he goes to
+each one with the tenant. No step waits for his approval. After the 10th paid deal, the live lines fold into
+one day line in the 20:00 message (decided 2026-11-15).
+
+His number for all of it is **+249 919 071 294** (`MKAN_REP_WHATSAPP`). Brokers pay Mkan's 10% to **MoMo
+0780 984 777** until Databayt Ltd has a merchant code.
+
+## What reaches his phone
+
+| When | What |
+| --- | --- |
+| Every deal step | One line: a tenant picked a home, the broker was asked, the broker said yes (and how fast), a viewing time is proposed, viewed, signed, paid, lost, or a chat went quiet |
+| 07:00 Kigali | Today's viewings |
+| 20:00 Kigali | Tomorrow's viewings; on Sunday also the week's numbers |
+| 2 h before a viewing | A reminder with the meeting point and the tenant's number |
+| 3 h after a viewing | "How did K5811 go?" |
+
+Each viewing in the schedule carries the time, the home and its rent, the meeting point, the tenant (name,
+number, language), the broker, the terms to confirm, **Mkan's share to agree (10% of the broker's
+commission)**, a one-tap *Add to calendar* link, and three questions to ask the tenant:
+
+1. How did you find your last home?
+2. What did a broker charge you?
+3. What almost stopped you from taking a home?
+
+Write each answer back with `note K5811 …`: they are what the first 10 deals are for.
+
+Viewings are booked 09:00–18:00, Monday to Saturday, with at least 90 minutes between two of his.
+
+## The words
+
+Written to Mkan's line (+250 780 984 777) from his number, in English or Arabic:
+
+| Word | What it does |
+| --- | --- |
+| `signed K5811 share 9000` | The lease is signed; the share request goes to the broker with the MoMo number |
+| `paid K5811` | The broker paid; revenue is recorded |
+| `viewed K5811` | The viewing happened, no decision yet |
+| `lost K5811 too expensive` | It will not happen, and why |
+| `take K5811` / `back K5811` | Pause the bot on that tenant's chat for 12 h / hand it back (typing in the chat also pauses it) |
+| `note K5811 …` | A note on the deal, in Twenty too |
+| `cost K5811 3000` | What going to the viewing cost: it feeds the net per deal |
+| `off 2026-11-20` / `off tomorrow` | No viewings that day |
+| `deals` | The open deals and their codes |
+| `numbers` | The figures below, each with what it means |
+
+## The numbers, and what each means
+
+Real people only (the team, test phones and personal contacts are left out). The week's numbers come every
+Sunday at 20:00 and on the word `numbers`; the First 10 tile sits on [/monetize](https://www.mkan.sd/en/monetize).
+
+| Number | What it means | Act when |
+| --- | --- | --- |
+| Real WhatsApp tenants a week | Demand reaching the line | The pivot gate: 20 by **2026-11-29**, with at least one viewing |
+| Shown → picked | The homes fit what people ask | Under 20%: stock or price mismatch |
+| Picked → broker yes, median hours | Brokers answer | Over 24 h: the next broker |
+| Yes → viewing booked | The step where every tenant stopped so far | Under 50%: call the tenant |
+| Booked → viewed | Tenants show up | Under 70%: confirm the day before |
+| Viewed → signed | The video matched the home | Low: the posts or the prices mislead |
+| Signed → paid, days | Brokers pay the share | Any over 7 days: chase it |
+| Net per deal (share − trip cost) | Whether a visit is worth it | Below zero: lean to homes of 700k and up |
+| Paid deals, of 10 | When the loop stops reporting each step | — |
+| Chats that quote a K-code | TikTok brings tenants | None for 2 weeks: change the video, not the count |
+
+## Twenty is the record
+
+The Mkan agent writes every tenant and every deal into Twenty's `mkan` workspace (`mkan.databayt.org`)
+within minutes:
+
+- **Deals:** one card per deal, its stage moving from Picked to Paid or Lost, with the rent, the commission,
+  Mkan's share, the trip cost, the terms and the notes.
+- **Tenants:** each real person who wrote, with where they came from (a TikTok code, the bio page, Today, the
+  web) and how far they got.
+- **Tasks:** one per booked viewing, assigned to Abdout, due at the viewing.
+
+An edit in Twenty acts like a word from his phone. Moving a deal to *Signed* sends the share request, and
+moving it to *Paid* records the money. A tenant marked *opted out* gets nothing more. A broker's relationship
+or share reaches the line at once. If Twenty is down, nothing stops: the writes wait and go when it is back.
+
+## Today on Mkan
+
+The homes @mkan.rw posts each day, at most five, become one post on the web with a short note:
+
+- [mkan.sd/en/today](https://www.mkan.sd/en/today), with the last seven days kept;
+- a strip under the homepage hero, with **Tell Mkan what you need** and **Chat on WhatsApp**;
+- in both chats: "today", "what's new", «اليوم», "uyu munsi" list the day's homes, numbered on WhatsApp with
+  the /today link, and /find has a *Today's homes* starter card.
+
+## Every door
+
+Each way in was checked end to end on 2026-11-15 (`tests/e2e/doors.spec.ts`, `pnpm wa:e2e`, `pnpm deal:e2e`):
+a TikTok code, a pasted TikTok link, the bio page, Today, a home's own page, the web chat and its *Continue on
+WhatsApp*, and from a pick through the viewing to *paid*.
+
+Still open: the homepage hero sells nightly stays and ends on Sudan inspiration in English. The Kigali calls
+to action live in the strip under it until the hero is redone.
+
+Related: [Where we stand](/docs/mkan/report) · [Setup](/docs/mkan/setup) · [TikTok](/docs/mkan/tiktok)
