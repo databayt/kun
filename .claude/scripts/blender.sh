@@ -9,6 +9,11 @@
 #   blender.sh render <script.py> [-- args]   headless (no window): blender -b --factory-startup -P
 #   blender.sh frames <dir> <out.mp4> [fps]   a rendered PNG sequence → H.264 (Blender 5 dropped
 #                                 its FFMPEG image format; encode here, then media.sh as usual)
+#   blender.sh stills <scene.json> <outdir> [--aspect landscape|portrait] [--scale 0.5] [--legs a,b]
+#                                 a stills film: a camera over still images (edit/scripts/blender/
+#                                 stills.py, schema stills.schema.md) rendered to PNGs, then each
+#                                 leg+aspect encoded to <outdir>/<leg>-<aspect>.mp4 (mezzanine:
+#                                 H.264 CRF 10, yuv420p, tv-range BT.709) for FilmCraft's assembler
 #   blender.sh mcp                MCP server (ahujasid/blender-mcp, MIT) — drives the OPEN Blender
 #                                 through its add-on on 127.0.0.1:9876; telemetry off
 #
@@ -57,8 +62,29 @@ case "${1:-help}" in
     ffmpeg -v error -y -framerate "$fps" -i "$dir/$pattern" -c:v libx264 -crf 16 -pix_fmt yuv420p \
       -color_primaries bt709 -color_trc bt709 -colorspace bt709 -movflags +faststart "$out"
     echo "$out" ;;
+  stills)
+    shift; scene="${1:?scene.json}"; outdir="${2:?outdir}"; shift 2
+    here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    py="$here/../skills/edit/scripts/blender/stills.py"; [ -f "$py" ] || py="$HOME/.claude/skills/edit/scripts/blender/stills.py"
+    fps=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('fps',30))" "$scene")
+    asp=""; legs=""; prev=""
+    for a in "$@"; do
+      case "$prev" in --aspect) asp="$a" ;; --legs) legs="$a" ;; esac; prev="$a"
+    done
+    "$BIN" -b --factory-startup -P "$py" -- "$scene" "$outdir" "$@" 2>&1 | grep -v -E 'use_nodes|DeprecationWarning'
+    for d in "$outdir"/*/*/; do
+      [ -f "${d}00001.png" ] || continue
+      a=$(basename "$d"); l=$(basename "$(dirname "$d")")
+      [ -z "$asp" ] || [ "$a" = "$asp" ] || continue
+      [ -z "$legs" ] || [[ ",$legs," == *",$l,"* ]] || continue
+      ffmpeg -v error -y -framerate "$fps" -i "${d}%05d.png" \
+        -vf "scale=in_range=pc:out_range=tv:out_color_matrix=bt709:flags=lanczos+accurate_rnd+full_chroma_int,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv,format=yuv420p" \
+        -c:v libx264 -preset slow -crf 10 -pix_fmt yuv420p -color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv \
+        -movflags +faststart "$outdir/$l-$a.mp4"
+      echo "$outdir/$l-$a.mp4"
+    done ;;
   mcp)
     export DISABLE_TELEMETRY=true
     exec uvx --from "$MCP_PKG" mcp-for-blender ;;
-  *) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

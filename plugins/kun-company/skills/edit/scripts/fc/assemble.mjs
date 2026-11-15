@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // assemble.mjs — build a branded video from a piece spec with FilmCraft (headless), for any brand.
 //
-//   node assemble.mjs <piece.video.json> [--aspect 16:9|9:16] [--no-export] [--frames]
+//   node assemble.mjs <piece.video.json> [--aspect 16:9|9:16] [--no-export] [--frames] [--deliver]
 //
 // Spec (paths relative to the spec's folder):
 // {
@@ -15,8 +15,23 @@
 //   "voice": "vo.wav", "music": "bed.m4a", "musicDb": -18,
 //   "captions": "vo.srt", "burnCaptions": true,          // default: burned on 9:16 only
 //   "endCard": { "title": "…", "subtitle": "ed.databayt.org" },
-//   "loudness": -14
+//   "end": 6                                              // trim the whole piece to 6 s (optional)
 // }
+// Item extras:
+//   still.move   { "from": [cx, cy, zoom], "to": [cx, cy, zoom], "ease": "inOutSine|linear|outCubic|inCubic" }
+//                Ken Burns by Motion keyframes: (cx, cy) = the picture point (0..1) held at the frame
+//                centre, zoom = x the size the frame mode gave it (1 = as placed). No Blender needed.
+//   transition   { "type": "cross_dissolve", "frames": 12 }  dissolve into this item from the previous one
+//                (centred on the cut; the previous clip needs a handle past its out, else it starts at the cut)
+//   src          a path, or { "16:9": path, "9:16": path } (also "landscape"/"portrait") for a per-aspect take
+// Spec extras:
+//   music        "bed.m4a" or { "src", "db", "fadeIn", "fadeOut", "start" } (seconds; start = source offset)
+//   canvas       { "16:9": [1920,1072], "9:16": [1080,2332] }  override an aspect's frame size
+//   a piece needs no voice, no card, no brand text: clips/stills + music (or silence) is fine.
+// Loudness has ONE owner: media.sh encode (two-pass EBU R128, true-peak safe). FilmCraft exports the
+// master un-normalised (a -4 dB limiter on the mix bus stays). `loudness` in a spec is ignored.
+// --deliver  after each export: media.sh encode (web for 16:9, reel for 9:16; --max = real duration,
+//            --box = the canvas) then media.sh qa-pack; prints the delivered paths and the verdict.
 // A clip/still `label` becomes a lower third over that item. Any item (and endCard) may carry
 // `say`, a narration line: then voice/captions are generated (see narrate) and stills/cards last
 // as long as their line.
@@ -24,7 +39,7 @@
 // Output, beside the spec: <piece>.fcproj (one project, one sequence per aspect),
 // <piece>-<lang>.mp4 (16:9), <piece>-<lang>.reel.mp4 (9:16), and with --frames a mid-frame PNG per
 // aspect for review. Encode/QA/publish stay with media.sh — this only edits.
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { homedir } from 'node:os';
@@ -40,6 +55,7 @@ if (!specPath) {
   process.exit(2);
 }
 const flag = (f) => args.includes(f);
+const KUN_EDIT = join(KUN, '.claude/skills/edit/scripts');
 const onlyAspect = args.includes('--aspect') ? args[args.indexOf('--aspect') + 1] : null;
 
 const spec = JSON.parse(readFileSync(specPath, 'utf8'));
@@ -89,7 +105,7 @@ function narrate() {
   let vEnd = 0;
   let k = 0;
   for (const it of slots) {
-    const natural = it.type === 'clip' ? (it.out ?? probeSeconds(at(it.src))) - (it.in ?? 0) : (it.seconds ?? (it === spec.endCard ? 3 : 0));
+    const natural = it.type === 'clip' ? (it.out ?? probeSeconds(at(srcFor(it.src, '16:9')))) - (it.in ?? 0) : (it.seconds ?? (it === spec.endCard ? 3 : 0));
     let len = natural;
     if (it.say) {
       const g = got[k++];
@@ -157,11 +173,19 @@ function burnCaptions(input, srt, out, tall) {
 }
 
 // ---- build ---------------------------------------------------------------------------------
-const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920] };
+const ASPECTS_DEFAULT = { '16:9': [1920, 1080], '9:16': [1080, 1920] };
+const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], ...(spec.canvas || {}) };
 const aspects = (onlyAspect ? [onlyAspect] : spec.aspects || ['16:9']).filter((a) => ASPECTS[a]);
 
 if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 execFileSync(CLI, ['--save-as', project, 'exec', 'file.newProject', JSON.stringify({ name: piece })], { stdio: 'ignore' });
+
+// A per-aspect source: "src" may be { "16:9": …, "9:16": … } (or landscape/portrait).
+function srcFor(src, aspect) {
+  if (!src || typeof src === 'string') return src;
+  const alias = aspect === '9:16' ? 'portrait' : 'landscape';
+  return src[aspect] ?? src[alias] ?? Object.values(src)[0];
+}
 
 const imported = new Map();
 function importItem(file) {
@@ -235,8 +259,22 @@ function lowerThird(t, seconds, text, width, height, pos) {
   return g.clip;
 }
 
+// ---- deliver: media.sh encode + qa-pack --------------------------------------------------------
+// The reel profile caps at 60 s unless told otherwise, so every encode gets the piece's real length.
+function deliver(master, aspect, w, h, seconds) {
+  const media = join(KUN_EDIT, 'media.sh');
+  const tall = aspect === '9:16';
+  const dest = master.replace(/\.mp4$/, '.final.mp4');
+  const std = ASPECTS_DEFAULT[aspect];
+  const enc = ['encode', tall ? 'reel' : 'web', master, dest, '--max', String(Math.round(seconds * 100) / 100 + 0.02)];
+  if (!std || std[0] !== w || std[1] !== h) enc.push('--box', `${w}x${h}`);
+  execFileSync('bash', [media, ...enc], { stdio: ['ignore', 'ignore', 'inherit'] });
+  const qa = spawnSync('bash', [media, 'qa-pack', dest], { encoding: 'utf8' });
+  console.error(qa.stdout || '', qa.stderr || '');
+  report.delivered.push({ aspect, master, file: dest, qa: (qa.stdout || '').trim().split('\n').slice(-12).join('\n'), qaExit: qa.status });
+}
 narrate();
-const report = { project, outputs: [], frames: [] };
+const report = { project, outputs: [], delivered: [], frames: [] };
 
 for (const aspect of aspects) {
   const [w, h] = ASPECTS[aspect];
@@ -245,15 +283,19 @@ for (const aspect of aspects) {
   const videoClips = [];
   const reframes = [];
 
+  const END = spec.end != null ? snap(spec.end) : Infinity;
+  const moves = [];
+  const dissolves = [];
   for (const it of spec.items || []) {
+    if (t >= END) break;
     const secs = it.seconds ?? it.voiceSeconds;
     if (it.type === 'card') {
-      const cs = snap(secs ?? 3);
+      const cs = snap(Math.min(secs ?? 3, END - t));
       card(t, cs, it.title, it.subtitle, h > w);
       t += cs;
       continue;
     }
-    const file = at(it.src);
+    const file = at(srcFor(it.src, aspect));
     const item = importItem(file);
     let len;
     // A reframed picture in a reel may not cover the frame: it rides on V2 over a brand-canvas matte.
@@ -261,12 +303,12 @@ for (const aspect of aspects) {
     const place = { item, track: onCanvas ? 'V2' : 'V1', seconds: t };
     if (it.type === 'clip') {
       const inS = it.in ?? 0;
-      len = snap((it.out ?? probeSeconds(file)) - inS);
+      len = snap(Math.min((it.out ?? probeSeconds(file)) - inS, END - t));
       place.sourceIn = { seconds: inS };
       place.duration = { seconds: len };
       if (it.mute || spec.voice) place.audio = false;
     } else {
-      len = snap(secs ?? 5);
+      len = snap(Math.min(secs ?? 5, END - t));
       place.duration = { seconds: len };
     }
     const r = fc('timeline.place', place);
@@ -275,13 +317,15 @@ for (const aspect of aspects) {
       const m = fc('file.newColorMatte', { color: v.canvas, seconds: len });
       fc('timeline.place', { item: m.item, track: 'V1', seconds: t, duration: { seconds: len } });
     }
+    if (it.type === 'still' && it.move) moves.push({ clip: (r.clips || [])[0], file, move: it.move, t, len, onCanvas });
+    if (it.transition && t > 0) dissolves.push({ clip: (r.clips || [])[0], ...it.transition });
     if (h > w && it.reel) reframes.push({ clip: (r.clips || [])[0], file, ...it.reel });
     if (it.label) lowerThird(t, Math.min(len, 4), it.label, w, h, it.labelPos ?? spec.labelPos);
     t += len;
   }
 
-  if (spec.endCard) {
-    const s = snap(spec.endCard.seconds || 3);
+  if (spec.endCard && t < END) {
+    const s = snap(Math.min(spec.endCard.seconds || 3, END - t));
     card(t, s, spec.endCard.title || '', spec.endCard.subtitle || brand.hosts?.prod?.replace(/^https?:\/\//, ''), h > w);
     if (logo) {
       // The mark above the title: a 512 px square at ~22% of the short side, centred.
@@ -315,14 +359,56 @@ for (const aspect of aspects) {
     fc('effects.setParam', { clip: f.clip, effect: 'motion', param: 'position', value: [w / 2 - ((f.cx ?? 0.5) - 0.5) * Wd, h * (f.at ?? 0.42) - ((f.cy ?? 0.5) - 0.5) * Hd] });
   }
 
+  // Ken Burns: still.move keys Motion scale + position. Scale is FilmCraft's own value (percent of the
+  // size the frame mode gave the picture, `fillScale`), so zoom z -> scale F*z; position puts the picture
+  // point (cx, cy) at the frame centre. Easing: linear, or auto-bezier (a soft in/out) unless the
+  // ease asks for outCubic (easeOut) / inCubic (easeIn).
+  const interp = { linear: 'linear', outCubic: 'easeOut', inCubic: 'easeIn' };
+  for (const m of moves) {
+    const src = JSON.parse(execFileSync(CLI, ['probe', m.file], { encoding: 'utf8' }));
+    const W = src.video?.width ?? src.width;
+    const H = src.video?.height ?? src.height;
+    const F = fillScale.get(m.clip);
+    if (!W || !H || !F) continue;
+    const fill = (spec.frame ?? (h > w ? 'fill' : 'fit')) === 'fill';
+    const baseW = fill ? Math.max(w, (h * W) / H) : Math.min(w, (h * W) / H);
+    const baseH = (baseW * H) / W;
+    const key = (time, [cx, cy, z]) => {
+      const dW = baseW * z, dH = baseH * z;
+      fc('effects.setParam', { clip: m.clip, effect: 'motion', param: 'scale', value: F * z, time: ticks(time), keyframe: true });
+      fc('effects.setParam', { clip: m.clip, effect: 'motion', param: 'position', value: [w / 2 - (cx - 0.5) * dW, h / 2 - (cy - 0.5) * dH], time: ticks(time), keyframe: true });
+    };
+    const last = m.t + m.len - 1 / FPS; // the clip's last frame
+    key(m.t, m.move.from);
+    key(last, m.move.to);
+    const mode = interp[m.move.ease] ?? 'autoBezier';
+    for (const param of ['scale', 'position']) {
+      for (const time of [m.t, last]) { // setInterpolation's mediaTime is clip-relative (source time of a still)
+        fc('effects.setInterpolation', { clip: m.clip, effect: 'motion', param, mediaTime: ticks(time - m.t), interpolation: mode });
+      }
+    }
+  }
+  for (const d of dissolves) {
+    const params = { clip: d.clip, effect: d.type || 'cross_dissolve', frames: d.frames ?? 12, edge: 'in' };
+    try { fc('sequence.applyVideoTransition', { ...params, align: d.align ?? 'center' }); }
+    catch { fc('sequence.applyVideoTransition', { ...params, align: 'start' }); } // no handle to straddle the cut
+  }
+
   if (spec.voice) {
     const vo = fc('timeline.place', { item: importItem(at(spec.voice)), track: 'A2', seconds: 0, video: false });
     fc('essentialSound.setType', { clips: vo.clips, type: 'dialogue' });
   }
   if (spec.music) {
-    const mu = fc('timeline.place', { item: importItem(at(spec.music)), track: 'A3', seconds: 0, video: false, duration: { seconds: t } });
+    // "bed.m4a" or { src, db, fadeIn, fadeOut, start } — fades in seconds, start = offset into the source.
+    const M = typeof spec.music === 'string' ? { src: spec.music } : spec.music;
+    const mplace = { item: importItem(at(M.src)), track: 'A3', seconds: 0, video: false, duration: { seconds: Math.min(t, END) } };
+    if (M.start) mplace.sourceIn = { seconds: M.start };
+    const mu = fc('timeline.place', mplace);
     fc('essentialSound.setType', { clips: mu.clips, type: 'music' });
-    fc('essentialSound.set', { clips: mu.clips, key: 'volume.levelDb', value: spec.musicDb ?? -18 });
+    fc('essentialSound.set', { clips: mu.clips, key: 'volume.levelDb', value: M.db ?? spec.musicDb ?? -18 });
+    for (const [edge, secs] of [['in', M.fadeIn], ['out', M.fadeOut]]) {
+      if (secs > 0) fc('sequence.applyAudioTransition', { clip: mu.clips[0], effect: 'constant_power', frames: Math.round(secs * FPS), edge, align: edge === 'in' ? 'start' : 'end' });
+    }
     if (spec.voice) fc('essentialSound.generateDucking', { clips: mu.clips });
   }
   // A true-peak ceiling on the mix bus: the export's loudness gain and a music bed's transients
@@ -353,15 +439,14 @@ for (const aspect of aspects) {
     // does not), so captions burn through libass, the house path, after the export.
     const burn = !!spec.captions && (spec.burnCaptions ?? aspect === '9:16');
     const clean = burn ? out.replace(/\.mp4$/, '.nocap.mp4') : out;
-    fc('file.exportMedia', {
-      path: clean, format: 'h264', sequence: seq, wait: true,
-      loudnessLufs: spec.loudness ?? (aspect === '9:16' ? -14 : -16),
-    }, { save: false });
+    // No loudnessLufs here: media.sh encode owns loudness (see the header).
+    fc('file.exportMedia', { path: clean, format: 'h264', sequence: seq, wait: true }, { save: false });
     if (burn) {
       burnCaptions(clean, at(spec.captions), out, h > w);
       rmSync(clean, { force: true });
     }
     report.outputs.push(out);
+    if (flag('--deliver')) deliver(out, aspect, w, h, Math.min(t, END));
   }
   report[aspect] = { seconds: Number(t.toFixed(2)), sequence: seq };
 }

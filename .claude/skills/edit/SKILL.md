@@ -24,6 +24,7 @@ are /higgs). How-to for humans: `content/docs/edit.mdx`.
 | Timeline edit: assemble, grade, mix, titles, a project Abdout can reopen | **FilmCraft** NLE (Apache/MIT, free; replaces Adobe)               | `filmcraft` MCP · `filmcraft-cli` |
 | Motion graphics, title cards, promos                                     | **HyperFrames** plugin (Apache-2.0, HTML + GSAP → MP4)             | `scripts/hf.sh <cmd>`             |
 | Product demo                                                             | `/shoot` sim or `/record` take + HyperFrames cards + ffmpeg concat | below                             |
+| Stills film (camera over still images) | **Blender** `stills.py`, then FilmCraft | `blender.sh stills` · `fc/assemble.mjs --deliver` |
 | Reel (9:16)                                                              | a video-use cut → `scripts/reel.sh`                                | below                             |
 | Quick silence strip of a long recording                                  | `auto-editor`                                                      | below                             |
 
@@ -64,13 +65,15 @@ Apple notarization). Two MCP servers, both user scope:
   Abdout wants to watch or touch the timeline: `bash .claude/scripts/filmcraft.sh desktop <p.fcproj>`.
 
 Loop: import → inspect for ids → batch the edits → `render_frame` and look → fix with `edit.undo` →
-export. The same works from the shell (`--save` writes the project back):
+export. The same works from the shell. `--save` and `--project` are global options that go **before** the
+subcommand (`import`, `run`, `exec`, `export`), and each call is its own process: without `--save` the
+edit is lost when it exits.
 
 ```bash
 P=~/media/<repo>/<flow>/<flow>.fcproj        # one project per piece; reopens in the desktop app
 filmcraft-cli --save-as $P exec file.newSequence name=<flow> width=1080 height=1920 fps=30
 filmcraft-cli --project $P --save import <clip.mp4> <music.wav>
-filmcraft-cli --project $P --save run steps.jsonl   # {"id":"timeline.place","params":{"item":8,"track":"V1","seconds":0}} per line
+filmcraft-cli --project $P --save run steps.jsonl   # `run` = many commands, one per line: {"id":"timeline.place","params":{"item":8,"track":"V1","seconds":0}} per line
 filmcraft-cli --project $P render --seconds 3 --out f.png --scale 0.5
 filmcraft-cli --project $P export <out>.mp4         # then media.sh encode + qa-pack as usual
 ```
@@ -78,7 +81,7 @@ filmcraft-cli --project $P export <out>.mp4         # then media.sh encode + qa-
 Commands worth knowing: `timeline.place` (item → track at seconds), `clip.fillFrame` (16:9 footage
 fills a 9:16 frame), `graphics.newText` + `graphics.set` (titles; Arabic shapes and runs RTL
 correctly, verified 2026-11-15), `captions.import` (SRT from video-use), `essentialSound.generateDucking`,
-`clip.audioGain`, `lumetri.setLook`, `file.exportMedia {loudnessLufs, burnCaptions, wait:true}`.
+`clip.audioGain`, `lumetri.setLook`, `file.exportMedia {burnCaptions, wait:true}` (loudness is not set here: `media.sh encode` owns it, see below).
 Use `filmcraft-cli describe <id>` for a command's params before guessing. Output still goes
 through `media.sh` (below); FilmCraft is the editor, not the publisher.
 
@@ -98,9 +101,18 @@ header of `assemble.mjs` documents the spec. What it does for you:
 - **Reels**: pictures fill 9:16; a wide screenshot takes `"reel": {"cx","cy","width"}` to frame
   what the line names, over the brand canvas; captions burn through libass (house Thmanyah box).
   Wide films keep the `.vtt` sidecar, no burned captions.
-- **Sound**: music ducked under the voice (`essentialSound`), a −4 dB limiter on the mix bus, the
-  export at −16 (wide) / −14 (reel) LUFS. Then `media.sh encode web|reel` + `qa-pack` as always —
-  FilmCraft's export is a high-bitrate master, never the deliverable.
+- **Sound**: music ducked under the voice (`essentialSound`), a −4 dB limiter on the mix bus.
+  **Loudness has one owner, `media.sh encode`** (two-pass EBU R128: −16 web, −14 reel, true-peak
+  safe). FilmCraft exports the master un-normalised (no `loudnessLufs`; a spec's `loudness` is
+  ignored), so the level is never changed twice. `--deliver` runs `media.sh encode web|reel` +
+  `qa-pack` for you; FilmCraft's export is a high-bitrate master, never the deliverable.
+- **Ken Burns without Blender**: a still's `"move": {"from":[cx,cy,zoom],"to":[cx,cy,zoom],"ease"}`
+  keys Motion scale/position. **Dissolve**: `"transition": {"type":"cross_dissolve","frames":12}` on
+  an item. **Music**: `"music": {"src","db","fadeIn","fadeOut","start"}`; `"end": S` trims the
+  piece; `"canvas": {"16:9":[1920,1072],"9:16":[1080,2332]}` sets frame sizes; an item's `src` may
+  be `{ "16:9": …, "9:16": … }` for a per-aspect take. A piece with clips and music, no voice or
+  cards, is fine. `--deliver` encodes with `--max <real length>` (the reel profile's 60 s default
+  never truncates it) and `--box <canvas>`, then prints the `qa-pack` verdict.
 
 Recipes:
 
@@ -134,8 +146,24 @@ install` (checks blender.org's own SHA-256 and the Blender Foundation's notariza
 - **`blender` MCP** — only with Blender open (its add-on serves on :9876): `execute_blender_code`,
   `get_scene_info`, `look`. `generate_3d`, `generate_gaussian_world` and `search_assets` call outside
   services, some paid: not without Abdout's yes.
+- **Stills film** (a camera over still images — zoom into a rect of one picture while a child
+  picture takes over): `blender.sh stills scene.json out/` renders PNGs with `scripts/blender/stills.py`
+  (schema, semantics and the per-aspect overrides: `scripts/blender/stills.schema.md`) and encodes
+  each leg and aspect to `out/<leg>-<aspect>.mp4`. Colour-exact (Standard view, emission only), ~0.12
+  s/frame at 1920x1072. Then `assemble.mjs` takes those clips like any other.
 - **Arabic text:** Blender's text objects don't shape Arabic. Render the 3D without words and put
   titles on in FilmCraft (`assemble.mjs` takes the clip like any other).
+
+### Stills film recipe — Blender camera, FilmCraft assembly, media.sh deliver
+
+1. Write `scene.json` (stills.schema.md): images as a tree, legs with camera keys and opacity.
+   Check a moment first: `blender.sh render $S/blender/stills.py -- scene.json out --frames 90 --aspect landscape`.
+2. `blender.sh stills scene.json out/` — a mezzanine clip per leg and aspect.
+3. A `<piece>.video.json`: clips (`src` per aspect), `transition` dissolves, `music`, `end`, `canvas`.
+4. `node $S/fc/assemble.mjs <piece>.video.json --deliver` — master, then `media.sh encode` + `qa-pack`.
+   Simple pushes (no child image) skip step 1-2: use a still's `move`.
+   Note: `qa-pack` judges photo-dense footage against the UI-footage MB/min budget; a FIX for size
+   alone on a stills film is expected, not a defect.
 
 ## Motion graphics → HyperFrames
 
