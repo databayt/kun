@@ -28,13 +28,16 @@ probe_field() { ffprobe -v error -select_streams v:0 -show_entries "stream=$1" -
 has_audio() { [ -n "$(ffprobe -v error -select_streams a -show_entries stream=index -of default=nw=1:nk=1 "$1" | head -1)" ]; }
 
 # Two-pass EBU R128 to the target; prints the af= value for pass two.
-loudnorm_af() { # <in> <I> <TP>
-  local j
-  j=$(ffmpeg -hide_banner -nostats -i "$1" -af "loudnorm=I=$2:TP=$3:LRA=11:print_format=json" -f null - 2>&1 | sed -n '/^{/,/^}/p')
-  python3 - "$2" "$3" "$j" <<'PY'
+loudnorm_af() { # <in> <I> <TP> [pre-filter,]
+  # The pre-filter (a mono downmix) runs before both the measurement and the normaliser: measured on
+  # stereo and downmixed after, dual-mono audio gained ~3 dB (ffmpeg's default stereo→mono mix) and
+  # a narrated promo shipped at +0.1 dBTP against a -2.5 target.
+  local j pre="${4:-}"
+  j=$(ffmpeg -hide_banner -nostats -i "$1" -af "${pre}loudnorm=I=$2:TP=$3:LRA=11:print_format=json" -f null - 2>&1 | sed -n '/^{/,/^}/p')
+  python3 - "$2" "$3" "$j" "$pre" <<'PY'
 import json, sys
-I, TP, j = sys.argv[1], sys.argv[2], json.loads(sys.argv[3])
-print(f"loudnorm=I={I}:TP={TP}:LRA=11:measured_I={j['input_i']}:measured_TP={j['input_tp']}:"
+I, TP, j, pre = sys.argv[1], sys.argv[2], json.loads(sys.argv[3]), sys.argv[4]
+print(f"{pre}loudnorm=I={I}:TP={TP}:LRA=11:measured_I={j['input_i']}:measured_TP={j['input_tp']}:"
       f"measured_LRA={j['input_lra']}:measured_thresh={j['input_thresh']}:offset={j['target_offset']}:linear=true")
 PY
 }
@@ -85,7 +88,10 @@ s=min(1,bw/w,bh/h); tw=int(w*s)//2*2; th=int(h*s)//2*2; print(tw,th)")
     # and peaky speech (TTS) landed at -0.7 dBTP when aimed at the budget itself
     local I=-16 TP=-2.5 ab=96k ac=1
     [ "$profile" = reel ] && { I=-14; TP=-2; ab=128k; ac=2; }
-    a=(-af "$(loudnorm_af "$in" $I $TP)" -c:a aac -b:a $ab -ac $ac -ar 48000)
+    local pre="" chans
+    chans=$(ffprobe -v error -select_streams a:0 -show_entries stream=channels -of csv=p=0 "$in" 2>/dev/null)
+    [ "$ac" = 1 ] && [ "${chans:-1}" -ge 2 ] 2>/dev/null && pre="pan=mono|c0=0.5*c0+0.5*c1,"
+    a=(-af "$(loudnorm_af "$in" $I $TP "$pre")" -c:a aac -b:a $ab -ac $ac -ar 48000)
   fi
   local acrf=34; case "$profile" in clip) acrf=36 ;; loop) acrf=38 ;; reel) acrf=32 ;; esac
   # Budget-aware: UI footage fits the MB/min budget at the default CRF; photo-heavy footage (listing

@@ -82,6 +82,45 @@ correctly, verified 2026-11-15), `captions.import` (SRT from video-use), `essent
 Use `filmcraft-cli describe <id>` for a command's params before guessing. Output still goes
 through `media.sh` (below); FilmCraft is the editor, not the publisher.
 
+### Brand videos — one spec, one assembler (`scripts/fc/`)
+
+Every brand piece (marketing promo, feature explainer, one-off support clip, lesson) is a spec
+`~/media/<repo>/<piece>/<piece>.video.json` that `node $S/fc/assemble.mjs <spec> [--aspect 9:16]
+[--frames]` turns into `<piece>.fcproj` + `<piece>-<lang>.mp4` (16:9) + `.reel.mp4` (9:16). The
+header of `assemble.mjs` documents the spec. What it does for you:
+
+- **Brand** from `content/media/brand-kit.json` (`balqalam` is Hogwarts' school-facing face,
+  `mkan`, `databayt`): title cards and end cards (built-in `title-centered`, auto-fit to the width,
+  logo via `"logo"`), labels (`lower-third-slab`, solid, `labelPos`: wide top-left, reel top-right).
+- **Narration**: an item's `say` line → one batched Gemini stock-voice request (`voice.mjs`, 10
+  free a day — never loop it), then the voice sets the clock (cards/stills last as long as their
+  line); writes `.vo.wav`, `.srt`, `.vtt` with the steering diacritics stripped.
+- **Reels**: pictures fill 9:16; a wide screenshot takes `"reel": {"cx","cy","width"}` to frame
+  what the line names, over the brand canvas; captions burn through libass (house Thmanyah box).
+  Wide films keep the `.vtt` sidecar, no burned captions.
+- **Sound**: music ducked under the voice (`essentialSound`), a −4 dB limiter on the mix bus, the
+  export at −16 (wide) / −14 (reel) LUFS. Then `media.sh encode web|reel` + `qa-pack` as always —
+  FilmCraft's export is a high-bitrate master, never the deliverable.
+
+Recipes:
+
+| Kind              | Source                                                                                    | Spec shape                                                                                            |
+| ----------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Marketing promo   | feature loops `~/media/<repo>/feature-*/…-ar.mp4` + a Lyria bed (`uv run media/lyria.py`) | card → 5 s clips with `label`+`say` → endCard                                                         |
+| Feature explainer | the feature's stills/loop                                                                 | card → stills with `label`+`say`+`reel` → endCard                                                     |
+| Support clip      | a `/record` take (tutorials stay on `/shoot` sim)                                         | clips with `label`, captions                                                                          |
+| Lesson            | catalog textbook twin → `lesson.json`                                                     | `node $S/fc/lesson.mjs lesson.json` renders brand slides (title/points/definition/fact) and assembles |
+
+Lessons: write `lesson.json` from the textbook's own text only (header of `lesson.mjs`); grade
+B twins are garbled — read through it, never invent. Hogwarts stores lesson videos as `Video`
+rows on a catalog `Lesson` (S3 `storageKey`, approval PENDING → approved): publishing one is a
+prod write, so it waits for Abdout's yes.
+
+Known FilmCraft limits (2026-11-15): its caption renderer drops the dots of a final ي in Thmanyah
+(the graphics engine does not — hence libass for burned captions); TTS is English-only and
+transcription tops out at whisper-small (kun's Gemini voice and mlx-whisper stay); removal is
+blur/mosaic only (Mkan keeps `mkan-video`'s Vision + LaMa fill).
+
 ## Motion graphics → HyperFrames
 
 Load the plugin's router skill `/hyperframes:hyperframes`. It routes to core, animation, captions,

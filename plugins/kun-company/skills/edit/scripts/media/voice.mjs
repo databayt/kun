@@ -4,7 +4,8 @@
 //   voice status [id]                                   consent + sample state of every voice
 //   voice record <id> --speaker "<name>" [--seconds 15]  record the reference sample at this Mac's mic
 //   voice consent <id> --given | --revoke                record the speaker's yes (or withdraw it)
-//   voice gen <script.json> --out <dir> [--retries 3]    synthesize + gate every line → <dir>/voice.json
+//   voice gen <script.json> --out <dir> [--retries 3] [--take <wav>]  synthesize + gate every line → <dir>/voice.json
+//                                                       (--take: re-split a kept batch take, no new request)
 //                                                       script.engine "gemini" = a stock Google voice
 //                                                       (script.voice e.g. "Charon", script.style) —
 //                                                       no clone, so no consent; GEMINI_API_KEY from kun/.env;
@@ -65,31 +66,63 @@ const toWav = (buf, file) => {
   ffmpeg([...(isWav ? [] : ["-f", "s16le", "-ar", "24000", "-ac", "1"]), "-i", tmp, "-c:a", "pcm_s16le", file])
   spawnSync("rm", ["-f", tmp])
 }
+// Where a batched take breaks into its lines. The voice does not always honour the long pauses:
+// breaks came out 0.40–0.64 s, and a sentence pause inside a line (after «بِالقَلَم.») was wider
+// than one real break — so width alone cannot tell them apart. Every pause ≥ 0.3 s (at -30 dB) is a
+// candidate; each break snaps to the candidate nearest where it should fall, by the share of the
+// characters spoken before it. Whisper's CER gate then checks every piece against its own line.
+function splitTake(all, texts) {
+  const n = texts.length
+  const total = probe(all).duration
+  const log = spawnSync(FFMPEG, ["-hide_banner", "-nostats", "-i", all, "-af", "silencedetect=n=-30dB:d=0.3", "-f", "null", "-"], { encoding: "utf8" }).stderr
+  const gaps = [...log.matchAll(/silence_end: ([\d.]+) \| silence_duration: ([\d.]+)/g)].map((m) => ({ mid: +m[1] - +m[2] / 2, d: +m[2] })).filter((g) => g.mid > 0.2 && g.mid < total - 0.2)
+  if (gaps.length < n - 1) return null
+  const chars = texts.map((t) => t.replace(/[\u064B-\u0652\s]/g, "").length)
+  const sum = chars.reduce((a, b) => a + b, 0)
+  const cuts = []
+  let acc = 0
+  let from = 0
+  for (let k = 0; k < n - 1; k++) {
+    acc += chars[k]
+    const want = (total * acc) / sum
+    // the nearest remaining candidate, leaving enough candidates for the breaks still to come
+    let best = -1
+    for (let j = from; j <= gaps.length - (n - 1 - k); j++) if (best < 0 || Math.abs(gaps[j].mid - want) < Math.abs(gaps[best].mid - want)) best = j
+    if (best < 0) return null
+    cuts.push(gaps[best].mid)
+    from = best + 1
+  }
+  return cuts
+}
+
+// Whisper writes a spoken number as digits («37») where the script spells it («سبعةً وثلاثينَ»), and
+// the CER gate failed a correct line on that alone (then spent two retries). Numbers are set aside on
+// both sides — digit runs in what was heard, number words on either side — before the comparison.
+const NUM_WORDS = /^(?:و|ب|ل|وب|ول)?(?:صفر|واحد|واحدة|اثنان|اثنين|اثنتان|ثلاث|ثلاثة|أربع|أربعة|خمس|خمسة|ست|ستة|سبع|سبعة|ثمان|ثماني|ثمانية|تسع|تسعة|عشر|عشرة|عشرون|عشرين|ثلاثون|ثلاثين|أربعون|أربعين|خمسون|خمسين|ستون|ستين|سبعون|سبعين|ثمانون|ثمانين|تسعون|تسعين|مئة|مائة|مئتان|مئتين|ألف|آلاف|ألفان|ألفين|بالمئة|بالمائة)$/
+function numbersAside(text, heard) {
+  const plainWord = (w) => w.replace(/[\u064B-\u0652\u0640،,.!؟?:;]/g, "")
+  const words = (x) => x.split(/\s+/).filter((w) => w && !NUM_WORDS.test(plainWord(w))).join(" ")
+  const h = heard.replace(/[0-9٠-٩]+(?:[.,٫][0-9٠-٩]+)?\s*[%٪]?/g, " ")
+  return [words(text), words(h)]
+}
+
 async function geminiLines(texts, o) {
   mkdirSync(TTS_CACHE, { recursive: true })
   const files = texts.map((t) => join(TTS_CACHE, `${ttsKey(o, t)}.wav`))
   const todo = texts.map((t, i) => i).filter((i) => !existsSync(files[i]))
   if (todo.length > 1) {
     // one request: lines separated by a double long pause, cut back at the N-1 widest silences
-    const all = join(TTS_CACHE, `batch-${process.pid}.wav`)
-    toWav(await geminiSay(todo.map((i) => texts[i]).join(" <long pause> <long pause> <long pause> "), o), all)
-    const log = spawnSync(FFMPEG, ["-hide_banner", "-nostats", "-i", all, "-af", "silencedetect=n=-40dB:d=0.5", "-f", "null", "-"], { encoding: "utf8" }).stderr
-    const sil = [...log.matchAll(/silence_end: ([\d.]+) \| silence_duration: ([\d.]+)/g)].map((m) => ({ end: +m[1], d: +m[2] }))
-    // the N-1 widest gaps are the line breaks when they stand clear of the rest: each >= 0.6 s and the
-    // narrowest of them >= 1.4x the widest gap left inside a line (one break came out 0.84 s against
-    // 0.50 s in-line pauses — a fixed 0.9 s floor threw that take away). Whisper's CER gate checks each piece.
-    const byWidth = [...sil].sort((a, b) => b.d - a.d)
-    const cuts = byWidth.slice(0, todo.length - 1).sort((a, b) => a.end - b.end)
-    const inLine = byWidth[todo.length - 1]?.d ?? 0
-    const clear = cuts.length === todo.length - 1 && cuts.every((c) => c.d >= 0.6 && c.d >= 1.4 * inLine)
-    if (clear) {
-      const edges = [0, ...cuts.map((c) => c.end - c.d / 2), probe(all).duration]
+    const all = o.take || join(TTS_CACHE, `batch-${process.pid}.wav`)
+    if (!o.take) toWav(await geminiSay(todo.map((i) => texts[i]).join(" <long pause> <long pause> <long pause> "), o), all)
+    const cuts = splitTake(all, todo.map((i) => texts[i]))
+    if (cuts) {
+      const edges = [0, ...cuts, probe(all).duration]
       todo.forEach((i, k) => ffmpeg(["-i", all, "-ss", edges[k].toFixed(3), "-to", edges[k + 1].toFixed(3), "-c:a", "pcm_s16le", files[i]]))
-      spawnSync("rm", ["-f", all])
+      if (!o.take) spawnSync("rm", ["-f", all])
     } else {
       // never fall back to a request per line: at ~10 free requests a day that one fallback spends the
-      // whole day. Keep the take for a look and fail; the cached lines from a good batch stay.
-      throw new Error(`gemini: batch split found ${cuts.length}/${todo.length - 1} clean gaps — take kept at ${all}; shorten or re-punctuate a line and retry`)
+      // whole day. Keep the take for a look and fail; `voice gen … --take <wav>` re-splits it for free.
+      throw new Error(`gemini: batch split found no clean line breaks — take kept at ${all}; re-split with --take ${all}, or re-punctuate a line`)
     }
   }
   if (todo.length === 1) toWav(await geminiSay(texts[todo[0]], o), files[todo[0]])
@@ -220,7 +253,7 @@ if (sub === "gen") {
     let gen
     if (gemini) {
       try {
-        const files = await geminiLines(items.map((it) => it.text), { model: GEMINI_MODEL, voice: id, style: script.style, attempt: t })
+        const files = await geminiLines(items.map((it) => it.text), { model: GEMINI_MODEL, voice: id, style: script.style, attempt: t, take: t === 1 ? arg("take") : undefined })
         gen = items.map((it, k) => ({ id: it.id, ok: true, file: files[k] }))
       } catch (e) {
         // the daily quota and an unsplittable take are not per-line failures — another round would just
@@ -254,7 +287,7 @@ if (sub === "gen") {
       // catch a cut-off line (far too short) or a runaway/looping one (far too long).
       const expected = normAr(l.text).length / 10
       const ratio = expected ? dur / expected : 0
-      const e = cer(l.text, heard)
+      const e = cer(...numbersAside(l.text, heard))
       const ok = e <= B.voice_cer_max && ratio >= 0.5 && ratio <= 2.0
       if (ok || l.cer === undefined || e < l.cer) Object.assign(l, { candidate: clean, heard, cer: +e.toFixed(3), duration: +dur.toFixed(2), ratio: +ratio.toFixed(2) })
       if (ok) {
