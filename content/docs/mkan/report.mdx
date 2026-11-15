@@ -83,17 +83,35 @@ that finds tenants through video. So the house posting is the core of the page, 
 
 - **Kept, never switched off:** the daily posting of homes, each video enhanced first, exactly as
   the lane runs today.
-- **Tuned:** fewer home posts a day.
+- **Tuned:** at most 5 posts in any 24 hours, set from the numbers below.
 - **Added on top:** other kinds of video: informative videos (how renting in Kigali works, prices
   by neighbourhood, what a deposit covers), stories, and tenants' and brokers' experiences. These
   are additions to the home posts, never a replacement for them.
 
-The numbers this mix has to move: views per post (46 → 31 as volume rose), and comments and chats
-from TikTok (0 so far). Still open:
+**How many a day — decided from our own numbers (11-15).** Every post at least a day old (59
+posts), split by how many we had posted in the 24 hours before it:
 
-- How many posts a day? 3–5 is the working range.
-- What share does each kind of video get?
-- Which number decides: views per post, comments, or chats that quote a code?
+| Posts in the 24 h before | Posts | Median views | Got 50+ views |
+| --- | --- | --- | --- |
+| 0–3 | 10 | 157 | 10 of 10 |
+| 4–5 | 4 | 122 | 4 of 4 |
+| 6–7 | 12 | 6 | 0 of 12 |
+| 8+ | 33 | 7 | 0 of 33 |
+
+TikTok shows our first five posts in a day to people and buries the sixth onward. Neither the hour
+nor the gap between posts explains the difference; the count does. Over-posting also buries the
+next morning's posts: 11-10 to 11-12 posted 29 videos for about 200 views in total, while 11-13
+posted 2 that drew 423.
+
+- **The rule:** at most **5 posts in any 24 hours**, every kind of video counted, at 07:00, 11:30,
+  15:30, 18:30 and 20:30. The house posts never stop; only the count is bounded.
+- **The loop:** every week the 21:00 stats job re-measures the curve on posts at least 48 hours old.
+  If the 5th post of a day still draws at least half the views of the first ones, the cap rises by
+  one for a week to test the 6th. If the last allowed post draws under a quarter, the cap falls by
+  one. The cap stays between 3 and 8, moves one step a week, and each change is posted to #mkan.
+  `pnpm tt:cadence` prints the curve at any time.
+- **Still open:** which number decides success after reach is fixed: comments, or chats that quote
+  a home code. Once the other kinds of video exist, how to split the 5 between them and the homes.
 
 **D. The unit economics are thin and fragile.**
 - 10% of a broker's commission comes to 5,000–10,000 RWF. One trip to a viewing can eat that, and a
@@ -123,8 +141,8 @@ first client on 12-19. Mkan has taken a large share of the engine's time for fou
    viewings in person, and log what each one cost and why it stalled.
 4. **Five renter interviews this week, Mom-Test style.** Ask "Walk me through how you found your
    current place": where they looked, whom they paid, and how long it took.
-5. **TikTok stays a marketplace.** House posting keeps running every day, each home enhanced
-   first, just fewer a day. Informative, story and experience videos come on top of it. Each post
+5. **TikTok stays a marketplace.** House posting keeps running every day (at most 5 posts in 24 h), each home enhanced
+   first. Informative, story and experience videos come on top of it. Each post
    asks a question that invites a comment. Facebook and WhatsApp housing groups are a second
    channel where Kigali renters already ask. Step 2's freeze does not touch this lane.
 6. **Test who pays.** Pick one and run it on the next 10 tenants: a small tenant fee through MoMo
