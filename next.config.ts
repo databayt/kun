@@ -17,14 +17,27 @@ const nextConfig: NextConfig = {
   // absolute path so OpenNext marks it external and wrangler uploads the .wasm as a module.
   ...(CF_WORKERS
     ? {
-        webpack: (config: { externals?: unknown }, { isServer }: { isServer: boolean }) => {
+        webpack: (
+          config: { externals?: unknown },
+          { isServer }: { isServer: boolean },
+        ) => {
           if (!isServer) return config;
-          const existing = config.externals ? (Array.isArray(config.externals) ? config.externals : [config.externals]) : [];
+          const existing = config.externals
+            ? Array.isArray(config.externals)
+              ? config.externals
+              : [config.externals]
+            : [];
           config.externals = [
             ...existing,
-            ({ request, context }: { request?: string; context?: string }, callback: (err?: Error | null, result?: string) => void) => {
+            (
+              { request, context }: { request?: string; context?: string },
+              callback: (err?: Error | null, result?: string) => void,
+            ) => {
               if (request?.endsWith(".wasm?module") && context) {
-                const file = path.resolve(context, request.slice(0, -"?module".length));
+                const file = path.resolve(
+                  context,
+                  request.slice(0, -"?module".length),
+                );
                 return callback(null, `import ${file}?module`);
               }
               callback();
@@ -58,6 +71,13 @@ const nextConfig: NextConfig = {
         source: "/docs/:path*",
         destination: "/en/docs/:path*",
         permanent: false,
+      },
+      // The Mkan docs moved under /docs/mkan/ (2026-11-15) — mkan's code
+      // and older notes still link the flat mkan-<page> names.
+      {
+        source: "/:lang(en|ar)/docs/mkan-:page(setup|tiktok|airbnb|report)",
+        destination: "/:lang/docs/mkan/:page",
+        permanent: true,
       },
       // The Social Hub moved up out of /engine — keep old links alive.
       {
