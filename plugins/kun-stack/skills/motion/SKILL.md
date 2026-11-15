@@ -12,6 +12,8 @@ effort: medium
 
 Add Framer Motion animations to components.
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 ## Usage
 ```
 /motion hero      # Add hero animations

@@ -405,7 +405,7 @@ All products and workflows must be accessible:
 
 ### ADR-003: Opus 4.8 as Default Model (amended 2026-06-12)
 
-**Decision**: Default to Opus 4.8 for all agents and primary work; Sonnet 4.6 for standard build agents; Haiku 4.5 for exploration/routine. Fallback chain in settings (`fallbackModel: opus-4-8 → sonnet-4-6`). Source of truth: `.claude/engine.json` → `model_tiers`.
+**Decision**: Default to Opus 4.8 for all agents and primary work; Sonnet 4.6 for standard build agents; Haiku 4.5 for exploration/routine. Fallback chain in settings (`fallbackModel: opus-4-8 → sonnet-4-6`). Source of truth: `.claude/engine.json` → `lanes`.
 
 **Rationale**: Architecture-first approach values output quality over cost. Max 5x plan ($100/mo), subscription-only — tiering and fallbacks keep the engine inside plan caps with zero per-token spend.
 

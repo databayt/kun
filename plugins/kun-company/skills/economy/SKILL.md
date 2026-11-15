@@ -3,11 +3,13 @@ name: economy
 description: Token economy — audit consumption and delegate across model × effort × product lane
 when_to_use: "Use when token consumption, plan limits, or usage windows are the topic — auditing what's burning the Max pool, delegating work to a cheaper model/effort/product lane, or applying session hygiene. Triggers on: economy, token usage, optimize tokens, we're burning tokens, hit the limit, usage window, plan limit, tokens per outcome, توكن, استهلاك."
 argument-hint: "[audit|route <task>]"
-effort: medium
-lane: build
+effort: low
+lane: research
+model: sonnet
+context: fork
 ---
 
-Token-economy audit and delegation. Policy: `docs/TOKEN-ECONOMY.md`; machine truth: `.claude/engine.json` → `delegation`.
+Token-economy audit and delegation. Policy: `docs/TOKEN-ECONOMY.md`; machine truth: `.claude/engine.json` → `lanes` (+ `delegation.products` for surfaces).
 
 Arguments: $ARGUMENTS (default `audit`; or `route <task description>` to place one task on the cheapest adequate lane)
 
@@ -21,13 +23,13 @@ Max 5x ($100/mo), subscription-only. There is no dollar meter — the budget is 
    - Instruction files: flag any always-loaded file that grew; detail needed only sometimes belongs in a skill or a doc (loaded on demand). MEMORY.md is an index — one short hook per line, the content lives in the files.
    - MCP: price each server from that output, then check its use — count `mcp__<server>__` calls across `~/.claude/projects/*/*.jsonl`. Propose removing the unused ones (user scope: `claude mcp remove -s user <name>`; a claude.ai connector: a `deniedMcpServers` entry) — reversible, but needs Abdout's nod, since other sessions/skills may depend on them.
    - Skill listing: it sits at the `skillListingBudgetFraction` ceiling while total demand exceeds it, so trimming descriptions buys dispatch room, not tokens — the saving comes only from less demand or a lower fraction.
-   - Fleet drift: every agent in `~/.claude/agents/` and `.claude/agents/` must carry `effort:` matching its model per `engine.json → delegation.efforts` (haiku→low, sonnet→medium, opus→high; captain/architecture/orchestration→xhigh). Fix drift mechanically.
+   - Fleet drift: every agent in `~/.claude/agents/` and `.claude/agents/` must carry `effort:` matching its model per `engine.json → lanes` (haiku→low, sonnet→medium, opus→high; captain/architecture/orchestration→xhigh). Fix drift mechanically.
    - Tell Abdout to run `/usage` (per-category breakdown, flags long-context/cache-miss behaviors ≥10%) and `/context` (what fills this session) — these are interactive-only.
 2. **Report**: one table — surface, current cost, action, saving. Apply mechanical fixes (effort drift, stale skill pointers); propose posture changes (MCP trim, CLAUDE.md diet) without executing.
 
 ## `route <task>` mode
 
-Place the task on the cheapest adequate lane, citing `engine.json → delegation`:
+Place the task on the cheapest adequate lane, citing `engine.json → lanes`:
 
 1. **Off-pool first**: trivial one-file mechanical change → `a` lane. Chat relay/gateway → `h` lane.
 2. **Product lane**: pure think-work (Q&A, drafting, decisions) → Claude chat or Cowork (handoff via bridge.md), not a Code session dragging rules + MCP + repo per turn. Long-running babysitting → claude.ai/code routine, kept lean.

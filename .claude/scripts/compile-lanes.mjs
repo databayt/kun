@@ -133,7 +133,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   } else if (mode === "--page") {
     // The public page: the lane table and who is on each lane. Generated, so it cannot go stale.
     const lanes = JSON.parse(fs.readFileSync(path.join(ROOT, ".claude/engine.json"), "utf8")).lanes || {};
-    const order = ["script", "mechanical", "lookup", "research", "build", "judge", "captain", "escalate"];
+    const order = ["script", "mechanical", "lookup", "research", "build", "judge", "captain", "crm", "escalate"];
     const code = (x) => "`" + x + "`";
     const on = (lane, kind) => rows.filter((r) => r.lane === lane && r.kind === kind).map((r) => r.name);
     const L = ["---", "title: Lanes", "description: One table decides which model and how much effort each kind of work gets", "---", ""];
@@ -146,6 +146,19 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       L.push(`| ${code(n)} | ${l.model || "none"} | ${l.effort || "—"} | ${l.runs || ""} |`);
     }
     L.push("", "The table lives in `.claude/engine.json` under `lanes`. Change a row, run `node .claude/scripts/compile-lanes.mjs`, and everything on that lane changes with it.", "");
+    L.push("The main loop plans and judges on Opus. Build work goes to sonnet build agents with a written brief, lookups to the haiku Explore agent, and CRM work to the lead or funnel agent.", "");
+    const routes = lanes["$routes"] || {};
+    const rl = ["captain", "judge", "crm", "build", "lookup"].filter((n) => Array.isArray(routes[n]) && routes[n].length);
+    if (rl.length) {
+      L.push("## Keyword and MCP routes", "");
+      L.push("The router reads each prompt, matches these words and phrases (whole words, case-insensitive, longest phrase first; on a tie the higher lane wins) and adds one `lane` line to its route hint. An MCP call runs on whatever model makes it, so the route says who should make it. `resolve.mjs --lane \"<task>\"` prints the lane for a task; `captain` and `escalate` never come back from it, they cap at `judge`.", "");
+      L.push("| Lane | Model · effort | Phrases |", "| --- | --- | --- |");
+      for (const n of rl) {
+        const l = lanes[n] || {};
+        L.push(`| ${code(n)} | ${l.model || "none"} · ${l.effort || "—"} | ${routes[n].map(code).join(", ")} |`);
+      }
+      L.push("");
+    }
     L.push("## What a lane writes", "");
     L.push("| For | It writes | Why |", "| --- | --- | --- |");
     L.push("| an agent | `model` and `effort` | applied when the agent starts |");

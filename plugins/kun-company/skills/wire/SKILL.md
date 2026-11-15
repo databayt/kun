@@ -11,6 +11,8 @@ effort: medium
 
 Wire everything together: pages, content components, forms, tables, and i18n. The layer users actually see.
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 ## Usage
 
 - `/wire #42` — from issue spec

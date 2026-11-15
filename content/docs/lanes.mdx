@@ -18,9 +18,24 @@ A lane is a kind of work with a fixed model and a fixed effort. Every agent and 
 | `build` | sonnet | medium | a build agent with a written brief |
 | `judge` | opus | high | the main loop or an opus agent |
 | `captain` | opus | xhigh | the main loop, attended |
+| `crm` | sonnet | medium | the lead or funnel agent against Twenty (crm-api.databayt.org); reads and hygiene that a script already does stay on the script lane |
 | `escalate` | fable | xhigh | by hand, attended only — never unattended |
 
 The table lives in `.claude/engine.json` under `lanes`. Change a row, run `node .claude/scripts/compile-lanes.mjs`, and everything on that lane changes with it.
+
+The main loop plans and judges on Opus. Build work goes to sonnet build agents with a written brief, lookups to the haiku Explore agent, and CRM work to the lead or funnel agent.
+
+## Keyword and MCP routes
+
+The router reads each prompt, matches these words and phrases (whole words, case-insensitive, longest phrase first; on a tie the higher lane wins) and adds one `lane` line to its route hint. An MCP call runs on whatever model makes it, so the route says who should make it. `resolve.mjs --lane "<task>"` prints the lane for a task; `captain` and `escalate` never come back from it, they cap at `judge`.
+
+| Lane | Model · effort | Phrases |
+| --- | --- | --- |
+| `captain` | opus · xhigh | `pricing`, `canon`, `strategy`, `captain`, `hiring`, `fundraise`, `runway`, `what should i do next` |
+| `judge` | opus · high | `fix`, `bug`, `review`, `plan`, `architecture`, `deploy`, `ship`, `release`, `migration`, `run sql`, `production`, `prod`, `security`, `slack send`, `send message`, `gmail send`, `send email`, `publish`, `decide` |
+| `crm` | sonnet · medium | `crm`, `twenty`, `lead`, `leads`, `pipeline`, `prospect`, `qualify`, `follow up`, `outreach`, `عملاء محتملين`, `متابعة` |
+| `build` | sonnet · medium | `component`, `page`, `form`, `table`, `wire`, `schema`, `server action`, `add a`, `build`, `implement`, `scaffold`, `refactor`, `migrate to` |
+| `lookup` | haiku · low | `figma read`, `get design context`, `neon describe`, `list tables`, `describe table`, `github read`, `search code`, `context7`, `library docs`, `ref docs`, `markitdown`, `convert to markdown`, `find where`, `where is`, `which file`, `look up` |
 
 ## What a lane writes
 
@@ -57,17 +72,17 @@ One call can still ask for more: naming a model on a single agent call overrides
 
 **Agents (5):** `hogwarts`, `learn`, `mkan`, `shifa`, `souq`
 
-**Skills (3):** `costs`, `crawl-anthropic`, `watch`
+**Skills (4):** `costs`, `crawl-anthropic`, `economy`, `watch`
 
 ### build
 
 **Agents (25):** `analyze`, `atom`, `authjs`, `block`, `build`, `clone`, `cloudflare`, `deploy`, `internationalization`, `middleware`, `nextjs`, `optimize`, `package`, `pattern`, `performance`, `prisma`, `pwa`, `react`, `record`, `report`, `shadcn`, `tailwind`, `template`, `test`, `typescript`
 
-**Skills (50):** `airbnb-copy`, `analyze`, `atom`, `auth`, `block`, `blur`, `build`, `calendar`, `carousel`, `check`, `clone`, `code`, `codebase`, `credentials`, `docs`, `draft`, `economy`, `edit`, `facebook`, `fix`, `funnel`, `higgs`, `idea`, `issue`, `jobs`, `learn`, `mcp-doctor`, `motion`, `package`, `pattern`, `performance`, `profile`, `pwa`, `quick`, `record`, `report`, `reverse`, `saas`, `scrape`, `screenshot`, `seek`, `shadcn`, `shoot`, `skeleton`, `social`, `tasks`, `template`, `test`, `textbook`, `wire`
+**Skills (47):** `airbnb-copy`, `analyze`, `atom`, `auth`, `block`, `blur`, `build`, `calendar`, `carousel`, `check`, `clone`, `code`, `codebase`, `credentials`, `docs`, `draft`, `edit`, `facebook`, `fix`, `higgs`, `idea`, `issue`, `jobs`, `learn`, `mcp-doctor`, `motion`, `package`, `pattern`, `performance`, `profile`, `pwa`, `quick`, `record`, `report`, `reverse`, `saas`, `screenshot`, `seek`, `shadcn`, `shoot`, `skeleton`, `social`, `tasks`, `template`, `test`, `textbook`, `wire`
 
 ### judge
 
-**Agents (16):** `adjudicate`, `analyst`, `architecture`, `funnel`, `growth`, `guardian`, `lead`, `media-qa`, `ops`, `orchestration`, `product`, `quality`, `revenue`, `support`, `tech-lead`, `transcribe`
+**Agents (15):** `adjudicate`, `analyst`, `architecture`, `funnel`, `growth`, `guardian`, `media-qa`, `ops`, `orchestration`, `product`, `quality`, `revenue`, `support`, `tech-lead`, `transcribe`
 
 **Skills (22):** `approve`, `behalf`, `bench`, `cloudflare`, `decide`, `deploy`, `feature`, `handover`, `incident`, `md`, `plan`, `premortem`, `pricing`, `proposal`, `publish`, `qa`, `release`, `schema`, `security`, `ship`, `spec`, `sync`
 
@@ -76,6 +91,12 @@ One call can still ask for more: naming a model on a single agent call overrides
 **Agents (1):** `captain`
 
 **Skills (3):** `canon`, `captain`, `weekly`
+
+### crm
+
+**Agents (1):** `lead`
+
+**Skills (2):** `funnel`, `scrape`
 
 ## Checks
 

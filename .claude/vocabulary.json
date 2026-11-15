@@ -5124,7 +5124,7 @@
           ],
           "steps": [
             "Read the <kun-route> hint (or run resolve.mjs) — the place",
-            "Pick the lane from engine.json → delegation — the who, model and effort",
+            "Pick the lane from engine.json → lanes — the who, model and effort",
             "Long or recurring work goes through kun-claude.sh — the receipt",
             "Read ~/.claude/state/aware.md before asking what is happening"
           ],

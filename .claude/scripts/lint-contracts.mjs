@@ -134,7 +134,7 @@ for (const fm of frontmatters) {
     retired
       ? `pins \`model: ${val}\`, which is not the engine model or a declared fallback (${[...live].join(", ")})`
       : `pins \`model: ${val}\` — a version, where engine.json requires an alias`,
-    `use an alias from engine.json → model_tiers (opus | sonnet | haiku), so the fleet follows the engine instead of a frozen version`
+    `use an alias from engine.json → lanes (opus | sonnet | haiku), so the fleet follows the engine instead of a frozen version`
   );
 }
 
@@ -193,7 +193,7 @@ if (existsSync(wfDir)) {
       const opts = win.slice(li, li + 300).split(/schema:/)[0];
       const line = raw.slice(0, m.index).split("\n").length;
       const miss = ["model", "effort"].filter((k) => !new RegExp(`\\b${k}:`).test(opts));
-      if (miss.length) add("error", "workflow-effort", `${f}:${line}`, `agent() without ${miss.join(" + ")} — inherits the Opus session default`, `pass model + effort per engine.json delegation.efforts (low mechanical, medium build, high verify)`);
+      if (miss.length) add("error", "workflow-effort", `${f}:${line}`, `agent() without ${miss.join(" + ")} — inherits the Opus session default`, `pass model + effort per engine.json → lanes (low mechanical, medium build, high verify)`);
     }
   }
 }

@@ -52,7 +52,7 @@ reset`, `--accept-data-loss`, `git reset --hard`, force-push, `DROP/TRUNCATE`. N
    _and_ bundled into the kun-company plugin so it travels with installs.
 4. **Confirmed model tiering.** The portable fleet was already textbook-tiered; only the project
    fleet was uniformly opus. Downtiered `package` (mechanical dep audit) to sonnet and codified
-   the policy in `engine.json` → `model_tiers`.
+   the policy in `engine.json` → `lanes`.
 
 ## Re-benchmark 2026-06-12 — the June surface
 
@@ -360,7 +360,7 @@ routine can't edit fleet surfaces without an approved row, so every material ite
 
 ## Model-tiering policy
 
-See `engine.json` → `model_tiers`. In short: **opus** for architecture, orchestration, deep
+See `engine.json` → `lanes`. In short: **opus** for architecture, orchestration, deep
 reasoning, code review/fixes, and strategy/leadership; **sonnet** for standard build agents and
 mechanical project agents; **haiku** for routine/formatting agents. `report` stays on **opus**
 despite being a "loop" agent — it performs real code fixes, and quality-over-speed wins over the

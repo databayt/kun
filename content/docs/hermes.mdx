@@ -3,7 +3,7 @@ title: "Hermes"
 description: "The optional gateway lane — NousResearch's hermes-agent bridges Slack (and other chat apps) to the machine. Install, gateway setup, and the full Slack wiring."
 ---
 
-**Hermes** ([hermes-agent](https://github.com/nousresearch/hermes-agent) · [site](https://hermes-agent.nousresearch.com) · MIT) is the engine's optional **assistant gateway** — the `h` lane. It is NOT a coding CLI: it bridges chat apps (Slack, WhatsApp, Telegram, Discord, Signal, Email, …) to an agent running on your machine, so you can reach the engine from wherever the conversation already is. **Slack is databayt's wired channel; WhatsApp (Abdout's personal number) is wired for the jobs lane since 2026-10-05.** Since 2026-11-01 Hermes is the **ears** and Claude Code the **hands**: real work asked for in Slack is handed to Claude Code (Opus 5.5) on the Mac through the [bridge](#claude-code-bridge).
+**Hermes** ([hermes-agent](https://github.com/nousresearch/hermes-agent) · [site](https://hermes-agent.nousresearch.com) · MIT) is the engine's optional **assistant gateway** — the `h` lane. It is NOT a coding CLI: it bridges chat apps (Slack, WhatsApp, Telegram, Discord, Signal, Email, …) to an agent running on your machine, so you can reach the engine from wherever the conversation already is. **Slack is databayt's wired channel; WhatsApp (Abdout's personal number) is wired for the jobs lane since 2026-10-05.** Since 2026-11-01 Hermes is the **ears** and Claude Code the **hands**: real work asked for in Slack is handed to Claude Code on the Mac through the [bridge](#claude-code-bridge).
 
 Hermes replaced OpenClaw as the gateway lane. If a machine previously ran OpenClaw, Hermes imports its persona, memories, skills, and platform configs in one command:
 
@@ -140,7 +140,7 @@ The Nous login expires now and then (`No access token found for Nous Portal logi
 
 ## Claude Code bridge
 
-Hermes hands real work to **Claude Code (Opus 5.5)** on the Mac: building, fixing, deploying, kun spells (`social`, `report`, `scrape`, `jobs`…), deep questions about a repo, screenshots to read. `claude -p` is Claude Code itself on the Max plan, so nothing borrows the login.
+Hermes hands real work to **Claude Code** on the Mac, on the lane kun picks from the task's words (`resolve.mjs --lane` → `engine.json` lanes: build Sonnet·medium by default, judge Opus·high for fix/deploy/prod, crm Sonnet·medium; a thread keeps its first lane; every run goes through `kun-claude.sh` as `hermes:bridge`): building, fixing, deploying, kun spells (`social`, `report`, `scrape`, `jobs`…), deep questions about a repo, screenshots to read. `claude -p` is Claude Code itself on the Max plan, so nothing borrows the login.
 
 | Piece | Where |
 |---|---|

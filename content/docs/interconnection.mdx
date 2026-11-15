@@ -86,20 +86,25 @@ alone, and `kun`, `codebase` and `marketing` never route bare. The full list is
 [Places](/docs/places). Policy: `engine.json → resolver`; registry:
 `.claude/memory/repositories.json`; per-repo block lists: `<repo>/.claude/blocks.json`.
 
-Then the session picks a lane — **the dispatch table** (`engine.json → delegation`):
+Then the session picks a lane — **the dispatch table** (`engine.json → lanes`):
 
 | Work | Lane | Model · effort |
 |---|---|---|
 | Q&A, small edits, deciding | the main session | Opus 5.5 · session effort |
-| Look up across many files | an Explore subagent | sonnet · low |
+| Look up across many files, batches of MCP reads | an Explore subagent | haiku · low |
 | Mechanical edit, formatting, git | haiku agents (git, comment, icon, …) | haiku · low |
-| Build to a known pattern | build agents | sonnet · medium |
+| Research that needs reading and synthesis | a fork | sonnet · low |
+| Build to a known pattern (after plan approval, 2+ files) | build agents, briefed in writing; the main loop reviews the diff | sonnet · medium |
+| Leads, enrichment, conversion against the CRM | `lead` / `funnel` agents (job prefix `crm:`) | sonnet · medium (funnel judges on opus · high) |
+| A task from Slack | Hermes bridge (`hermes:bridge`) — the lane is picked per task | per task |
 | Review, verify, judge | opus specialists, Workflow verify stages | opus · high |
 | Fan out with verification | a Workflow (qa, handover, textbook, scrape, …) — every stage names its model and effort (lint-enforced) | per stage |
 | Long or recurring work | a loop through `kun-claude.sh` (ledgered; lean when it needs no skills or MCP) | per job |
 | An errand in Abdout's name | `/behalf`, then Cowork | — |
 | An easy one-file task, off the Max pool | Antigravity (`a`) | Gemini |
 | Another running session | `ListAgents` → `SendMessage` (Code ↔ Code, any machine) | — |
+
+Keywords and MCP phrases map to a lane too — the full table is [Lanes](/docs/lanes). Fable is the `escalate` lane: attended sessions only, never a subagent or a headless run.
 
 ### ACT — every run leaves a receipt
 
@@ -229,7 +234,7 @@ Only the host machine runs a long-lived service (Hermes). Everyone else consumes
 
 ## Layer 3 — Hermes: one binary, two pipes
 
-Hermes ([hermes-agent](https://github.com/nousresearch/hermes-agent), the `h` lane) runs on the host machine and is **a relay, never the LLM** — Claude writes every word. It carries two unrelated flows:
+Hermes ([hermes-agent](https://github.com/nousresearch/hermes-agent), the `h` lane) runs on the host machine and is **a relay, never the LLM** — Claude writes every word. Its bridge runs through `kun-claude.sh` as the job `hermes:bridge`, and each Slack task gets a lane from `engine.json → lanes` (`resolve.mjs --lane "<task>"`). It carries two unrelated flows:
 
 ```
 PIPE 1 — inbound gateway (talk to the machine)

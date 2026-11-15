@@ -3,7 +3,7 @@
 > The budget is not dollars. On Max 5x ($100/mo, subscription-only) the budget is the
 > **5-hour session window + weekly window** — one pool shared across Claude Code, Claude
 > chat, and Cowork. Every optimization here is tokens-per-outcome: same result, smaller
-> draw on the pool. Machine-readable truth: `.claude/engine.json → delegation`.
+> draw on the pool. Machine-readable truth: `.claude/engine.json → lanes` (+ `delegation.products` for surfaces).
 > On-demand audit: `/economy`.
 
 Sources: [Claude Code costs](https://code.claude.com/docs/en/costs) ·
@@ -26,7 +26,7 @@ community practice (r/ClaudeCode). Adopted 2026-07-26.
 
 ## Axis 1 — model tier (who runs the task)
 
-Already encoded in agent frontmatter; `engine.json → model_tiers` is the doctrine.
+Already encoded in agent frontmatter; `engine.json → lanes` is the doctrine.
 
 | Tier   | Agents                                             | Work                                                 |
 | ------ | -------------------------------------------------- | ---------------------------------------------------- |

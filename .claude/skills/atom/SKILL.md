@@ -15,6 +15,8 @@ Create and manage atoms in `/Users/abdout/codebase` — compositions of 2+
 shadcn/ui primitives, mirrored on shadcn's "components" docs pattern.
 Deep expertise: the `atom` agent (`.claude/agents/atom.md` in the repo).
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 ## Usage
 
 ```

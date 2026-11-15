@@ -12,6 +12,8 @@ effort: medium
 
 Auto-fix all detected issues in the codebase.
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 ## Argument: $ARGUMENTS
 
 ## Steps

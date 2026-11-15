@@ -80,7 +80,7 @@ When you see a keyword:
 3. **`from <repo>` / `like <product>`** → reference patterns from the named source
 4. **Business/leadership/strategy decision** (natural conversation, _no slash_) → consult `docs/CANON.md`; surface the relevant book + one operating move, grounded in principle `#N`. Don't wait for `/canon`. Keep it brief — one book, one move — and skip trivial or purely-technical choices.
 
-**Dispatch — one door, four beats** (`dispatch`; full map: `content/docs/interconnection.mdx`): read live state from `~/.claude/state/aware.md` before asking; take the place from the `<kun-route>` hint; pick the lane from `engine.json → delegation` (lookup → Explore subagent, low effort · build → sonnet, medium · judge → opus, high · fan-out → a Workflow · long or recurring → a loop through `kun-claude.sh`); "sync self" turns what the runs showed into fixes.
+**Dispatch — one door, four beats** (`dispatch`; full map: `content/docs/interconnection.mdx`): read live state from `~/.claude/state/aware.md` before asking; take the place from the `<kun-route>` hint; pick the lane from `engine.json → lanes` (plan and judge on Opus in the main loop; build → sonnet build agents with a written brief, then review the diff — rule `delegation.md` · lookup → Explore, haiku · low · crm → lead/funnel agents against Twenty · fan-out → a Workflow · long or recurring → a loop through `kun-claude.sh`); "sync self" turns what the runs showed into fixes.
 
 Bug fixes → `/report`. New features → `/feature <name>`. Components → `/atom`, `/block`, `/template`.
 Pre-demo quality pass → `/handover <block>`. Autonomous QA + human-signoff issue → `/qa <block>` (passive: saying **"qa admission"** in prose activates it). **Send to client (one spell) → `/release <block>`.**

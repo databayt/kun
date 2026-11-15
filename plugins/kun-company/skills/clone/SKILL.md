@@ -11,6 +11,8 @@ effort: medium
 
 Polymorphic. Two families of source:
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 - **Live URL** (any non-Figma `http(s)://`) → **url-mode**: deterministically capture a section's
   DOM + exact computed styles and mirror it **pixel-exact** into the house stack. Replaces the
   manual Inspect-and-rebuild loop. Playbook below.

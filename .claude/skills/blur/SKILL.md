@@ -15,6 +15,8 @@ and sharpens into place over ~700 ms. The effect is one CSS transition (`blur` +
 the real image, optionally sitting on a tiny LQIP (low-quality image
 placeholder) so the colors are right from the first paint.
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 Canonical file layout, per-repo adoption, and the surface list: pattern card
 `.claude/patterns/cards/blur.md`. Enforced ambiently by `.claude/rules/loading/blur-image.md`.
 

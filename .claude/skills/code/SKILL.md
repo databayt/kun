@@ -11,6 +11,8 @@ effort: medium
 
 Create server actions and business logic: auth-guarded, validated, tenant-scoped CRUD operations.
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 ## Usage
 
 - `/code #42` — from issue spec

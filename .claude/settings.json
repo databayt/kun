@@ -185,6 +185,10 @@
           {
             "type": "command",
             "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-guard.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/block-guard.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "f=\"${CLAUDE_PROJECT_DIR}/.claude/hooks/delegate-nudge.sh\"; [ -f \"$f\" ] || f=\"$HOME/.claude/hooks/delegate-nudge.sh\"; [ -f \"$f\" ] && bash \"$f\"; exit 0"
           }
         ]
       }

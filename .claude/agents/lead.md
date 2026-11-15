@@ -1,11 +1,11 @@
 ---
 name: lead
 description: "Lead acquisition — contact gap, enrichment, tiering, outreach drafts against the Twenty CRM"
-model: opus
-effort: high
+model: sonnet
+effort: medium
 version: "databayt v1.0"
 handoff: [revenue, growth, captain]
-lane: judge
+lane: crm
 ---
 
 # Lead

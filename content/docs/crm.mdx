@@ -184,6 +184,15 @@ is gone for good, and local development needs a tunnel rather than `localhost`.
 
 `twenty/scripts/backup-twenty.sh`, launchd `com.databayt.twenty-backup`, daily 03:30. It dumps Postgres **and** tars the storage volume — `STORAGE_TYPE=local`, so attachments are not in the database and a SQL-only dump would silently lose them. Lands in `~/backups/twenty` (14 days) and Google Drive (30 days).
 
+## Delegating to the CRM
+
+CRM work runs on the **crm lane** (`engine.json → lanes`, sonnet · medium), and its headless jobs carry the `crm:` prefix in the run ledger.
+
+- **`lead` agent** — enrich, tier, and draft outreach against the records. Bounded, repeatable work.
+- **`funnel` agent** — conversion with real customers (gates, the stall clock, follow-ups). It stays the **opus · high** judge: a wrong message reaches a person.
+- **Hygiene** — dedupe, field fixes, backups checks — are scripts on the script lane (zero tokens), not agents.
+- **From Slack** — say "crm …" to Hermes; the bridge picks the crm lane and runs it as `hermes:bridge`.
+
 ## Ownership
 
 Aseel owns pipeline hygiene. The captain mirrors headline numbers into `.claude/memory/pipeline.json` during weekly planning; that mirror is manual and drifts. Machine-readable workspace registry: `.claude/memory/crm.json`.

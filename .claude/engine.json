@@ -76,11 +76,11 @@
   "project_skills": 85,
   "user_skills": 89,
   "pattern_cards": 15,
-  "project_rules": 7,
+  "project_rules": 8,
   "domain_rules": 57,
   "project_mcp": 23,
   "user_mcp": 27,
-  "hooks": 19,
+  "hooks": 20,
   "vocabulary_spells": 242,
   "workflows": 13,
   "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Since 2026-11-14 the stack fleet is in this repo too: .claude/agents holds the company agents and the 27 stack agents (kun-company skips the stack ones, and Explore), and every stack skill is also a company skill, so the union of both skill sets is 85.",
@@ -137,21 +137,11 @@
   "$harness_listing_comment": "The HARNESS budget (settings.json skillListingBudgetFraction), not listing_cap: Claude Code drops the descriptions of the least-used skills once the listing passes this share of the context window. Raised 0.01 → 0.02 by Abdout on 2026-09-26 after /skill-doctor showed ~110 skills listed name-only. listing_cap (kun's own fleet chars) is unchanged and still governs bloat."
  },
  "model_tiers": {
-  "$comment": "Per-agent model alias by task type. The portable stack fleet (~/.claude/agents) follows this; the project fleet defaults to opus (quality-over-speed) except purely mechanical agents. Every agent also carries `effort:` frontmatter per delegation.efforts (added 2026-07-26). Aliases resolve forward on their own (opus → Opus 5.5 since 2.1.280; sonnet → Sonnet 5.5 since 2.1.284; haiku → Haiku 5.5 since 2.1.293).",
-  "fable": "escalation only — switch the main loop to Fable 5.1 with /model when Opus 5.5 at xhigh falls short on long-horizon work. Never in agent frontmatter, fallbacks, or headless `claude -p` / Agent SDK runs: there Fable can bill usage credits with no consent prompt (code.claude.com/docs/en/model-config).",
-  "opus": "the main loop (session default Opus 5.5 since 2026-09-26) + architecture, orchestration, deep reasoning, code review/fixes, and strategy/leadership agents (incl. captain)",
-  "sonnet": "standard build agents + the mechanical project agent (package)",
-  "haiku": "routine/formatting agents (comment, git, icon, github, semantic, sse, structure)"
+  "$comment": "Folded into `lanes` on 2026-11-15 — a lane names the model and the effort; agents, skills, workflow stages, jobs, Hermes and the keyword/MCP routes all name a lane. Aliases resolve forward on their own (opus → Opus 5.5, sonnet → Sonnet 5.5, haiku → Haiku 5.5). Fable is the `escalate` lane only: attended main loop, never agent frontmatter, fallbacks or headless runs."
  },
  "delegation": {
   "$comment": "Token-economy routing — three axes: model tier × effort × product lane. Playbook: docs/TOKEN-ECONOMY.md; on-demand audit: /economy. Facts that shape it (re-verified 2026-09-26): models from Opus 4.7 on use a larger tokenizer (~35% more tokens than pre-4.7 for the same text); Opus 5.5 and Fable cannot turn thinking off — effort is the lever; prompt-cache TTL is 1h on subscription; Opus 5.5 lists at 2x Sonnet 5 per token ($4/$20 vs $2/$10 — it was ~5x in the Opus 4.x era), and on nextjs.org/evals it solved more for less per task (UNVERIFIED whether plan-window burn tracks list price).",
-  "efforts": {
-   "low": "haiku agents — mechanical/formatting work (comment, git, icon, github, semantic, sse, structure); workflow stages that transform rather than reason. The `haiku` alias resolves to Haiku 5.5 (Claude Code 2.1.293+), which takes effort, so `effort: low` now applies on haiku agents (was a no-op on Haiku 4.5).",
-   "medium": "sonnet build agents — standard implementation with known patterns",
-   "high": "opus specialists — default ceiling for agents; review, fixes, product references, strategy",
-   "xhigh": "judgment tier ONLY — captain, architecture, orchestration; main-loop deep design on explicit request",
-   "policy": "every agent carries `effort:` frontmatter matching its model tier; Workflow scripts pass opts.effort per stage (low for mechanical stages, high+ only for verify/judge)"
-  },
+  "efforts": { "$comment": "Folded into `lanes` (2026-11-15): each lane fixes its effort. Workflow scripts pass opts.model + opts.effort per stage from the lane they name (lint-contracts → workflow-effort)." },
   "products": {
    "$comment": "All Anthropic surfaces draw the SAME Max pool (5h session window + weekly window, shared with chat and Cowork). Product delegation optimizes tokens-per-outcome, not separate quotas — only the a/h lanes are off-pool.",
    "claude-code": "build work only — heaviest per-turn context (rules + MCP + repo files travel with every message)",
@@ -159,25 +149,13 @@
    "claude-chat": "pure Q&A, drafting, brainstorming — cheapest surface, zero engine preamble; use before opening a Code session for think-work",
    "claude-web-code": "long-running cloud babysitting (autofix-pr, scheduled routines) — same pool, so keep routines lean and infrequent",
    "antigravity": "OFF-POOL cheap lane (`a` = Gemini) — easy one-file mechanical tasks; zero Anthropic tokens",
-   "hermes": "OFF-POOL chat relay (`h` = free Nous model) — gateway/channel tasks, never build work itself; it hands build work to Claude Code through scripts/hermes/claude.sh (ON-POOL: Opus 5.5 on the Max plan, Abdout only, one at a time, 15 runs/day)"
+   "hermes": "OFF-POOL chat relay (`h` = free Nous model) — gateway/channel tasks, never build work itself; it hands build work to Claude Code through scripts/hermes/claude.sh → kun-claude.sh (ON-POOL, job hermes:bridge: the lane resolve.mjs --lane picks from the task — build sonnet·medium by default, judge opus·high, crm; Abdout only, one at a time, 15 runs/day)"
   },
-  "lanes": {
-   "$comment": "The dispatch table (2026-11-01): which lane, model and effort a kind of work goes to. Read by the main session (.claude/CLAUDE.md → Dispatch) and explained in content/docs/interconnection.mdx. Workflow stages must name model + effort (lint-contracts → workflow-effort).",
-   "decide": "main session — Opus 5.5, session effort",
-   "lookup": "Explore subagent — haiku, low effort (kun's own Explore agent; ask for sonnet on a deep read)",
-   "mechanical": "haiku agents (git, comment, icon, github, semantic, sse, structure) — low effort",
-   "build": "build agents — sonnet, medium effort",
-   "judge": "opus specialists or Workflow verify stages — high effort",
-   "fan_out": "a Workflow (qa, handover, textbook, scrape, …) — per-stage model + effort",
-   "long_or_recurring": "a loop through .claude/bin/kun-claude.sh — ledgered, lean when it needs no skills or MCP",
-   "errand_as_abdout": "/behalf, then Cowork",
-   "off_pool": "Antigravity (`a`, Gemini) — easy one-file tasks, zero Anthropic tokens",
-   "other_session": "ListAgents → SendMessage (Code ↔ Code, any of Abdout's machines)"
-  },
+  "lanes": { "$comment": "Folded into the top-level `lanes` table + lanes.$routes (2026-11-15). The main loop plans and judges on Opus; build work goes to sonnet build agents, lookups to the haiku Explore agent — rule: ~/.claude/rules/delegation.md. Public page: content/docs/lanes.mdx." },
   "session_hygiene": "/clear between unrelated tasks (stale context taxes every message); /compact with focus instructions on long tasks; batch touches inside the 1h cache window — a >1h idle gap reprocesses full context; plan mode before big builds; specific prompts over broad scans"
  },
  "lanes": {
-  "$comment": "The one routing table (2026-11-14, Kun v5 — docs: ~/.claude/plans/groovy-booping-pebble.md §2). A lane fixes the model and the effort; skills, agents, workflow stages and jobs name a lane instead of a model. Today .claude/bin/kun-claude.sh reads it: a headless run that names no --model takes its lane's (jobs.<job>.lane, then the longest jobs.$lanes prefix, then jobs.$lane_default), so no loop ever inherits the saved session default. `escalate` is the only lane on Fable and no unattended run may resolve to it — kun-claude.sh exits 75 on any fable model, because `claude -p` bills Fable to usage credits without asking. Since 2026-11-14 every agent and skill in .claude/ carries `lane:` and .claude/scripts/compile-lanes.mjs stamps its frontmatter from this table: an agent gets model + effort; a skill on a `skill: fork` lane gets context: fork + model + effort; a skill on a `skill: inline` lane gets the effort only (a model switch mid-conversation discards the prompt cache). lint-contracts.mjs fails on a missing lane or a stamp that drifted. delegation.lanes / delegation.efforts / model_tiers are the older prose view of the same thing.",
+  "$comment": "The one routing table (2026-11-14, Kun v5 — docs: ~/.claude/plans/groovy-booping-pebble.md §2). A lane fixes the model and the effort; skills, agents, workflow stages and jobs name a lane instead of a model. Today .claude/bin/kun-claude.sh reads it: a headless run that names no --model takes its lane's (jobs.<job>.lane, then the longest jobs.$lanes prefix, then jobs.$lane_default), so no loop ever inherits the saved session default. `escalate` is the only lane on Fable and no unattended run may resolve to it — kun-claude.sh exits 75 on any fable model, because `claude -p` bills Fable to usage credits without asking. Since 2026-11-14 every agent and skill in .claude/ carries `lane:` and .claude/scripts/compile-lanes.mjs stamps its frontmatter from this table: an agent gets model + effort; a skill on a `skill: fork` lane gets context: fork + model + effort; a skill on a `skill: inline` lane gets the effort only (a model switch mid-conversation discards the prompt cache). lint-contracts.mjs fails on a missing lane or a stamp that drifted. Since 2026-11-15 it is the only routing table: model_tiers and delegation.lanes/efforts point here; $routes maps keywords and MCP servers to a lane (resolve.mjs emits the hint in <kun-route> and answers --lane for Hermes).",
   "script": { "model": null, "effort": null, "runs": "a script — zero tokens" },
   "mechanical": { "model": "haiku", "effort": "low", "skill": "fork", "autoCompactWindow": 100000, "runs": "a forked skill: no conversation history, under 100K tokens" },
   "lookup": { "model": "haiku", "effort": "low", "skill": "fork", "autoCompactWindow": 100000, "runs": "the Explore agent" },
@@ -185,7 +163,16 @@
   "build": { "model": "sonnet", "effort": "medium", "skill": "inline", "runs": "a build agent with a written brief" },
   "judge": { "model": "opus", "effort": "high", "skill": "inline", "runs": "the main loop or an opus agent" },
   "captain": { "model": "opus", "effort": "xhigh", "skill": "inline", "runs": "the main loop, attended" },
-  "escalate": { "model": "fable", "effort": "xhigh", "runs": "by hand, attended only — never unattended" }
+  "crm": { "model": "sonnet", "effort": "medium", "skill": "inline", "runs": "the lead or funnel agent against Twenty (crm-api.databayt.org); reads and hygiene that a script already does stay on the script lane" },
+  "escalate": { "model": "fable", "effort": "xhigh", "runs": "by hand, attended only — never unattended" },
+  "$routes": {
+   "$comment": "Keyword and MCP → lane (2026-11-15). resolve.mjs matches a prompt's words against these (whole words, case-insensitive, longest phrase first) and adds one `lane` line to <kun-route>; resolve.mjs --lane \"<task>\" prints the lane for Hermes (default build; captain and escalate never come back from --lane — they cap at judge). An MCP call runs on whatever model makes it: the route says WHO should make it — a lookup batch goes to the haiku Explore agent, not the Opus main loop.",
+   "lookup": ["figma", "neon", "list the tables", "show the tables", "figma read", "get design context", "neon describe", "list tables", "describe table", "github read", "search code", "context7", "library docs", "ref docs", "markitdown", "convert to markdown", "find where", "where is", "which file", "look up"],
+   "build": ["component", "page", "form", "table", "wire", "schema", "server action", "add a", "build", "implement", "scaffold", "refactor", "migrate to"],
+   "judge": ["fix", "bug", "review", "plan", "architecture", "deploy", "ship", "release", "migration", "run sql", "production", "prod", "security", "slack send", "send message", "gmail send", "send email", "publish", "decide"],
+   "captain": ["pricing", "canon", "strategy", "captain", "hiring", "fundraise", "runway", "what should i do next"],
+   "crm": ["crm", "twenty", "lead", "leads", "pipeline", "prospect", "qualify", "follow up", "outreach", "عملاء محتملين", "متابعة"]
+  }
  },
  "devices": {
   "$comment": "Declared POLICY for the Mac ↔ iPhone ↔ Claude-surface lane, read by .claude/scripts/devices.sh (--status, --brief at SessionStart, --install). Measured state is never stored here — devices.sh reads it live. Facts verified against code.claude.com docs on 2026-09-27 (remote-control, mobile, desktop, settings-reference, env-vars): push is two settings keys (agentPushNotifEnabled, inputNeededNotifEnabled, both default false); `max` effort cannot be saved as a default (session-only unless CLAUDE_CODE_EFFORT_LEVEL pins it, which also overrides every agent's effort frontmatter — never set it); Dispatch is closed to new users; the Claude app offers Manual / Accept edits / Plan for Remote Control sessions, so the server's starting mode is set here.",
@@ -301,7 +288,7 @@
   "$comment": "Declared POLICY for every scheduled job. runs.sh judges (each job's own record in ~/.claude/state/runs/<job>.json first, then launchd, log mtimes and ~/.claude/logs/runs.jsonl); supervise.mjs acts on that judgment (re-fire, heal, escalate). Measured state never lives here; schedules stay in the plists and Hermes jobs.json, never copied. cadence_hours 0 = a KeepAlive daemon; kind trigger = a WatchPaths job. owner → $owners (where its issue and Slack line go). resume: auto (re-fire a missed or failed slot, up to max_attempts started runs) · tick (one early run on wake, never per slot) · alert (never re-fire) · heal (restart when down). needs: what the gate waits for besides a full wake and the network (twenty, vault, docker, neon, github, slack). max_wait: minutes job-run.sh waits for the gate before recording defer. max_minutes: the run cap. deadline_hours: an ok is due this long after a slot, or the watchdog outside the Mac alerts. refire: the entry point that re-runs this job's slot. only_if undelivered: re-fire only when Hermes ran it but the Slack send failed. mac_only false marks a job that needs nothing on the Mac.",
   "$notify": "per machine — ~/.claude/.kun-notify holds this machine's `me` target (e.g. slack:<DM id>); never fleet config, or every teammate's digest lands in one person's DM",
   "$hermes": "~/.hermes/cron/jobs.json",
-  "$lanes": { "seek:": "build", "social:": "build", "funnel:": "build", "jobs:": "build", "captain:": "judge" },
+  "$lanes": { "seek:": "build", "social:": "build", "funnel:": "build", "jobs:": "build", "captain:": "judge", "crm:": "crm" },
   "$lane_default": "build",
   "$lanes_comment": "Which lane a headless claude run takes when its caller names no model (2026-11-14). First match wins: the job's own `lane` field (run name, then ':' → '-'), the longest prefix in $lanes, then $lane_default. kun-claude.sh adds --model and --effort from the lane ONLY when the caller passed none: textbook:, hermes: and mkan's sprint runner name their own and keep them. captain: is `judge` (opus, high — the effort scripts/captain/weekly.sh already passes), not the attended `captain` lane. seek:, social: and funnel: ran on the saved session default (Opus) until today; they are `build` (sonnet, medium) now — move one back to `judge` here if its output drops.",
   "$full": ["social:", "textbook:", "captain:", "hermes:", "sync:"],
@@ -342,6 +329,7 @@
   "hermes:mkan-tiktok-post": { "cadence_hours": 24, "owner": "mkan", "resume": "auto", "max_attempts": 1, "needs": ["network", "vault"], "deadline_hours": 10, "refire": "hermes:mkan-tiktok-upload-retry", "steps": ["tiktok-post", "tiktok-upload"] },
   "hermes:mkan-tiktok-upload-retry": { "cadence_hours": 24, "owner": "mkan", "resume": "alert", "needs": ["network", "vault"], "$comment": "mkan's day TikTok slots (2026-11-07, plan B): 08:30, 12:30, 13:30 — each posts its share of the day, then renders ahead (tt:upload --spread, tt:render --ahead)" },
   "hermes:mkan-tiktok-upload-evening": { "cadence_hours": 24, "owner": "mkan", "resume": "alert", "needs": ["network", "vault"], "$comment": "mkan's evening TikTok slots (2026-11-07, plan B): every 30 min 17:00–21:30, when Kigali scrolls — each adds the 15:00 sweep's ads (tt:pick), posts its share, renders ahead; 07:00 picks every postable ad from today and yesterday, 3–15 a day" },
+  "hermes:bridge": { "cadence_hours": 0, "kind": "trigger", "owner": "kun", "resume": "alert", "lane": "build", "claude_budget": { "window_hours": 5, "window_usd": 4, "week_usd": 40 }, "$comment": "Slack → Hermes → scripts/hermes/claude.sh → kun-claude.sh (2026-11-15). The lane is picked per task by resolve.mjs --lane and passed as KUN_LANE; `lane` here is only the fallback. A thread keeps its first lane." },
   "hermes:mkan-sprint-runner": { "cadence_hours": 1, "owner": "mkan", "resume": "tick", "needs": ["network"], "max_minutes": 200, "claude_budget": { "window_hours": 5, "window_usd": 4, "week_usd": 60 }, "$comment": "mkan /monetize sprint loop (mkan scripts/crm/hermes/sprint-runner.sh), Hermes */10: each tick drains the queue back-to-back (cycle → claim → session → next, ≤3 h) until nothing is runnable or the budget parks it. claude_budget is read by kun-claude.sh (KUN_JOB = this name): notional USD per rolling 5 h and per 7 days, halved for a week after a plan-limit hit — Abdout 2026-11-07: back-to-back, keep headroom (Sonnet executes, Opus plans). MKAN_UNATTENDED=1 + lean sessions so nothing reaches a real person. Schedule (2026-11-07, Abdout: match the app's ticks so Neon can sleep): Hermes mkan-sprint-runner 0,15,30,45 7-21 and mkan-sprint-runner-night 0 22,23,0-6, the same script and lock; cadence 1 h so the hourly night ticks never read as stale." },
   "hermes:mkan-tiktok-stats": { "cadence_hours": 24, "owner": "mkan", "resume": "auto", "max_attempts": 3, "needs": ["network"] },
   "$owners": { "mkan": { "repo": "databayt/mkan", "notify": "mkan" }, "kun": { "repo": "databayt/kun", "notify": "me" }, "hogwarts": { "repo": "databayt/hogwarts", "notify": "me" }, "food": { "repo": "databayt/food", "notify": "me" } },

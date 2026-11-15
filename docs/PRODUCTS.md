@@ -176,7 +176,7 @@ Posture: databayt is subscription-only (Max plan) — the API-key / per-token la
 | Agent Chain                                     | Default Model                                     |
 | ----------------------------------------------- | ------------------------------------------------- |
 | Captain (CEO brain), long-horizon orchestration | `opus` → Opus 5.5                                 |
-| Stack, Design, UI, DevOps, VCS                  | `opus` / `sonnet` per `engine.json → model_tiers` |
+| Stack, Design, UI, DevOps, VCS                  | `opus` / `sonnet` per `engine.json → lanes` |
 | Explore subagents                               | Haiku 5.5                                         |
 
 ---

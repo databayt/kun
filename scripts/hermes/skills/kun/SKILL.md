@@ -1,6 +1,6 @@
 ---
 name: kun
-description: "Hand real work to Claude Code (Opus 5.5) on this Mac — building, fixing, changing or deploying code, kun spells (social, report, scrape, jobs, deploy, release, qa…), deep questions about the mkan or kun repos, screenshots or files to read, anything multi-step. One command starts it; Claude Code posts its own answer in the thread."
+description: "Hand real work to Claude Code on this Mac (kun picks the lane) — building, fixing, changing or deploying code, kun spells (social, report, scrape, jobs, deploy, release, qa…), deep questions about the mkan or kun repos, screenshots or files to read, anything multi-step. One command starts it; Claude Code posts its own answer in the thread."
 version: 1.0.0
 author: databayt
 license: SSPL
@@ -16,9 +16,15 @@ prerequisites:
 
 # kun — hand the work to Claude Code
 
-You are the ears. **Claude Code (Opus 5.5, on Abdout's Max plan) is the hands.** It runs
+You are the ears. **Claude Code (on Abdout's Max plan) is the hands.** It runs
 on this Mac with the kun engine loaded — every kun skill, the repos, the CRM, the
 Keychain, the browser vault — and it answers in the Slack thread itself.
+
+**Lanes.** Pass the task to `claude.sh` verbatim; never pick a model or effort. kun chooses
+the lane (`resolve.mjs --lane`, table in `engine.json` → `lanes`): **build** (Sonnet·medium)
+is the default; **judge** (Opus·high) for fix / review / deploy / prod / security words;
+**crm** (Sonnet·medium) for crm / leads / pipeline words, so "crm …" tasks route through the
+same script. A thread keeps its first lane; every run is ledgered as `hermes:bridge`.
 
 ## Hand off when
 

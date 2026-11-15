@@ -387,8 +387,40 @@ function protocol(b, root) {
   L.push("</block-protocol>");
   return L.join("\n");
 }
+
+// ── lane route (engine.json → lanes.$routes) ──────────────────────────────
+// Keyword/MCP phrases → lane. Whole words, case-insensitive, Unicode-aware; the longest
+// matched phrase wins, ties go to the higher lane (captain > judge > crm > build > lookup).
+const ROUTE_ORDER = ["captain", "judge", "crm", "build", "lookup"];
+export function routeLane(prompt, lanes) {
+  const routes = lanes && lanes["$routes"];
+  if (!routes || !prompt) return null;
+  let best = null;
+  for (const [rank, lane] of ROUTE_ORDER.entries()) {
+    for (const phrase of Array.isArray(routes[lane]) ? routes[lane] : []) {
+      const body = esc(String(phrase).trim()).replace(/\s+/g, "\\s+");
+      if (!body || !new RegExp(`(^|[^\\p{L}\\p{N}])${body}($|[^\\p{L}\\p{N}])`, "iu").test(prompt)) continue;
+      const len = phrase.length;
+      if (!best || len > best.len || (len === best.len && rank < best.rank)) best = { lane, phrase, len, rank };
+    }
+  }
+  return best ? { lane: best.lane, phrase: best.phrase } : null;
+}
+const ROUTE_DIRECTIVE = {
+  lookup: "hand the reads/MCP lookups to the Explore agent (haiku), not the main loop",
+  build: "plan here, implement through a sonnet build agent with a written brief, then review the diff",
+  crm: "delegate to the lead (or funnel) agent",
+  judge: "keep it in the main loop",
+  captain: "keep it in the main loop",
+};
+// the lane --lane may answer: captain and escalate cap at judge, default build
+export function laneFor(prompt, lanes) {
+  const r = routeLane(prompt, lanes);
+  const l = r ? r.lane : "build";
+  return l === "captain" || l === "escalate" ? "judge" : l;
+}
 const tilde = (p) => (p && p.startsWith(HOME) ? "~" + p.slice(HOME.length) : p);
-export function render(idx, res) {
+export function render(idx, res, route = null, lanes = null) {
   const out = res.local.filter((b) => !b.light).map((b) => protocol(b));
   const lines = [];
   const lightRepos = new Set(idx.light || []);
@@ -412,6 +444,12 @@ export function render(idx, res) {
     const also = b.also.length ? ` (also a ${b.also.join("/")} skill trigger — pick by context)` : "";
     const tail = lightRepos.has(b.repo) ? "" : "; if so, its block protocol applies";
     lines.push(`'${b.key}' may mean the ${b.repo} block ${tilde(path.join(idx.repos[b.repo].path, b.path))}${also}${tail}`);
+  }
+  // one lane line — unless a fork-lane skill line already routes this prompt
+  const forkSkill = (res.skill && res.skill.fork !== false) || (res.skills || []).some((s) => s.fork);
+  if (route && !forkSkill) {
+    const row = (lanes || {})[route.lane] || {};
+    lines.push(`lane ${route.lane} ← "${route.phrase}" (${row.model || "?"} · ${row.effort || "?"}: ${row.runs || ""}) — ${ROUTE_DIRECTIVE[route.lane] || "route accordingly"}`);
   }
   if (lines.length) out.push(`<kun-route>\n${lines.join("\n")}\n</kun-route>`);
   return out.join("\n");
@@ -598,9 +636,26 @@ function test(idx) {
     if (errs.length) fails.push(`✗ "${prompt}" @ ${proj}: ${errs.join("; ")}`);
     else pass++;
   }
+  // lane routes: [task, lane routeLane() finds, lane --lane prints]
+  const lanes = readJSON(path.join(KUN, ".claude/engine.json"), {})?.lanes || {};
+  const LANE_CASES = [
+    ["fix the login bug in hogwarts", "judge", "judge"],
+    ["add a table to mkan listings", "build", "build"],
+    ["how many leads in the crm", "crm", "crm"],
+    ["where is the attendance form defined", "lookup", "lookup"],
+    ["what should we charge, pricing", "captain", "judge"],
+    ["hello", null, "build"],
+    ["متابعة العملاء", "crm", "crm"],
+  ];
+  for (const [task, want, cli] of LANE_CASES) {
+    const got = routeLane(task, lanes)?.lane || null;
+    if (got !== want || laneFor(task, lanes) !== cli) fails.push(`✗ lane "${task}": routeLane ${got} want ${want}; --lane ${laneFor(task, lanes)} want ${cli}`);
+    else pass++;
+  }
+  const total = CASES.length + LANE_CASES.length;
   times.sort((a, b) => a - b);
   const p95 = times[Math.floor(times.length * 0.95)];
-  console.log(`resolve --test: ${pass}/${CASES.length} pass · per-prompt p95 ${p95.toFixed(2)} ms`);
+  console.log(`resolve --test: ${pass}/${total} pass · per-prompt p95 ${p95.toFixed(2)} ms`);
   for (const f of fails) console.log(f);
   return fails.length === 0;
 }
@@ -628,10 +683,12 @@ try {
         // Only words a person typed route.
         const said = /<task-notification>|\[SYSTEM NOTIFICATION|^\s*<system-reminder>/.test(input.prompt || "") ? "" : input.prompt || "";
         const res = resolve(idx, said, process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd());
-        const out = render(idx, res);
+        const lanes = readJSON(path.join(KUN, ".claude/engine.json"), {})?.lanes || {};
+        const route = said ? routeLane(said, lanes) : null;
+        const out = render(idx, res, route, lanes);
         if (out) {
           process.stdout.write(out + "\n");
-          const hit = { ts: new Date().toISOString(), project: res.project, ...(res.skill ? { skill: res.skill.name, lane: res.skill.lane } : {}), ...(res.skills.length ? { phrases: res.skills.map((x) => `${x.names.join("|")}:${x.phrase}`) } : {}), repos: res.repos.map((r) => r.id), local: res.local.map((b) => b.key), named: res.named.map((b) => `${b.repo}/${b.key}`), global: res.global.map((b) => `${b.repo}/${b.key}`), ms: Math.round(ms()) };
+          const hit = { ts: new Date().toISOString(), project: res.project, ...(res.skill ? { skill: res.skill.name, lane: res.skill.lane } : {}), ...(route ? { route: route.lane } : {}), ...(res.skills.length ? { phrases: res.skills.map((x) => `${x.names.join("|")}:${x.phrase}`) } : {}), repos: res.repos.map((r) => r.id), local: res.local.map((b) => b.key), named: res.named.map((b) => `${b.repo}/${b.key}`), global: res.global.map((b) => `${b.repo}/${b.key}`), ms: Math.round(ms()) };
           try {
             fs.mkdirSync(path.dirname(LOG), { recursive: true });
             fs.appendFileSync(LOG, JSON.stringify(hit) + "\n");
@@ -639,6 +696,16 @@ try {
         }
       }
     }
+  } else if (args[0] === "--lane") {
+    // the lane for a task, one word on stdout: `resolve.mjs --lane "<task>"` or the task on stdin
+    let task = args.slice(1).join(" ");
+    if (!task.trim()) {
+      try {
+        task = fs.readFileSync(0, "utf8");
+      } catch {}
+    }
+    const lanes = readJSON(path.join(KUN, ".claude/engine.json"), {})?.lanes || {};
+    console.log(laneFor(task, lanes));
   } else if (args[0] === "--route") {
     const idx = readJSON(INDEX) || build();
     const res = resolve(idx, args.slice(1).join(" "), null);

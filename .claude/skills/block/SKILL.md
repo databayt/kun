@@ -12,6 +12,8 @@ effort: medium
 
 Create and manage blocks - UI components with integrated business logic. Beyond shadcn/ui: authentication, data tables, payments, dashboards with full stack integration.
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 ## Usage
 ```
 /block <source>            - Add block from source

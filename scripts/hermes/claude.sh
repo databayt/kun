@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# claude.sh — Hermes hands a task to Claude Code (Opus 5.5) on this Mac.
+# claude.sh — Hermes hands a task to Claude Code on this Mac, on the lane kun picks.
 #
 #   scripts/hermes/claude.sh <kun|mkan> [--file <path>]... <<'TASK'
 #   <the task, in Abdout's words>
@@ -58,7 +58,9 @@ ALLOWED="${KUN_BRIDGE_USERS:-U0AQ0GLDY04}"
 DAILY="${KUN_BRIDGE_DAILY:-15}"
 TIMEOUT_S="${KUN_BRIDGE_TIMEOUT:-1800}"
 CLAUDE="${KUN_BRIDGE_CLAUDE:-$HOME/.local/bin/claude}"
+ENGINE="$HOME/kun/.claude/engine.json"
 # The ledger wrapper logs tokens + cost per run (JSON output passes through untouched).
+# KUN_LANE is exported per run, once the lane is known (2026-11-15: the lane table, not Opus·high).
 if [ -z "${KUN_BRIDGE_CLAUDE:-}" ] && [ -x "$HOME/.claude/bin/kun-claude.sh" ]; then
   export KUN_CLAUDE_REAL="$CLAUDE" KUN_JOB=hermes:bridge
   CLAUDE="$HOME/.claude/bin/kun-claude.sh"
@@ -73,14 +75,37 @@ THREAD="${HERMES_SESSION_THREAD_ID:-}"
 USER_ID="${HERMES_SESSION_USER_ID:-}"
 log() { printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >>"$LOG"; }
 
-# The thread's stored session: {"sid", "repo"} (a bare string is the pre-2026-11-01 form).
-thread_field() {  # $1 = sid|repo
+# The thread's stored session: {"sid", "repo", "lane"} (a bare string is the pre-2026-11-01 form).
+thread_field() {  # $1 = sid|repo|lane
   [ -n "$THREAD" ] && [ -f "$THREADS" ] || return 0
   KEY="$CHAT:$THREAD" FIELD="$1" /usr/bin/python3 -c 'import json,os,sys
 v = json.load(open(sys.argv[1])).get(os.environ["KEY"])
 if isinstance(v, str): v = {"sid": v, "repo": ""}
 print((v or {}).get(os.environ["FIELD"], ""))' "$THREADS" 2>/dev/null
 }
+# The lane (2026-11-15): kun's resolver picks it from the task's words; a Slack thread keeps
+# its first lane (stored beside the session id). Anything unknown → build.
+lane_ok() { case "$1" in script|mechanical|lookup|research|build|judge|crm) return 0 ;; esac; return 1; }
+pick_lane() {  # the task text → a lane word
+  local sticky l; sticky="$(thread_field lane)"
+  if lane_ok "$sticky"; then echo "$sticky"; return; fi
+  l="$(node "$RESOLVE" --lane "$1" 2>/dev/null | head -1 | tr -d '[:space:]')"
+  lane_ok "$l" && echo "$l" || echo build
+}
+lane_model() {  # $1 = lane → "<model> <effort>" from engine.json lanes.<lane>; null/fable → build's
+  /usr/bin/python3 - "$ENGINE" "$1" <<'PY' 2>/dev/null || echo "sonnet medium"
+import json, sys
+try: lanes = json.load(open(sys.argv[1])).get("lanes") or {}
+except Exception: lanes = {}
+def pick(n):
+    l = lanes.get(n) if isinstance(lanes.get(n), dict) else {}
+    return l.get("model"), l.get("effort")
+m, e = pick(sys.argv[2])
+if not m or "fable" in str(m).lower(): m, e = pick("build")
+print(m or "sonnet", e or "medium")
+PY
+}
+model_name() { case "$1" in opus*) echo "Opus 5.5" ;; sonnet*) echo "Sonnet 5.5" ;; haiku*) echo "Haiku 5.5" ;; *) echo "$1" ;; esac; }
 route() {  # the task text → a repo id
   local sticky; sticky="$(thread_field repo)"
   if [ -n "$sticky" ] && valid_repo "$sticky"; then echo "$sticky"; return; fi
@@ -92,13 +117,21 @@ if [ "$REPO_NAME" = auto ] && [ -z "${KUN_BRIDGE_CHILD:-}" ]; then
   if [ -z "$PEEK" ] && [ ! -t 0 ]; then PEEK="$(cat)"; WORDS=("$PEEK"); fi
   REPO_NAME="$(route "$PEEK")"
 fi
-if [ -n "$DRY" ]; then
-  SID_NOW="$(thread_field sid)"
-  echo "route: $REPO_NAME → $HOME/$REPO_NAME (session: ${SID_NOW:-new})"
-  exit 0
-fi
 REPO="$HOME/$REPO_NAME"
 [ "$REPO_NAME" = kun ] && OTHER="$HOME/mkan" || OTHER="$HOME/kun"
+
+if [ -n "$DRY" ]; then  # print the run, never make it
+  DTASK="${WORDS[*]-}"
+  [ -z "$DTASK" ] && [ ! -t 0 ] && DTASK="$(cat)"
+  DLANE="${KUN_BRIDGE_LANE:-$(pick_lane "$DTASK")}"
+  read -r DM DE <<<"$(lane_model "$DLANE")"
+  SID_NOW="$(thread_field sid)"
+  echo "route: $REPO_NAME → $REPO (session: ${SID_NOW:-new})"
+  echo "lane: $DLANE → model=$DM effort=$DE ($(model_name "$DM"))"
+  case "$CLAUDE" in */kun-claude.sh) DFLAGS="(KUN_LANE=$DLANE picks --model $DM --effort $DE)" ;; *) DFLAGS="--model $DM --effort $DE" ;; esac
+  echo "cmd: cd $REPO && KUN_JOB=hermes:bridge KUN_LANE=$DLANE $CLAUDE -p $DFLAGS --output-format json --permission-mode auto --permission-prompts none --add-dir $OTHER${SID_NOW:+ --resume $SID_NOW}  (timeout ${TIMEOUT_S}s, prompt on stdin)"
+  exit 0
+fi
 
 ARGS=("$REPO_NAME")
 for f in ${FILES[@]+"${FILES[@]}"}; do ARGS+=(--file "$f"); done
@@ -134,13 +167,14 @@ if [ -z "${KUN_BRIDGE_CHILD:-}" ]; then
   fi
   if [ ! -s "$TASK_FILE" ]; then rm -rf "$LOCK" "$TASK_FILE"; echo "No task given — pass it as text or on stdin."; exit 2; fi
   echo $((COUNT + 1)) >"$COUNT_FILE"
+  BLANE="$(pick_lane "$(cat "$TASK_FILE")")"; read -r BM _ <<<"$(lane_model "$BLANE")"
   if [ -z "$PLATFORM" ]; then
-    KUN_BRIDGE_CHILD=1 KUN_BRIDGE_TASK="$TASK_FILE" "$0" "${ARGS[@]}"
+    KUN_BRIDGE_CHILD=1 KUN_BRIDGE_TASK="$TASK_FILE" KUN_BRIDGE_LANE="$BLANE" "$0" "${ARGS[@]}"
     exit $?
   fi
-  KUN_BRIDGE_CHILD=1 KUN_BRIDGE_TASK="$TASK_FILE" nohup "$0" "${ARGS[@]}" >/dev/null 2>&1 &
+  KUN_BRIDGE_CHILD=1 KUN_BRIDGE_TASK="$TASK_FILE" KUN_BRIDGE_LANE="$BLANE" nohup "$0" "${ARGS[@]}" >/dev/null 2>&1 &
   echo $! >"$LOCK/pid"
-  echo "Started — Claude Code (Opus 5.5) is working in $REPO_NAME; the answer lands in this thread."
+  echo "Started — Claude Code ($(model_name "$BM"), $BLANE lane) is working in $REPO_NAME; the answer lands in this thread."
   exit 0
 fi
 
@@ -180,6 +214,9 @@ for c in chunks or ["(empty answer)"]:
 PY
 }
 
+LANE="${KUN_BRIDGE_LANE:-$(pick_lane "$TASK")}"
+read -r M EFFORT <<<"$(lane_model "$LANE")"
+export KUN_LANE="$LANE"
 # A thread that already has a Claude session continues it.
 SESSION="$(thread_field sid)"
 SESSION_REPO="$(thread_field repo)"
@@ -207,14 +244,20 @@ Files Abdout attached (read them):$ATTACH
 The task:
 $TASK"
 
-say ":hourglass_flowing_sand: Claude Code (Opus 5.5) is on it in \`$REPO_NAME\`${SESSION:+, continuing this thread}."
-log "START repo=$REPO_NAME user=$USER_ID chat=$CHAT thread=$THREAD resume=${SESSION:-no} task=$(printf '%s' "$TASK" | tr '\n' ' ' | cut -c1-160)"
+say ":hourglass_flowing_sand: Claude Code ($(model_name "$M"), $LANE lane) is on it in \`$REPO_NAME\`${SESSION:+, continuing this thread}."
+log "START repo=$REPO_NAME lane=$LANE model=$M user=$USER_ID chat=$CHAT thread=$THREAD resume=${SESSION:-no} task=$(printf '%s' "$TASK" | tr '\n' ' ' | cut -c1-160)"
 
 OUT="$(mktemp "$STATE/out.XXXXXX")"
 START=$(date +%s)
 cd "$REPO" || { say "⚠️ No repo at $REPO."; exit 1; }
+# Through kun-claude.sh, KUN_LANE picks the model + effort itself, so the ledger records the
+# lane by name; naming --model there would record it as `caller`. Direct claude needs the flags.
+case "$CLAUDE" in
+  */kun-claude.sh) MODEL_ARGS=() ;;
+  *) MODEL_ARGS=(--model "$M" --effort "$EFFORT") ;;
+esac
 printf '%s' "$PROMPT" | /usr/bin/perl -e 'alarm shift; exec @ARGV' "$TIMEOUT_S" \
-  "$CLAUDE" -p --model opus --effort high --output-format json \
+  "$CLAUDE" -p ${MODEL_ARGS[@]+"${MODEL_ARGS[@]}"} --output-format json \
   --permission-mode auto --permission-prompts none \
   --add-dir "$OTHER" ${SESSION:+--resume "$SESSION"} >"$OUT" 2>>"$LOG"
 CODE=$?
@@ -236,12 +279,12 @@ SID="${REST%%$'\t'*}"; ANSWER="${REST#*$'\t'}"
 rm -f "$OUT"
 
 if [ -n "$SID" ] && [ -n "$THREAD" ]; then
-  KEY="$CHAT:$THREAD" SID="$SID" REPO_ID="$REPO_NAME" /usr/bin/python3 - "$THREADS" <<'PY'
+  KEY="$CHAT:$THREAD" SID="$SID" REPO_ID="$REPO_NAME" LANE_ID="$LANE" /usr/bin/python3 - "$THREADS" <<'PY'
 import json, os, sys
 p = sys.argv[1]
 try: m = json.load(open(p))
 except Exception: m = {}
-m[os.environ["KEY"]] = {"sid": os.environ["SID"], "repo": os.environ["REPO_ID"]}
+m[os.environ["KEY"]] = {"sid": os.environ["SID"], "repo": os.environ["REPO_ID"], "lane": os.environ["LANE_ID"]}
 json.dump(dict(list(m.items())[-200:]), open(p, "w"))
 PY
 fi
@@ -253,5 +296,5 @@ elif [ "$STATUS" = "OK" ]; then
 else
   say "⚠️ Claude Code stopped with an error after ${SECS}s: $(printf '%s' "$ANSWER" | cut -c1-500)"
 fi
-log "END repo=$REPO_NAME status=$STATUS code=$CODE secs=$SECS session=$SID"
+log "END repo=$REPO_NAME lane=$LANE status=$STATUS code=$CODE secs=$SECS session=$SID"
 exit 0

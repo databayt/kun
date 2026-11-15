@@ -5,7 +5,7 @@
 ## Quick Stats
 
 - **Total Agents**: 46 (19 project + 27 user) — canonical counts live in `kun/.claude/engine.json` → `counts`; `/health` flags drift
-- **Model**: per `engine.json` → `model_tiers` (opus default; sonnet/haiku for mechanical agents)
+- **Model**: per `engine.json` → `lanes` (opus default; sonnet/haiku for mechanical agents)
 - **Stack**: Next.js 16 + React 19 + Prisma 6 + TypeScript 5
 
 ---

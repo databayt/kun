@@ -185,6 +185,59 @@ const detectors = {
     if (blind.length) add({ detector: "ledger", subject: "lane-blind", class: "TRACK", title: `${blind.length} headless run(s) this week recorded no lane or no actual model`, evidence: blind.slice(-3).map((e) => `${e.ts} ${e.job} lane=${e.lane || "-"} actual=${e.model_actual || "-"}`), fix: { kind: "repo", how: "the caller bypasses kun-claude.sh or runs an old copy — route it through the wrapper (bash .claude/scripts/setup.sh refreshes it)" } });
     if (adhoc.length) add({ detector: "ledger", subject: "adhoc", class: "DECIDE", title: `${adhoc.length} headless run(s) this week had no job name (lose lean mode and attribution)`, evidence: adhoc.slice(-3).map((e) => `${e.ts} model ${e.model}`), fix: { kind: "repo", how: "set KUN_JOB at the caller (or import scripts/lib/kun-claude.mjs)" } });
   },
+  // "Opus plans, lanes build": share of Edit/Write calls the interactive main loop made itself
+  // vs. those made inside subagents, over recent interactive transcripts. Zero tokens.
+  "delegation-share"() {
+    const PROJ = path.join(CLAUDE, "projects");
+    const cutoff = NOW - 7 * 864e5;
+    const CAP = pol.delegation_max_files || 150;
+    const BUILD = new Set(pol.build_agents || ["build", "block", "atom", "template", "nextjs", "react", "prisma", "typescript", "tailwind", "shadcn", "test", "clone", "report", "internationalization", "icon", "authjs", "middleware", "pwa", "sse"]);
+    const EDIT = new Set(["Edit", "Write", "NotebookEdit"]);
+    const counts = (file) => {
+      // code/config edits only: docs (.md/.mdx), plans and memory dirs don't count
+      const c = { edits: 0, agents: 0, build: 0, headless: false };
+      for (const line of fs.readFileSync(file, "utf8").split("\n")) {
+        if (!line.includes('"tool_use"')) continue;
+        const e = parse(line);
+        if (!e || e.type !== "assistant") continue;
+        if (e.entrypoint === "sdk-cli") c.headless = true;
+        for (const b of Array.isArray(e.message?.content) ? e.message.content : []) {
+          if (b.type !== "tool_use") continue;
+          if (EDIT.has(b.name)) {
+            const fp = b.input?.file_path || b.input?.notebook_path || "";
+            if (fp && !/\.mdx?$/.test(fp) && !/\/\.claude\/plans\/|\/memory\//.test(fp)) c.edits++;
+          } else if (b.name === "Agent") {
+            c.agents++;
+            if (BUILD.has(b.input?.subagent_type) || /sonnet/i.test(b.input?.model || "")) c.build++;
+          }
+        }
+      }
+      return c;
+    };
+    const recent = (dir) => {
+      try {
+        return fs.readdirSync(dir).filter((n) => n.endsWith(".jsonl")).map((n) => path.join(dir, n)).filter((f) => fs.statSync(f).mtimeMs >= cutoff);
+      } catch {
+        return [];
+      }
+    };
+    const mains = [];
+    for (const d of fs.readdirSync(PROJ)) for (const f of recent(path.join(PROJ, d))) mains.push({ f, m: fs.statSync(f).mtimeMs });
+    mains.sort((a, b) => b.m - a.m);
+    let sessions = 0, main = 0, agents = 0, build = 0, sub = 0;
+    for (const { f } of mains.slice(0, CAP)) {
+      const c = counts(f);
+      if (c.headless) continue; // unattended runs have their own lane (ledger)
+      sessions++;
+      main += c.edits; // sidechain entries live in the subagent files, so these are main-loop only
+      agents += c.agents;
+      build += c.build;
+      for (const sf of recent(path.join(f.slice(0, -6), "subagents"))) sub += counts(sf).edits;
+    }
+    const all = main + sub;
+    const share = all ? main / all : 0;
+    if (all >= (pol.delegation_min_edits || 20) && share > 0.6) add({ detector: "delegation-share", subject: "main-loop", class: "TRACK", title: `Main loop made ${Math.round(share * 100)}% of code edits in the last 7 days (target <= 60%) — Opus plans, lanes build`, evidence: [`${main} main-loop Edit/Write vs ${sub} in subagents (${all} total) across ${sessions} interactive sessions`, `${build} of ${agents} Agent calls went to build lane (build agent or model sonnet)`], metric: { name: "delegation.main_edit_share", before: Math.round(share * 100), target: 60 }, fix: { kind: "habit", how: "build work touching 2+ files goes to a sonnet build agent with a written brief (rule: delegation.md); the delegate-nudge Stop hook flags it live" } });
+  },
   aware() {
     const s = readJSON(path.join(STATE, "aware.json"));
     if (!s) return;

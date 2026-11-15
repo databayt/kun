@@ -15,6 +15,8 @@ table columns — drawn as soft blocks that shimmer. When the data lands, conten
 exactly those boxes and nothing moves. A skeleton that doesn't match its page is worse than
 none: it adds a layout shift on top of the wait.
 
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
 Canonical file layout, per-repo adoption, and the route list: pattern card
 `.claude/patterns/cards/skeleton.md`. Enforced ambiently by `.claude/rules/loading/skeleton-loading.md`.
 
