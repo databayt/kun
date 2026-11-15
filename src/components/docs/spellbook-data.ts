@@ -3106,6 +3106,20 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "blender",
+        effect:
+          "3D with Blender, free — product shots, logo stings, 3D scenes rendered headless to frames and finished in FilmCraft; the blender MCP drives the open app",
+        order: [s("/edit"), undefined("blender")],
+        steps: [
+          "blender.sh install if Blender is missing or behind (blender.org sha256 + notarization)",
+          "Write the scene as a Python script; view transform Standard for brand colours; no Arabic text in 3D",
+          "blender.sh render scene.py → PNG frames → blender.sh frames → MP4",
+          "Titles, voice and music in FilmCraft (assemble.mjs), then media.sh encode + qa-pack",
+        ],
+        connects: ["filmcraft", "edit", "motion graphic", "higgs"],
+        depends: [],
+      },
+      {
         name: "rough cut",
         effect:
           "Cut raw footage by its transcript — silences, fillers, false starts and retakes out, word-boundary cuts with 30ms fades, loudness to -14 LUFS",

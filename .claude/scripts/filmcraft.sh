@@ -6,7 +6,7 @@
 #   filmcraft.sh version          installed vs latest
 #   filmcraft.sh mcp              MCP server, headless (no window) — the `filmcraft` MCP entry
 #   filmcraft.sh bridge           MCP server driving the open desktop app — `filmcraft-desktop`
-#   filmcraft.sh desktop [p.fcproj]  open the desktop app with the control channel on :9876
+#   filmcraft.sh desktop [p.fcproj]  open the desktop app with the control channel on :9877
 #
 # The control token lives in Keychain (service databayt, account FILMCRAFT_CONTROL_TOKEN) and is
 # generated on first use; desktop and bridge read the same one. MCP modes print nothing to stdout
@@ -17,7 +17,8 @@ REPO="storytold/filmcraft"
 APP="/Applications/FilmCraft.app"
 SHARE="$HOME/.local/share/filmcraft-cli"
 CLI="$HOME/.local/bin/filmcraft-cli"
-PORT="${FILMCRAFT_PORT:-9876}"
+# 9877, not FilmCraft's documented 9876: the Blender MCP add-on listens on 9876 (2026-11-15).
+PORT="${FILMCRAFT_PORT:-9877}"
 TEAM_ID="DJ6XS33FX8" # Learning Machines LLC — the Developer ID that signs the releases
 
 token() {
