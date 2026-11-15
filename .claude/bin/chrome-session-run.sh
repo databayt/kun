@@ -18,6 +18,12 @@ APP="Google Chrome"
 main_pid() { ps -axo pid=,command= | awk -v p="--remote-debugging-port=$PORT" 'index($0, p) && !index($0, "--type=") {print $1; exit}'; }
 
 if [ -z "$(main_pid)" ]; then
+    # A lock left by an unclean exit names a pid the OS may have handed to another process since
+    # (2026-11-15: pid 487 became calaccessd), and Chrome then quits at once on every restart —
+    # "up … quit normally" in the same second for two days. No Chrome on this profile → it is stale.
+    if ! pgrep -f -- "--user-data-dir=$PROFILE" >/dev/null 2>&1; then
+        rm -f "$PROFILE/SingletonLock" "$PROFILE/SingletonCookie" "$PROFILE/SingletonSocket"
+    fi
     /usr/bin/open -g -j -n -a "$APP" --args \
         --remote-debugging-port="$PORT" '--remote-allow-origins=*' --user-data-dir="$PROFILE" \
         --no-first-run --no-default-browser-check --restore-last-session \
