@@ -5971,6 +5971,34 @@
           "depends": []
         },
         {
+          "name": "filmcraft",
+          "effect": "Edit on a real timeline with FilmCraft — the free, agent-native non-linear editor that replaced Adobe: assemble clips, fill 9:16, Arabic titles, SRT captions, ducking, looks, export; headless by default, the desktop app on request",
+          "order": [
+            {
+              "type": "skill",
+              "name": "/edit"
+            },
+            {
+              "type": "mcp",
+              "name": "filmcraft"
+            }
+          ],
+          "steps": [
+            "filmcraft.sh install if filmcraft-cli is missing or behind (verified download)",
+            "One project per piece at ~/media/<repo>/<flow>/<flow>.fcproj: import → inspect ids → command_batch the edits",
+            "render_frame at decision points and look; edit.undo what's wrong",
+            "Export the MP4, then media.sh encode + qa-pack; open filmcraft.sh desktop only if Abdout wants to see the timeline"
+          ],
+          "connects": [
+            "edit",
+            "rough cut",
+            "captions",
+            "reel",
+            "higgs"
+          ],
+          "depends": []
+        },
+        {
           "name": "rough cut",
           "effect": "Cut raw footage by its transcript — silences, fillers, false starts and retakes out, word-boundary cuts with 30ms fades, loudness to -14 LUFS",
           "order": [

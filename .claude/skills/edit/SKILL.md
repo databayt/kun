@@ -1,7 +1,7 @@
 ---
 name: edit
 description: Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels
-when_to_use: "Use when real footage must be cut or captioned, or a video composed from code. Filming is /record, /shoot; AI clips /higgs. Triggers on: edit video, cut the silences, rough cut, make a reel, add captions, motion graphic, title card, intro outro, مونتاج, قص الفيديو, ريلز."
+when_to_use: "Use when real footage must be cut or captioned, or a video composed from code. Filming is /record, /shoot; AI clips /higgs. Triggers on: edit video, cut the silences, rough cut, make a reel, add captions, motion graphic, title card, intro outro, filmcraft, timeline, مونتاج, قص الفيديو, ريلز, فيلم كرافت."
 argument-hint: "<footage dir|file> | motion <brief> | demo <flow> | reel <file>"
 lane: build
 effort: medium
@@ -13,18 +13,19 @@ The agent never watches video. It reads a word-level transcript and looks at a f
 decision points, writes an EDL or an HTML composition, and renders with ffmpeg. Everything runs on
 this Mac, so there is no API spend.
 
-Keywords (vocabulary, *The Pensieve*) map to lanes: `edit`/`مونتاج` asks, then routes ·
+Keywords (vocabulary, _The Pensieve_) map to lanes: `edit`/`مونتاج` asks, then routes ·
 `rough cut`/`قص الفيديو` → raw footage · `captions`/`ترجمة الفيديو` → captions on a cut ·
 `title card`, `motion graphic` → HyperFrames · `reel`/`ريلز` → cut, then `reel.sh` (AI-only reels
 are /higgs). How-to for humans: `content/docs/edit.mdx`.
 
-| Need                                    | Engine                                                             | Entry                    |
-| --------------------------------------- | ------------------------------------------------------------------ | ------------------------ |
-| Raw footage → cut                       | **video-use** (MIT, patched for local mlx-whisper)                 | `scripts/vu.sh <helper>` |
-| Motion graphics, title cards, promos    | **HyperFrames** plugin (Apache-2.0, HTML + GSAP → MP4)             | `scripts/hf.sh <cmd>`    |
-| Product demo                            | `/shoot` sim or `/record` take + HyperFrames cards + ffmpeg concat | below                    |
-| Reel (9:16)                             | a video-use cut → `scripts/reel.sh`                                | below                    |
-| Quick silence strip of a long recording | `auto-editor`                                                      | below                    |
+| Need                                                                     | Engine                                                             | Entry                             |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------ | --------------------------------- |
+| Raw footage → cut                                                        | **video-use** (MIT, patched for local mlx-whisper)                 | `scripts/vu.sh <helper>`          |
+| Timeline edit: assemble, grade, mix, titles, a project Abdout can reopen | **FilmCraft** NLE (Apache/MIT, free; replaces Adobe)               | `filmcraft` MCP · `filmcraft-cli` |
+| Motion graphics, title cards, promos                                     | **HyperFrames** plugin (Apache-2.0, HTML + GSAP → MP4)             | `scripts/hf.sh <cmd>`             |
+| Product demo                                                             | `/shoot` sim or `/record` take + HyperFrames cards + ffmpeg concat | below                             |
+| Reel (9:16)                                                              | a video-use cut → `scripts/reel.sh`                                | below                             |
+| Quick silence strip of a long recording                                  | `auto-editor`                                                      | below                             |
 
 First run on a machine: `bash ~/.claude/skills/edit/scripts/setup.sh`. It is idempotent and prints the toolchain.
 Scripts live at `~/.claude/skills/edit/scripts/`, called `S` below.
@@ -48,6 +49,38 @@ $S/vu.sh render <dir>/edit/edl.json -o <dir>/edit/final.mp4 --build-subtitles
   transcript JSON. Never re-transcribe.
 - **Captions:** Thmanyah Sans on a padded dark box (`EDIT_AR_SUB_STYLE` in `lib.sh`). Outlines
   muddy Arabic dots. English footage: `VIDEO_USE_SUB_STYLE= VIDEO_USE_SUB_FONT=Helvetica`.
+
+## Timeline edit → FilmCraft
+
+FilmCraft (`storytold/filmcraft`) is a full non-linear editor — Premiere-class timeline, color,
+keyframes, audio mixer, captions, titles, H.264/HEVC/ProRes export — and every action is a command
+an agent can run (`filmcraft-cli commands` lists ~700). It replaced the paid Adobe lane on
+2026-11-15. Install/update: `bash .claude/scripts/filmcraft.sh install` (verifies sha256, gpg and
+Apple notarization). Two MCP servers, both user scope:
+
+- **`filmcraft`** — headless, no window. The default. Tools: `media_import`, `doc_inspect`,
+  `command_run`, `command_batch`, `render_frame`, `command_list`.
+- **`filmcraft-desktop`** — drives the open app (adds `ui_*` click/drag/key/screenshot). Only when
+  Abdout wants to watch or touch the timeline: `bash .claude/scripts/filmcraft.sh desktop <p.fcproj>`.
+
+Loop: import → inspect for ids → batch the edits → `render_frame` and look → fix with `edit.undo` →
+export. The same works from the shell (`--save` writes the project back):
+
+```bash
+P=~/media/<repo>/<flow>/<flow>.fcproj        # one project per piece; reopens in the desktop app
+filmcraft-cli --save-as $P exec file.newSequence name=<flow> width=1080 height=1920 fps=30
+filmcraft-cli --project $P --save import <clip.mp4> <music.wav>
+filmcraft-cli --project $P --save run steps.jsonl   # {"id":"timeline.place","params":{"item":8,"track":"V1","seconds":0}} per line
+filmcraft-cli --project $P render --seconds 3 --out f.png --scale 0.5
+filmcraft-cli --project $P export <out>.mp4         # then media.sh encode + qa-pack as usual
+```
+
+Commands worth knowing: `timeline.place` (item → track at seconds), `clip.fillFrame` (16:9 footage
+fills a 9:16 frame), `graphics.newText` + `graphics.set` (titles; Arabic shapes and runs RTL
+correctly, verified 2026-11-15), `captions.import` (SRT from video-use), `essentialSound.generateDucking`,
+`clip.audioGain`, `lumetri.setLook`, `file.exportMedia {loudnessLufs, burnCaptions, wait:true}`.
+Use `filmcraft-cli describe <id>` for a command's params before guessing. Output still goes
+through `media.sh` (below); FilmCraft is the editor, not the publisher.
 
 ## Motion graphics → HyperFrames
 
@@ -104,18 +137,18 @@ recordings before the transcript pass. Transcript-driven cuts (video-use) are th
 `$S/media.sh` is the one path for encoding, deriving, publishing and checking media. It is local
 and free:
 
-| Command | Does |
-|---|---|
-| `encode <web\|av1\|reel\|clip\|loop\|draft> <in> <out>` | tv-range BT.709 tags, faststart, two-pass loudnorm (−16 web, −14 social). An out ending in `.av1.mp4` encodes SVT-AV1. |
-| `poster <in> <out.webp> --at S` | A meaningful frame as WebP, 1600 px wide |
-| `derive <png…> [--kind ui\|photo] [--check]` | oxipng master plus AVIF/WebP at 1600/2400 (4:4:4 for UI text); EXIF stripped; ssimulacra2 score |
-| `vtt <srt\|json> <out.vtt>` | WebVTT captions for `<track>` |
+| Command                                                                                  | Does                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `encode <web\|av1\|reel\|clip\|loop\|draft> <in> <out>`                                  | tv-range BT.709 tags, faststart, two-pass loudnorm (−16 web, −14 social). An out ending in `.av1.mp4` encodes SVT-AV1.                                                                                                                                                                                                                                                    |
+| `poster <in> <out.webp> --at S`                                                          | A meaningful frame as WebP, 1600 px wide                                                                                                                                                                                                                                                                                                                                  |
+| `derive <png…> [--kind ui\|photo] [--check]`                                             | oxipng master plus AVIF/WebP at 1600/2400 (4:4:4 for UI text); EXIF stripped; ssimulacra2 score                                                                                                                                                                                                                                                                           |
+| `vtt <srt\|json> <out.vtt>`                                                              | WebVTT captions for `<track>`                                                                                                                                                                                                                                                                                                                                             |
 | `publish --ns <brand> (--key <path> \| --slug <s>) --id <id> --manifest <path> <files…>` | `--key`: clean stable keys that mirror the app URL (`hogwarts/ar/students/add/video.mp4`, `…/add/list@2x.avif`), overwritten in place + CloudFront-invalidated, `?v=<sha8>` in the manifest; `--slug`: legacy hashed immutable keys — don't use for new media. Each HEAD-verified, plus an upsert into the product's `media-manifest.json` (AV1 source first, then H.264) |
-| `prune --ns <brand> --manifest <path> --repo <dir> [--match re] [--delete]` | Lists CDN keys nothing serves or names any more (default: hashed leftovers); `--delete` removes them one by one after a human yes |
-| `qa-pack <files…> [--vtt] [--ref]` | Numbers against `engine.json → media` plus ≤1600 px previews for the `media-qa` agent |
-| `voice status\|record\|consent\|gen\|mix\|revoke` | Consent-gated local Arabic narration (Chatterbox Multilingual v3 on MLX), whisper-gated |
-| `brand <id> --json\|--css\|--ass` | The brand kit's production entry for any renderer |
-| `doctor` · `purge [--deep]` | Toolchain status; age out render caches (`--deep` with every session closed) |
+| `prune --ns <brand> --manifest <path> --repo <dir> [--match re] [--delete]`              | Lists CDN keys nothing serves or names any more (default: hashed leftovers); `--delete` removes them one by one after a human yes                                                                                                                                                                                                                                         |
+| `qa-pack <files…> [--vtt] [--ref]`                                                       | Numbers against `engine.json → media` plus ≤1600 px previews for the `media-qa` agent                                                                                                                                                                                                                                                                                     |
+| `voice status\|record\|consent\|gen\|mix\|revoke`                                        | Consent-gated local Arabic narration (Chatterbox Multilingual v3 on MLX), whisper-gated                                                                                                                                                                                                                                                                                   |
+| `brand <id> --json\|--css\|--ass`                                                        | The brand kit's production entry for any renderer                                                                                                                                                                                                                                                                                                                         |
+| `doctor` · `purge [--deep]`                                                              | Toolchain status; age out render caches (`--deep` with every session closed)                                                                                                                                                                                                                                                                                              |
 
 - **Before shipping:** run `qa-pack`, then have `media-qa` judge it. PASS means publish; FIX means
   re-render with the named change.
@@ -138,6 +171,8 @@ and free:
 - Confirm the strategy before the first full render. Use `--draft` or `--preview` while iterating.
 - You cannot listen. Report the loudness numbers that `render` prints (−14 LUFS target) instead of
   claiming it sounds right.
+- **Adobe is not used:** Premiere and After Effects need a paid licence; FilmCraft covers the
+  timeline for free (the staged Adobe MCPs stay unregistered).
 - **Remotion is not used:** databayt has more than 3 people, so it needs the paid Company licence.
   HyperFrames covers the same ground for free.
 

@@ -40,6 +40,7 @@ generation API (decided 2026-10-07). Pick the tool by the job:
 | Native apps, OTP inboxes, multi-app flows | `/record` (`--page`, clicks shown), or `computer-use` / the Desktop iOS Simulator pane (Cmd+S still, Cmd+R video) | Raw take, then `/edit` |
 | Quick support answer from a live, logged-in page | Claude in Chrome (`claude --chrome`): record a GIF, then `media.sh encode loop` | Muted looping MP4 |
 | Footage: cuts, captions, motion graphics | [`/edit`](/docs/edit): video-use, HyperFrames | Finished video |
+| Timeline edit: assemble, grade, mix, Arabic titles, a project you can reopen | [`/edit`](/docs/edit): **FilmCraft** (free, agent-driven NLE; replaces Adobe Premiere/After Effects) | `.fcproj` + MP4 |
 | AI imagery (text-free) | `/higgs` ladder: Adobe for creativity → Canva → Claude Design → Figma Weave → ChatGPT seat | Stills; video through Weave and Adobe |
 | Anything carrying copy | `/carousel` templates | Exact platform sizes |
 
@@ -67,6 +68,9 @@ captions only, and `voice revoke` lists every asset that then needs re-rendering
 - **Adobe for creativity**: enable it per media session with
   `claude plugin enable adobe-for-creativity@claude-plugins-official`. Its 15 skills crowd the
   skill listing if always on.
+- **FilmCraft** (free, Apache/MIT, on this Mac): `filmcraft` MCP runs headless, `filmcraft-desktop`
+  drives the open app (`bash .claude/scripts/filmcraft.sh desktop <p.fcproj>`). Install or update
+  with `filmcraft.sh install`. It replaced the paid Adobe Premiere/After Effects lane on 2026-11-15.
 - **Claude Design**: run `/design-login` once.
 - **Figma Weave**: 150 credits a month. The `figma-quota` hook warns before the Figma MCP's
   ~20 calls a month run out.

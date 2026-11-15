@@ -25,7 +25,7 @@
     },
     "skills_without_triggers": 2,
     "builtin_targeted_spells": 3,
-    "corpus_hash": "fnv1a:b699b700"
+    "corpus_hash": "fnv1a:dcf77f29"
   },
   "split": {
     "version": "v1",
@@ -2020,6 +2020,14 @@
       "cases_to": 712,
       "top1_hard": null,
       "note": "BASELINE RESET, not a scored run. Approved by Abdout in the plan of 2026-11-14. Trigger phrases moved deliberately in the v5 overhaul (lane tags and the fork skills' own trigger phrases, dev as a Haiku fork, 17 once-user-only skills now sources in the repo), and four HyperFrames skills joined the listing with no trigger phrases (89 skills, 712 cases, listing 34,559 chars; cap raised 33,500 -> 34,600 in engine.json with its reason). Scores before this entry are not comparable with scores after it. The next bench-dispatch run re-establishes the number."
+    },
+    {
+      "week_of": "2026-11-15",
+      "baseline_reset": true,
+      "corpus_hash_from": "fnv1a:b699b700",
+      "corpus_hash_to": "fnv1a:dcf77f29",
+      "top1_hard": null,
+      "note": "BASELINE RESET, not a scored run. /edit gained the triggers `filmcraft`, `timeline` and `فيلم كرافت` when FilmCraft replaced the Adobe lane (plan approved by Abdout 2026-11-15). Listing stays under the 34,600 cap. Scores before this entry are not comparable with scores after it; the next bench-dispatch run re-establishes the number."
     }
   ],
   "stratified": {

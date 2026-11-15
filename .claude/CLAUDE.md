@@ -59,7 +59,7 @@ Every skill routes by its own description. The keywords below have NO skill of t
 **The Unforgivable Commands** — forbidden by the engine: `rm -rf *`, `prisma migrate reset`, `prisma db push --accept-data-loss`, `DROP TABLE`, `git push --force main`
 **The Auror Office** — one keyword, one quality dimension: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`, `guard`, `architecture`, `structure`, `design`, `stack`, `trace`, `efficient`, `mirror`, `diff`
 **The Ministry of Magic** — operations and intelligence: `conventions`, `patterns`, `drift`, `dispatch`, `aware`
-**The Pensieve** — judgment and conversion: `contract`, `transcribe`, `agreement`, `adjudicate`, `textbook bench`, `textbook status`, `textbook loop`, `land the twin`, `تحويل الكتب`, `media`, `rough cut`, `captions`, `title card`, `motion graphic`, `مونتاج`, `قص الفيديو`, `ترجمة الفيديو`
+**The Pensieve** — judgment and conversion: `contract`, `transcribe`, `agreement`, `adjudicate`, `textbook bench`, `textbook status`, `textbook loop`, `land the twin`, `تحويل الكتب`, `media`, `filmcraft`, `rough cut`, `captions`, `title card`, `motion graphic`, `مونتاج`, `قص الفيديو`, `ترجمة الفيديو`
 **The Portrait Gallery** — the media studio: `hero image`, `og image`, `banner`, `mockup`, `lifestyle`, `split-screen`, `reel`, `infographic`, `testimonial`, `showroom`
 **The Owlery** — lead acquisition and outreach: `scrap`, `contact gap`, `leads`, `prospect`, `enrich`, `outreach`, `pipeline health`, `scrap facebook`, `scrap whatsapp`, `scrap for hogwarts`, `scrap for mkan`, `scrap tiktok`, `scrap facebook for mkan`, `tiktok homes`, `اسحب`, `جمع بيانات`, `عملاء محتملين`, `apply`, `وظائف`
 **The Floo Network** — conversation to conversion: `qualify`, `segment`, `nurture`, `follow up`, `stalled`, `chatbot`, `قمع`, `تأهيل`, `متابعة`
@@ -96,7 +96,7 @@ Pre-demo quality pass → `/handover <block>`. Autonomous QA + human-signoff iss
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
