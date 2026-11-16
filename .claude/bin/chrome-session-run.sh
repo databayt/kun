@@ -15,7 +15,10 @@ PORT="${1:-9222}"
 PROFILE="${2:-$HOME/.claude/chrome-debug-profile}"
 APP="Google Chrome"
 
-main_pid() { ps -axo pid=,command= | awk -v p="--remote-debugging-port=$PORT" 'index($0, p) && !index($0, "--type=") {print $1; exit}'; }
+# The flag is assembled inside awk: passed whole (-v p="--remote-debugging-port=9222") it sat in awk's own
+# command line, so with no Chrome up awk found ITSELF — the vault "was up", never started, and "quit" in the
+# same second, every 5 min (2026-11-13 → 11-16). Same for the runner's own line: it carries only the port.
+main_pid() { ps -axo pid=,command= | awk -v port="$PORT" 'index($0, "--remote-debugging-" "port=" port " ") || $0 ~ ("--remote-debugging-" "port=" port "$") { if (!index($0, "--type=")) { print $1; exit } }'; }
 
 if [ -z "$(main_pid)" ]; then
     # A lock left by an unclean exit names a pid the OS may have handed to another process since
