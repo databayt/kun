@@ -29,12 +29,12 @@ import { similarRole } from "@/lib/jobs/deduplication";
 import { evaluateSendGate, holdReasonFor } from "@/lib/jobs/send-gate";
 
 import { BoardRow, ledger, listBoard, patchRow } from "./board";
-import { inFocus, kigaliNow, LANE_BAND, loadConfig, seniorityBand, todaysCap } from "./config";
+import { inFocus, isContractCampaign, kigaliNow, LANE_BAND, loadConfig, seniorityBand, todaysCap } from "./config";
 import { tailorCvs, type TailorResult } from "./tailor";
 import { pickVariants } from "./variants";
 
 const TENDER_NOTICE =
-  /tender|expression of interest|\beoi\b|request for (proposal|quotation)|\brf[pq]\b|terms of reference|^notice for|supply,? delivery|construction and commissioning|\((works|goods|services)\)|procurement of/i;
+  /tender|expressions? of interest|\beoi\b|request for (proposal|quotation)|\brf[pq]\b|terms of reference|\btors?\b|consultancy|invitation for (submission of )?quotations|^notice for|supply,? delivery|construction and commissioning|\((works|goods|services)\)|procurement of/i;
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run");
@@ -181,6 +181,9 @@ async function main(): Promise<void> {
     )
     .filter((r) => (r.channel === "EMAIL" && r.applyEmail) || (r.channel === "WHATSAPP" && r.applyPhone))
     // A tender wants a bid, not a cover letter — even when it names an address.
+    // The campaign decides first (approval never turns a tender into a letter);
+    // the title catches tenders filed under a job lane.
+    .filter((r) => !isContractCampaign(r.campaign))
     .filter((r) => r.applicationStatus === "APPROVED" || !TENDER_NOTICE.test(r.name))
     .filter((r) => r.applicationStatus === "APPROVED" || !cfg.pausedLanes.includes(r.campaign ?? ""))
     .filter((r) => r.applicationStatus === "APPROVED" || inFocus(r, cfg, date))
@@ -276,6 +279,7 @@ async function main(): Promise<void> {
       }
       verdict = evaluateSendGate({
         channel: row.channel === "WHATSAPP" ? "whatsapp" : "email",
+        campaign: row.campaign,
         letter,
         company: req.company,
         role: req.role,

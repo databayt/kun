@@ -34,6 +34,12 @@ export interface LoopConfig {
   // are prepared or sent; every other card waits on the board, untouched.
   // anywhereLanes pass in any country (remote work like AI_TRAINING).
   focus?: { lanes: string[]; countries: string[]; until: string; anywhereLanes?: string[] };
+  // "jobs" = the original apply-to-postings loop. "contracts" (Abdout,
+  // 2026-11-16, after 66 sends and 0 interviews in 51 days): no job
+  // applications at all — the company bids on tenders and answers client
+  // requests; loop.sh skips the sending steps and the board keeps only
+  // CONTRACT_CAMPAIGNS. Flip back to "jobs" to restore the old loop.
+  mode: "jobs" | "contracts";
 }
 
 const DEFAULTS: LoopConfig = {
@@ -61,7 +67,15 @@ const DEFAULTS: LoopConfig = {
   pausedLanes: [],
   dailyTotalCap: 100,
   minCoverageByLane: { AI_TRAINING: 20 },
+  mode: "jobs",
 };
+
+/// Board campaigns that are company work, not a person's job application: a
+/// tender wants a bid packet, a client request wants a person — none of them
+/// ever goes out as a CV + cover letter (send-gate.ts refuses it).
+export const CONTRACT_CAMPAIGNS = ["TENDER", "ENGINEERING_CONTRACT", "CLIENT_PROJECT"] as const;
+export const isContractCampaign = (c?: string | null): boolean =>
+  (CONTRACT_CAMPAIGNS as readonly string[]).includes(c ?? "");
 
 /// Priority, lowest first (Abdout, 2026-10-03): days-to-cash — AI-training
 /// gigs and software roles → remote → freelance + electrical/protection →

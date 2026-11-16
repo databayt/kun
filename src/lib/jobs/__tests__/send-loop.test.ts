@@ -258,3 +258,23 @@ describe("reply classifier — acknowledgements that mention interviews", () => 
     ).toBe("interview");
   });
 });
+
+describe("send gate — company work is never a job letter", () => {
+  // 2026-10-27: an NGO's "Software Development Firm" ToR went out as a CV +
+  // cover letter; the title check missed "ToR:" and approval skipped it.
+  it("refuses a tender, even with a clean letter", () => {
+    const v = evaluateSendGate(base({ campaign: "TENDER" }));
+    expect(v.pass).toBe(false);
+    expect(v.hard).toContain("tender — needs a bid packet, not a letter");
+  });
+
+  it("refuses engineering contracts and client requests", () => {
+    for (const campaign of ["ENGINEERING_CONTRACT", "CLIENT_PROJECT"])
+      expect(evaluateSendGate(base({ campaign })).pass).toBe(false);
+  });
+
+  it("still passes a clean job letter", () => {
+    expect(evaluateSendGate(base({ campaign: "WEB_DEVELOPER" })).pass).toBe(true);
+    expect(evaluateSendGate(base({ campaign: null })).pass).toBe(true);
+  });
+});

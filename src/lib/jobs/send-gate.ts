@@ -13,6 +13,11 @@ export interface GateInput {
   /// email: a letter to an address; ats: a cover letter for a hosted form;
   /// whatsapp: the letter as a message + CV to the number on the posting.
   channel?: "email" | "ats" | "whatsapp";
+  /// The board campaign. Tenders, engineering contracts and client requests
+  /// are company work: they get a bid packet a person submits, never a CV and
+  /// cover letter (2026-10-27 an NGO's "Software Development Firm" ToR went
+  /// out as a job letter because only the title was checked).
+  campaign?: string | null;
   letter: { to: string; subject: string; body: string };
   company: string;
   role: string;
@@ -102,10 +107,19 @@ function mentions(body: string, phrase: string): boolean {
   return hits / significant.length >= 0.5;
 }
 
+/// Mirrors CONTRACT_CAMPAIGNS in scripts/seek/config.ts (src/ can't import
+/// from scripts/).
+const CONTRACT_CAMPAIGNS = new Set(["TENDER", "ENGINEERING_CONTRACT", "CLIENT_PROJECT"]);
+
 export function evaluateSendGate(input: GateInput): GateVerdict {
   const hard: string[] = [];
   const needs: string[] = [];
   const { letter, postingText } = input;
+
+  // ── company work is never a job letter ─────────────────────────────────────
+  // A hard reason, so it also stops APPROVED cards and `send --now`.
+  if (CONTRACT_CAMPAIGNS.has(input.campaign ?? ""))
+    hard.push("tender — needs a bid packet, not a letter");
 
   // ── the posting ────────────────────────────────────────────────────────────
   if (postingText === null) hard.push("posting unreachable");

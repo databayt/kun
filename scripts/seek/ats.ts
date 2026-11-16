@@ -363,6 +363,7 @@ async function prepare(): Promise<void> {
       const l = JSON.parse(readFileSync(req.out, "utf-8")) as AtsLetter;
       const v = evaluateSendGate({
         channel: "ats",
+        campaign: row?.campaign,
         letter: { to: "", subject: "", body: l.body },
         company: req.company,
         role: req.role,

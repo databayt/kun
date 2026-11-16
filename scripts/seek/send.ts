@@ -313,6 +313,7 @@ async function main(): Promise<void> {
     }
     const verdict = evaluateSendGate({
       channel: wa ? "whatsapp" : "email",
+      campaign: fresh.campaign ?? row.campaign,
       letter: found.letter,
       company,
       role,

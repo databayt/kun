@@ -11,6 +11,7 @@
 // the ATS lane can pick the card up the next morning.
 
 import { listBoard, noteRow, patchRow, type BoardRow } from "./board";
+import { isContractCampaign } from "./config";
 
 const APPLY = process.argv.includes("--apply");
 const UA =
@@ -122,7 +123,11 @@ async function resolve(row: BoardRow): Promise<Route> {
   }
   if (!page.html) return { kind: "none", why: `HTTP ${page.status}` };
   // Tenders and consultancies need a bid, not a cover letter.
-  if (/tender|consultancy|\bRFP\b|\bbid\b/i.test(row.name)) return { kind: "none", why: "tender — bid, not a letter" };
+  if (
+    isContractCampaign(row.campaign) ||
+    /tender|consultancy|\bRFP\b|\bbid\b|\btors?\b|terms of reference|expressions? of interest|quotations?/i.test(row.name)
+  )
+    return { kind: "none", why: "tender — bid, not a letter" };
   if (
     /no longer (accepting|available)|job (has )?expired|position (has been )?filled/i.test(
       page.html,
