@@ -16,7 +16,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { decideFollowUp } from "@/lib/jobs/cadence";
 
 import { ledger, listBoard, noteRow } from "./board";
-import { kigaliNow, killSwitchOn, loadConfig } from "./config";
+import { isContractCampaign, kigaliNow, killSwitchOn, loadConfig } from "./config";
 import { mailSend, sentToday } from "./send";
 import { pickFollowUp } from "./variants";
 import { splitName } from "./wave";
@@ -87,6 +87,9 @@ async function main(): Promise<void> {
   );
 
   for (const row of applied) {
+    // A submitted bid is chased by a person and evaluated for weeks: no
+    // templated "I applied for the … position" nudge, no 21-day archive.
+    if (isContractCampaign(row.campaign)) continue;
     const action = decideFollowUp({
       appliedAt: row.appliedAt,
       touchNumber: row.touchNumber,
@@ -111,6 +114,12 @@ async function main(): Promise<void> {
       continue;
     }
 
+    // Contracts mode (2026-11-16): the job lanes are closed — applications
+    // already out still archive above, but nobody gets nudged again.
+    if (cfg.mode === "contracts") {
+      console.log(`  skip      ${row.name.slice(0, 60)} — contracts mode, no job follow-ups`);
+      continue;
+    }
     const first = original.get(row.id);
     if (!first?.to || !first.subject) {
       console.log(

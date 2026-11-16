@@ -60,5 +60,17 @@
       "location": "Nairobi, Kenya",
       "bidCampaigns": []
     }
+  },
+  "company": {
+    "legalName": "EXAMPLE LTD",
+    "tin": "000000000",
+    "registered": "2026-01-01",
+    "country": "Kenya",
+    "office": "1 Example Street, Nairobi",
+    "activities": [{ "code": "6201", "label": "Computer programming" }],
+    "director": "Jane Doe",
+    "website": "https://example.com",
+    "email": "jane@example.com",
+    "portfolio": ["<Product>: <one true sentence: what it is and where it runs>"]
   }
 }

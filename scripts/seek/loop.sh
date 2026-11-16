@@ -171,7 +171,7 @@ case "$MODE" in
     --status)
         if launchctl print "gui/$(id -u)/$PLIST_LABEL" >/dev/null 2>&1; then echo "armed ($PLIST_LABEL, every 30 min)"; else echo "not armed"; fi
         [ -f "$REPO/jobs/.send-off" ] && echo "⛔ sending paused (jobs/.send-off)"
-        for s in google discover wave ats-prepare tailor-packets digest followup week; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
+        for s in google discover wave ats-prepare tailor-packets bid digest followup week; do printf "  %-9s %s\n" "$s" "$(cat "$STATE/$s" 2>/dev/null || echo never)"; done
         [ -f "$LOG_FILE" ] && tail -8 "$LOG_FILE"
         ;;
     --tick)
@@ -206,13 +206,21 @@ case "$MODE" in
         # wave and the send, so a veto from the phone beats the send window.
         run console-pull pnpm -s seek:pull --apply
 
+        # Contracts mode (Abdout, 2026-11-16 — 66 sends, 0 interviews in 51
+        # days): no job applications. The company bids on tenders and answers
+        # client requests; every step that writes or sends a job letter is
+        # skipped. Set "mode": "jobs" in jobs/loop.config.json to restore.
+        LOOP_MODE="$(node -p 'try{require("./jobs/loop.config.json").mode||"jobs"}catch(e){"jobs"}' 2>/dev/null || echo jobs)"
+        contracts() { [ "$LOOP_MODE" = "contracts" ]; }
+        contracts && log "mode: contracts — google, wave, send, ATS and tailor-packets skipped"
+
         if [ "$HOUR" -ge 7 ] && ! done_today discover; then
             # Ingest's Neon websocket drops now and then (an ErrorEvent, exit 1):
             # on 2026-10-01/02 that left discover unstamped, so no wave and no
             # digest ran for three days. One retry a minute later clears it.
             # Google sweep (2026-10-17): Kigali electrical + software roles the
             # fetch adapters can't reach. A miss never blocks discover.
-            done_today google || { run google pnpm -s jobs:google && stamp google; }
+            contracts || done_today google || { run google pnpm -s jobs:google && stamp google; }
             run discover node scripts/seek/discover.mjs &&
                 { run ingest pnpm -s jobs:ingest || { sleep 60; run ingest-retry pnpm -s jobs:ingest; }; } &&
                 stamp discover
@@ -220,32 +228,38 @@ case "$MODE" in
             # its address or form so the wave and the ATS lane can use it.
             run resolve pnpm -s jobs:resolve --apply
         fi
-        if weekday && [ "$HOUR" -ge 7 ] && [ "$HOUR" -lt 17 ] && done_today discover && ! done_today wave; then
+        if ! contracts && weekday && [ "$HOUR" -ge 7 ] && [ "$HOUR" -lt 17 ] && done_today discover && ! done_today wave; then
             run facts pnpm -s jobs:facts
             run wave pnpm -s jobs:wave && stamp wave
         fi
+        # Contracts mode: one bid run a day after discovery — triage open
+        # tenders against the company's registered activities, write a packet
+        # (one claude -p per in-scope tender), card → HOLD "bid ready". Never sends.
+        if contracts && [ "$HOUR" -ge 7 ] && done_today discover && ! done_today bid; then
+            run bid pnpm -s jobs:bid --limit 3 && stamp bid
+        fi
         # The digest follows the wave so it shows what will actually go out;
         # on weekends (no wave) it follows discover. Delivered by Hermes.
-        if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today digest && { ! weekday || done_today wave || [ "$HOUR" -ge 17 ]; }; then
+        if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today digest && { contracts || ! weekday || done_today wave || [ "$HOUR" -ge 17 ]; }; then
             run digest pnpm -s jobs:digest --send && stamp digest
         fi
         mail_up=""
         if [ "$HOUR" -ge 8 ] && [ "$HOUR" -lt 22 ] && mail_ok; then mail_up=1; fi
-        if weekday && [ "$HOUR" -ge 10 ] && [ "$HOUR" -lt 17 ] && [ -n "$mail_up" ]; then
+        if ! contracts && weekday && [ "$HOUR" -ge 10 ] && [ "$HOUR" -lt 17 ] && [ -n "$mail_up" ]; then
             run send pnpm -s jobs:send --apply --limit 10
         fi
         # ATS lane (Abdout, 2026-09-27: auto-submit portal forms toward
         # 100/day): prepare once a day after discovery, then submit a few per
         # tick through the working day. The daily total cap is in config.
-        if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today ats-prepare; then
+        if ! contracts && [ "$HOUR" -ge 7 ] && done_today discover && ! done_today ats-prepare; then
             run ats-prepare pnpm -s jobs:ats prepare --limit 80 && stamp ats-prepare
         fi
-        if [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 20 ] && [ -n "$mail_up" ]; then
+        if ! contracts && [ "$HOUR" -ge 9 ] && [ "$HOUR" -lt 20 ] && [ -n "$mail_up" ]; then
             run ats-submit pnpm -s jobs:ats submit --apply --limit 8
         fi
         # Tailored CVs for the cards he submits himself (Martide, portals):
         # once a day after discovery, the PDF path noted on each card.
-        if [ "$HOUR" -ge 7 ] && done_today discover && ! done_today tailor-packets; then
+        if ! contracts && [ "$HOUR" -ge 7 ] && done_today discover && ! done_today tailor-packets; then
             run tailor-packets pnpm -s jobs:tailor --packets --limit 12 && stamp tailor-packets
         fi
         # Client requests from the databayt.org wizard: every tick, all day —
@@ -254,6 +268,7 @@ case "$MODE" in
         if [ -n "$mail_up" ]; then
             run inbox pnpm -s jobs:inbox
         fi
+        # In contracts mode followup only archives silent job applications.
         if weekday && [ "$HOUR" -ge 16 ] && [ "$HOUR" -lt 17 ] && ! done_today followup; then
             run followup pnpm -s jobs:followup --apply && stamp followup
         fi

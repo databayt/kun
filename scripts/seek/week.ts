@@ -21,7 +21,8 @@ import {
 } from "@/lib/jobs/learn-metrics";
 
 import { type Action, applyAll, changes, describe } from "./adopt";
-import { kigaliNow, loadConfig } from "./config";
+import { listBoard } from "./board";
+import { isContractCampaign, kigaliNow, loadConfig } from "./config";
 import { notify } from "./notify";
 import { post, WEEK_THREAD } from "./slack";
 import { loadVariants } from "./variants";
@@ -87,7 +88,17 @@ function silentLanePauses(lines: LedgerLine[]): Action[] {
     }));
 }
 
+/// Contracts mode: the bid funnel, read off the board. Bids are too few for the
+/// 15-send rule, so the report leads with these counts instead.
+async function bidFunnel(): Promise<string> {
+  const rows = (await listBoard()).filter((r) => isContractCampaign(r.campaign));
+  const n = (...s: string[]) => rows.filter((r) => s.includes(r.applicationStatus ?? "")).length;
+  const ready = rows.filter((r) => r.applicationStatus === "HOLD" && /^bid ready/i.test(r.holdReason ?? "")).length;
+  return `*Bids: ${n("APPLIED", "RESPONSE", "INTERVIEW", "OFFER")} submitted · ${n("RESPONSE", "INTERVIEW")} shortlisted · ${n("OFFER")} won · ${ready} ready to submit*\nValue won: not recorded on the board yet`;
+}
+
 async function main(): Promise<void> {
+  const contractsMode = loadConfig().mode === "contracts";
   const { date } = kigaliNow();
   const report = `${DATA}/learn/${date}.md`;
   const planFile = `${DATA}/learn/${date}.week.json`;
@@ -98,7 +109,7 @@ async function main(): Promise<void> {
     throw new Error(`jobs:learn failed: ${(learn.stderr || "").slice(0, 300)}`);
 
   // 2. Claude reads the week and decides.
-  const prompt = `You run ${ME.name}'s opportunity loop and improve it every week.${STRATEGY ? ` ${STRATEGY}` : ""}
+  const prompt = `You run ${ME.name}'s opportunity loop and improve it every week.${STRATEGY ? ` ${STRATEGY}` : ""}${contractsMode ? "\nThe loop is in CONTRACTS mode since 2026-11-16: no job applications; Databayt Ltd bids on tenders and answers client requests. Judge the week by bids submitted, shortlisted and won, and by the tenders discovered versus the ones in scope. Do not propose job-lane changes." : ""}
 
 Read:
 - ${ROOT}/${report} — this week's funnel by source, discover yield, outcomes by lane/source/variant, hold reasons
@@ -145,10 +156,12 @@ Prefer 1–4 actions that move volume toward the fastest-paying lanes. With too 
     .split("\n")
     .filter(Boolean)
     .map((l) => JSON.parse(l) as LedgerLine);
-  plan.actions.push(...settledAbTests(lines), ...silentLanePauses(lines));
+  plan.actions.push(...settledAbTests(lines), ...(contractsMode ? [] : silentLanePauses(lines)));
   const interviews = interviewsByWeek(lines);
 
-  const interviewLine = `*Interviews: ${interviews.at(-1)} this week* (last 4 weeks: ${interviews.join(" · ")})`;
+  const interviewLine = contractsMode
+    ? await bidFunnel().catch(() => "*Bids: board unreachable*")
+    : `*Interviews: ${interviews.at(-1)} this week* (last 4 weeks: ${interviews.join(" · ")})`;
 
   if (DRY) {
     console.log(interviewLine);

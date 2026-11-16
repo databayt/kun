@@ -198,7 +198,7 @@ function parseDate(s) {
 // 2026-10-05 before this widened.
 const TENDERISH = /tender|expression of interest|\beoi\b|request for (proposal|quotation)|\brf[pq]\b|terms of reference|\btors?\b|^notice for|supply,? delivery|construction and commissioning|\((works|goods|services)\)|procurement of/i;
 
-function item({ title, company, location, url, source, campaign, deadline, description, employmentType, remoteType, salary, skills = [], applyEmail, applyWhatsApp }) {
+function item({ title, company, location, url, source, campaign, deadline, description, employmentType, remoteType, salary, skills = [], applyEmail, applyWhatsApp, applyMethod }) {
   return {
     title,
     company: company || "Unknown employer",
@@ -217,9 +217,9 @@ function item({ title, company, location, url, source, campaign, deadline, descr
     // A tender or EOI wants a proposal, not an application letter: it never
     // takes the email channel, whatever address the notice gives.
     // Email first, then WhatsApp ("send your CV on WhatsApp"), then the portal.
-    applyMethod: TENDERISH.test(title) || campaign?.includes("tender")
+    applyMethod: applyMethod ?? (TENDERISH.test(title) || campaign?.includes("tender")
       ? `portal:${url}`
-      : applyEmail ? `email:${applyEmail}` : applyWhatsApp ? `whatsapp:${applyWhatsApp}` : `portal:${url}`,
+      : applyEmail ? `email:${applyEmail}` : applyWhatsApp ? `whatsapp:${applyWhatsApp}` : `portal:${url}`),
     note: applyEmail
       ? `Auto-discovered — the posting asks for applications to ${applyEmail}.`
       : applyWhatsApp
@@ -247,6 +247,26 @@ export function openToRwanda(place, text = "") {
   return false;
 }
 
+
+async function post(url, form, attempt = 1) {
+  await sleep(SPACING_MS);
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(form).toString(),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) throw new Error(`${res.status} ${url}`);
+    return await res.text();
+  } catch (err) {
+    if (attempt < 3 && !/^\d{3} /.test(err.message)) {
+      await sleep(2000 * attempt);
+      return post(url, form, attempt + 1);
+    }
+    throw err;
+  }
+}
 
 // ── company → ATS board, via the public job-board APIs ───────────────────────
 // Aggregators name the company; its own Greenhouse/Lever/Ashby board is the
@@ -355,6 +375,61 @@ const ADAPTERS = {
         }
         items.push(item({ title, company, url, source: "jobinrwanda", campaign, deadline, description, applyEmail, applyWhatsApp }));
       }
+    }
+    return { items, dropped };
+  },
+
+  /// Umucyo — Rwanda's e-procurement portal (RPPA). The public advertised-tender
+  /// list is a Struts page: POST currentPageNo / recordCountPerPage=50 (3 pages, 1.5 s apart). Columns: name | tender no | status | advertised | deadline |
+  /// planned open | stage. The procuring entity is the Tender No suffix.
+  /// A challenge page or an empty table drops the source — never evaded.
+  async umucyo() {
+    const items = [];
+    const dropped = [];
+    const LIST = "https://www.umucyo.gov.rw/eb/bav/selectListAdvertisingListForGU.do";
+    const seen = new Set();
+    for (let page = 1; page <= 3; page++) {
+      const html = await post(LIST, { currentPageNo: String(page), recordCountPerPage: "50", searchConditions: "" });
+      if (/captcha|cf-chl|just a moment|access denied|enable javascript/i.test(html.slice(0, 4000)) && !/name="tenderNo"/.test(html)) {
+        dropped.push("umucyo: challenge page — source dropped, not evaded");
+        return { items: [], dropped };
+      }
+      const rows = html.split(/<tr[\s>]/).filter((r) => /name="tenderNo"/.test(r));
+      if (rows.length === 0) {
+        dropped.push(`umucyo: 0 rows on page ${page} — markup changed or blocked`);
+        break;
+      }
+      for (const row of rows) {
+        const value = row.match(/name="tenderNo"[\s\S]*?value="([^"]+)"/)?.[1] ?? "";
+        const [, valueName] = value.split("|");
+        const cells = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((m) => text(m[1]));
+        // cells: [radio, name, tender no, status, advertised, deadline, planned open, stage]
+        const title = (cells[1] || valueName || "").replace(/\s+/g, " ").trim();
+        const tenderNo = (cells[2] || "").trim();
+        const status = (cells[3] || "").trim();
+        const deadline = parseDate(cells[5]);
+        if (!title || !tenderNo || seen.has(tenderNo)) continue;
+        seen.add(tenderNo);
+        if (/cancel/i.test(status)) { dropped.push(`cancelled: ${title}`); continue; }
+        if (deadline && deadline < TODAY) { dropped.push(`expired ${deadline}: ${title}`); continue; }
+        const campaign = laneForTender(title);
+        if (!campaign) continue;
+        if (items.length >= LIMIT) break;
+        const entity = tenderNo.split("/").pop() || "Umucyo buyer";
+        items.push(
+          item({
+            title,
+            company: entity,
+            url: `${LIST}#${encodeURIComponent(tenderNo)}`,
+            source: "umucyo",
+            campaign,
+            deadline,
+            description: `Umucyo tender ${tenderNo} (${status}). Advertised ${cells[4] ?? "?"}; submission deadline ${cells[5] ?? "?"}; opening ${cells[6] ?? "?"}. Stage: ${cells[7] ?? "?"}.`,
+            applyMethod: "tender-portal:umucyo",
+          }),
+        );
+      }
+      if (items.length >= LIMIT) break;
     }
     return { items, dropped };
   },
@@ -1034,9 +1109,23 @@ const ADAPTERS = {
 const OFF = existsSync(`${DATA}/sources.json`)
   ? (JSON.parse(readFileSync(`${DATA}/sources.json`, "utf-8")).off ?? [])
   : [];
+// Contracts mode (jobs/loop.config.json "mode": "contracts", Abdout 2026-11-16):
+// no job applications — only the tender / contract / client-project lanes are
+// kept, and adapters that only ever produce job postings are not run at all.
+const CONTRACT_CAMPAIGNS = new Set(["rwanda-tenders-databayt", "engineering-contracts", "client-projects-databayt"]);
+const JOB_ONLY = new Set(["remotive", "himalayas", "mercor", "aggregators", "ats", "myjobmag", "martide", "rigzone", "remoteok"]);
+const MODE = (() => {
+  try {
+    return JSON.parse(readFileSync(`${DATA}/loop.config.json`, "utf-8")).mode ?? "jobs";
+  } catch {
+    return "jobs";
+  }
+})();
+const CONTRACTS = MODE === "contracts";
+if (CONTRACTS) console.log("mode: contracts — job-only adapters skipped, non-contract campaigns dropped");
 const selected = ONLY
   ? { [ONLY]: ADAPTERS[ONLY] }
-  : Object.fromEntries(Object.entries(ADAPTERS).filter(([n]) => !OFF.includes(n)));
+  : Object.fromEntries(Object.entries(ADAPTERS).filter(([n]) => !OFF.includes(n) && !(CONTRACTS && JOB_ONLY.has(n))));
 if (ONLY && !ADAPTERS[ONLY]) {
   console.error(`unknown source "${ONLY}" — one of: ${Object.keys(ADAPTERS).join(", ")}`);
   process.exit(1);
@@ -1048,8 +1137,13 @@ for (const [name, adapter] of Object.entries(selected)) {
   try {
     const found = await adapter();
     // Platforms that refused Abdout's location — never resurface them.
-    const items = found.items.filter((i) => !BLOCKED_PLATFORMS.test(`${i.company} ${i.sourceUrl ?? ""}`));
+    let items = found.items.filter((i) => !BLOCKED_PLATFORMS.test(`${i.company} ${i.sourceUrl ?? ""}`));
     const { dropped } = found;
+    if (CONTRACTS) {
+      const kept = items.filter((i) => CONTRACT_CAMPAIGNS.has(i.campaign));
+      if (kept.length !== items.length) dropped.push(`mode=contracts: ${items.length - kept.length} non-contract item(s) dropped`);
+      items = kept;
+    }
     yields[name] = { items: items.length, dropped: dropped.length, blocked: found.items.length - items.length };
     console.log(`${name.padEnd(16)} ${String(items.length).padStart(3)} items   ${dropped.length} dropped`);
     for (const d of dropped.slice(0, 8)) console.log(`   · ${d}`);

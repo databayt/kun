@@ -15,6 +15,7 @@ import {
   LANE_BAND,
   inFocus,
   kigaliNow,
+  isContractCampaign,
   killSwitchOn,
   loadConfig,
   seniorityBand,
@@ -64,6 +65,111 @@ function firstAsk(board: BoardRow[]): string | null {
   return `${ask.replace(/^Abdout:\s*/, "")} — unblocks ${rows.length} card(s) <${boardUrl(rows[0].id)}|card>`;
 }
 
+// ── contracts mode (Abdout, 2026-11-16): bids, not applications ──────────────
+
+const BID_READY = /^bid ready/i;
+const bidDeadline = (r: BoardRow): string => r.deadline?.slice(0, 10) ?? "9999-12-31";
+const bidPacket = (r: BoardRow): string =>
+  (r.holdReason ?? "").split(" — ").slice(2).join(" — ").trim();
+
+/// The one thing to do first, contracts mode: the nearest-deadline bid that is
+/// ready, else an answer someone sent, else nothing.
+function contractsFirstAsk(board: BoardRow[]): string {
+  const ready = board
+    .filter((r) => isContractCampaign(r.campaign) && r.applicationStatus === "HOLD" && BID_READY.test(r.holdReason ?? ""))
+    .sort((a, b) => bidDeadline(a).localeCompare(bidDeadline(b)));
+  if (ready.length)
+    return `review, sign and submit ${short(ready[0])} by ${bidDeadline(ready[0])} (${bidPacket(ready[0]) || "packet on the card"}) <${boardUrl(ready[0].id)}|card>`;
+  const answered = board.filter(
+    (r) => r.applicationStatus === "RESPONSE" && isContractCampaign(r.campaign),
+  );
+  if (answered.length)
+    return `${answered.length} bid/request(s) got an answer — start with ${short(answered[0])} <${boardUrl(answered[0].id)}|card>`;
+  return "No bid ready — nothing to do today";
+}
+
+/// An unmet company requirement, named the same way whatever the notice calls it.
+function gateName(item: string): string {
+  const t = item.toLowerCase();
+  if (/tax clearance|\brra\b|tax compliance/.test(t)) return "RRA tax clearance certificate";
+  if (/rssb|social security/.test(t)) return "RSSB clearance";
+  if (/bid (security|bond|guarantee)|tender (security|guarantee)/.test(t)) return "Bid security / guarantee";
+  if (/umucyo|e-?procurement/.test(t)) return "Umucyo bidder registration";
+  if (/audited|financial statements|turnover/.test(t)) return "Audited accounts";
+  if (/similar|past|previous|experience|contracts?/.test(t)) return "Past contracts of similar size";
+  return item.trim().slice(0, 80);
+}
+
+/// Aggregate the ❌ rows of the open packets' README checklists: gate → bids blocked.
+function companyGates(packets: string[]): [string, number][] {
+  const count = new Map<string, number>();
+  for (const dir of packets) {
+    const file = `${dir}/README.md`;
+    if (!dir || !existsSync(file)) continue;
+    const seen = new Set<string>();
+    for (const line of readFileSync(file, "utf-8").split("\n")) {
+      const cells = line.split("|").map((c) => c.trim());
+      if (cells.length < 4 || !cells[2].includes("❌")) continue;
+      seen.add(gateName(cells[1]));
+    }
+    for (const g of seen) count.set(g, (count.get(g) ?? 0) + 1);
+  }
+  return [...count.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function contractsDigest(board: BoardRow[], date: string, events: { kind: string; ts: string; detail?: string }[]): string {
+  const contract = board.filter((r) => isContractCampaign(r.campaign));
+  const ready = contract
+    .filter((r) => r.applicationStatus === "HOLD" && BID_READY.test(r.holdReason ?? ""))
+    .sort((a, b) => bidDeadline(a).localeCompare(bidDeadline(b)));
+  const submitted = contract.filter((r) => r.applicationStatus === "APPLIED");
+  const clients = contract.filter(
+    (r) => r.campaign === "CLIENT_PROJECT" && !["ARCHIVED", "REJECTED", "OFFER"].includes(r.applicationStatus ?? ""),
+  );
+  const outOfScope = contract.filter((r) => /^outside databayt/i.test(r.holdReason ?? "")).length;
+  const gates = companyGates(ready.map((r) => bidPacket(r)));
+  const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
+  const replies = events.filter((e) => e.kind === "reply" && e.ts >= dayAgo && !(e.detail ?? "").startsWith("ack"));
+
+  const lines: string[] = [`*Contracts — ${date}*`];
+  lines.push(`👉 *Do this first:* ${contractsFirstAsk(board)}`);
+
+  lines.push(`\n*Bids ready (${ready.length}):*`);
+  if (!ready.length) lines.push("• none");
+  for (const r of ready.slice(0, 8))
+    lines.push(
+      `• ${short(r)} — ${splitBuyer(r)} — due ${bidDeadline(r)} — ${bidPacket(r) || "packet on the card"} <${boardUrl(r.id)}|card>`,
+    );
+
+  lines.push(`\n*Bids submitted, waiting (${submitted.length}):*`);
+  if (!submitted.length) lines.push("• none");
+  for (const r of submitted.slice(0, 8))
+    lines.push(`• ${short(r)} — sent ${r.appliedAt?.slice(0, 10) ?? "?"} <${boardUrl(r.id)}|card>`);
+
+  lines.push(`\n*Client requests (${clients.length}):*`);
+  if (!clients.length) lines.push("• none");
+  for (const r of clients.slice(0, 8))
+    lines.push(`• ${short(r)} — ${r.applicationStatus} <${boardUrl(r.id)}|card>`);
+
+  if (gates.length) {
+    lines.push(`\n*Company gates the open bids need:*`);
+    for (const [g, n] of gates) lines.push(`• ${g} — blocks ${n} bid${n === 1 ? "" : "s"}`);
+  }
+
+  if (replies.length) {
+    lines.push(`\n*Replies in the last 24h (${replies.length}):*`);
+    for (const e of replies.slice(0, 6)) lines.push(`• ${(e.detail ?? "").slice(0, 100)}`);
+  } else lines.push(`\nReplies in the last 24h: none`);
+
+  lines.push(`\nOut-of-scope tenders held: ${outOfScope}`);
+  return lines.join("\n");
+}
+
+const splitBuyer = (r: BoardRow): string => {
+  const at = r.name.lastIndexOf(" @ ");
+  return at > -1 ? r.name.slice(at + 3).trim() : "buyer on the notice";
+};
+
 async function main(): Promise<void> {
   const cfg = loadConfig();
   const { date } = kigaliNow();
@@ -84,6 +190,13 @@ async function main(): Promise<void> {
     : [];
   const count = (k: string, pred: (d: string) => boolean = () => true) =>
     events.filter((e) => e.kind === k && pred(e.detail ?? "")).length;
+
+  if (cfg.mode === "contracts") {
+    const text = contractsDigest(board, date, events);
+    if (process.argv.includes("--send")) notify(text, `Contracts — ${date}`);
+    else console.log(text);
+    return;
+  }
 
   const soon = board
     .filter((r) =>
