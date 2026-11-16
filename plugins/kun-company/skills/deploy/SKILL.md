@@ -1,7 +1,7 @@
 ---
 name: deploy
 description: Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane
-when_to_use: "Use when Abdout says deploy, push to prod, ship it or deploy everything — the whole cycle, not just the upload, including the Neon restore point and prod data steps. Distinct from /check (pre-ship gate only), /watch (observe, never fix), /cloudflare (platform ops: DNS, crons, logs) and /quick (commit-push, no build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
+when_to_use: "Use when Abdout says deploy, push to prod or ship it — the whole cycle, Neon restore point and prod data included. Not /check (gate), /watch (observe), /cloudflare (DNS, crons, logs) or /quick (commit-push). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
 argument-hint: "[preview|logs|status] [app]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *), Bash(curl *), Bash(docker *), Bash(vercel *), Bash(scripts/*)
 lane: judge

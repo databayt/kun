@@ -135,17 +135,10 @@ blur/mosaic only (Mkan keeps `mkan-video`'s Vision + LaMa fill).
 
 ## 3D → Blender
 
-Blender 5.3 (`blender/blender`, GPL, free; installed 2026-11-15) makes what a timeline cannot: product
-shots, a logo sting, a 3D scene or explainer object. Install/update: `bash .claude/scripts/blender.sh
-install` (checks blender.org's own SHA-256 and the Blender Foundation's notarization).
+3D scenes, flythroughs and product shots have their own lane: **/blender** (`.claude/skills/blender/`
+— the official Blender Lab MCP for version-matched API lookups, the headless kit, the render rules).
+Its finished `full.mp4` comes back here for `assemble.mjs --deliver` like any other clip.
 
-- **Headless — the default, no window:** write a Python scene script, then
-  `blender.sh render scene.py -- <args>` renders a PNG sequence and `blender.sh frames <dir> out.mp4`
-  encodes it. Set `view_settings.view_transform = 'Standard'` for exact brand colours (AgX washes
-  them). Blender 5 has no FFMPEG image format: always frames → `blender.sh frames`.
-- **`blender` MCP** — only with Blender open (its add-on serves on :9876): `execute_blender_code`,
-  `get_scene_info`, `look`. `generate_3d`, `generate_gaussian_world` and `search_assets` call outside
-  services, some paid: not without Abdout's yes.
 - **Stills film** (a camera over still images — zoom into a rect of one picture while a child
   picture takes over): `blender.sh stills scene.json out/` renders PNGs with `scripts/blender/stills.py`
   (schema, semantics and the per-aspect overrides: `scripts/blender/stills.schema.md`) and encodes

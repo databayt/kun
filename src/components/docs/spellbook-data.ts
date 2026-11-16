@@ -3095,7 +3095,7 @@ export const schools: School[] = [
         name: "filmcraft",
         effect:
           "Edit on a real timeline with FilmCraft — the free, agent-native non-linear editor that replaced Adobe: assemble clips, fill 9:16, Arabic titles, SRT captions, ducking, looks, export; headless by default, the desktop app on request",
-        order: [s("/edit"), undefined("filmcraft")],
+        order: [s("/edit"), p("filmcraft")],
         steps: [
           "filmcraft.sh install if filmcraft-cli is missing or behind (verified download)",
           "One project per piece at ~/media/<repo>/<flow>/<flow>.fcproj: import → inspect ids → command_batch the edits",
@@ -3108,13 +3108,13 @@ export const schools: School[] = [
       {
         name: "blender",
         effect:
-          "3D with Blender, free — product shots, logo stings, 3D scenes rendered headless to frames and finished in FilmCraft; the blender MCP drives the open app",
-        order: [s("/edit"), undefined("blender")],
+          "Build and render 3D as code in Blender 5.x — flythroughs, product shots, logo stings, glTF from three.js — headless, CC0 assets, every uncertain API checked against Blender's official MCP",
+        order: [s("/blender"), p("blender-lab"), p("blender")],
         steps: [
-          "blender.sh install if Blender is missing or behind (blender.org sha256 + notarization)",
-          "Write the scene as a Python script; view transform Standard for brand colours; no Arabic text in 3D",
-          "blender.sh render scene.py → PNG frames → blender.sh frames → MP4",
-          "Titles, voice and music in FilmCraft (assemble.mjs), then media.sh encode + qa-pack",
+          "blender.sh install / install-lab if missing (verified downloads); look up any uncertain 5.x API in blender-lab first",
+          "Scene as code in stages: kit/stage.py per stage → checkpoint .blend + 480p probe; look at every probe",
+          "Final settings (EEVEE ray tracing, AgX, grade); check range, camera, free disk and mains power; then kit/render_chunks.sh",
+          "Hand full.mp4 to /edit: assemble.mjs --deliver (sound, levels, QA)",
         ],
         connects: ["filmcraft", "edit", "motion graphic", "higgs"],
         depends: [],

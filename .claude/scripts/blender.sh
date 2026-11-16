@@ -15,13 +15,23 @@
 #                                 leg+aspect encoded to <outdir>/<leg>-<aspect>.mp4 (mezzanine:
 #                                 H.264 CRF 10, yuv420p, tv-range BT.709) for FilmCraft's assembler
 #   blender.sh mcp                MCP server (ahujasid/blender-mcp, MIT) — drives the OPEN Blender
-#                                 through its add-on on 127.0.0.1:9876; telemetry off
+#                                 through its add-on on 127.0.0.1:9876; telemetry off; safe mode on
+#                                 (model-written code is AST-checked: Poly Haven text reaches the model)
+#   blender.sh install-lab        Blender Lab's official MCP (projects.blender.org/lab/blender_mcp,
+#                                 GPL): the add-on (port 9878) + the server (uv tool), sha256-pinned
+#   blender.sh lab                that server (stdio): version-matched bpy API + manual search,
+#                                 background-Blender exec, .blend summaries, screenshots, renders
 #
 # Scripts: set scene.view_settings.view_transform = 'Standard' for exact brand colours (the default
 # AgX look washes them). Blender's text objects do not shape Arabic: Arabic titles go on in FilmCraft.
 set -euo pipefail
 
-MCP_PKG="mcp-for-blender==2.2.9" # pinned; bump deliberately (sync)
+MCP_PKG="mcp-for-blender==2.2.9" # pinned; bump deliberately (sync). Has the 2026-07 Poly Haven path-traversal fix (#258)
+LAB_VER="1.0.3" # Blender Lab MCP, released 2026-09-11
+LAB_URL="https://projects.blender.org/lab/blender_mcp/releases/download/v$LAB_VER"
+LAB_ADDON_SHA="a7a9da816192502e5a0a202a396444e266b47d8fc4f74ad4698048bd43040707" # mcp-$LAB_VER.zip
+LAB_SERVER_SHA="d6fe04dd17767f7c7fb452142f1f0e6787db575db49f3976a166142683b5b97e" # blender-$LAB_VER.mcpb
+LAB_PORT=9878 # 9876 = ahujasid's add-on, 9877 = FilmCraft
 APP="/Applications/Blender.app"
 BIN="$APP/Contents/MacOS/Blender"
 TEAM_ID="68UA947AUU" # Stichting Blender Foundation
@@ -84,7 +94,30 @@ case "${1:-help}" in
       echo "$outdir/$l-$a.mp4"
     done ;;
   mcp)
-    export DISABLE_TELEMETRY=true
+    export DISABLE_TELEMETRY=true BLENDER_MCP_SAFE_MODE=1
     exec uvx --from "$MCP_PKG" mcp-for-blender ;;
-  *) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//' ;;
+  install-lab)
+    tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+    curl -fsSL -o "$tmp/addon.zip" "$LAB_URL/mcp-$LAB_VER.zip"
+    curl -fsSL -o "$tmp/server.mcpb" "$LAB_URL/blender-$LAB_VER.mcpb"
+    echo "$LAB_ADDON_SHA  $tmp/addon.zip" | shasum -a 256 -c - >/dev/null || { echo "add-on sha256 mismatch" >&2; exit 1; }
+    echo "$LAB_SERVER_SHA  $tmp/server.mcpb" | shasum -a 256 -c - >/dev/null || { echo "server sha256 mismatch" >&2; exit 1; }
+    "$BIN" --command extension install-file -r user_default -e "$tmp/addon.zip" 2>&1 | grep -E "STATUS|rror" || true
+    cat > "$tmp/port.py" <<PY
+import bpy
+key = next(k for k in bpy.context.preferences.addons.keys() if k.endswith('.mcp'))
+p = bpy.context.preferences.addons[key].preferences
+p.port = $LAB_PORT; p.use_autostart = True
+bpy.ops.wm.save_userpref()
+print("blender-lab add-on:", key, "port", p.port)
+PY
+    "$BIN" -b --python "$tmp/port.py" 2>&1 | grep "blender-lab add-on"
+    dest="$HOME/.local/share/databayt/blender-lab/$LAB_VER"
+    rm -rf "$dest"; mkdir -p "$dest"; (cd "$dest" && unzip -q "$tmp/server.mcpb")
+    uv tool install --force --python 3.12 "$dest" 2>&1 | tail -1
+    echo "registered as: claude mcp add -s user blender-lab -- $0 lab" ;;
+  lab)
+    export BLENDER_MCP_PORT=$LAB_PORT BLENDER_PATH="$BIN"
+    exec "$HOME/.local/bin/blender-mcp" ;;
+  *) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

@@ -26,7 +26,7 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 3: KUN CONFIGURATION ENGINE (core value)                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ CLAUDE.md   │ 55 Agents  │  0 Commands │ 23 MCP Servers   │ │
+│  │ CLAUDE.md   │ 55 Agents  │  0 Commands │ 24 MCP Servers   │ │
 │  │ 5 Rules     │ 19 Hooks   │ 11 Cards   │ 240 Keywords     │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
@@ -181,7 +181,7 @@ Priority (High → Low):
 
 ### 4.3 Skill Library
 
-85 skills triggered by keywords or slash commands:
+86 skills triggered by keywords or slash commands:
 
 | Category          | Skills                               | Trigger Keywords                 |
 | ----------------- | ------------------------------------ | -------------------------------- |

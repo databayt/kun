@@ -5979,7 +5979,7 @@
               "name": "/edit"
             },
             {
-              "type": "mcp",
+              "type": "portal",
               "name": "filmcraft"
             }
           ],
@@ -6000,22 +6000,26 @@
         },
         {
           "name": "blender",
-          "effect": "3D with Blender, free — product shots, logo stings, 3D scenes rendered headless to frames and finished in FilmCraft; the blender MCP drives the open app",
+          "effect": "Build and render 3D as code in Blender 5.x — flythroughs, product shots, logo stings, glTF from three.js — headless, CC0 assets, every uncertain API checked against Blender's official MCP",
           "order": [
             {
               "type": "skill",
-              "name": "/edit"
+              "name": "/blender"
             },
             {
-              "type": "mcp",
+              "type": "portal",
+              "name": "blender-lab"
+            },
+            {
+              "type": "portal",
               "name": "blender"
             }
           ],
           "steps": [
-            "blender.sh install if Blender is missing or behind (blender.org sha256 + notarization)",
-            "Write the scene as a Python script; view transform Standard for brand colours; no Arabic text in 3D",
-            "blender.sh render scene.py → PNG frames → blender.sh frames → MP4",
-            "Titles, voice and music in FilmCraft (assemble.mjs), then media.sh encode + qa-pack"
+            "blender.sh install / install-lab if missing (verified downloads); look up any uncertain 5.x API in blender-lab first",
+            "Scene as code in stages: kit/stage.py per stage → checkpoint .blend + 480p probe; look at every probe",
+            "Final settings (EEVEE ray tracing, AgX, grade); check range, camera, free disk and mains power; then kit/render_chunks.sh",
+            "Hand full.mp4 to /edit: assemble.mjs --deliver (sound, levels, QA)"
           ],
           "connects": [
             "filmcraft",
