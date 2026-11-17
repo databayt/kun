@@ -28,6 +28,14 @@ ts-rs = { version = "12", features = ["serde-json-impl"] }
 sha2 = "0.11"
 walkdir = "2"
 dirs = "6"
+# voice (cargo feature `voice`): local speech-to-text. whisper-rs builds whisper.cpp with
+# cmake; a builder without cmake uses `--no-default-features` and gets a "not built" message.
+whisper-rs = { version = "=0.16.0", optional = true }
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "stream"], optional = true }
+
+[features]
+default = ["voice"]
+voice = ["dep:whisper-rs", "dep:reqwest"]
 
 [dev-dependencies]
 insta = { version = "1", features = ["json"] }
