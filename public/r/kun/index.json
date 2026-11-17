@@ -4283,7 +4283,7 @@
         {
           "path": "departments/business/pack.json",
           "target": "departments/business/pack.json",
-          "sha256": "85d7f7428ab27910ab1aa88e2f7cfaaa0461dfe1138f981de4d2c4aae38a43a7"
+          "sha256": "cb731a270ac7798d860a1f0613e48bd22e62cd6cdf07eeed970fcbb72824bde4"
         },
         {
           "path": "departments/business/prompt.md",
@@ -4291,7 +4291,7 @@
           "sha256": "68c79a429623b9eb907faafd8266c627549bbfaff0ccb14c96916b82a5d021ed"
         }
       ],
-      "version": "bede05c56aa96271b991610c79f703099ba10edd65a99087700f7518cd5ee1c7"
+      "version": "6fd699c58ce521dda3170c4f49008cf271876154e318f6ff79fcee59f70aa642"
     },
     {
       "id": "pack:marketing",
@@ -4315,7 +4315,7 @@
         {
           "path": "departments/marketing/pack.json",
           "target": "departments/marketing/pack.json",
-          "sha256": "5c3dfdd89af68fbe78acbab44dd0ec671e2b48bb7413f27fad73facb5c0a6362"
+          "sha256": "262f8aed997a87541da07da13da2bfbcbf3cd770f0fd13d01597a50bd22dced8"
         },
         {
           "path": "departments/marketing/prompt.md",
@@ -4323,7 +4323,7 @@
           "sha256": "14024ec25b79d596841f7518bd2d69e3293f625dc0e67b3f7c37c9d93a4b6141"
         }
       ],
-      "version": "faa52b685509db5bfb625ecdddb9f1574d2dde8d67d6990ced7dcb886bbbd298"
+      "version": "94989c43ce123fda1c82eea8e4c4965f4f7af6c5a7b1c882aa5dc3627fa669d3"
     },
     {
       "id": "pack:rnd",
@@ -4346,7 +4346,7 @@
         {
           "path": "departments/rnd/pack.json",
           "target": "departments/rnd/pack.json",
-          "sha256": "efd722f1b7189d08a6598435aedb92f9415e20464db1f6a80088a2d3dd6cf0e0"
+          "sha256": "9135da405cf879ee273c3e8820e83fee54471f6d2db0d6997d9e2699d0b2bd58"
         },
         {
           "path": "departments/rnd/prompt.md",
@@ -4354,7 +4354,7 @@
           "sha256": "3c199fa7704f3bcea32ed87afab09fcab7023a3974c0a7de8276f27fca375731"
         }
       ],
-      "version": "4d3d1c846ce382133946f5ee58200c47d068540d55bc1b7d4a68bf61822e78ca"
+      "version": "4179cb50348e8d68b177102b1df7d03b3d8461104ee1d44423715d50d75c20d0"
     },
     {
       "id": "pack:sales",
@@ -4378,7 +4378,7 @@
         {
           "path": "departments/sales/pack.json",
           "target": "departments/sales/pack.json",
-          "sha256": "d52e731fdd53ee5dd03e0d364a4c8ceadd7da747130af46b5e7fdf6f3366c75b"
+          "sha256": "c1654ab21b2e1b29d53b5de509c3a92bea11d1774b60341557c95bc7a7a290d7"
         },
         {
           "path": "departments/sales/prompt.md",
@@ -4386,7 +4386,7 @@
           "sha256": "849c8755b9cb8f4a5a4183bfe068beb0db73e5fe3c3c49a70770fdf4e0ebe5a6"
         }
       ],
-      "version": "de764420828c5e75e2b32403850a6b0ae7e42222a548e84bf0c79490d6bc98ba"
+      "version": "ebfe50cd173c78ba6e28e0a9144eea0ffb10853f41382430fffef2a1248bb187"
     },
     {
       "id": "pack:support",
@@ -4408,7 +4408,7 @@
         {
           "path": "departments/support/pack.json",
           "target": "departments/support/pack.json",
-          "sha256": "2a57fd5883d57031500e10d8fc73347c8b32eb461c6e61729bd874bca435a42c"
+          "sha256": "558956db97b9782496407798b5e5581b923984d99b04b27060eb9c9321effea9"
         },
         {
           "path": "departments/support/prompt.md",
@@ -4416,7 +4416,7 @@
           "sha256": "d5aa966be852b33e507c3ac04760192b30c86ffdd1229e5372ecfaedf5bdeb0c"
         }
       ],
-      "version": "eb4fc5c68a1a97fe50b6f921c0c1f2611b3c3d34f309ead8f5b807ba78feee14"
+      "version": "4d1b7375794ef2a6ac1e50e78d78c87f2a87624ce14b24402fb0b0d404d84df3"
     },
     {
       "id": "pack:tech",
@@ -4442,7 +4442,7 @@
         {
           "path": "departments/tech/pack.json",
           "target": "departments/tech/pack.json",
-          "sha256": "30655610b74704b73e068d65a41e3d51733d6e246316c273bd24a7ac555225bb"
+          "sha256": "47f2cc59db9a283d1a53fe088133460c2dd67500ff933bf6c8925a0b6d9c68a0"
         },
         {
           "path": "departments/tech/prompt.md",
@@ -4450,7 +4450,7 @@
           "sha256": "197a67f7db572240337a680111456da8d3126f20771d7e234c623bed96c0901a"
         }
       ],
-      "version": "ae071f74a24be0525bbc29db25af89461d04b6aae1764a6780b077ed10df6b8d"
+      "version": "3b152f00d5a1fafce10c5e1e0f0aa717080dd4d122cc7b3b80e2b733679f595f"
     },
     {
       "id": "pack:video",
@@ -4473,7 +4473,7 @@
         {
           "path": "departments/video/pack.json",
           "target": "departments/video/pack.json",
-          "sha256": "188b79701a9a6a39859e4c2f274bc6c88a43d475b7376aea68d39bac7940c815"
+          "sha256": "5fba6559db437b85a8f4cda34615e783e486eb413fe74cab76e9f2e37af36bad"
         },
         {
           "path": "departments/video/prompt.md",
@@ -4481,7 +4481,7 @@
           "sha256": "79b64693c9e4c5095d8908c38fe65791002b17a83202c656ebef79cad656c7a9"
         }
       ],
-      "version": "2b8a16e1345e2faf73d60ca4dbdf12faf9ab5a3259909d2c9c0e2b9e35222e8e"
+      "version": "7b0ba256f15c13f7a1c3fcd3d252f7719e645aef32c2af7319c42a36c7d71df1"
     },
     {
       "id": "machine:abdout",

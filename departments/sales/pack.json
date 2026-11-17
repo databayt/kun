@@ -30,17 +30,23 @@
     {
       "label_ar": "عرض سعر لمدرسة",
       "label_en": "Quote a school",
-      "prompt": "جهّز عرض سعر لمدرسة: اسأل عن عدد الطلاب ثم استخدم التسعير المعتمد."
+      "prompt": "جهّز عرض سعر لمدرسة: اسأل عن عدد الطلاب ثم استخدم التسعير المعتمد.",
+      "description_en": "Ask for the student count, then build a quote from the approved pricing.",
+      "description_ar": "اسأل عن عدد الطلاب ثم جهّز عرض السعر من التسعير المعتمد."
     },
     {
       "label_ar": "من أتابع اليوم؟",
       "label_en": "Who to follow up",
-      "prompt": "من العملاء الذين يجب أن أتابعهم اليوم؟ رتّبهم حسب الأولوية."
+      "prompt": "من العملاء الذين يجب أن أتابعهم اليوم؟ رتّبهم حسب الأولوية.",
+      "description_en": "The leads to follow up today, ranked by priority, with what to say to each.",
+      "description_ar": "العملاء الذين تتابعهم اليوم مرتبين حسب الأولوية، مع ما تقوله لكل منهم."
     },
     {
       "label_ar": "عملاء جدد",
       "label_en": "Find leads",
-      "prompt": "اقترح ١٠ مدارس جديدة نتواصل معها هذا الأسبوع."
+      "prompt": "اقترح ١٠ مدارس جديدة نتواصل معها هذا الأسبوع.",
+      "description_en": "Ten new schools worth contacting this week, with why each one fits.",
+      "description_ar": "عشر مدارس جديدة تستحق التواصل هذا الأسبوع، مع سبب مناسبة كل منها."
     }
   ]
 }

@@ -29,17 +29,23 @@
     {
       "label_ar": "ريلز من فيديو",
       "label_en": "Reel from a video",
-      "prompt": "اصنع ريلز قصيرة من آخر فيديو في مجلد العمل مع ترجمة عربية."
+      "prompt": "اصنع ريلز قصيرة من آخر فيديو في مجلد العمل مع ترجمة عربية.",
+      "description_en": "Cut a short reel from the latest video in your work folder, with Arabic captions.",
+      "description_ar": "اقطع ريلز قصيرة من آخر فيديو في مجلد عملك مع ترجمة عربية."
     },
     {
       "label_ar": "سكربت فيديو",
       "label_en": "Video script",
-      "prompt": "اكتب سكربت فيديو ٦٠ ثانية لميزة من هوغورتس: الفكرة، اللقطات، والتعليق الصوتي."
+      "prompt": "اكتب سكربت فيديو ٦٠ ثانية لميزة من هوغورتس: الفكرة، اللقطات، والتعليق الصوتي.",
+      "description_en": "A 60-second script for a Hogwarts feature: the idea, the shots and the voiceover.",
+      "description_ar": "سكربت ٦٠ ثانية لميزة في هوغورتس: الفكرة واللقطات والتعليق الصوتي."
     },
     {
       "label_ar": "لقطات شاشة",
       "label_en": "Screenshots",
-      "prompt": "خذ لقطات شاشة لصفحة الحضور في هوغورتس."
+      "prompt": "خذ لقطات شاشة لصفحة الحضور في هوغورتس.",
+      "description_en": "Clean screenshots of the Hogwarts attendance page, framed and ready to post.",
+      "description_ar": "لقطات شاشة نظيفة لصفحة الحضور في هوغورتس، جاهزة للنشر."
     }
   ]
 }

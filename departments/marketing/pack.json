@@ -31,22 +31,30 @@
     {
       "label_ar": "منشور عن ميزة",
       "label_en": "Post about a feature",
-      "prompt": "اكتب منشوراً عن ميزة الحضور في هوغورتس، عربي أولاً، بعد أن تقرأ الكود والوثائق."
+      "prompt": "اكتب منشوراً عن ميزة الحضور في هوغورتس، عربي أولاً، بعد أن تقرأ الكود والوثائق.",
+      "description_en": "Write an Arabic-first post about a Hogwarts feature after reading its code and docs.",
+      "description_ar": "اكتب منشوراً عربياً أولاً عن ميزة في هوغورتس بعد قراءة الكود والوثائق."
     },
     {
       "label_ar": "تقويم الأسبوع",
       "label_en": "This week's calendar",
-      "prompt": "ما الذي ننشره هذا الأسبوع ولأي علامة؟ اقترح خطة من المنشورات."
+      "prompt": "ما الذي ننشره هذا الأسبوع ولأي علامة؟ اقترح خطة من المنشورات.",
+      "description_en": "What to publish this week and for which brand, as a ready posting plan.",
+      "description_ar": "ما الذي ننشره هذا الأسبوع ولأي علامة، كخطة نشر جاهزة."
     },
     {
       "label_ar": "كاروسيل",
       "label_en": "Carousel",
-      "prompt": "صمّم كاروسيل من ٥ شرائح يشرح ميزة من هوغورتس لمدير مدرسة."
+      "prompt": "صمّم كاروسيل من ٥ شرائح يشرح ميزة من هوغورتس لمدير مدرسة.",
+      "description_en": "A five-slide carousel that explains one Hogwarts feature to a school principal.",
+      "description_ar": "كاروسيل من خمس شرائح يشرح ميزة واحدة من هوغورتس لمدير مدرسة."
     },
     {
       "label_ar": "أداء المنشورات",
       "label_en": "How did the posts do",
-      "prompt": "كيف كان أداء آخر منشوراتنا؟ اعرض الوصول والتفاعل."
+      "prompt": "كيف كان أداء آخر منشوراتنا؟ اعرض الوصول والتفاعل.",
+      "description_en": "Reach and engagement for our latest posts, and what to do more of.",
+      "description_ar": "الوصول والتفاعل لآخر منشوراتنا، وما الذي نكثر منه."
     }
   ]
 }

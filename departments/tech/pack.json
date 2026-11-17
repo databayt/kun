@@ -35,17 +35,23 @@
     {
       "label_ar": "افحص قبل الشحن",
       "label_en": "Pre-ship check",
-      "prompt": "شغّل فحص ما قبل الشحن على المستودع الحالي وأعطني الحالة: جاهز أو محظور مع السبب."
+      "prompt": "شغّل فحص ما قبل الشحن على المستودع الحالي وأعطني الحالة: جاهز أو محظور مع السبب.",
+      "description_en": "Run the pre-ship gate on the current repo and get a clear ready or blocked, with the reason.",
+      "description_ar": "شغّل فحص ما قبل الشحن على المستودع الحالي واحصل على جاهز أو محظور مع السبب."
     },
     {
       "label_ar": "أصلح الأخطاء",
       "label_en": "Fix errors",
-      "prompt": "أصلح أخطاء TypeScript وlint والبناء حتى يصبح كل شيء أخضر."
+      "prompt": "أصلح أخطاء TypeScript وlint والبناء حتى يصبح كل شيء أخضر.",
+      "description_en": "Clear TypeScript, lint and build errors in a loop until everything is green again.",
+      "description_ar": "أصلح أخطاء TypeScript وlint والبناء في حلقة حتى يصبح كل شيء أخضر من جديد."
     },
     {
       "label_ar": "راقب الإنتاج",
       "label_en": "Watch production",
-      "prompt": "تحقق من آخر نشر في الإنتاج: لقطة، أخطاء الكونسول والشبكة."
+      "prompt": "تحقق من آخر نشر في الإنتاج: لقطة، أخطاء الكونسول والشبكة.",
+      "description_en": "Check the latest production deploy: a screenshot, console and network errors.",
+      "description_ar": "افحص آخر نشر في الإنتاج: لقطة شاشة وأخطاء الكونسول والشبكة."
     }
   ]
 }

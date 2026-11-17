@@ -22,7 +22,7 @@
     {
       "path": "departments/tech/pack.json",
       "target": "departments/tech/pack.json",
-      "sha256": "30655610b74704b73e068d65a41e3d51733d6e246316c273bd24a7ac555225bb"
+      "sha256": "47f2cc59db9a283d1a53fe088133460c2dd67500ff933bf6c8925a0b6d9c68a0"
     },
     {
       "path": "departments/tech/prompt.md",
@@ -30,5 +30,5 @@
       "sha256": "197a67f7db572240337a680111456da8d3126f20771d7e234c623bed96c0901a"
     }
   ],
-  "version": "ae071f74a24be0525bbc29db25af89461d04b6aae1764a6780b077ed10df6b8d"
+  "version": "3b152f00d5a1fafce10c5e1e0f0aa717080dd4d122cc7b3b80e2b733679f595f"
 }

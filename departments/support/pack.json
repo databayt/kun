@@ -28,17 +28,23 @@
     {
       "label_ar": "البلاغات المفتوحة",
       "label_en": "Open reports",
-      "prompt": "اعرض البلاغات المفتوحة في جدول مرقّم لأختار منها."
+      "prompt": "اعرض البلاغات المفتوحة في جدول مرقّم لأختار منها.",
+      "description_en": "The open user reports in a numbered table, so you can take or reject each one.",
+      "description_ar": "البلاغات المفتوحة في جدول مرقّم لتأخذ أو ترفض كل واحد منها."
     },
     {
       "label_ar": "فحص النشر",
       "label_en": "Deploy sweep",
-      "prompt": "افحص النشر والتوفر والتكلفة لمنتجات databayt وصعّد أي أحمر."
+      "prompt": "افحص النشر والتوفر والتكلفة لمنتجات databayt وصعّد أي أحمر.",
+      "description_en": "Deploys, uptime and spend across databayt products, with anything red escalated.",
+      "description_ar": "النشر والتوفر والتكلفة لمنتجات databayt، مع تصعيد أي أحمر."
     },
     {
       "label_ar": "صحة النطاقات",
       "label_en": "Domain health",
-      "prompt": "افحص انتهاء النطاقات وDNS والبريد وأخبرني بما يحتاج تجديداً."
+      "prompt": "افحص انتهاء النطاقات وDNS والبريد وأخبرني بما يحتاج تجديداً.",
+      "description_en": "Domain expiry, DNS and mail checked, with what needs renewing first.",
+      "description_ar": "انتهاء النطاقات وDNS والبريد، مع ما يحتاج تجديداً أولاً."
     }
   ]
 }

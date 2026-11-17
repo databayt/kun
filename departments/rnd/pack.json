@@ -30,17 +30,23 @@
     {
       "label_ar": "ما الجديد؟",
       "label_en": "What's new?",
-      "prompt": "افحص إصدارات Anthropic والمكدس واقترح ما نعتمده الآن."
+      "prompt": "افحص إصدارات Anthropic والمكدس واقترح ما نعتمده الآن.",
+      "description_en": "New Anthropic and stack releases, and which of them to adopt right now.",
+      "description_ar": "إصدارات Anthropic والمكدس الجديدة، وما الذي نعتمده منها الآن."
     },
     {
       "label_ar": "قِس المحرك",
       "label_en": "Bench the engine",
-      "prompt": "شغّل قياس توجيه المهارات واذكر الإخفاقات."
+      "prompt": "شغّل قياس توجيه المهارات واذكر الإخفاقات.",
+      "description_en": "Measure how well skills route to the right prompt, and list every miss.",
+      "description_ar": "قِس دقة توجيه المهارات إلى الطلب الصحيح، واذكر كل إخفاق."
     },
     {
       "label_ar": "حوّل ملفاً",
       "label_en": "Convert a file",
-      "prompt": "حوّل هذا الملف أو الرابط إلى Markdown نظيف."
+      "prompt": "حوّل هذا الملف أو الرابط إلى Markdown نظيف.",
+      "description_en": "Turn a file or a link into clean Markdown you can read, search and reuse.",
+      "description_ar": "حوّل ملفاً أو رابطاً إلى Markdown نظيف تقرؤه وتبحث فيه وتعيد استخدامه."
     }
   ]
 }

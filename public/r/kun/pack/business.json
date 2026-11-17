@@ -21,7 +21,7 @@
     {
       "path": "departments/business/pack.json",
       "target": "departments/business/pack.json",
-      "sha256": "85d7f7428ab27910ab1aa88e2f7cfaaa0461dfe1138f981de4d2c4aae38a43a7"
+      "sha256": "cb731a270ac7798d860a1f0613e48bd22e62cd6cdf07eeed970fcbb72824bde4"
     },
     {
       "path": "departments/business/prompt.md",
@@ -29,5 +29,5 @@
       "sha256": "68c79a429623b9eb907faafd8266c627549bbfaff0ccb14c96916b82a5d021ed"
     }
   ],
-  "version": "bede05c56aa96271b991610c79f703099ba10edd65a99087700f7518cd5ee1c7"
+  "version": "6fd699c58ce521dda3170c4f49008cf271876154e318f6ff79fcee59f70aa642"
 }

@@ -32,17 +32,23 @@
     {
       "label_ar": "ماذا أعمل بعد؟",
       "label_en": "What next?",
-      "prompt": "لخّص حالة الشركة واقترح أهم إجراء لهذا الأسبوع مرتبطاً بالتدفق النقدي."
+      "prompt": "لخّص حالة الشركة واقترح أهم إجراء لهذا الأسبوع مرتبطاً بالتدفق النقدي.",
+      "description_en": "A short company status and the one action this week that moves cash flow.",
+      "description_ar": "حالة الشركة باختصار وأهم إجراء هذا الأسبوع يحرّك التدفق النقدي."
     },
     {
       "label_ar": "خطة الأسبوع",
       "label_en": "Weekly plan",
-      "prompt": "جهّز خطة الأسبوع وتوزيع الفريق مع مقياس المدارس الدافعة."
+      "prompt": "جهّز خطة الأسبوع وتوزيع الفريق مع مقياس المدارس الدافعة.",
+      "description_en": "Plan the week: who works on what, tied to the number of paying schools.",
+      "description_ar": "خطة الأسبوع: من يعمل على ماذا، مرتبطة بعدد المدارس الدافعة."
     },
     {
       "label_ar": "سجّل قراراً",
       "label_en": "Log a decision",
-      "prompt": "سجّل هذا القرار: النوع، المخاطر، النتيجة المتوقعة وتاريخ المراجعة."
+      "prompt": "سجّل هذا القرار: النوع، المخاطر، النتيجة المتوقعة وتاريخ المراجعة.",
+      "description_en": "Record a decision with its type, risks, expected outcome and a review date.",
+      "description_ar": "سجّل قراراً بنوعه ومخاطره والنتيجة المتوقعة وتاريخ مراجعته."
     }
   ]
 }
