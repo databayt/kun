@@ -1,13 +1,7 @@
-import SessionsContent from "@/components/machine/sessions/content"
-import type { Locale } from "@/components/local/config"
+import { redirect } from "next/navigation"
 
-export const metadata = { title: "Sessions" }
-
-interface PageProps {
-  params: Promise<{ lang: string }>
-}
-
-export default async function SessionsPage({ params }: PageProps) {
+// Sessions live in the chat's ☰ drawer now.
+export default async function SessionsPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params
-  return <SessionsContent lang={lang as Locale} />
+  redirect(`/${lang}/machine`)
 }

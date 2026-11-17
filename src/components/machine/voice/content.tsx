@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { isTauri } from "@tauri-apps/api/core"
 import { DownloadIcon, LoaderIcon, MicIcon, SquareIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import type { Locale } from "@/components/local/config"
 import { downloadModel, startRecording, transcribe, voiceStatus, type Recording } from "./actions"
 import type { ModelEvent, VoiceStatus } from "./types"
@@ -87,32 +87,38 @@ export function VoiceButton({ lang, onTranscript, className }: VoiceButtonProps)
   const disabled = !available || status?.built === false || phase === "working" || phase === "downloading"
   const label = !available ? t.off : status?.built === false ? t.notBuilt : needsModel ? t.download : phase === "recording" ? t.stop : phase === "working" ? t.working : t.talk
 
+  // Sits inside the composer's pill like mkan's mic; progress and errors float above it, not in the pill.
   return (
-    <span className="inline-flex flex-col items-start gap-1">
-      <Button
+    <span className="relative inline-flex">
+      <button
         type="button"
-        size="icon"
-        variant={phase === "recording" ? "destructive" : "outline"}
-        className={className}
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-full transition-colors disabled:opacity-40",
+          phase === "recording" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+          className
+        )}
         disabled={disabled}
         title={label}
         aria-label={label}
+        aria-pressed={phase === "recording"}
         onClick={() => (needsModel ? void fetchModel() : void toggle())}
       >
         {phase === "working" || phase === "downloading" ? (
-          <LoaderIcon className="size-4 animate-spin" />
+          <LoaderIcon className="size-5 animate-spin" aria-hidden />
         ) : phase === "recording" ? (
-          <SquareIcon className="size-4" />
+          <SquareIcon className="size-3.5 animate-pulse fill-current" aria-hidden />
         ) : needsModel ? (
-          <DownloadIcon className="size-4" />
+          <DownloadIcon className="size-5" aria-hidden />
         ) : (
-          <MicIcon className="size-4" />
+          <MicIcon className="size-[22px]" aria-hidden />
         )}
-      </Button>
+      </button>
       {phase === "downloading" && progress !== null && (
-        <span className="text-muted-foreground text-xs" dir="ltr">{progress}%</span>
+        <span className="absolute bottom-full end-0 mb-2 rounded-lg border bg-background px-2 py-1 text-xs text-muted-foreground shadow-sm" dir="ltr">{progress}%</span>
       )}
-      {error && <span className="text-destructive max-w-56 text-xs">{error}</span>}
+      {error && (
+        <span role="alert" className="absolute bottom-full end-0 mb-2 w-56 rounded-lg border bg-background px-2 py-1 text-xs text-destructive shadow-sm">{error}</span>
+      )}
     </span>
   )
 }

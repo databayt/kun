@@ -5,9 +5,10 @@ import { useEffect, useState } from "react"
 import type { Locale } from "@/components/local/config"
 import type { DriverStatus } from "../driver/types"
 import { departments as listDepartments } from "../pack/actions"
-import { OpenInMachine, useInMachine } from "../shell/content"
+import { OpenInMachine, PageShell, useInMachine } from "../shell/content"
 import { detectDrivers, loadSettings } from "./actions"
 import { SettingsForm } from "./form"
+import { LanguageToggle } from "./language"
 import type { Settings } from "./types"
 
 export default function SettingsContent({ lang }: { lang: Locale }) {
@@ -26,16 +27,24 @@ export default function SettingsContent({ lang }: { lang: Locale }) {
   }, [inApp])
 
   if (inApp === null) return null
-  if (!inApp) return <OpenInMachine lang={lang} />
 
+  const title = isAr ? "الإعدادات" : "Settings"
   return (
-    <div className="mx-auto max-w-xl px-4 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{isAr ? "الإعدادات" : "Settings"}</h1>
-      <p className="text-muted-foreground mt-2 text-sm">
-        {isAr ? "من أنت، وفي أي قسم تعمل، وأي وكيل يجيب." : "Who you are, which department you work in, and which agent answers."}
-      </p>
-      {error && <p className="text-destructive mt-4 text-sm">{error}</p>}
-      {state && <SettingsForm isAr={isAr} initial={state.settings} drivers={state.drivers} departments={state.departments} />}
-    </div>
+    <PageShell lang={lang} title={title}>
+      <div className="space-y-6">
+        <LanguageToggle lang={lang} />
+        {!inApp ? (
+          <OpenInMachine lang={lang} />
+        ) : (
+          <>
+            <p className="text-muted-foreground text-sm">
+              {isAr ? "من أنت، وفي أي قسم تعمل، وأي وكيل يجيب." : "Who you are, which department you work in, and which agent answers."}
+            </p>
+            {error && <p className="text-destructive text-sm">{error}</p>}
+            {state && <SettingsForm isAr={isAr} initial={state.settings} drivers={state.drivers} departments={state.departments} />}
+          </>
+        )}
+      </div>
+    </PageShell>
   )
 }

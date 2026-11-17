@@ -5,11 +5,13 @@ export const metadata = { title: "Kun" }
 
 interface PageProps {
   params: Promise<{ lang: string }>
-  searchParams: Promise<{ session?: string }>
+  searchParams: Promise<{ s?: string; session?: string }>
 }
 
 export default async function MachinePage({ params, searchParams }: PageProps) {
   const { lang } = await params
-  const { session } = await searchParams
-  return <ChatContent lang={lang as Locale} session={session} />
+  const { s, session } = await searchParams
+  const resume = s ?? session
+  // Keyed by the resumed session, so opening another one from the drawer starts that chat fresh.
+  return <ChatContent key={resume ?? "new"} lang={lang as Locale} session={resume} />
 }

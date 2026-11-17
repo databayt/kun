@@ -6,6 +6,7 @@ import type { Locale } from "@/components/local/config"
 import { Badge } from "@/components/ui/badge"
 
 import { copy, statusLabel } from "./config"
+import { PageShell } from "../shell/content"
 import { ItemActions } from "./item-actions"
 import { useCanInstall, useCatalog } from "./use-catalog"
 
@@ -17,17 +18,14 @@ export default function CatalogDetail({ lang, type, name }: { lang: Locale; type
   const item = items?.find((i) => i.id === `${type}:${name}`)
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
-      <Link href={`/${lang}/machine/catalog`} className="text-muted-foreground text-sm hover:underline">
-        {t(copy.back)}
-      </Link>
+    <PageShell lang={lang} title={(item && ((isAr && item.title_ar) || item.title)) || t(copy.title)} backHref={`/${lang}/machine/catalog`} backLabel={t(copy.back)}>
       {error && <p className="text-destructive mt-6 text-sm">{error}</p>}
       {!items && !error && <p className="text-muted-foreground mt-6">{t(copy.loading)}</p>}
       {items && !item && <p className="mt-6">{t(copy.notFound)}</p>}
       {item && (
         <>
           <div className="mt-4 flex items-center gap-3">
-            <h1 className="text-3xl font-semibold tracking-tight">{(isAr && item.title_ar) || item.title}</h1>
+            <h1 className="text-[26px] font-semibold leading-tight tracking-tight sm:text-3xl">{(isAr && item.title_ar) || item.title}</h1>
             <Badge variant="outline">{type}</Badge>
             {canInstallHere && <Badge>{t(statusLabel[item.status])}</Badge>}
           </div>
@@ -82,6 +80,6 @@ export default function CatalogDetail({ lang, type, name }: { lang: Locale; type
           </section>
         </>
       )}
-    </div>
+    </PageShell>
   )
 }

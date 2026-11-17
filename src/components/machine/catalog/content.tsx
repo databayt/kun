@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { copy, statusLabel, TYPES, typeLabel, type ItemType } from "./config"
+import { PageShell } from "../shell/content"
 import { ItemActions } from "./item-actions"
 import { useCanInstall, useCatalog } from "./use-catalog"
 
@@ -30,12 +31,11 @@ export default function CatalogContent({ lang }: { lang: Locale }) {
   }, [items, type, query])
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="text-3xl font-semibold tracking-tight">{t(copy.title)}</h1>
-      <p className="text-muted-foreground mt-2">{t(copy.subtitle)}</p>
+    <PageShell lang={lang} title={t(copy.title)}>
+      <p className="text-muted-foreground">{t(copy.subtitle)}</p>
 
       {!canInstallHere && (
-        <div className="bg-muted mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg p-4 text-sm">
+        <div className="bg-muted mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4 text-sm">
           <span>{t(copy.getMachine)}</span>
           <Link href={`/${lang}/machine`} className="text-primary font-medium underline-offset-4 hover:underline">
             {t(copy.getMachineButton)}
@@ -46,6 +46,7 @@ export default function CatalogContent({ lang }: { lang: Locale }) {
       <div className="mt-6 flex flex-col gap-4">
         <Input
           value={query}
+          className="h-12 rounded-full bg-muted px-5 text-base shadow-none"
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t(copy.search)}
           aria-label={t(copy.search)}
@@ -68,7 +69,7 @@ export default function CatalogContent({ lang }: { lang: Locale }) {
 
       <ul className="mt-6 grid gap-3 sm:grid-cols-2">
         {shown.map((item) => (
-          <li key={item.id} className="border-border flex flex-col justify-between gap-3 rounded-lg border p-4">
+          <li key={item.id} className="bg-muted/70 flex flex-col justify-between gap-3 rounded-2xl p-4">
             <div>
               <div className="flex items-center justify-between gap-2">
                 <Link
@@ -89,6 +90,6 @@ export default function CatalogContent({ lang }: { lang: Locale }) {
           </li>
         ))}
       </ul>
-    </div>
+    </PageShell>
   )
 }

@@ -44,10 +44,10 @@ export function SettingsForm({ isAr, initial, drivers, departments }: Props) {
   const deptOptions = departments.includes(values.department) ? departments : [values.department, ...departments]
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="person">{isAr ? "الاسم" : "Your name"}</Label>
-        <Input id="person" value={values.person} maxLength={80} onChange={(e) => setValues({ ...values, person: e.target.value })} />
+        <Input id="person" className="h-12 rounded-full bg-muted px-5 text-base shadow-none" value={values.person} maxLength={80} onChange={(e) => setValues({ ...values, person: e.target.value })} />
       </div>
 
       <div className="space-y-2">
@@ -57,14 +57,14 @@ export function SettingsForm({ isAr, initial, drivers, departments }: Props) {
             id="department"
             value={values.department}
             onChange={(e) => setValues({ ...values, department: e.target.value })}
-            className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+            className="bg-muted h-12 w-full rounded-full px-5 text-base"
           >
             {deptOptions.map((d) => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
         ) : (
-          <Input id="department" value={values.department} onChange={(e) => setValues({ ...values, department: e.target.value })} />
+          <Input id="department" className="h-12 rounded-full bg-muted px-5 text-base shadow-none" value={values.department} onChange={(e) => setValues({ ...values, department: e.target.value })} />
         )}
       </div>
 
@@ -79,12 +79,12 @@ export function SettingsForm({ isAr, initial, drivers, departments }: Props) {
               onClick={() => setValues({ ...values, driver: d.kind })}
               aria-pressed={values.driver === d.kind}
               className={cn(
-                "border-border rounded-lg border p-3 text-start text-sm transition-colors disabled:opacity-50",
-                values.driver === d.kind && "border-primary bg-accent"
+                "bg-muted/70 rounded-2xl p-3 text-start text-sm transition-colors hover:bg-muted disabled:opacity-50",
+                values.driver === d.kind && "bg-foreground text-background hover:bg-foreground/90"
               )}
             >
               <div className="font-medium">{d.kind}</div>
-              <div className="text-muted-foreground mt-0.5 text-xs">
+              <div className={cn("mt-0.5 text-xs", values.driver === d.kind ? "text-background/70" : "text-muted-foreground")}>
                 {d.installed ? (isAr ? "مثبّت" : "Installed") : isAr ? "غير مثبّت" : "Not installed"}
               </div>
             </button>
@@ -93,7 +93,7 @@ export function SettingsForm({ isAr, initial, drivers, departments }: Props) {
       </fieldset>
 
       <div className="flex items-center gap-3">
-        <Button type="submit" disabled={busy}>{isAr ? "حفظ" : "Save"}</Button>
+        <Button type="submit" disabled={busy} className="h-12 rounded-full px-6 text-base">{isAr ? "حفظ" : "Save"}</Button>
         {message && <span className={cn("text-sm", message.ok ? "text-muted-foreground" : "text-destructive")}>{message.text}</span>}
       </div>
     </form>

@@ -1,58 +1,15 @@
 "use client"
 
-// The machine app shell: a compact nav (no site header) and the "open in machine"
-// state every machine page shows when it is loaded in a plain browser.
+// The machine app shell: the page bar the secondary pages share (catalog, engine, settings),
+// and the "open in machine" state every machine page shows when it is loaded in a plain browser.
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { isTauri } from "@tauri-apps/api/core"
-import {
-  BlocksIcon,
-  CogIcon,
-  HistoryIcon,
-  MessageSquareIcon,
-  SettingsIcon,
-} from "lucide-react"
+import { ChevronLeftIcon } from "lucide-react"
 
 import type { Locale } from "@/components/local/config"
-import { cn } from "@/lib/utils"
-
-const items = [
-  { href: "", ar: "المحادثة", en: "Chat", Icon: MessageSquareIcon },
-  { href: "/catalog", ar: "الكتالوج", en: "Catalog", Icon: BlocksIcon },
-  { href: "/engine", ar: "المحرك", en: "Engine", Icon: CogIcon },
-  { href: "/sessions", ar: "الجلسات", en: "Sessions", Icon: HistoryIcon },
-  { href: "/settings", ar: "الإعدادات", en: "Settings", Icon: SettingsIcon },
-]
-
-export function MachineNav({ lang }: { lang: Locale }) {
-  const isAr = lang === "ar"
-  const pathname = usePathname()
-  const base = `/${lang}/machine`
-  return (
-    <nav className="border-border flex items-center gap-1 overflow-x-auto border-b px-3 py-2">
-      <span className="px-2 text-sm font-semibold">{isAr ? "كن" : "Kun"}</span>
-      {items.map(({ href, ar, en, Icon }) => {
-        const to = base + href
-        const active = href === "" ? pathname === base : pathname.startsWith(to)
-        return (
-          <Link
-            key={href}
-            href={to}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap transition-colors",
-              active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Icon className="size-4" />
-            {isAr ? ar : en}
-          </Link>
-        )
-      })}
-    </nav>
-  )
-}
+import { copy, tr } from "../chat/config"
+import { ChatHeader, headerButton } from "./header"
 
 /** null while unknown (first render), then whether the page runs inside the machine app. */
 export function useInMachine(): boolean | null {
@@ -61,18 +18,58 @@ export function useInMachine(): boolean | null {
   return inApp
 }
 
-export function OpenInMachine({ lang }: { lang: Locale }) {
-  const isAr = lang === "ar"
+/**
+ * A secondary page in the chat's frame: the same bar (‹ back to the chat · title start-aligned),
+ * then a scrolling column as wide as the chat's.
+ */
+export function PageShell({
+  lang,
+  title,
+  backHref,
+  backLabel,
+  children,
+}: {
+  lang: Locale
+  title: string
+  /** Where ‹ goes; the chat by default. */
+  backHref?: string
+  backLabel?: string
+  children: React.ReactNode
+}) {
+  const t = tr(lang === "ar")
+  const [scrolled, setScrolled] = useState(false)
+  const label = backLabel ?? t(copy.back)
   return (
-    <div className="mx-auto max-w-md px-6 py-24 text-center">
-      <h1 className="text-xl font-semibold">
-        {isAr ? "افتح هذه الصفحة في تطبيق كن" : "Open this page in the Kun app"}
-      </h1>
-      <p className="text-muted-foreground mt-2 text-sm">
-        {isAr
-          ? "المحادثة والجلسات والإعدادات تعمل على جهازك داخل التطبيق فقط."
-          : "Chat, sessions and settings run on your computer, inside the app only."}
-      </p>
+    <div className="flex h-full flex-col bg-background">
+      <ChatHeader
+        title={title}
+        scrolled={scrolled}
+        start={
+          <Link href={backHref ?? `/${lang}/machine`} aria-label={label} title={label} className={headerButton}>
+            <ChevronLeftIcon className="rtl:rotate-180" aria-hidden />
+          </Link>
+        }
+      />
+      <div onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-4">{children}</div>
+      </div>
+    </div>
+  )
+}
+
+/** Outside the app: the greeting's place, one sentence, one black pill. */
+export function OpenInMachine({ lang }: { lang: Locale }) {
+  const t = tr(lang === "ar")
+  return (
+    <div className="mx-auto flex h-full min-h-[60vh] w-full max-w-3xl flex-col items-center justify-center gap-3 px-4 py-6 text-center">
+      <h1 className="text-balance text-[26px] font-semibold leading-tight tracking-tight sm:text-3xl">{t(copy.openTitle)}</h1>
+      <p className="max-w-md text-balance text-muted-foreground">{t(copy.openText)}</p>
+      <Link
+        href={`/${lang}/machine/catalog`}
+        className="mt-3 flex h-12 items-center rounded-full bg-foreground px-6 text-[17px] font-medium text-background transition-colors hover:bg-foreground/90"
+      >
+        {t(copy.openButton)}
+      </Link>
     </div>
   )
 }
