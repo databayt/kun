@@ -44,7 +44,7 @@ Every skill routes by its own description. The keywords below have NO skill of t
 **The Pipeline** — idea to production in one word: `ready`
 **Charm Work** — everyday practical magic: `push`
 **Transfiguration** — creating something from nothing: `component`, `page`, `api`, `migration`
-**Ancient Runes** — the foundational frameworks: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`
+**Ancient Runes** — the foundational frameworks: `nextjs`, `react`, `typescript`, `prisma`, `tailwind`, `rust`, `tauri`, `machine`, `catalog`
 **Conjuration** — summoning ui elements: `table`, `header`, `menu`, `form`, `modal`, `card`, `sidebar`, `footer`, `hero`, `navbar`
 **The Dark Arts of Features** — n.e.w.t.-level system enchantments: `dashboard`, `landing`, `checkout`, `settings`, `admin`, `onboarding`
 **Animation Charms** — giving life to stillness: `animation`, `transition`, `gesture`, `scroll`

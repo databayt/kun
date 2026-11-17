@@ -26,7 +26,7 @@ Kun is a **configuration engine** — not a server, not a platform. It sits as t
 │                                                                  │
 │  Layer 3: KUN CONFIGURATION ENGINE (core value)                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ CLAUDE.md   │ 55 Agents  │  0 Commands │ 24 MCP Servers   │ │
+│  │ CLAUDE.md   │ 56 Agents  │  0 Commands │ 24 MCP Servers   │ │
 │  │ 5 Rules     │ 19 Hooks   │ 11 Cards   │ 240 Keywords     │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
@@ -424,6 +424,14 @@ All products and workflows must be accessible:
 **Decision**: All products inherit from databayt/codebase. No product builds UI primitives from scratch.
 
 **Rationale**: With a team of 7 (3 engineers), code reuse is survival. Every atom built once serves all products.
+
+### ADR-006: machine — a thin Rust shell over native CLIs
+
+**Decision**: Ship `machine`, a Tauri 2 desktop app (`machine/` + `src/components/machine/<feature>/rust.rs`) that spawns the unmodified `claude` / `codex` / `opencode` binaries on the owner's own login. No model proxy, no embedded agent runtime, no Agent SDK on subscription logins.
+
+**Rationale**: Amends ADR-001, does not override it: the engine is still configuration on native Anthropic products, and machine only gives non-engineers a window onto them. A Cowork plugin was the alternative and is rejected: it is Claude-only, has no dispatch across lanes, no per-item catalog, and no local Arabic voice. Rust gives a small signed binary with least-privilege IPC (capability scoped to kun's `/*/machine/*` pages). Pattern: `.claude/patterns/cards/rust.md`; agent `rust`.
+
+**Kill criterion**: if Sales is not using it weekly 4 weeks after install, stop at v1.
 
 ---
 

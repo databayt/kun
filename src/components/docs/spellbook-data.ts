@@ -674,6 +674,62 @@ export const schools: School[] = [
         connects: ["atom", "component", "tailwind"],
         depends: [],
       },
+      {
+        name: "rust",
+        effect:
+          "Rust 1.90 — thiserror, clippy pedantic, feature-colocated rust.rs",
+        order: [f("rust"), f("typescript"), f("architecture"), w("rust")],
+        steps: [
+          "edition 2024, exact tauri pins",
+          "unwrap denied outside tests",
+          "rust.rs beside content.tsx",
+          "clippy -D warnings",
+        ],
+        connects: ["tauri", "machine", "typescript"],
+        depends: [],
+      },
+      {
+        name: "tauri",
+        effect:
+          "Tauri 2 — inlined plugins, least-privilege capabilities, ts-rs types",
+        order: [f("rust"), f("nextjs"), f("architecture"), w("rust")],
+        steps: [
+          "One plugin per feature via build.rs",
+          "Capability scoped to /*/machine/*",
+          "invoke(plugin:<feature>|<cmd>)",
+          "Types flow Rust to TS",
+        ],
+        connects: ["rust", "machine", "nextjs"],
+        depends: [],
+      },
+      {
+        name: "machine",
+        effect:
+          "The machine desktop app — a thin Rust shell over native claude/codex/opencode CLIs",
+        order: [f("rust"), f("nextjs"), f("architecture")],
+        steps: [
+          "Spawn unmodified CLIs on the owner's login",
+          "No model proxy, no agent runtime",
+          "Feature folder = UI + Rust",
+          "MACHINE_ONLY=<feature> cargo test",
+        ],
+        connects: ["rust", "tauri", "catalog"],
+        depends: [],
+      },
+      {
+        name: "catalog",
+        effect:
+          "The machine catalog — per-item skills and agents surfaced in the desktop app",
+        order: [f("rust"), f("nextjs"), f("product")],
+        steps: [
+          "Each item a feature folder",
+          "Dispatch across claude/codex/opencode",
+          "Arabic-first copy",
+          "Rust re-validates inputs",
+        ],
+        connects: ["machine", "rust"],
+        depends: [],
+      },
     ],
   },
   {
