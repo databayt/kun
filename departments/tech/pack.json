@@ -1,0 +1,51 @@
+{
+  "name": "tech",
+  "title": "Technology",
+  "title_ar": "التقنية",
+  "description": "Build, check, ship and watch the products — the engineering department.",
+  "description_ar": "بناء المنتجات وفحصها وشحنها ومراقبتها — قسم الهندسة.",
+  "items": [
+    "skill:build",
+    "skill:check",
+    "skill:ship",
+    "skill:watch",
+    "skill:qa",
+    "skill:fix",
+    "skill:test",
+    "agent:tech-lead",
+    "agent:guardian"
+  ],
+  "repos": [
+    "kun",
+    "hogwarts",
+    "codebase",
+    "mkan"
+  ],
+  "docs": [
+    "engineering",
+    "stack",
+    "architecture",
+    "rules",
+    "skills",
+    "agents"
+  ],
+  "prompt": "prompt.md",
+  "defaultDriver": "claude",
+  "quickActions": [
+    {
+      "label_ar": "افحص قبل الشحن",
+      "label_en": "Pre-ship check",
+      "prompt": "شغّل فحص ما قبل الشحن على المستودع الحالي وأعطني الحالة: جاهز أو محظور مع السبب."
+    },
+    {
+      "label_ar": "أصلح الأخطاء",
+      "label_en": "Fix errors",
+      "prompt": "أصلح أخطاء TypeScript وlint والبناء حتى يصبح كل شيء أخضر."
+    },
+    {
+      "label_ar": "راقب الإنتاج",
+      "label_en": "Watch production",
+      "prompt": "تحقق من آخر نشر في الإنتاج: لقطة، أخطاء الكونسول والشبكة."
+    }
+  ]
+}

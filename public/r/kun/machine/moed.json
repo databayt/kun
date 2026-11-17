@@ -14,8 +14,8 @@
     {
       "path": "machines/moed.json",
       "target": "machines/moed.json",
-      "sha256": "f62f96ed9efb52235588a4ae147cad865910973ac8373bd8ec5d1b068cc67d4e"
+      "sha256": "9391c49cc98e1f0a15ad4acffae21753fb2011178d782c35e7408ef0241596de"
     }
   ],
-  "version": "e863124f1231eba6a0843ece27218942e7db39200b3e5566f44847c474df3c33"
+  "version": "39f333ce1a35ae077d6bb349aba220ec56600921d86604d4d2ad71ad07140163"
 }

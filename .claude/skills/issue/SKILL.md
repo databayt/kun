@@ -57,6 +57,19 @@ assign:abdout, assign:ali, assign:samia, assign:sedon, assign:captain
 7. Post to Slack `#dev` channel with the issue link
 8. Report the issue URL
 
+## Team task shape
+
+When the issue is a task for a person on the team (a department's work, not an engine chore), use the
+machine app's shape (`src/lib/machine/contract.ts`; full example in `.claude/skills/captain/SKILL.md`,
+"Task shape"):
+
+- Labels `dept:<tech|business|sales|marketing|video|support|rnd>` + `P0`..`P3` (create missing with `gh label create`).
+- Milestone = the current sprint, `Sprint <yyyy>-W<ww>` (`date +%G-W%V`), created if missing with the goal as description.
+- Body: Goal, Acceptance checklist, Context links, then the last line
+  `<!-- kun: repos=<repos>; items=<skill:x,agent:y from departments/<d>/pack.json>; after=<repo#n,#n> -->`.
+- Never set `holder:` / `status:` labels and never close it for the person: machines manage those; only the CEO closes.
+- Creating it still waits for Abdout's explicit "send" when the captain or weekly drafted it.
+
 ## Slack Integration
 
 After creating an issue, post to Slack:

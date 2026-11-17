@@ -41,7 +41,10 @@ pub(super) fn copy_dir(src: &Path, dst: &Path) -> io::Result<()> {
             fs::copy(entry.path(), to)?;
         }
     }
-    fs::write(dst.join(COPY_MARKER), "copied by machine; refreshed on every run\n")
+    fs::write(
+        dst.join(COPY_MARKER),
+        "copied by machine; refreshed on every run\n",
+    )
 }
 
 /// A symlink or junction we can remove with `remove_file` / `remove_dir`.
@@ -64,7 +67,9 @@ pub(super) fn link_skills(src: &Path, dest: &Path, wanted: &[String]) -> Result<
             Ok(_) => match fs::read_link(&link) {
                 Ok(t) if t == target => continue,
                 Ok(_) => remove_link(&link).map_err(io_err(&link))?,
-                Err(_) if link.join(COPY_MARKER).is_file() => fs::remove_dir_all(&link).map_err(io_err(&link))?,
+                Err(_) if link.join(COPY_MARKER).is_file() => {
+                    fs::remove_dir_all(&link).map_err(io_err(&link))?;
+                }
                 Err(_) => continue,
             },
             Err(e) if e.kind() == io::ErrorKind::NotFound => {}
@@ -74,7 +79,9 @@ pub(super) fn link_skills(src: &Path, dest: &Path, wanted: &[String]) -> Result<
     }
     for entry in fs::read_dir(dest).map_err(io_err(dest))?.flatten() {
         let path = entry.path();
-        let keep = wanted.iter().any(|w| path.file_name().is_some_and(|n| n == w.as_str()));
+        let keep = wanted
+            .iter()
+            .any(|w| path.file_name().is_some_and(|n| n == w.as_str()));
         if keep {
             continue;
         }

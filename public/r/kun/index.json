@@ -4261,6 +4261,39 @@
       "version": "38feff422c084b6434895d2418cf4ba81bbe53562de958f6ccad4d9caa50f4ad"
     },
     {
+      "id": "pack:business",
+      "name": "business",
+      "type": "kun:pack",
+      "title": "Business",
+      "description": "Set the week, decide with the canon, price and propose — the CEO-desk department.",
+      "title_ar": "الأعمال",
+      "description_ar": "تحديد أولويات الأسبوع، القرار بالكتب المرجعية، التسعير والعروض — قسم مكتب الإدارة.",
+      "keywords": [],
+      "dependencies": [
+        "skill:captain",
+        "skill:pricing",
+        "skill:proposal",
+        "skill:canon",
+        "skill:decide",
+        "skill:weekly",
+        "agent:revenue",
+        "agent:analyst"
+      ],
+      "files": [
+        {
+          "path": "departments/business/pack.json",
+          "target": "departments/business/pack.json",
+          "sha256": "85d7f7428ab27910ab1aa88e2f7cfaaa0461dfe1138f981de4d2c4aae38a43a7"
+        },
+        {
+          "path": "departments/business/prompt.md",
+          "target": "departments/business/prompt.md",
+          "sha256": "68c79a429623b9eb907faafd8266c627549bbfaff0ccb14c96916b82a5d021ed"
+        }
+      ],
+      "version": "bede05c56aa96271b991610c79f703099ba10edd65a99087700f7518cd5ee1c7"
+    },
+    {
       "id": "pack:marketing",
       "name": "marketing",
       "type": "kun:pack",
@@ -4282,7 +4315,7 @@
         {
           "path": "departments/marketing/pack.json",
           "target": "departments/marketing/pack.json",
-          "sha256": "3b9e170ea4e3e0a1b1023c231b67f17c3bad333a16031c8bbb137c1bfb178205"
+          "sha256": "5c3dfdd89af68fbe78acbab44dd0ec671e2b48bb7413f27fad73facb5c0a6362"
         },
         {
           "path": "departments/marketing/prompt.md",
@@ -4290,7 +4323,38 @@
           "sha256": "14024ec25b79d596841f7518bd2d69e3293f625dc0e67b3f7c37c9d93a4b6141"
         }
       ],
-      "version": "ff34e056406bac60f00158a5c92dac470db641b00d6f6cf38aab45544c72af20"
+      "version": "faa52b685509db5bfb625ecdddb9f1574d2dde8d67d6990ced7dcb886bbbd298"
+    },
+    {
+      "id": "pack:rnd",
+      "name": "rnd",
+      "type": "kun:pack",
+      "title": "Research & development",
+      "description": "Mine patterns, benchmark the engine, sync upstream and convert textbooks.",
+      "title_ar": "البحث والتطوير",
+      "description_ar": "استخراج الأنماط، قياس المحرك، المزامنة مع المصادر وتحويل الكتب.",
+      "keywords": [],
+      "dependencies": [
+        "skill:learn",
+        "skill:bench",
+        "skill:sync",
+        "skill:textbook",
+        "skill:convert",
+        "agent:analyst"
+      ],
+      "files": [
+        {
+          "path": "departments/rnd/pack.json",
+          "target": "departments/rnd/pack.json",
+          "sha256": "c1ee81de3dcea7577bd850ef9aec79de0c611939e221a3c9d9e96fadb18dd1e7"
+        },
+        {
+          "path": "departments/rnd/prompt.md",
+          "target": "departments/rnd/prompt.md",
+          "sha256": "3c199fa7704f3bcea32ed87afab09fcab7023a3974c0a7de8276f27fca375731"
+        }
+      ],
+      "version": "8c849b0d459be2c0fbbc6147dbbd57389e0a7c66c6884a3ff226015ecc1d85ac"
     },
     {
       "id": "pack:sales",
@@ -4314,7 +4378,7 @@
         {
           "path": "departments/sales/pack.json",
           "target": "departments/sales/pack.json",
-          "sha256": "3b1688db161a4bc164719e7c5d4957f4675a76f4ea5444f1811a50c8a98b5a2e"
+          "sha256": "d52e731fdd53ee5dd03e0d364a4c8ceadd7da747130af46b5e7fdf6f3366c75b"
         },
         {
           "path": "departments/sales/prompt.md",
@@ -4322,15 +4386,79 @@
           "sha256": "849c8755b9cb8f4a5a4183bfe068beb0db73e5fe3c3c49a70770fdf4e0ebe5a6"
         }
       ],
-      "version": "a2473a98f8d7d05ac6af4cc03d33dffd9cba8cdb3481f7423a0b09cb109000c3"
+      "version": "de764420828c5e75e2b32403850a6b0ae7e42222a548e84bf0c79490d6bc98ba"
+    },
+    {
+      "id": "pack:support",
+      "name": "support",
+      "type": "kun:pack",
+      "title": "Support",
+      "description": "Triage reports, handle incidents, keep domains and deploys healthy — customer success.",
+      "title_ar": "الدعم",
+      "description_ar": "فرز البلاغات، معالجة الحوادث، وصحة النطاقات والنشر — نجاح العملاء.",
+      "keywords": [],
+      "dependencies": [
+        "skill:report",
+        "skill:incident",
+        "skill:domains",
+        "skill:monitor",
+        "agent:support"
+      ],
+      "files": [
+        {
+          "path": "departments/support/pack.json",
+          "target": "departments/support/pack.json",
+          "sha256": "2a57fd5883d57031500e10d8fc73347c8b32eb461c6e61729bd874bca435a42c"
+        },
+        {
+          "path": "departments/support/prompt.md",
+          "target": "departments/support/prompt.md",
+          "sha256": "d5aa966be852b33e507c3ac04760192b30c86ffdd1229e5372ecfaedf5bdeb0c"
+        }
+      ],
+      "version": "eb4fc5c68a1a97fe50b6f921c0c1f2611b3c3d34f309ead8f5b807ba78feee14"
+    },
+    {
+      "id": "pack:tech",
+      "name": "tech",
+      "type": "kun:pack",
+      "title": "Technology",
+      "description": "Build, check, ship and watch the products — the engineering department.",
+      "title_ar": "التقنية",
+      "description_ar": "بناء المنتجات وفحصها وشحنها ومراقبتها — قسم الهندسة.",
+      "keywords": [],
+      "dependencies": [
+        "skill:build",
+        "skill:check",
+        "skill:ship",
+        "skill:watch",
+        "skill:qa",
+        "skill:fix",
+        "skill:test",
+        "agent:tech-lead",
+        "agent:guardian"
+      ],
+      "files": [
+        {
+          "path": "departments/tech/pack.json",
+          "target": "departments/tech/pack.json",
+          "sha256": "30655610b74704b73e068d65a41e3d51733d6e246316c273bd24a7ac555225bb"
+        },
+        {
+          "path": "departments/tech/prompt.md",
+          "target": "departments/tech/prompt.md",
+          "sha256": "197a67f7db572240337a680111456da8d3126f20771d7e234c623bed96c0901a"
+        }
+      ],
+      "version": "ae071f74a24be0525bbc29db25af89461d04b6aae1764a6780b077ed10df6b8d"
     },
     {
       "id": "pack:video",
       "name": "video",
       "type": "kun:pack",
-      "title": "Video production",
+      "title": "Media production",
       "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
-      "title_ar": "إنتاج الفيديو",
+      "title_ar": "الإنتاج الإعلامي",
       "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
       "keywords": [],
       "dependencies": [
@@ -4345,7 +4473,7 @@
         {
           "path": "departments/video/pack.json",
           "target": "departments/video/pack.json",
-          "sha256": "df13dce598c62cb24f77e6c47d48d1cd76d8cfb60fa81eaf0166c713cabe815d"
+          "sha256": "e58085480c4edf8c6e2291de6a4ab75287aea51b1e57531245cac9a5aac8ff17"
         },
         {
           "path": "departments/video/prompt.md",
@@ -4353,28 +4481,32 @@
           "sha256": "79b64693c9e4c5095d8908c38fe65791002b17a83202c656ebef79cad656c7a9"
         }
       ],
-      "version": "3e9fc16af88cf9709ab9220cb5d420573ff22e478e6731d23f19755da487f428"
+      "version": "a74d79622963f73595a44449de0b9cfc0dbdd68ae51bf5e83ae0ef42e28b1b49"
     },
     {
       "id": "machine:abdout",
       "name": "abdout",
       "type": "kun:machine",
       "title": "Abdout",
-      "description": "macos machine · sales, marketing, video · code write",
+      "description": "macos machine · tech, business, sales, marketing, video, support, rnd · code write",
       "keywords": [],
       "dependencies": [
+        "pack:tech",
+        "pack:business",
         "pack:sales",
         "pack:marketing",
-        "pack:video"
+        "pack:video",
+        "pack:support",
+        "pack:rnd"
       ],
       "files": [
         {
           "path": "machines/abdout.json",
           "target": "machines/abdout.json",
-          "sha256": "450e724305593c57454f16bf373b67083fff6a05a6f48c34a5e65e311b7aabbd"
+          "sha256": "e9f232a27aed3870ce8900d3ec353abf83fda15da024d2206c97714b9a9870fa"
         }
       ],
-      "version": "7c5ef9b98cbd18114737d2beb3eb5fb8d7d57902f7c82f9d6792433eafed9303"
+      "version": "a33f4e947813bec38e6f8a17441e2fed0b9f28b1a8a8e69e145cc9f797f90e3e"
     },
     {
       "id": "machine:moed",
@@ -4392,10 +4524,10 @@
         {
           "path": "machines/moed.json",
           "target": "machines/moed.json",
-          "sha256": "f62f96ed9efb52235588a4ae147cad865910973ac8373bd8ec5d1b068cc67d4e"
+          "sha256": "9391c49cc98e1f0a15ad4acffae21753fb2011178d782c35e7408ef0241596de"
         }
       ],
-      "version": "e863124f1231eba6a0843ece27218942e7db39200b3e5566f44847c474df3c33"
+      "version": "39f333ce1a35ae077d6bb349aba220ec56600921d86604d4d2ad71ad07140163"
     }
   ]
 }

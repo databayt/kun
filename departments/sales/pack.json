@@ -13,6 +13,17 @@
     "agent:lead",
     "agent:revenue"
   ],
+  "repos": [
+    "kun",
+    "hogwarts"
+  ],
+  "docs": [
+    "funnel",
+    "scrape",
+    "jobs",
+    "crm",
+    "seek"
+  ],
   "prompt": "prompt.md",
   "defaultDriver": "claude",
   "quickActions": [

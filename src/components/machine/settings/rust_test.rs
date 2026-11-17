@@ -9,7 +9,16 @@ fn defaults_when_missing() {
 #[test]
 fn round_trips_and_trims() {
     let d = tempfile::tempdir().unwrap();
-    let saved = save_in(d.path(), Settings { person: "  هويدا ".into(), department: "video".into(), driver: DriverKind::Opencode, login: " moed ".into() }).unwrap();
+    let saved = save_in(
+        d.path(),
+        Settings {
+            person: "  هويدا ".into(),
+            department: "video".into(),
+            driver: DriverKind::Opencode,
+            login: " moed ".into(),
+        },
+    )
+    .unwrap();
     assert_eq!(saved.person, "هويدا");
     assert_eq!(saved.login, "moed");
     assert_eq!(load_in(d.path()).unwrap(), saved);
@@ -19,11 +28,50 @@ fn round_trips_and_trims() {
 fn rejects_bad_fields() {
     let d = tempfile::tempdir().unwrap();
     let base = Settings::default();
-    assert!(matches!(save_in(d.path(), Settings { person: "x".repeat(81), ..base.clone() }), Err(SettingsError::BadPerson)));
-    assert!(matches!(save_in(d.path(), Settings { person: "a\nb".into(), ..base.clone() }), Err(SettingsError::BadPerson)));
-    assert!(matches!(save_in(d.path(), Settings { department: "../x".into(), ..base }), Err(SettingsError::BadDepartment)));
+    assert!(matches!(
+        save_in(
+            d.path(),
+            Settings {
+                person: "x".repeat(81),
+                ..base.clone()
+            }
+        ),
+        Err(SettingsError::BadPerson)
+    ));
+    assert!(matches!(
+        save_in(
+            d.path(),
+            Settings {
+                person: "a\nb".into(),
+                ..base.clone()
+            }
+        ),
+        Err(SettingsError::BadPerson)
+    ));
+    assert!(matches!(
+        save_in(
+            d.path(),
+            Settings {
+                department: "../x".into(),
+                ..base
+            }
+        ),
+        Err(SettingsError::BadDepartment)
+    ));
     for login in ["Moed", "a b", "../x", "moed_1"] {
-        assert!(matches!(save_in(d.path(), Settings { login: login.into(), ..Settings::default() }), Err(SettingsError::BadLogin)), "{login}");
+        assert!(
+            matches!(
+                save_in(
+                    d.path(),
+                    Settings {
+                        login: login.into(),
+                        ..Settings::default()
+                    }
+                ),
+                Err(SettingsError::BadLogin)
+            ),
+            "{login}"
+        );
     }
     assert!(!d.path().join("settings.json").exists());
 }

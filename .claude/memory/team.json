@@ -21,6 +21,10 @@
   "team": [
     {
       "id": "abdout",
+      "departments": [
+        "tech",
+        "business"
+      ],
       "name": "Osman Abdout",
       "category": "tech",
       "role": "Founder & Tech Lead",
@@ -30,6 +34,9 @@
     },
     {
       "id": "ibrahim",
+      "departments": [
+        "tech"
+      ],
       "name": "Ibrahim",
       "category": "tech",
       "role": "Senior Fullstack Engineer (web + mobile)",
@@ -39,6 +46,10 @@
     },
     {
       "id": "moutaz",
+      "departments": [
+        "tech",
+        "sales"
+      ],
       "name": "Moutaz",
       "aka": [
         "mutaz"
@@ -51,6 +62,10 @@
     },
     {
       "id": "aseel",
+      "departments": [
+        "sales",
+        "support"
+      ],
       "name": "Ali Aseel",
       "aka": [
         "ali"
@@ -71,6 +86,11 @@
     },
     {
       "id": "moed",
+      "departments": [
+        "sales",
+        "marketing",
+        "video"
+      ],
       "name": "Moed",
       "aka": [
         "moad"
@@ -83,6 +103,10 @@
     },
     {
       "id": "samia",
+      "departments": [
+        "rnd",
+        "video"
+      ],
       "name": "Samia",
       "category": "rnd",
       "role": "Research & Development",
@@ -96,6 +120,10 @@
     },
     {
       "id": "sedon",
+      "departments": [
+        "tech",
+        "support"
+      ],
       "name": "Osman Sedon",
       "category": "ops",
       "role": "DevOps + Saudi facilitator",
@@ -105,6 +133,9 @@
     },
     {
       "id": "abobaker",
+      "departments": [
+        "business"
+      ],
       "name": "Abobaker",
       "category": "business",
       "role": "CEO",
@@ -117,6 +148,11 @@
     },
     {
       "id": "huwaida",
+      "departments": [
+        "sales",
+        "marketing",
+        "video"
+      ],
       "name": "Huwaida",
       "name_ar": "هويدا",
       "category": "business",

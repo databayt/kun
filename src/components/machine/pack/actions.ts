@@ -1,7 +1,8 @@
 // pack — the TS face of rust.rs (IPC to the local Rust plugin).
 import { Channel, invoke, isTauri } from "@tauri-apps/api/core"
 
-import type { PackInfo, SyncEvent } from "./types"
+import type { SyncEvent } from "../repos/types"
+import type { PackInfo } from "./types"
 
 /** A department's title and quick actions; null outside the machine app. */
 export async function packInfo(department: string): Promise<PackInfo | null> {

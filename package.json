@@ -23,6 +23,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:seed:jobs": "tsx scripts/seed-jobs.ts",
+    "machine:token": "tsx scripts/machine-token.mts",
     "kun:registry": "tsx scripts/kun-registry.mts",
     "seek:ingest": "tsx scripts/seek/ingest.ts",
     "seek:discover": "node scripts/seek/discover.mjs",

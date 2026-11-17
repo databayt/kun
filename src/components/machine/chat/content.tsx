@@ -44,10 +44,13 @@ export default function ChatContent({
   lang,
   session: resume,
   prompt,
+  task,
 }: {
   lang: Locale;
   session?: string;
   prompt?: string;
+  /** A started task (`databayt/<repo>#<n>`): its runs get TASK.md and the task's repos. */
+  task?: string;
 }) {
   const isAr = lang === "ar";
   const t = tr(isAr);
@@ -153,7 +156,7 @@ export default function ChatContent({
       ]);
       requestAnimationFrame(() => scrollToBottom());
       try {
-        await ask(text, { jobId: id, session }, onEvent);
+        await ask(text, { jobId: id, session, taskId: task ?? null }, onEvent);
       } catch (err) {
         patchLast((m) => ({ ...m, streaming: false, error: String(err) }));
       } finally {

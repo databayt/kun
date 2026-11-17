@@ -1,0 +1,30 @@
+{
+  "id": "pack:support",
+  "name": "support",
+  "type": "kun:pack",
+  "title": "Support",
+  "description": "Triage reports, handle incidents, keep domains and deploys healthy — customer success.",
+  "title_ar": "الدعم",
+  "description_ar": "فرز البلاغات، معالجة الحوادث، وصحة النطاقات والنشر — نجاح العملاء.",
+  "keywords": [],
+  "dependencies": [
+    "skill:report",
+    "skill:incident",
+    "skill:domains",
+    "skill:monitor",
+    "agent:support"
+  ],
+  "files": [
+    {
+      "path": "departments/support/pack.json",
+      "target": "departments/support/pack.json",
+      "sha256": "2a57fd5883d57031500e10d8fc73347c8b32eb461c6e61729bd874bca435a42c"
+    },
+    {
+      "path": "departments/support/prompt.md",
+      "target": "departments/support/prompt.md",
+      "sha256": "d5aa966be852b33e507c3ac04760192b30c86ffdd1229e5372ecfaedf5bdeb0c"
+    }
+  ],
+  "version": "eb4fc5c68a1a97fe50b6f921c0c1f2611b3c3d34f309ead8f5b807ba78feee14"
+}

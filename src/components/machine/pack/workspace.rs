@@ -3,7 +3,7 @@
 //! ```text
 //! ~/Kun/<login>/            CLAUDE.md AGENTS.md KNOWLEDGE.md .claude-settings.json .claude/skills/…
 //!      <login>/work/        the only place a read-only profile may write
-//! ~/Kun/repos/<name>/       the profile's public repos (see repos.rs), read-only for the run
+//! ~/Kun/repos/<name>/       the profile's public repos (the repos feature), read-only for the run
 //! ```
 //!
 //! Everything but `work/` is regenerated on every call, so it is idempotent and never drifts.
@@ -59,9 +59,15 @@ pub fn settings_json(repos: &Path, work: &Path, access: &Access) -> String {
         ]);
     }
     if access.workspace == WorkspaceAccess::Write {
-        allow.extend([format!("Edit({work_rule}/**)"), format!("Write({work_rule}/**)")]);
+        allow.extend([
+            format!("Edit({work_rule}/**)"),
+            format!("Write({work_rule}/**)"),
+        ]);
     } else {
-        deny.extend([format!("Edit({work_rule}/**)"), format!("Write({work_rule}/**)")]);
+        deny.extend([
+            format!("Edit({work_rule}/**)"),
+            format!("Write({work_rule}/**)"),
+        ]);
     }
     let value = json!({ "permissions": { "allow": allow, "deny": deny } });
     let mut out = serde_json::to_string_pretty(&value).unwrap_or_default();
@@ -72,7 +78,9 @@ pub fn settings_json(repos: &Path, work: &Path, access: &Access) -> String {
 fn first_lines(text: &str, count: usize, width: usize) -> String {
     text.lines()
         .map(str::trim)
-        .filter(|l| !l.is_empty() && !l.starts_with('#') && !l.starts_with("---") && !l.starts_with("<!--"))
+        .filter(|l| {
+            !l.is_empty() && !l.starts_with('#') && !l.starts_with("---") && !l.starts_with("<!--")
+        })
         .take(count)
         .collect::<Vec<_>>()
         .join(" ")
@@ -91,7 +99,8 @@ fn frontmatter(text: &str, key: &str) -> Option<String> {
 }
 
 fn heading(text: &str) -> Option<String> {
-    text.lines().find_map(|l| l.strip_prefix("# ").map(|h| h.trim().to_owned()))
+    text.lines()
+        .find_map(|l| l.strip_prefix("# ").map(|h| h.trim().to_owned()))
 }
 
 /// A repo's folder: the clone under `repos/`, or kun's own checkout for `kun`.
@@ -108,6 +117,8 @@ fn repo_dir(kun: &Path, repos: &Path, name: &str) -> Option<PathBuf> {
 
 /// The generated knowledge map: where each feature is explained, and how to explain one.
 #[must_use]
+// One linear document template, section after section; splitting it would only scatter the text.
+#[allow(clippy::too_many_lines)]
 pub(super) fn knowledge_md(kun: &Path, repos: &Path, profile: &MachineProfile) -> String {
     let mut out = String::from(
         "# KNOWLEDGE — خريطة المعرفة\n\n\
@@ -121,23 +132,47 @@ pub(super) fn knowledge_md(kun: &Path, repos: &Path, profile: &MachineProfile) -
         .max_depth(2)
         .into_iter()
         .flatten()
-        .filter(|e| e.file_type().is_file() && e.path().extension().is_some_and(|x| x == "mdx" || x == "md"))
+        .filter(|e| {
+            e.file_type().is_file()
+                && e.path()
+                    .extension()
+                    .is_some_and(|x| x == "mdx" || x == "md")
+        })
         .map(walkdir::DirEntry::into_path)
         .collect();
     docs.sort();
     for path in docs.iter().take(300) {
         let text = fs::read_to_string(path).unwrap_or_default();
-        let title = frontmatter(&text, "title").or_else(|| heading(&text)).unwrap_or_else(|| {
-            path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default()
-        });
+        let title = frontmatter(&text, "title")
+            .or_else(|| heading(&text))
+            .unwrap_or_else(|| {
+                path.file_stem()
+                    .map(|s| s.to_string_lossy().into_owned())
+                    .unwrap_or_default()
+            });
         let desc = frontmatter(&text, "description").unwrap_or_default();
-        let _ = writeln!(out, "- **{title}** — `{}`{}", path.display(), if desc.is_empty() { String::new() } else { format!(" — {desc}") });
+        let _ = writeln!(
+            out,
+            "- **{title}** — `{}`{}",
+            path.display(),
+            if desc.is_empty() {
+                String::new()
+            } else {
+                format!(" — {desc}")
+            }
+        );
     }
     if docs.is_empty() {
         out.push_str("_No content/docs found in this checkout._\n");
     }
 
-    if let Some(hogwarts) = profile.repos.iter().any(|r| r == "hogwarts").then(|| repo_dir(kun, repos, "hogwarts")).flatten() {
+    if let Some(hogwarts) = profile
+        .repos
+        .iter()
+        .any(|r| r == "hogwarts")
+        .then(|| repo_dir(kun, repos, "hogwarts"))
+        .flatten()
+    {
         out.push_str("\n## hogwarts — the blocks (src/components/**/README.md)\n\n");
         let mut readmes: Vec<PathBuf> = walkdir::WalkDir::new(hogwarts.join("src/components"))
             .max_depth(3)
@@ -149,19 +184,41 @@ pub(super) fn knowledge_md(kun: &Path, repos: &Path, profile: &MachineProfile) -
         readmes.sort();
         for path in readmes.iter().take(200) {
             let text = fs::read_to_string(path).unwrap_or_default();
-            let block = path.parent().and_then(|p| p.strip_prefix(hogwarts.join("src/components")).ok()).map(|p| p.display().to_string()).unwrap_or_default();
-            let _ = writeln!(out, "- **{block}** — `{}` — {}", path.display(), first_lines(&text, 3, 240));
+            let block = path
+                .parent()
+                .and_then(|p| p.strip_prefix(hogwarts.join("src/components")).ok())
+                .map(|p| p.display().to_string())
+                .unwrap_or_default();
+            let _ = writeln!(
+                out,
+                "- **{block}** — `{}` — {}",
+                path.display(),
+                first_lines(&text, 3, 240)
+            );
         }
         if readmes.is_empty() {
-            out.push_str("_No block READMEs found; read the folders under src/components directly._\n");
+            out.push_str(
+                "_No block READMEs found; read the folders under src/components directly._\n",
+            );
         }
     }
 
-    if let Some(mkan) = profile.repos.iter().any(|r| r == "mkan").then(|| repo_dir(kun, repos, "mkan")).flatten() {
+    if let Some(mkan) = profile
+        .repos
+        .iter()
+        .any(|r| r == "mkan")
+        .then(|| repo_dir(kun, repos, "mkan"))
+        .flatten()
+    {
         out.push_str("\n## mkan — rentals marketplace\n\n");
         let readme = mkan.join("README.md");
         let text = fs::read_to_string(&readme).unwrap_or_default();
-        let _ = writeln!(out, "`{}`\n\n{}", readme.display(), text.lines().take(40).collect::<Vec<_>>().join("\n"));
+        let _ = writeln!(
+            out,
+            "`{}`\n\n{}",
+            readme.display(),
+            text.lines().take(40).collect::<Vec<_>>().join("\n")
+        );
     }
 
     out.push_str(
@@ -177,7 +234,14 @@ pub(super) fn knowledge_md(kun: &Path, repos: &Path, profile: &MachineProfile) -
 }
 
 fn claude_md(kun: &Path, repos: &Path, work: &Path, profile: &MachineProfile) -> String {
-    let mut out = format!("# {} — Kun workspace\n\n", if profile.name.is_empty() { &profile.login } else { &profile.name });
+    let mut out = format!(
+        "# {} — Kun workspace\n\n",
+        if profile.name.is_empty() {
+            &profile.login
+        } else {
+            &profile.name
+        }
+    );
     out.push_str(
         "## Knowledge rules — قواعد المعرفة\n\
          - Answer from `KNOWLEDGE.md` and the code it points to. Read the file first; cite its path.\n\
@@ -191,8 +255,14 @@ fn claude_md(kun: &Path, repos: &Path, work: &Path, profile: &MachineProfile) ->
         let _ = writeln!(out, "  - `{}`", repos.join(r).display());
     }
     let _ = writeln!(out, "- Write here only: `{}`\n", work.display());
-    for dept in profile.departments.iter().map(|d| d.name.as_str()).filter(|d| valid_name(d)) {
-        let prompt = fs::read_to_string(kun.join("departments").join(dept).join("prompt.md")).unwrap_or_default();
+    for dept in profile
+        .departments
+        .iter()
+        .map(|d| d.name.as_str())
+        .filter(|d| valid_name(d))
+    {
+        let prompt = fs::read_to_string(kun.join("departments").join(dept).join("prompt.md"))
+            .unwrap_or_default();
         if !prompt.trim().is_empty() {
             let _ = write!(out, "---\n\n{}\n\n", prompt.trim_end());
         }
@@ -204,7 +274,11 @@ fn claude_md(kun: &Path, repos: &Path, work: &Path, profile: &MachineProfile) ->
 ///
 /// # Errors
 /// On a login or department that is not a plain name, or a filesystem failure.
-pub fn ensure_workspace_in(kun: &Path, root: &Path, profile: &MachineProfile) -> Result<Workspace, PackError> {
+pub fn ensure_workspace_in(
+    kun: &Path,
+    root: &Path,
+    profile: &MachineProfile,
+) -> Result<Workspace, PackError> {
     if !valid_name(&profile.login) {
         return Err(PackError::BadName);
     }
@@ -218,8 +292,14 @@ pub fn ensure_workspace_in(kun: &Path, root: &Path, profile: &MachineProfile) ->
     let claude = claude_md(kun, &repos, &work, profile);
     write_if_changed(&dir.join("CLAUDE.md"), &claude)?;
     write_if_changed(&dir.join("AGENTS.md"), &claude)?;
-    write_if_changed(&dir.join("KNOWLEDGE.md"), &knowledge_md(kun, &repos, profile))?;
-    write_if_changed(&settings_file, &settings_json(&repos, &work, &profile.access))?;
+    write_if_changed(
+        &dir.join("KNOWLEDGE.md"),
+        &knowledge_md(kun, &repos, profile),
+    )?;
+    write_if_changed(
+        &settings_file,
+        &settings_json(&repos, &work, &profile.access),
+    )?;
 
     let mut wanted: Vec<String> = Vec::new();
     for dept in &profile.departments {
@@ -229,10 +309,19 @@ pub fn ensure_workspace_in(kun: &Path, root: &Path, profile: &MachineProfile) ->
             }
         }
     }
-    link::link_skills(&kun.join(".claude/skills"), &dir.join(".claude/skills"), &wanted)?;
+    link::link_skills(
+        &kun.join(".claude/skills"),
+        &dir.join(".claude/skills"),
+        &wanted,
+    )?;
     let agents = kun.join(".agents/skills");
     if agents.is_dir() {
         link::link_skills(&agents, &dir.join(".agents/skills"), &wanted)?;
     }
-    Ok(Workspace { dir, repos, work, settings_file })
+    Ok(Workspace {
+        dir,
+        repos,
+        work,
+        settings_file,
+    })
 }

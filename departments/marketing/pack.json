@@ -13,6 +13,18 @@
     "skill:approve",
     "skill:publish"
   ],
+  "repos": [
+    "kun",
+    "hogwarts",
+    "mkan"
+  ],
+  "docs": [
+    "social",
+    "brand",
+    "tweets",
+    "voice",
+    "media"
+  ],
   "prompt": "prompt.md",
   "defaultDriver": "claude",
   "quickActions": [

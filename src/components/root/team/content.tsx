@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { team } from "./config";
 import type { Locale } from "@/components/local/config";
+import Machines from "./machines";
 
 interface TeamContentProps {
   lang: Locale;
 }
 
-export default function TeamContent({ lang }: TeamContentProps) {
+export default async function TeamContent({ lang }: TeamContentProps) {
   const isAr = lang === "ar";
 
   return (
@@ -39,6 +40,7 @@ export default function TeamContent({ lang }: TeamContentProps) {
           </Link>
         ))}
       </div>
+      <Machines lang={lang} />
     </div>
   );
 }

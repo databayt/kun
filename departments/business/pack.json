@@ -1,0 +1,48 @@
+{
+  "name": "business",
+  "title": "Business",
+  "title_ar": "الأعمال",
+  "description": "Set the week, decide with the canon, price and propose — the CEO-desk department.",
+  "description_ar": "تحديد أولويات الأسبوع، القرار بالكتب المرجعية، التسعير والعروض — قسم مكتب الإدارة.",
+  "items": [
+    "skill:captain",
+    "skill:pricing",
+    "skill:proposal",
+    "skill:canon",
+    "skill:decide",
+    "skill:weekly",
+    "agent:revenue",
+    "agent:analyst"
+  ],
+  "repos": [
+    "kun"
+  ],
+  "docs": [
+    "captain",
+    "team",
+    "sprint",
+    "philosophy",
+    "projects",
+    "products",
+    "desk"
+  ],
+  "prompt": "prompt.md",
+  "defaultDriver": "claude",
+  "quickActions": [
+    {
+      "label_ar": "ماذا أعمل بعد؟",
+      "label_en": "What next?",
+      "prompt": "لخّص حالة الشركة واقترح أهم إجراء لهذا الأسبوع مرتبطاً بالتدفق النقدي."
+    },
+    {
+      "label_ar": "خطة الأسبوع",
+      "label_en": "Weekly plan",
+      "prompt": "جهّز خطة الأسبوع وتوزيع الفريق مع مقياس المدارس الدافعة."
+    },
+    {
+      "label_ar": "سجّل قراراً",
+      "label_en": "Log a decision",
+      "prompt": "سجّل هذا القرار: النوع، المخاطر، النتيجة المتوقعة وتاريخ المراجعة."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "pack:tech",
+  "name": "tech",
+  "type": "kun:pack",
+  "title": "Technology",
+  "description": "Build, check, ship and watch the products — the engineering department.",
+  "title_ar": "التقنية",
+  "description_ar": "بناء المنتجات وفحصها وشحنها ومراقبتها — قسم الهندسة.",
+  "keywords": [],
+  "dependencies": [
+    "skill:build",
+    "skill:check",
+    "skill:ship",
+    "skill:watch",
+    "skill:qa",
+    "skill:fix",
+    "skill:test",
+    "agent:tech-lead",
+    "agent:guardian"
+  ],
+  "files": [
+    {
+      "path": "departments/tech/pack.json",
+      "target": "departments/tech/pack.json",
+      "sha256": "30655610b74704b73e068d65a41e3d51733d6e246316c273bd24a7ac555225bb"
+    },
+    {
+      "path": "departments/tech/prompt.md",
+      "target": "departments/tech/prompt.md",
+      "sha256": "197a67f7db572240337a680111456da8d3126f20771d7e234c623bed96c0901a"
+    }
+  ],
+  "version": "ae071f74a24be0525bbc29db25af89461d04b6aae1764a6780b077ed10df6b8d"
+}

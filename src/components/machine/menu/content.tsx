@@ -1,186 +1,203 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { BlocksIcon, CogIcon, XIcon } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/components/local/config";
+import type { HealthReport, TeamResponse } from "./data";
 import { tr } from "../chat/config";
-import { loadSettings } from "../settings/actions";
-import type { Settings } from "../settings/types";
 import { useInMachine } from "../shell/content";
-import { Chats } from "./chats";
-import { copy } from "./config";
-import { InlineSettings } from "./inline-settings";
-import { Knowledge, Lanes } from "./lanes";
 import { getProfile, type MachineProfile } from "../profile/actions";
-import { rowClass, Section } from "./section";
+import { copy, DEPT_KEY } from "./config";
+import { deptExtras, loadHealth, loadRepos, loadTasks, loadTeam, type RepoRow, type TasksView } from "./data";
+import { Departments } from "./departments";
+import { Footer } from "./footer";
+import { Know } from "./know";
+import { MorphButton } from "./morph-button";
+import { Now } from "./now";
+import { Run } from "./run";
+import { quiet } from "./ui";
+
+const MS = 200;
+const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
- * The only chrome of the machine app: a floating two-line button at the top start corner that opens a
- * full-page mega menu. Ported from space's MobileNav — the native <dialog> gives showModal(), Esc, a
- * focus trap and an inert page behind it; it closes on navigation and on any link click.
+ * The machine's mega menu. A fixed two-line button morphs into an X; the full-screen dialog fades and
+ * lifts in. Four columns centred on the screen: Departments · Now · Run · Know, over a footer strip.
  */
 export function MachineMenu({ lang }: { lang: Locale }) {
   const isAr = lang === "ar";
   const t = tr(isAr);
   const inApp = useInMachine();
-  const dialog = useRef<HTMLDialogElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
-  const active = useSearchParams().get("s");
-  const [shown, setShown] = useState(false);
-  const [profile, setProfile] = useState<MachineProfile | null>(null);
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const firstDept = useRef<HTMLButtonElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Navigating closes the menu.
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [profile, setProfile] = useState<MachineProfile | null>(null);
+  const [dept, setDept] = useState<string>("");
+  const [tasks, setTasks] = useState<TasksView | null>(null);
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [team, setTeam] = useState<TeamResponse | null>(null);
+  const [repos, setRepos] = useState<RepoRow[]>([]);
+  const [health, setHealth] = useState<HealthReport | null>(null);
+
+  const open = useCallback(() => {
+    clearTimeout(timer.current);
+    setMounted(true);
+    document.documentElement.style.overflow = "hidden";
+    requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
+  }, []);
+  const close = useCallback(() => {
+    setVisible(false);
+    clearTimeout(timer.current);
+    const done = () => {
+      setMounted(false);
+      document.documentElement.style.overflow = "";
+    };
+    if (reduced()) done();
+    else timer.current = setTimeout(done, MS);
+    trigger.current?.focus();
+  }, []);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  // Navigating closes it.
   useEffect(() => {
-    dialog.current?.close();
+    if (mounted) close();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  // The profile once; everything else each time it opens.
   useEffect(() => {
     if (!inApp) return;
-    getProfile()
-      .then(setProfile)
-      .catch(() => setProfile(null));
-    loadSettings()
-      .then(setSettings)
-      .catch(() => setSettings(null));
+    getProfile().then(setProfile).catch(() => setProfile(null));
   }, [inApp]);
 
-  const open = () => {
-    dialog.current?.showModal();
-    document.documentElement.style.overflow = "hidden";
-    setShown(true);
-  };
-  const close = () => dialog.current?.close();
+  // Default = remembered choice if the profile still has it, else its first department.
+  useEffect(() => {
+    if (!profile?.departments.length) return;
+    let saved = "";
+    try {
+      saved = localStorage.getItem(DEPT_KEY) ?? "";
+    } catch {}
+    const names = profile.departments.map((d) => d.name);
+    setDept(names.includes(saved) ? saved : names[0]);
+  }, [profile]);
 
-  // null profile (outside the app, or none set) = full access.
-  const showCatalog =
-    !profile ||
-    profile.access.catalog === "all" ||
-    profile.access.catalog === "profile";
+  const choose = (name: string) => {
+    setDept(name);
+    try {
+      localStorage.setItem(DEPT_KEY, name);
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (!visible || !inApp) return;
+    loadHealth().then(setHealth);
+    loadRepos().then(setRepos);
+  }, [visible, inApp]);
+
+  useEffect(() => {
+    if (!visible || !inApp || !dept) return;
+    let live = true;
+    setTasks(null);
+    setTeam(null);
+    setTasksLoading(true);
+    loadTasks(dept).then((v) => {
+      if (!live) return;
+      setTasks(v);
+      setTasksLoading(false);
+    });
+    loadTeam(dept).then((v) => live && setTeam(v));
+    return () => {
+      live = false;
+    };
+  }, [visible, inApp, dept]);
+
+  // Focus into the dialog on open.
+  useEffect(() => {
+    if (visible) firstDept.current?.focus({ preventScroll: true });
+  }, [visible, dept, profile]);
+
+  // Esc closes; Tab stays inside the dialog and the button that closes it.
+  useEffect(() => {
+    if (!mounted) return;
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return close();
+      if (e.key !== "Tab" || !root.current) return;
+      const items = [
+        trigger.current,
+        ...root.current.querySelectorAll<HTMLElement>("a[href],button:not([disabled])"),
+      ].filter((x): x is HTMLElement => !!x);
+      const i = items.indexOf(document.activeElement as HTMLElement);
+      const next = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : i === items.length - 1 ? 0 : i + 1;
+      e.preventDefault();
+      items[next]?.focus();
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [mounted, close]);
+
+  const showCatalog = !profile || profile.access.catalog === "all" || profile.access.catalog === "profile";
   const showEngine = inApp === true && (!profile || profile.access.engine);
-  const who = profile?.name || settings?.person.trim() || "";
-  const dept = profile
-    ? profile.departments
-        .map((d) => (isAr && d.title_ar) || d.title)
-        .join(" · ")
-    : (settings?.department ?? "");
+  const current = profile?.departments.find((d) => d.name === dept);
+  const extras = current ? deptExtras(current) : { repos: [], docs: [] };
 
   return (
     <>
-      <button
-        ref={trigger}
-        type="button"
-        onClick={open}
-        aria-label={t(copy.open)}
-        aria-haspopup="dialog"
-        className="fixed start-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 inline-flex size-11 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/5"
-      >
-        {/* Two-line menu mark, as in space. */}
-        <svg
-          aria-hidden
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          className="size-6"
-        >
-          <path d="M4 8h16M4 16h16" />
-        </svg>
-      </button>
-
-      <dialog
-        ref={dialog}
-        aria-label={t(copy.title)}
-        dir={isAr ? "rtl" : "ltr"}
-        onClose={() => {
-          document.documentElement.style.overflow = "";
-          trigger.current?.focus();
-        }}
-        onClick={(e) => {
-          // Links inside close it; so does a click on the backdrop.
-          if (
-            e.target === e.currentTarget ||
-            (e.target as HTMLElement).closest("a")
-          )
-            close();
-        }}
-        className="m-0 h-dvh max-h-none w-full max-w-none bg-background p-0 text-foreground backdrop:bg-foreground/30 open:flex open:flex-col open:animate-in open:fade-in-0"
-      >
-        <div className="flex h-16 shrink-0 items-center justify-between gap-3 px-4 pt-[env(safe-area-inset-top)] sm:px-6">
-          <div className="flex min-w-0 items-baseline gap-3">
-            <p className="font-heading text-2xl font-bold tracking-tight">
-              {t({ en: "Kun", ar: "كن" })}
-            </p>
-            {(who || dept) && (
-              <p dir="auto" className="truncate text-sm text-muted-foreground">
-                {[who, dept].filter(Boolean).join(" · ")}
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={close}
-            aria-label={t(copy.close)}
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
-          >
-            <XIcon aria-hidden className="size-6" />
-          </button>
-        </div>
-
-        <nav
+      <MorphButton
+        buttonRef={trigger}
+        open={visible}
+        label={t(visible ? copy.close : copy.open)}
+        onClick={visible ? close : open}
+      />
+      {mounted && (
+        <div
+          ref={root}
+          role="dialog"
+          aria-modal="true"
           aria-label={t(copy.title)}
-          className="flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6"
+          dir={isAr ? "rtl" : "ltr"}
+          onClick={(e) => {
+            const a = (e.target as HTMLElement).closest("a");
+            if (a && a.target !== "_blank") close();
+          }}
+          className={cn(
+            "fixed inset-0 z-50 flex h-dvh flex-col overflow-y-auto overscroll-contain bg-background text-foreground transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none",
+            visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
+          )}
         >
-          <div className="mx-auto grid max-w-6xl items-start gap-x-10 gap-y-12 pt-6 sm:grid-cols-2 lg:grid-cols-4">
-            {inApp ? (
+          <nav
+            aria-label={t(copy.title)}
+            className="mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center gap-8 px-6 pb-4 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.75rem))] lg:grid lg:grid-cols-4 lg:content-center lg:items-start lg:gap-x-10 lg:py-16"
+          >
+            {inApp && profile && profile.departments.length > 0 ? (
               <>
-                <Chats lang={lang} activeId={active} open={shown} />
-                {profile && <Lanes lang={lang} profile={profile} />}
-                <Knowledge lang={lang} repos={profile ? profile.repos : null} />
+                <Departments
+                  isAr={isAr}
+                  profile={profile}
+                  selected={dept}
+                  onSelect={choose}
+                  title={t(copy.departments)}
+                  first={firstDept}
+                />
+                <Now lang={lang} view={tasks} loading={tasksLoading} onStarted={close} />
+                <Run lang={lang} dept={current} />
+                <Know lang={lang} repos={extras.repos} localRepos={repos} docs={extras.docs} team={team} />
               </>
             ) : (
-              <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
-                {t(copy.appOnly)}
+              <p className={cn(quiet, "lg:col-span-4 lg:text-center")}>
+                {inApp ? t(copy.noDept) : t(copy.appOnly)}
               </p>
             )}
-            <div className="min-w-0 space-y-12">
-              <InlineSettings
-                lang={lang}
-                profile={profile}
-                inApp={inApp === true}
-              />
-              {(showCatalog || showEngine) && (
-                <Section title={t({ en: "More", ar: "المزيد" })}>
-                  {showCatalog && (
-                    <Link
-                      href={`/${lang}/machine/catalog`}
-                      title={t(copy.catalogHint)}
-                      className={rowClass}
-                    >
-                      {t(copy.catalog)}
-                    </Link>
-                  )}
-                  {showEngine && (
-                    <Link
-                      href={`/${lang}/machine/engine`}
-                      title={t(copy.engineHint)}
-                      className={rowClass}
-                    >
-                      {t(copy.engine)}
-                    </Link>
-                  )}
-                </Section>
-              )}
-            </div>
-          </div>
-        </nav>
-      </dialog>
+          </nav>
+          <Footer lang={lang} inApp={inApp === true} showCatalog={showCatalog} showEngine={showEngine} health={health} />
+        </div>
+      )}
     </>
   );
 }

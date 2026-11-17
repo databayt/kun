@@ -23,6 +23,37 @@ export const copy = {
   catalogHint: { en: "Browse and install Kun, item by item", ar: "تصفّح كن وثبّته عنصراً عنصراً" },
   engine: { en: "Engine", ar: "المحرك" },
   engineHint: { en: "Version, updates and health", ar: "الإصدار والتحديثات والصحة" },
+  departments: { en: "Departments", ar: "الأقسام" },
+  now: { en: "Now", ar: "الآن" },
+  run: { en: "Run", ar: "تشغيل" },
+  know: { en: "Know", ar: "معرفة" },
+  sprint: { en: "Sprint", ar: "السبرنت" },
+  myTasks: { en: "My tasks", ar: "مهامي" },
+  board: { en: "Team board", ar: "لوحة الفريق" },
+  noTasks: { en: "Nothing queued for you.", ar: "لا شيء في طابورك." },
+  noBoard: { en: "No open tasks.", ar: "لا مهام مفتوحة." },
+  noSprint: { en: "No sprint is running.", ar: "لا سبرنت جارٍ." },
+  tasksOffline: { en: "Tasks load when the machine is connected.", ar: "تظهر المهام حين يتصل الجهاز." },
+  start: { en: "Start", ar: "ابدأ" },
+  ready: { en: "Ready to start", ar: "جاهزة للبدء" },
+  missing: { en: "Missing context", ar: "ينقصها سياق" },
+  blocked: { en: "Blocked", ar: "محجوبة" },
+  unassigned: { en: "Unassigned", ar: "بلا مسؤول" },
+  noSkills: { en: "No lanes for this department.", ar: "لا مسارات لهذا القسم." },
+  repos: { en: "Repos", ar: "المستودعات" },
+  docs: { en: "Docs", ar: "الوثائق" },
+  people: { en: "People", ar: "الفريق" },
+  local: { en: "On this machine", ar: "على هذا الجهاز" },
+  remote: { en: "Not on this machine", ar: "ليس على هذا الجهاز" },
+  seen: { en: "Last seen", ar: "آخر ظهور" },
+  never: { en: "never", ar: "لم يظهر" },
+  recent: { en: "Recent chats", ar: "آخر المحادثات" },
+  language: { en: "Language", ar: "اللغة" },
+  health: { en: "Machine health", ar: "صحة الجهاز" },
+  healthOk: { en: "Healthy", ar: "سليم" },
+  healthBad: { en: "Needs attention", ar: "يحتاج انتباهاً" },
+  healthUnknown: { en: "Not checked yet", ar: "لم يُفحص بعد" },
+  noDept: { en: "No department is set for this machine.", ar: "لا قسم لهذا الجهاز." },
   appOnly: { en: "Chats and lanes run inside the Kun app.", ar: "المحادثات والمسارات تعمل داخل تطبيق كن." },
   groups: {
     today: { en: "Today", ar: "اليوم" },
@@ -71,3 +102,5 @@ export const promptHref = (lang: string, prompt: string) => `/${lang}/machine?pr
 /** Window events that tie the menu to the open chat. */
 export const NEW_CHAT_EVENT = "kun:new-chat"
 export const CHAT_DELETED_EVENT = "kun:chat-deleted"
+
+export const DEPT_KEY = "kun.machine.dept"

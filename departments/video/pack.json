@@ -1,7 +1,7 @@
 {
   "name": "video",
-  "title": "Video production",
-  "title_ar": "إنتاج الفيديو",
+  "title": "Media production",
+  "title_ar": "الإنتاج الإعلامي",
   "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
   "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
   "items": [
@@ -11,6 +11,17 @@
     "skill:higgs",
     "skill:carousel",
     "agent:media-qa"
+  ],
+  "repos": [
+    "kun",
+    "hogwarts"
+  ],
+  "docs": [
+    "edit",
+    "record",
+    "shoot",
+    "media",
+    "brand"
   ],
   "prompt": "prompt.md",
   "defaultDriver": "claude",

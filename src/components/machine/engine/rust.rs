@@ -100,13 +100,17 @@ static LAST_HEALTH: Mutex<Option<HealthReport>> = Mutex::new(None);
 /// `KUN_DIR` or `~/kun`.
 #[must_use]
 pub fn kun_dir() -> PathBuf {
-    env_or("KUN_DIR", || dirs::home_dir().unwrap_or_default().join("kun"))
+    env_or("KUN_DIR", || {
+        dirs::home_dir().unwrap_or_default().join("kun")
+    })
 }
 
 /// `CLAUDE_DIR` or `~/.claude`.
 #[must_use]
 pub fn claude_dir() -> PathBuf {
-    env_or("CLAUDE_DIR", || dirs::home_dir().unwrap_or_default().join(".claude"))
+    env_or("CLAUDE_DIR", || {
+        dirs::home_dir().unwrap_or_default().join(".claude")
+    })
 }
 
 fn env_or(key: &str, fallback: impl FnOnce() -> PathBuf) -> PathBuf {
@@ -212,7 +216,11 @@ fn find_tool(name: &'static str) -> Result<PathBuf, EngineError> {
     if let Some(path) = std::env::var_os("PATH") {
         dirs_.extend(std::env::split_paths(&path));
     }
-    let exe = if cfg!(windows) { format!("{name}.exe") } else { name.to_string() };
+    let exe = if cfg!(windows) {
+        format!("{name}.exe")
+    } else {
+        name.to_string()
+    };
     dirs_
         .into_iter()
         .map(|d| d.join(&exe))
@@ -246,7 +254,10 @@ async fn run_capture(
         }
         text.push_str(&err);
     }
-    Ok(Captured { ok: out.status.success(), text: clip_tail(strip_ansi(&text).trim_end(), MAX_OUTPUT) })
+    Ok(Captured {
+        ok: out.status.success(),
+        text: clip_tail(strip_ansi(&text).trim_end(), MAX_OUTPUT),
+    })
 }
 
 async fn git(dir: &Path, args: &[&str], limit: Duration) -> Result<Captured, EngineError> {
@@ -305,7 +316,13 @@ pub async fn read_status(dir: &Path) -> Result<EngineStatus, EngineError> {
     {
         status.branch = Some(b.text.trim().to_string());
     }
-    if let Ok(s) = git(dir, &["status", "--porcelain", "--untracked-files=no"], GIT_TIMEOUT).await {
+    if let Ok(s) = git(
+        dir,
+        &["status", "--porcelain", "--untracked-files=no"],
+        GIT_TIMEOUT,
+    )
+    .await
+    {
         status.dirty = s.ok && !s.text.trim().is_empty();
     }
     match git(dir, &["fetch", "--quiet"], GIT_TIMEOUT).await {
@@ -327,10 +344,22 @@ pub async fn read_status(dir: &Path) -> Result<EngineStatus, EngineError> {
 /// If there is no checkout, git is missing or the pull times out.
 pub async fn pull(dir: &Path) -> Result<UpdateReport, EngineError> {
     check_checkout(dir)?;
-    let before = git(dir, &["rev-parse", "--short", "HEAD"], GIT_TIMEOUT).await.ok().map(|c| c.text.trim().to_string());
+    let before = git(dir, &["rev-parse", "--short", "HEAD"], GIT_TIMEOUT)
+        .await
+        .ok()
+        .map(|c| c.text.trim().to_string());
     let done = git(dir, &["pull", "--ff-only"], PULL_TIMEOUT).await?;
-    let after = git(dir, &["rev-parse", "--short", "HEAD"], GIT_TIMEOUT).await.ok().map(|c| c.text.trim().to_string());
-    Ok(UpdateReport { ok: done.ok, up_to_date: done.ok && summarize_pull(&done.text), before, after, output: done.text })
+    let after = git(dir, &["rev-parse", "--short", "HEAD"], GIT_TIMEOUT)
+        .await
+        .ok()
+        .map(|c| c.text.trim().to_string());
+    Ok(UpdateReport {
+        ok: done.ok,
+        up_to_date: done.ok && summarize_pull(&done.text),
+        before,
+        after,
+        output: done.text,
+    })
 }
 
 /// Runs the engine's health script.
@@ -339,7 +368,9 @@ pub async fn pull(dir: &Path) -> Result<UpdateReport, EngineError> {
 /// If bash is unavailable (Windows), the script is missing or it times out.
 pub async fn run_health(dir: &Path) -> Result<HealthReport, EngineError> {
     if cfg!(windows) {
-        return Err(EngineError::Unsupported("الفحص يحتاج bash ولا يعمل على ويندوز بعد · health needs bash, not supported on Windows yet"));
+        return Err(EngineError::Unsupported(
+            "الفحص يحتاج bash ولا يعمل على ويندوز بعد · health needs bash, not supported on Windows yet",
+        ));
     }
     check_checkout(dir)?;
     let script = dir.join(".claude/scripts/health.sh");
@@ -349,7 +380,11 @@ pub async fn run_health(dir: &Path) -> Result<HealthReport, EngineError> {
     let mut cmd = Command::new(find_tool("bash")?);
     cmd.arg(&script).current_dir(dir);
     let run = run_capture("health.sh", cmd, HEALTH_TIMEOUT).await?;
-    let report = HealthReport { ok: run.ok, at: now_secs(), output: run.text };
+    let report = HealthReport {
+        ok: run.ok,
+        at: now_secs(),
+        output: run.text,
+    };
     if let Ok(mut g) = LAST_HEALTH.lock() {
         *g = Some(report.clone());
     }
@@ -364,10 +399,16 @@ pub async fn read_state(claude: &Path) -> Result<LiveState, EngineError> {
     let path = claude.join("state/aware.md");
     let shown = path.display().to_string();
     match tokio::fs::read_to_string(&path).await {
-        Ok(text) => Ok(LiveState { path: shown, exists: true, text: clip_tail(&text, MAX_OUTPUT) }),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            Ok(LiveState { path: shown, exists: false, text: String::new() })
-        }
+        Ok(text) => Ok(LiveState {
+            path: shown,
+            exists: true,
+            text: clip_tail(&text, MAX_OUTPUT),
+        }),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(LiveState {
+            path: shown,
+            exists: false,
+            text: String::new(),
+        }),
         Err(e) => Err(EngineError::Read(shown, e)),
     }
 }
@@ -398,7 +439,9 @@ async fn state() -> Result<LiveState, EngineError> {
 
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("engine").invoke_handler(tauri::generate_handler![status, update, health, state]).build()
+    Builder::new("engine")
+        .invoke_handler(tauri::generate_handler![status, update, health, state])
+        .build()
 }
 
 #[cfg(test)]

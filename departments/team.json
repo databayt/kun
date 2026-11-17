@@ -1,51 +1,86 @@
 {
   "$comment": "person -> department. Seeded from content/docs/team.mdx (login = <login>@databayt.org). A person may hold more than one department; the first is the default pack the machine suggests.",
-  "departments": ["management", "development", "sales", "marketing", "video"],
+  "departments": [
+    "tech",
+    "business",
+    "sales",
+    "marketing",
+    "video",
+    "support",
+    "rnd"
+  ],
   "people": [
     {
       "login": "abdout",
       "name": "Abdout",
-      "departments": ["management", "development"]
+      "departments": [
+        "tech",
+        "business"
+      ]
     },
     {
       "login": "abobaker",
       "name": "Abobaker",
-      "departments": ["management"]
+      "departments": [
+        "business"
+      ]
     },
     {
       "login": "ibrahim",
       "name": "Ibrahim",
-      "departments": ["development"]
+      "departments": [
+        "tech"
+      ]
     },
     {
       "login": "moutaz",
       "name": "Moutaz",
-      "departments": ["development", "sales"]
+      "departments": [
+        "tech",
+        "sales"
+      ]
     },
     {
       "login": "aseel",
       "name": "Ali Aseel",
-      "departments": ["sales", "development"]
+      "departments": [
+        "sales",
+        "support"
+      ]
     },
     {
       "login": "moed",
       "name": "Moed",
-      "departments": ["sales", "marketing", "video"]
+      "departments": [
+        "sales",
+        "marketing",
+        "video"
+      ]
     },
     {
       "login": "samia",
       "name": "Samia",
-      "departments": ["video", "management"]
+      "departments": [
+        "rnd",
+        "video"
+      ]
     },
     {
       "login": "sedon",
       "name": "Sedon",
-      "departments": ["development", "management"]
+      "departments": [
+        "tech",
+        "support"
+      ]
     },
     {
       "login": "huwaida",
       "name": "هويدا",
-      "departments": ["sales", "marketing", "video"]
+      "departments": [
+        "sales",
+        "marketing",
+        "video"
+      ]
     }
   ]
 }

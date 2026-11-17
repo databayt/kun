@@ -31,7 +31,9 @@ pub enum VoiceError {
     TooShort,
     #[error("لم نسمع صوتًا · no speech was heard")]
     Silence,
-    #[error("الصوت غير مفعّل في هذا الإصدار · voice is not built into this version (build with the `voice` feature)")]
+    #[error(
+        "الصوت غير مفعّل في هذا الإصدار · voice is not built into this version (build with the `voice` feature)"
+    )]
     NotBuilt,
     #[error("نموذج الصوت غير محمّل بعد · the speech model is not downloaded yet")]
     NoModel,
@@ -141,7 +143,9 @@ mod engine {
     static CTX: Mutex<Option<(PathBuf, Arc<WhisperContext>)>> = Mutex::new(None);
 
     fn context(path: &Path) -> Result<Arc<WhisperContext>, VoiceError> {
-        let mut guard = CTX.lock().map_err(|_| VoiceError::Whisper("lock poisoned".into()))?;
+        let mut guard = CTX
+            .lock()
+            .map_err(|_| VoiceError::Whisper("lock poisoned".into()))?;
         if let Some((loaded, c)) = guard.as_ref()
             && loaded == path
         {
@@ -155,10 +159,18 @@ mod engine {
         Ok(ctx)
     }
 
-    fn run(ctx: &WhisperContext, pcm: &[f32], language: Option<&str>) -> Result<(String, String), VoiceError> {
-        let mut state = ctx.create_state().map_err(|e| VoiceError::Whisper(e.to_string()))?;
+    fn run(
+        ctx: &WhisperContext,
+        pcm: &[f32],
+        language: Option<&str>,
+    ) -> Result<(String, String), VoiceError> {
+        let mut state = ctx
+            .create_state()
+            .map_err(|e| VoiceError::Whisper(e.to_string()))?;
         let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
-        let threads = std::thread::available_parallelism().map_or(4, std::num::NonZero::get).min(8);
+        let threads = std::thread::available_parallelism()
+            .map_or(4, std::num::NonZero::get)
+            .min(8);
         params.set_n_threads(i32::try_from(threads).unwrap_or(4));
         params.set_language(language);
         params.set_translate(false);
@@ -169,19 +181,30 @@ mod engine {
         params.set_print_timestamps(false);
         params.set_suppress_blank(true);
         params.set_suppress_nst(true);
-        state.full(params, pcm).map_err(|e| VoiceError::Whisper(e.to_string()))?;
+        state
+            .full(params, pcm)
+            .map_err(|e| VoiceError::Whisper(e.to_string()))?;
         let mut text = String::new();
         for i in 0..state.full_n_segments() {
             if let Some(seg) = state.get_segment(i) {
-                text.push_str(&seg.to_str_lossy().map_err(|e| VoiceError::Whisper(e.to_string()))?);
+                text.push_str(
+                    &seg.to_str_lossy()
+                        .map_err(|e| VoiceError::Whisper(e.to_string()))?,
+                );
             }
         }
-        let lang = whisper_rs::get_lang_str(state.full_lang_id_from_state()).unwrap_or("auto").to_string();
+        let lang = whisper_rs::get_lang_str(state.full_lang_id_from_state())
+            .unwrap_or("auto")
+            .to_string();
         Ok((clean_transcript(&text), lang))
     }
 
     /// Blocking: transcribe `pcm` (16 kHz mono). With a hint, a wrong-language detection is re-run forced.
-    pub(super) fn transcribe(path: &Path, pcm: &[f32], hint: Option<&str>) -> Result<(String, String), VoiceError> {
+    pub(super) fn transcribe(
+        path: &Path,
+        pcm: &[f32],
+        hint: Option<&str>,
+    ) -> Result<(String, String), VoiceError> {
         let ctx = context(path)?;
         let (text, lang) = run(&ctx, pcm, None)?;
         if needs_rerun(&lang, hint) {
@@ -197,7 +220,11 @@ mod engine {
 
     use super::VoiceError;
 
-    pub(super) fn transcribe(_: &Path, _: &[f32], _: Option<&str>) -> Result<(String, String), VoiceError> {
+    pub(super) fn transcribe(
+        _: &Path,
+        _: &[f32],
+        _: Option<&str>,
+    ) -> Result<(String, String), VoiceError> {
         Err(VoiceError::NotBuilt)
     }
 }
@@ -232,7 +259,10 @@ async fn voice_status() -> VoiceStatus {
 /// `download_model` — fetch a speech model once (`model`: `base` by default, or `small`),
 /// streaming progress to the UI.
 #[tauri::command]
-async fn download_model(model: Option<String>, on_progress: Channel<ModelEvent>) -> Result<(), VoiceError> {
+async fn download_model(
+    model: Option<String>,
+    on_progress: Channel<ModelEvent>,
+) -> Result<(), VoiceError> {
     let model = Model::parse(model.as_deref())?;
     #[cfg(feature = "voice")]
     {
@@ -262,7 +292,9 @@ async fn transcribe(request: Request<'_>) -> Result<Transcript, VoiceError> {
     let InvokeBody::Raw(bytes) = request.body() else {
         return Err(VoiceError::Invalid("send raw PCM bytes"));
     };
-    let rate: u32 = header(&request, "x-rate").and_then(|v| v.parse().ok()).ok_or(VoiceError::Invalid("x-rate header"))?;
+    let rate: u32 = header(&request, "x-rate")
+        .and_then(|v| v.parse().ok())
+        .ok_or(VoiceError::Invalid("x-rate header"))?;
     let hint = parse_hint(header(&request, "x-lang"));
     let pcm = audio::prepare(bytes, rate)?;
     let model = Model::parse(header(&request, "x-model"))?;
@@ -274,10 +306,15 @@ async fn transcribe(request: Request<'_>) -> Result<Transcript, VoiceError> {
         return Err(VoiceError::NoModel);
     }
     let started = Instant::now();
-    let (text, language) = tokio::task::spawn_blocking(move || engine::transcribe(&path, &pcm, hint))
-        .await
-        .map_err(|e| VoiceError::Whisper(e.to_string()))??;
-    Ok(Transcript { text, language, millis: u32::try_from(started.elapsed().as_millis()).unwrap_or(u32::MAX) })
+    let (text, language) =
+        tokio::task::spawn_blocking(move || engine::transcribe(&path, &pcm, hint))
+            .await
+            .map_err(|e| VoiceError::Whisper(e.to_string()))??;
+    Ok(Transcript {
+        text,
+        language,
+        millis: u32::try_from(started.elapsed().as_millis()).unwrap_or(u32::MAX),
+    })
 }
 
 /// `speak` — read `text` aloud in `lang` (`ar` or `en`) with the OS voice.
@@ -296,7 +333,13 @@ fn stop_speaking() {
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("voice")
-        .invoke_handler(tauri::generate_handler![voice_status, download_model, transcribe, speak, stop_speaking])
+        .invoke_handler(tauri::generate_handler![
+            voice_status,
+            download_model,
+            transcribe,
+            speak,
+            stop_speaking
+        ])
         .build()
 }
 

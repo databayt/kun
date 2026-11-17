@@ -33,7 +33,10 @@ keyring = "4.2"
 # voice (cargo feature `voice`): local speech-to-text. whisper-rs builds whisper.cpp with
 # cmake; a builder without cmake uses `--no-default-features` and gets a "not built" message.
 whisper-rs = { version = "=0.16.0", optional = true }
-reqwest = { version = "0.13", default-features = false, features = ["rustls", "stream"], optional = true }
+# reqwest: the network feature talks to kun.databayt.org; voice reuses it for model downloads.
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "stream", "json"] }
+# free disk space, portable (network health check).
+fs4 = { version = "1.1", features = ["sync"] }
 
 [target.'cfg(windows)'.dependencies]
 # skill links without admin rights: symlink_dir, then a directory junction, then a copy.
@@ -41,7 +44,7 @@ junction = "=2.1.0"
 
 [features]
 default = ["voice"]
-voice = ["dep:whisper-rs", "dep:reqwest"]
+voice = ["dep:whisper-rs"]
 
 [dev-dependencies]
 insta = { version = "1", features = ["json"] }

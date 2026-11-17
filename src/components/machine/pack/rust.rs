@@ -8,7 +8,7 @@
 //! With a profile (`machines/<login>.json`) the run lives in `~/Kun/<login>/` instead
 //! (`workspace.rs`): CLAUDE.md, a generated KNOWLEDGE.md, the profile's skills, a `work/`
 //! folder and the `--settings` file that enforces read-only code. The profile's public repos
-//! are cloned into `~/Kun/repos/` and only ever fast-forwarded (`repos.rs`). Skill links
+//! are cloned into `~/Kun/repos/` and only ever fast-forwarded (the `repos` feature). Skill links
 //! (`link.rs`) use junctions on Windows.
 
 use std::{
@@ -29,12 +29,10 @@ use crate::driver::DriverKind;
 
 #[path = "link.rs"]
 mod link;
-#[path = "repos.rs"]
-mod repos;
 #[path = "workspace.rs"]
 mod workspace;
 
-pub use repos::{SyncEvent, SyncState};
+pub use crate::repos::{SyncEvent, SyncState};
 pub use workspace::{Workspace, ensure_workspace_in, settings_json};
 
 #[derive(Debug, thiserror::Error)]
@@ -115,7 +113,8 @@ pub fn valid_name(s: &str) -> bool {
     !s.is_empty()
         && s.len() <= 64
         && !s.starts_with(['.', '-'])
-        && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.')
+        && s.chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.')
         && !s.contains("..")
 }
 
@@ -126,7 +125,9 @@ pub fn valid_name(s: &str) -> bool {
 pub fn kun_dir() -> Result<PathBuf, PackError> {
     match std::env::var_os("KUN_DIR") {
         Some(p) if !p.is_empty() => Ok(PathBuf::from(p)),
-        _ => dirs::home_dir().map(|h| h.join("kun")).ok_or(PackError::NoHome),
+        _ => dirs::home_dir()
+            .map(|h| h.join("kun"))
+            .ok_or(PackError::NoHome),
     }
 }
 
@@ -137,7 +138,9 @@ pub fn kun_dir() -> Result<PathBuf, PackError> {
 pub fn machine_dir() -> Result<PathBuf, PackError> {
     match std::env::var_os("KUN_HOME") {
         Some(p) if !p.is_empty() => Ok(PathBuf::from(p).join("machine")),
-        _ => dirs::home_dir().map(|h| h.join(".kun/machine")).ok_or(PackError::NoHome),
+        _ => dirs::home_dir()
+            .map(|h| h.join(".kun/machine"))
+            .ok_or(PackError::NoHome),
     }
 }
 
@@ -191,14 +194,27 @@ pub fn ensure_in(kun: &Path, machine: &Path, dept: &str) -> Result<PathBuf, Pack
 
     let rules = kun.join("CLAUDE.md");
     let body = prompt.trim_end();
-    write_if_changed(&dir.join("CLAUDE.md"), &format!("{body}\n\n---\n\n@{}\n", rules.display().to_string().replace('\\', "/")))?;
+    write_if_changed(
+        &dir.join("CLAUDE.md"),
+        &format!(
+            "{body}\n\n---\n\n@{}\n",
+            rules.display().to_string().replace('\\', "/")
+        ),
+    )?;
     write_if_changed(
         &dir.join("AGENTS.md"),
-        &format!("{body}\n\n---\n\nCompany rules: read {} before you start.\n", rules.display()),
+        &format!(
+            "{body}\n\n---\n\nCompany rules: read {} before you start.\n",
+            rules.display()
+        ),
     )?;
 
     let wanted = item_names(&read_pack(kun, dept).items);
-    link::link_skills(&kun.join(".claude/skills"), &dir.join(".claude/skills"), &wanted)?;
+    link::link_skills(
+        &kun.join(".claude/skills"),
+        &dir.join(".claude/skills"),
+        &wanted,
+    )?;
     let agents = kun.join(".agents/skills");
     if agents.is_dir() {
         link::link_skills(&agents, &dir.join(".agents/skills"), &wanted)?;
@@ -250,7 +266,11 @@ pub fn meta_in(kun: &Path, dept: &str) -> Result<PackMeta, PackError> {
             .quick_actions
             .into_iter()
             .filter(|q| !q.prompt.trim().is_empty())
-            .map(|q| QuickAction { label_ar: q.label_ar, label_en: q.label_en, prompt: q.prompt })
+            .map(|q| QuickAction {
+                label_ar: q.label_ar,
+                label_en: q.label_en,
+                prompt: q.prompt,
+            })
             .collect(),
     })
 }
@@ -306,7 +326,9 @@ fn info(department: String) -> Result<PackInfo, PackError> {
 pub fn workspace_root() -> Result<PathBuf, PackError> {
     match std::env::var_os("KUN_HOME") {
         Some(p) if !p.is_empty() => Ok(PathBuf::from(p).join("Kun")),
-        _ => dirs::home_dir().map(|h| h.join("Kun")).ok_or(PackError::NoHome),
+        _ => dirs::home_dir()
+            .map(|h| h.join("Kun"))
+            .ok_or(PackError::NoHome),
     }
 }
 
@@ -336,15 +358,31 @@ fn prepare(department: String) -> Result<String, PackError> {
 async fn sync_repos(channel: Channel<SyncEvent>) -> Result<(), PackError> {
     let resolved = crate::profile::current().map_err(|e| PackError::Profile(e.to_string()))?;
     let root = workspace_root()?.join("repos");
-    repos::sync_all(&root, &resolved.profile.repos, repos::GITHUB_BASE, |e| {
-        let _ = channel.send(e);
-    })
+    crate::repos::sync_all(
+        &root,
+        &resolved.profile.repos,
+        crate::repos::GITHUB_BASE,
+        |e| {
+            let _ = channel.send(e);
+        },
+    )
     .await
+    .map_err(|e| match e {
+        crate::repos::RepoError::BadName(n) => PackError::BadRepo(n),
+        other => PackError::Profile(other.to_string()),
+    })
 }
 
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("pack").invoke_handler(tauri::generate_handler![departments, info, prepare, sync_repos]).build()
+    Builder::new("pack")
+        .invoke_handler(tauri::generate_handler![
+            departments,
+            info,
+            prepare,
+            sync_repos
+        ])
+        .build()
 }
 
 #[cfg(test)]

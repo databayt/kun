@@ -131,7 +131,53 @@ ALLOCATION (proposed)
 ESCALATIONS DUE
   - <list of items past or approaching deadline>
 
-CONFIRM TO POST TO SLACK + DISPATCH? [y/N]
+TASKS (one GitHub issue each, shape below — drafted, not created)
+  1. <repo>: <title> — dept:<d> · P<n> · after <none|repo#n>
+
+CONFIRM TO POST TO SLACK + DISPATCH + CREATE THE ISSUES? Only Abdout's explicit "send" does any of it.
+```
+
+After "send", **distribute work**: create one issue per task in the Task shape below, in the right
+databayt repo. Before "send" the tasks stay drafts in the output; nothing is created or posted.
+
+## Task shape (what the machine app reads)
+
+Contract: `src/lib/machine/contract.ts`. A task is a GitHub issue; the machine app lists it for the
+person whose department matches, checks readiness, and opens a chat on Start.
+
+- **Repo**: the repo the work lands in (`hogwarts`, `mkan`, `kun`, ...). Work with no repo goes in `kun`.
+- **Title**: imperative, under 70 chars. **Body**: Goal, Acceptance (a checklist, each line testable),
+  Context (links to docs, issues, files), then the kun block as the last line.
+- **Labels**: `dept:<tech|business|sales|marketing|video|support|rnd>` + `P0`..`P3`. Missing label:
+  `gh label create "dept:sales" --repo databayt/<repo> --color 0E8A16` (same for `P1`).
+- **Milestone**: the current sprint, title `Sprint <yyyy>-W<ww>` (ISO week, `date +%G-W%V`), goal in its
+  description. Missing: `gh api repos/databayt/<repo>/milestones -f title="Sprint 2026-W47" -f description="<goal>"`.
+- **Kun block**: `<!-- kun: repos=<repos the task needs>; items=<skill:x,agent:y>; after=<ids> -->`.
+  `items` come from `departments/<dept>/pack.json` → `items` (only what the task uses, never invent one);
+  `repos` are the repos the person must have local; `after` orders the queue: `repo#n` or a bare `#n`
+  for the same repo; omit when nothing blocks.
+- **Never set** `holder:<login>`, `status:in-progress` or `status:review`: the machines manage them.
+  Never close an issue for a person: only the CEO closes, after Done moves it to review.
+- **Assignee**: leave it; the holder label is set when a person presses Start.
+
+Example (sales; the quote waits for the pricing issue):
+
+```bash
+gh issue create --repo databayt/hogwarts \
+  --title "Quote Al-Ibda: 1,152 SAR per year" \
+  --label "dept:sales" --label "P1" --milestone "Sprint 2026-W47" \
+  --body '## Goal
+Send Al-Ibda a quote at the approved rate (24 SAR per student).
+
+## Acceptance
+- [ ] Student count confirmed with the school
+- [ ] Quote uses the one rate, no VAT, 1-month trial stated
+- [ ] Sent after Abdout approves; logged in the CRM
+
+## Context
+docs: content/docs/pricing.mdx · pilot: memory project_pilot_status
+
+<!-- kun: repos=hogwarts,kun; items=skill:proposal,skill:pricing; after=#41 -->'
 ```
 
 ## Decision suggestions follow these rules

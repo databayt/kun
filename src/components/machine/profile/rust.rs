@@ -64,9 +64,19 @@ pub struct Access {
 
 impl Access {
     /// Everything: the founder's machine, and any machine without a profile.
-    pub const FULL: Self = Self { code: CodeAccess::Write, workspace: WorkspaceAccess::Write, catalog: CatalogAccess::All, engine: true };
+    pub const FULL: Self = Self {
+        code: CodeAccess::Write,
+        workspace: WorkspaceAccess::Write,
+        catalog: CatalogAccess::All,
+        engine: true,
+    };
     /// What a profile that omits `access` gets: the least it can.
-    const LEAST: Self = Self { code: CodeAccess::Read, workspace: WorkspaceAccess::Write, catalog: CatalogAccess::Profile, engine: false };
+    const LEAST: Self = Self {
+        code: CodeAccess::Read,
+        workspace: WorkspaceAccess::Write,
+        catalog: CatalogAccess::Profile,
+        engine: false,
+    };
 }
 
 /// One skill a department offers, from its SKILL.md frontmatter.
@@ -129,7 +139,12 @@ struct RawAccess {
 impl Default for RawAccess {
     fn default() -> Self {
         let a = Access::LEAST;
-        Self { code: a.code, workspace: a.workspace, catalog: a.catalog, engine: a.engine }
+        Self {
+            code: a.code,
+            workspace: a.workspace,
+            catalog: a.catalog,
+            engine: a.engine,
+        }
     }
 }
 
@@ -181,11 +196,17 @@ impl Serialize for ProfileError {
 /// A login: lowercase letters, digits and `-`, 1 to 32 characters.
 #[must_use]
 pub fn valid_login(s: &str) -> bool {
-    !s.is_empty() && s.len() <= 32 && s.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+    !s.is_empty()
+        && s.len() <= 32
+        && s.chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
 }
 
 fn valid_secret_name(s: &str) -> bool {
-    !s.is_empty() && s.len() <= 64 && s.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
+    !s.is_empty()
+        && s.len() <= 64
+        && s.chars()
+            .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
 }
 
 /// A SKILL.md's `name` and `description`; the folder name stands in for a missing `name`.
@@ -199,7 +220,11 @@ fn skill_ref(kun: &Path, name: &str) -> Option<SkillRef> {
             (k.trim() == key).then(|| v.trim().trim_matches(['"', '\'']).to_owned())
         })
     };
-    Some(SkillRef { name: name.to_owned(), title: get("name").unwrap_or_else(|| name.to_owned()), description: get("description").unwrap_or_default() })
+    Some(SkillRef {
+        name: name.to_owned(),
+        title: get("name").unwrap_or_else(|| name.to_owned()),
+        description: get("description").unwrap_or_default(),
+    })
 }
 
 /// A catalog id: `<type>:<name>`, lowercase.
@@ -234,9 +259,16 @@ fn default_os() -> String {
 ///
 /// # Errors
 /// On an invalid login, or a profile file that exists but is damaged or names unsafe values.
-pub fn resolve_in(kun: &Path, login: &str, fallback_driver: DriverKind) -> Result<Resolved, ProfileError> {
+pub fn resolve_in(
+    kun: &Path,
+    login: &str,
+    fallback_driver: DriverKind,
+) -> Result<Resolved, ProfileError> {
     let default = || -> Result<Resolved, ProfileError> {
-        let departments = pack::departments_in(kun).iter().map(|d| department(kun, d, &[])).collect::<Result<Vec<_>, _>>()?;
+        let departments = pack::departments_in(kun)
+            .iter()
+            .map(|d| department(kun, d, &[]))
+            .collect::<Result<Vec<_>, _>>()?;
         Ok(Resolved {
             profile: MachineProfile {
                 login: login.to_owned(),
@@ -269,7 +301,12 @@ pub fn resolve_in(kun: &Path, login: &str, fallback_driver: DriverKind) -> Resul
     if raw.login != login {
         return Err(corrupt(format!("login field is `{}`", raw.login)));
     }
-    if let Some(bad) = raw.departments.iter().chain(&raw.repos).find(|n| !pack::valid_name(n)) {
+    if let Some(bad) = raw
+        .departments
+        .iter()
+        .chain(&raw.repos)
+        .find(|n| !pack::valid_name(n))
+    {
         return Err(corrupt(format!("unsafe name `{bad}`")));
     }
     if let Some(bad) = raw.secrets.iter().find(|n| !valid_secret_name(n)) {
@@ -278,17 +315,30 @@ pub fn resolve_in(kun: &Path, login: &str, fallback_driver: DriverKind) -> Resul
     if let Some(bad) = raw.hidden.iter().find(|n| !valid_id(n)) {
         return Err(corrupt(format!("bad hidden id `{bad}`")));
     }
-    let departments = raw.departments.iter().map(|d| department(kun, d, &raw.hidden)).collect::<Result<Vec<_>, _>>()?;
+    let departments = raw
+        .departments
+        .iter()
+        .map(|d| department(kun, d, &raw.hidden))
+        .collect::<Result<Vec<_>, _>>()?;
     let a = raw.access;
     Ok(Resolved {
         profile: MachineProfile {
             login: raw.login,
             name: raw.name,
-            os: if raw.os.is_empty() { default_os() } else { raw.os },
+            os: if raw.os.is_empty() {
+                default_os()
+            } else {
+                raw.os
+            },
             driver: raw.driver.unwrap_or(fallback_driver),
             departments,
             repos: raw.repos,
-            access: Access { code: a.code, workspace: a.workspace, catalog: a.catalog, engine: a.engine },
+            access: Access {
+                code: a.code,
+                workspace: a.workspace,
+                catalog: a.catalog,
+                engine: a.engine,
+            },
             hidden: raw.hidden,
         },
         secrets: raw.secrets,
@@ -323,7 +373,9 @@ const SERVICE: &str = "org.databayt.kun.machine";
 
 impl SecretStore for OsStore {
     fn set(&self, account: &str, value: &str) -> Result<(), String> {
-        keyring::Entry::new(SERVICE, account).and_then(|e| e.set_password(value)).map_err(|e| e.to_string())
+        keyring::Entry::new(SERVICE, account)
+            .and_then(|e| e.set_password(value))
+            .map_err(|e| e.to_string())
     }
 
     fn get(&self, account: &str) -> Result<Option<String>, String> {
@@ -340,39 +392,63 @@ fn account(resolved: &Resolved, name: &str) -> String {
 }
 
 fn allowed(resolved: &Resolved, name: &str) -> Result<(), ProfileError> {
-    if resolved.secrets.iter().any(|s| s == name) { Ok(()) } else { Err(ProfileError::NotAllowed(name.to_owned())) }
+    if resolved.secrets.iter().any(|s| s == name) {
+        Ok(())
+    } else {
+        Err(ProfileError::NotAllowed(name.to_owned()))
+    }
 }
 
 /// Stores a secret the profile lists. The value is trimmed (a pasted trailing newline breaks keys).
 ///
 /// # Errors
 /// When the name is not in the profile, the value is empty, too long or has control characters, or the store fails.
-pub fn store_secret(store: &impl SecretStore, resolved: &Resolved, name: &str, value: &str) -> Result<(), ProfileError> {
+pub fn store_secret(
+    store: &impl SecretStore,
+    resolved: &Resolved,
+    name: &str,
+    value: &str,
+) -> Result<(), ProfileError> {
     allowed(resolved, name)?;
     let value = value.trim();
     if value.is_empty() || value.len() > 8192 || value.chars().any(char::is_control) {
         return Err(ProfileError::BadValue);
     }
-    store.set(&account(resolved, name), value).map_err(ProfileError::Store)
+    store
+        .set(&account(resolved, name), value)
+        .map_err(ProfileError::Store)
 }
 
 /// Whether a secret the profile lists is stored. Never returns the value.
 ///
 /// # Errors
 /// When the name is not in the profile or the store cannot be read.
-pub fn secret_present(store: &impl SecretStore, resolved: &Resolved, name: &str) -> Result<bool, ProfileError> {
+pub fn secret_present(
+    store: &impl SecretStore,
+    resolved: &Resolved,
+    name: &str,
+) -> Result<bool, ProfileError> {
     allowed(resolved, name)?;
-    Ok(store.get(&account(resolved, name)).map_err(ProfileError::Store)?.is_some())
+    Ok(store
+        .get(&account(resolved, name))
+        .map_err(ProfileError::Store)?
+        .is_some())
 }
 
 /// Every stored secret of the profile as `(NAME, value)`, for the environment of one run.
 ///
 /// # Errors
 /// When the store cannot be read.
-pub fn secret_env(store: &impl SecretStore, resolved: &Resolved) -> Result<Vec<(String, String)>, ProfileError> {
+pub fn secret_env(
+    store: &impl SecretStore,
+    resolved: &Resolved,
+) -> Result<Vec<(String, String)>, ProfileError> {
     let mut env = Vec::new();
     for name in &resolved.secrets {
-        if let Some(v) = store.get(&account(resolved, name)).map_err(ProfileError::Store)? {
+        if let Some(v) = store
+            .get(&account(resolved, name))
+            .map_err(ProfileError::Store)?
+        {
             env.push((name.clone(), v));
         }
     }
@@ -401,7 +477,9 @@ fn has_secret(name: String) -> Result<bool, ProfileError> {
 
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("profile").invoke_handler(tauri::generate_handler![profile, set_secret, has_secret]).build()
+    Builder::new("profile")
+        .invoke_handler(tauri::generate_handler![profile, set_secret, has_secret])
+        .build()
 }
 
 #[cfg(test)]

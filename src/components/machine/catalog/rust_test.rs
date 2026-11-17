@@ -45,15 +45,31 @@ fn standard() -> World {
                 "skill:funnel",
                 &[],
                 &[
-                    (".claude/skills/funnel/SKILL.md", "skills/funnel/SKILL.md", "# funnel"),
-                    (".claude/skills/funnel/scripts/run.sh", "skills/funnel/scripts/run.sh", "echo hi"),
+                    (
+                        ".claude/skills/funnel/SKILL.md",
+                        "skills/funnel/SKILL.md",
+                        "# funnel",
+                    ),
+                    (
+                        ".claude/skills/funnel/scripts/run.sh",
+                        "skills/funnel/scripts/run.sh",
+                        "echo hi",
+                    ),
                 ],
             ),
-            item("agent:lead", &[], &[(".claude/agents/lead.md", "agents/lead.md", "# lead")]),
+            item(
+                "agent:lead",
+                &[],
+                &[(".claude/agents/lead.md", "agents/lead.md", "# lead")],
+            ),
             item(
                 "pack:sales",
                 &["skill:funnel", "agent:lead"],
-                &[("departments/sales/pack.json", "departments/sales/pack.json", "{}")],
+                &[(
+                    "departments/sales/pack.json",
+                    "departments/sales/pack.json",
+                    "{}",
+                )],
             ),
         ],
         &[
@@ -66,7 +82,12 @@ fn standard() -> World {
 }
 
 fn status(env: &Env, id: &str) -> ItemStatus {
-    list_items(env).unwrap().into_iter().find(|i| i.id == id).unwrap().status
+    list_items(env)
+        .unwrap()
+        .into_iter()
+        .find(|i| i.id == id)
+        .unwrap()
+        .status
 }
 
 fn rel_files(dir: &Path) -> Vec<String> {
@@ -74,7 +95,13 @@ fn rel_files(dir: &Path) -> Vec<String> {
         .into_iter()
         .filter_map(std::result::Result::ok)
         .filter(|e| e.file_type().is_file())
-        .map(|e| e.path().strip_prefix(dir).unwrap().to_string_lossy().into_owned())
+        .map(|e| {
+            e.path()
+                .strip_prefix(dir)
+                .unwrap()
+                .to_string_lossy()
+                .into_owned()
+        })
         .collect();
     v.sort();
     v
@@ -94,13 +121,23 @@ fn fixture_registry_parses() {
 fn install_copies_files_and_records_lock() {
     let w = standard();
     assert_eq!(status(&w.env, "skill:funnel"), ItemStatus::Available);
-    assert_eq!(install_item(&w.env, "skill:funnel").unwrap(), vec!["skill:funnel"]);
-    assert_eq!(fs::read_to_string(w.env.claude_dir.join("skills/funnel/SKILL.md")).unwrap(), "# funnel");
+    assert_eq!(
+        install_item(&w.env, "skill:funnel").unwrap(),
+        vec!["skill:funnel"]
+    );
+    assert_eq!(
+        fs::read_to_string(w.env.claude_dir.join("skills/funnel/SKILL.md")).unwrap(),
+        "# funnel"
+    );
     assert_eq!(status(&w.env, "skill:funnel"), ItemStatus::Installed);
     let lock = read_lock(&w.env);
     assert_eq!(lock.items["skill:funnel"].files.len(), 2);
     // No temp files left behind.
-    assert!(rel_files(&w.env.claude_dir).iter().all(|f| !f.contains("kun-tmp")));
+    assert!(
+        rel_files(&w.env.claude_dir)
+            .iter()
+            .all(|f| !f.contains("kun-tmp"))
+    );
 }
 
 #[test]
@@ -109,7 +146,12 @@ fn pack_installs_dependencies_first() {
     let done = install_item(&w.env, "pack:sales").unwrap();
     assert_eq!(done, vec!["skill:funnel", "agent:lead", "pack:sales"]);
     assert!(w.env.claude_dir.join("agents/lead.md").is_file());
-    assert!(w.env.claude_dir.join("departments/sales/pack.json").is_file());
+    assert!(
+        w.env
+            .claude_dir
+            .join("departments/sales/pack.json")
+            .is_file()
+    );
 }
 
 #[test]
@@ -128,11 +170,22 @@ fn new_registry_version_is_outdated() {
     install_item(&w.env, "agent:lead").unwrap();
     // The checkout moves on: new source content, new hash.
     fs::write(w.env.kun_dir.join(".claude/agents/lead.md"), "# lead v2").unwrap();
-    let reg = item("agent:lead", &[], &[(".claude/agents/lead.md", "agents/lead.md", "# lead v2")]);
-    fs::write(w.env.registry_path(), serde_json::json!({ "items": [reg] }).to_string()).unwrap();
+    let reg = item(
+        "agent:lead",
+        &[],
+        &[(".claude/agents/lead.md", "agents/lead.md", "# lead v2")],
+    );
+    fs::write(
+        w.env.registry_path(),
+        serde_json::json!({ "items": [reg] }).to_string(),
+    )
+    .unwrap();
     assert_eq!(status(&w.env, "agent:lead"), ItemStatus::Outdated);
     install_item(&w.env, "agent:lead").unwrap();
-    assert_eq!(fs::read_to_string(w.env.claude_dir.join("agents/lead.md")).unwrap(), "# lead v2");
+    assert_eq!(
+        fs::read_to_string(w.env.claude_dir.join("agents/lead.md")).unwrap(),
+        "# lead v2"
+    );
 }
 
 #[test]
@@ -147,7 +200,10 @@ fn uninstall_removes_only_recorded_files() {
 
     uninstall_item(&w.env, "skill:funnel").unwrap();
     assert!(!w.env.claude_dir.join("skills/funnel/SKILL.md").exists());
-    assert!(!w.env.claude_dir.join("skills/funnel/scripts").exists(), "empty dir is pruned");
+    assert!(
+        !w.env.claude_dir.join("skills/funnel/scripts").exists(),
+        "empty dir is pruned"
+    );
     assert!(mine.is_file(), "a file the user made survives");
     assert!(other.is_file());
     assert!(read_lock(&w.env).items.is_empty());
@@ -169,7 +225,11 @@ fn uninstall_refuses_while_a_dependent_is_installed() {
 fn target_escaping_claude_dir_is_refused() {
     for bad in ["../evil.md", "/tmp/evil.md", "skills/../../evil.md"] {
         let w = world(
-            &[item("skill:evil", &[], &[(".claude/skills/evil/SKILL.md", bad, "x")])],
+            &[item(
+                "skill:evil",
+                &[],
+                &[(".claude/skills/evil/SKILL.md", bad, "x")],
+            )],
             &[(".claude/skills/evil/SKILL.md", "x")],
         );
         let err = install_item(&w.env, "skill:evil").unwrap_err();
@@ -203,11 +263,27 @@ fn source_that_no_longer_matches_the_registry_is_refused() {
 #[test]
 fn names_are_validated() {
     let w = standard();
-    for bad in ["", "../etc", "Skill:funnel", "skill:fun nel", "skill/funnel", "skill:funnel\n"] {
-        assert!(matches!(install_item(&w.env, bad), Err(CatalogError::InvalidName)), "{bad:?}");
-        assert!(matches!(uninstall_item(&w.env, bad), Err(CatalogError::InvalidName)), "{bad:?}");
+    for bad in [
+        "",
+        "../etc",
+        "Skill:funnel",
+        "skill:fun nel",
+        "skill/funnel",
+        "skill:funnel\n",
+    ] {
+        assert!(
+            matches!(install_item(&w.env, bad), Err(CatalogError::InvalidName)),
+            "{bad:?}"
+        );
+        assert!(
+            matches!(uninstall_item(&w.env, bad), Err(CatalogError::InvalidName)),
+            "{bad:?}"
+        );
     }
-    assert!(matches!(install_item(&w.env, "skill:nope"), Err(CatalogError::UnknownItem(_))));
+    assert!(matches!(
+        install_item(&w.env, "skill:nope"),
+        Err(CatalogError::UnknownItem(_))
+    ));
 }
 
 #[test]
@@ -226,7 +302,10 @@ fn executable_bit_is_kept() {
     let src = w.env.kun_dir.join(".claude/skills/funnel/scripts/run.sh");
     fs::set_permissions(&src, fs::Permissions::from_mode(0o755)).unwrap();
     install_item(&w.env, "skill:funnel").unwrap();
-    let mode = fs::metadata(w.env.claude_dir.join("skills/funnel/scripts/run.sh")).unwrap().permissions().mode();
+    let mode = fs::metadata(w.env.claude_dir.join("skills/funnel/scripts/run.sh"))
+        .unwrap()
+        .permissions()
+        .mode();
     assert_eq!(mode & 0o111, 0o111);
 }
 
@@ -244,10 +323,19 @@ fn profile_for(depts: &[&str], catalog: CatalogAccess) -> MachineProfile {
         driver: DriverKind::Claude,
         departments: depts
             .iter()
-            .map(|d| Department { name: (*d).into(), title: (*d).into(), title_ar: None, quick_actions: Vec::new(), skills: Vec::new() })
+            .map(|d| Department {
+                name: (*d).into(),
+                title: (*d).into(),
+                title_ar: None,
+                quick_actions: Vec::new(),
+                skills: Vec::new(),
+            })
             .collect(),
         repos: Vec::new(),
-        access: Access { catalog, ..Access::FULL },
+        access: Access {
+            catalog,
+            ..Access::FULL
+        },
         hidden: Vec::new(),
     }
 }
@@ -256,12 +344,32 @@ fn profile_for(depts: &[&str], catalog: CatalogAccess) -> MachineProfile {
 fn two_packs() -> World {
     let w = standard();
     let reg = w.env.kun_dir.join("public/r/kun/index.json");
-    let mut json: serde_json::Value = serde_json::from_str(&fs::read_to_string(&reg).unwrap()).unwrap();
+    let mut json: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&reg).unwrap()).unwrap();
     let items = json["items"].as_array_mut().unwrap();
-    items.push(item("skill:edit", &[], &[(".claude/skills/edit/SKILL.md", "skills/edit/SKILL.md", "# edit")]));
-    items.push(item("pack:video", &["skill:edit"], &[("departments/video/pack.json", "departments/video/pack.json", "{}")]));
+    items.push(item(
+        "skill:edit",
+        &[],
+        &[(
+            ".claude/skills/edit/SKILL.md",
+            "skills/edit/SKILL.md",
+            "# edit",
+        )],
+    ));
+    items.push(item(
+        "pack:video",
+        &["skill:edit"],
+        &[(
+            "departments/video/pack.json",
+            "departments/video/pack.json",
+            "{}",
+        )],
+    ));
     fs::write(&reg, json.to_string()).unwrap();
-    for (p, body) in [(".claude/skills/edit/SKILL.md", "# edit"), ("departments/video/pack.json", "{}")] {
+    for (p, body) in [
+        (".claude/skills/edit/SKILL.md", "# edit"),
+        ("departments/video/pack.json", "{}"),
+    ] {
         let path = w.env.kun_dir.join(p);
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         fs::write(path, body).unwrap();
@@ -274,15 +382,27 @@ fn a_profile_lists_only_its_packs_and_what_they_need() {
     let w = two_packs();
     let profile = profile_for(&["sales"], CatalogAccess::Profile);
     let allowed = allowed_ids(&w.env, &profile).unwrap();
-    let ids: Vec<String> = list_items_scoped(&w.env, allowed.as_ref()).unwrap().into_iter().map(|i| i.id).collect();
+    let ids: Vec<String> = list_items_scoped(&w.env, allowed.as_ref())
+        .unwrap()
+        .into_iter()
+        .map(|i| i.id)
+        .collect();
     assert_eq!(ids, vec!["skill:funnel", "agent:lead", "pack:sales"]);
-    assert_eq!(list_items(&w.env).unwrap().len(), 5, "unscoped still lists everything");
+    assert_eq!(
+        list_items(&w.env).unwrap().len(),
+        5,
+        "unscoped still lists everything"
+    );
 }
 
 #[test]
 fn full_catalog_access_means_no_limit() {
     let w = two_packs();
-    assert!(allowed_ids(&w.env, &profile_for(&["sales"], CatalogAccess::All)).unwrap().is_none());
+    assert!(
+        allowed_ids(&w.env, &profile_for(&["sales"], CatalogAccess::All))
+            .unwrap()
+            .is_none()
+    );
 }
 
 #[test]
@@ -290,10 +410,25 @@ fn install_and_uninstall_refuse_outside_the_profile() {
     let w = two_packs();
     let allowed = allowed_ids(&w.env, &profile_for(&["sales"], CatalogAccess::Profile)).unwrap();
     for outside in ["pack:video", "skill:edit"] {
-        assert!(matches!(install_item_scoped(&w.env, outside, allowed.as_ref()), Err(CatalogError::OutsideProfile(_))), "{outside}");
-        assert!(matches!(uninstall_item_scoped(&w.env, outside, allowed.as_ref()), Err(CatalogError::OutsideProfile(_))), "{outside}");
+        assert!(
+            matches!(
+                install_item_scoped(&w.env, outside, allowed.as_ref()),
+                Err(CatalogError::OutsideProfile(_))
+            ),
+            "{outside}"
+        );
+        assert!(
+            matches!(
+                uninstall_item_scoped(&w.env, outside, allowed.as_ref()),
+                Err(CatalogError::OutsideProfile(_))
+            ),
+            "{outside}"
+        );
     }
-    assert!(!w.env.claude_dir.join("skills/edit").exists(), "nothing was written");
+    assert!(
+        !w.env.claude_dir.join("skills/edit").exists(),
+        "nothing was written"
+    );
 
     let done = install_item_scoped(&w.env, "pack:sales", allowed.as_ref()).unwrap();
     assert_eq!(done.last().map(String::as_str), Some("pack:sales"));
@@ -306,10 +441,21 @@ fn hidden_lanes_never_install_even_through_their_pack() {
     let mut profile = profile_for(&["video"], CatalogAccess::Profile);
     profile.hidden = vec!["skill:edit".into()];
     let allowed = allowed_ids(&w.env, &profile).unwrap();
-    let ids: Vec<String> = list_items_scoped(&w.env, allowed.as_ref()).unwrap().into_iter().map(|i| i.id).collect();
+    let ids: Vec<String> = list_items_scoped(&w.env, allowed.as_ref())
+        .unwrap()
+        .into_iter()
+        .map(|i| i.id)
+        .collect();
     assert_eq!(ids, vec!["pack:video"], "the hidden skill is not listed");
-    assert!(matches!(install_item_scoped(&w.env, "skill:edit", allowed.as_ref()), Err(CatalogError::OutsideProfile(_))));
+    assert!(matches!(
+        install_item_scoped(&w.env, "skill:edit", allowed.as_ref()),
+        Err(CatalogError::OutsideProfile(_))
+    ));
     let done = install_item_scoped(&w.env, "pack:video", allowed.as_ref()).unwrap();
-    assert_eq!(done, vec!["pack:video"], "the pack installs without its hidden lane");
+    assert_eq!(
+        done,
+        vec!["pack:video"],
+        "the pack installs without its hidden lane"
+    );
     assert!(!w.env.claude_dir.join("skills/edit").exists());
 }

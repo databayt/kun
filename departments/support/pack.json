@@ -1,0 +1,44 @@
+{
+  "name": "support",
+  "title": "Support",
+  "title_ar": "الدعم",
+  "description": "Triage reports, handle incidents, keep domains and deploys healthy — customer success.",
+  "description_ar": "فرز البلاغات، معالجة الحوادث، وصحة النطاقات والنشر — نجاح العملاء.",
+  "items": [
+    "skill:report",
+    "skill:incident",
+    "skill:domains",
+    "skill:monitor",
+    "agent:support"
+  ],
+  "repos": [
+    "hogwarts",
+    "kun"
+  ],
+  "docs": [
+    "onboarding",
+    "delivery",
+    "email",
+    "slack",
+    "crm"
+  ],
+  "prompt": "prompt.md",
+  "defaultDriver": "claude",
+  "quickActions": [
+    {
+      "label_ar": "البلاغات المفتوحة",
+      "label_en": "Open reports",
+      "prompt": "اعرض البلاغات المفتوحة في جدول مرقّم لأختار منها."
+    },
+    {
+      "label_ar": "فحص النشر",
+      "label_en": "Deploy sweep",
+      "prompt": "افحص النشر والتوفر والتكلفة لمنتجات databayt وصعّد أي أحمر."
+    },
+    {
+      "label_ar": "صحة النطاقات",
+      "label_en": "Domain health",
+      "prompt": "افحص انتهاء النطاقات وDNS والبريد وأخبرني بما يحتاج تجديداً."
+    }
+  ]
+}

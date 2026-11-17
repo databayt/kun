@@ -551,3 +551,35 @@ model SeekCommand {
   @@index([instance, status, createdAt])
   @@index([instance, externalId])
 }
+
+// ── Connected machines ─────────────────────────────────────────────────────
+// One row per kun login that runs the machine app. Only the sha256 of the bearer
+// token is stored (`pnpm machine:token <login>` prints it once).
+
+model Machine {
+  id          String    @id @default(cuid())
+  login       String    @unique
+  name        String
+  os          String    @default("")
+  appVersion  String    @default("")
+  tokenHash   String    @unique
+  lastSeenAt  DateTime?
+  health      Json?
+  repos       Json?
+  currentTask String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model MachineMessage {
+  id        String    @id @default(cuid())
+  toLogin   String
+  fromLogin String
+  /// note | job | nudge
+  kind      String
+  body      Json
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  @@index([toLogin, readAt])
+}

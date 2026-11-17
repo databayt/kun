@@ -1,4 +1,8 @@
-#![allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 
 use super::{audio::*, model::*, tts::*, *};
 
@@ -8,7 +12,9 @@ fn f32_bytes(v: &[f32]) -> Vec<u8> {
 
 fn sine(hz: f32, rate: u32, secs: f32) -> Vec<f32> {
     let n = (rate as f32 * secs) as usize;
-    (0..n).map(|i| 0.5 * (std::f32::consts::TAU * hz * i as f32 / rate as f32).sin()).collect()
+    (0..n)
+        .map(|i| 0.5 * (std::f32::consts::TAU * hz * i as f32 / rate as f32).sin())
+        .collect()
 }
 
 #[test]
@@ -63,7 +69,10 @@ fn sha_and_ready_check() {
     let dir = tempfile::tempdir().unwrap();
     let f = dir.path().join("x.bin");
     std::fs::write(&f, b"abc").unwrap();
-    assert_eq!(sha256_file(&f).unwrap(), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    assert_eq!(
+        sha256_file(&f).unwrap(),
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
     assert!(!is_ready(&f, Model::Base));
     assert!(sha256_file(&dir.path().join("none")).is_err());
     for m in Model::ALL {
@@ -115,7 +124,10 @@ fn hints() {
 #[test]
 fn transcript_cleanup() {
     assert_eq!(clean_transcript(" [BLANK_AUDIO] "), "");
-    assert_eq!(clean_transcript("  مرحبا   (music) بالعالم "), "مرحبا بالعالم");
+    assert_eq!(
+        clean_transcript("  مرحبا   (music) بالعالم "),
+        "مرحبا بالعالم"
+    );
     assert_eq!(clean_transcript("hello [noise] world"), "hello world");
 }
 
@@ -135,13 +147,17 @@ fn say_voices_parse_and_pick() {
     assert_eq!(v[1].locale, "en_US");
     assert_eq!(pick_say_voice(&v, "ar").as_deref(), Some("Majed"));
     assert_eq!(pick_say_voice(&v, "en").as_deref(), Some("Samantha"));
-    assert_eq!(pick_say_voice(&parse_say_voices("Zarvox en_US # x"), "ar"), None);
+    assert_eq!(
+        pick_say_voice(&parse_say_voices("Zarvox en_US # x"), "ar"),
+        None
+    );
     assert!(parse_say_voices("garbage line").is_empty());
 }
 
 #[test]
 fn speech_text_is_cleaned() {
-    let md = "# عنوان\n**مهم** انظر https://kun.databayt.org الآن\n```rs\nfn main() {}\n```\nتم `الأمر`";
+    let md =
+        "# عنوان\n**مهم** انظر https://kun.databayt.org الآن\n```rs\nfn main() {}\n```\nتم `الأمر`";
     assert_eq!(clean_for_speech(md), "عنوان مهم انظر الآن تم الأمر");
     assert!(clean_for_speech(&"ا".repeat(5000)).chars().count() <= 2000);
     assert_eq!(clean_for_speech("```\ncode\n```"), "");
@@ -153,6 +169,11 @@ async fn status_reports_the_build() {
     assert_eq!(status.built, cfg!(feature = "voice"));
     assert_eq!(status.model_mb, 141);
     assert_eq!(status.models.len(), 2);
-    assert!(status.models.iter().any(|m| m.id == "small" && m.mb == 465 && !m.default));
+    assert!(
+        status
+            .models
+            .iter()
+            .any(|m| m.id == "small" && m.mb == 465 && !m.default)
+    );
     assert!(status.models_dir.ends_with("models"));
 }

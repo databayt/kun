@@ -34,12 +34,17 @@ fn behind_count() {
 #[test]
 fn pull_summary() {
     assert!(summarize_pull("Already up to date.\n"));
-    assert!(!summarize_pull("Updating a..b\nFast-forward\n 1 file changed"));
+    assert!(!summarize_pull(
+        "Updating a..b\nFast-forward\n 1 file changed"
+    ));
 }
 
 #[test]
 fn head_line() {
-    assert_eq!(parse_head("cd3342e\tfeat(machine): the shell\n"), Some(("cd3342e".into(), "feat(machine): the shell".into())));
+    assert_eq!(
+        parse_head("cd3342e\tfeat(machine): the shell\n"),
+        Some(("cd3342e".into(), "feat(machine): the shell".into()))
+    );
     assert_eq!(parse_head(""), None);
     assert_eq!(parse_head("nosubject"), None);
 }
@@ -59,7 +64,10 @@ async fn missing_checkout_is_reported_not_fatal() {
     let st = read_status(dir.path()).await.unwrap();
     assert!(!st.exists);
     assert!(st.note.is_some());
-    assert!(matches!(pull(dir.path()).await, Err(EngineError::NoCheckout(_))));
+    assert!(matches!(
+        pull(dir.path()).await,
+        Err(EngineError::NoCheckout(_))
+    ));
 }
 
 #[tokio::test]
@@ -79,10 +87,17 @@ async fn real_repo_status_and_ff_only_pull() {
     let root = tempfile::tempdir().unwrap();
     let sh = |dir: &Path, args: &[&str]| {
         let ok = std::process::Command::new("git")
-            .arg("-C").arg(dir).args(args)
-            .env("GIT_AUTHOR_NAME", "t").env("GIT_AUTHOR_EMAIL", "t@t")
-            .env("GIT_COMMITTER_NAME", "t").env("GIT_COMMITTER_EMAIL", "t@t")
-            .output().unwrap().status.success();
+            .arg("-C")
+            .arg(dir)
+            .args(args)
+            .env("GIT_AUTHOR_NAME", "t")
+            .env("GIT_AUTHOR_EMAIL", "t@t")
+            .env("GIT_COMMITTER_NAME", "t")
+            .env("GIT_COMMITTER_EMAIL", "t@t")
+            .output()
+            .unwrap()
+            .status
+            .success();
         assert!(ok, "git {args:?}");
     };
     let up = root.path().join("up");
@@ -92,7 +107,10 @@ async fn real_repo_status_and_ff_only_pull() {
     sh(&up, &["add", "a"]);
     sh(&up, &["commit", "-q", "-m", "first"]);
     let me = root.path().join("me");
-    sh(root.path(), &["clone", "-q", up.to_str().unwrap(), me.to_str().unwrap()]);
+    sh(
+        root.path(),
+        &["clone", "-q", up.to_str().unwrap(), me.to_str().unwrap()],
+    );
     std::fs::write(up.join("a"), "2").unwrap();
     sh(&up, &["commit", "-q", "-am", "second"]);
 

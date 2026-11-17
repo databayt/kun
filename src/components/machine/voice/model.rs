@@ -43,8 +43,12 @@ impl Model {
     #[must_use]
     pub const fn url(self) -> &'static str {
         match self {
-            Model::Base => "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
-            Model::Small => "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin",
+            Model::Base => {
+                "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin"
+            }
+            Model::Small => {
+                "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
+            }
         }
     }
 
@@ -90,7 +94,9 @@ impl Model {
 pub fn models_dir() -> PathBuf {
     match std::env::var_os("KUN_MODELS_DIR") {
         Some(v) if !v.is_empty() => PathBuf::from(v),
-        _ => dirs::home_dir().unwrap_or_default().join(".kun/machine/models"),
+        _ => dirs::home_dir()
+            .unwrap_or_default()
+            .join(".kun/machine/models"),
     }
 }
 
@@ -109,10 +115,12 @@ pub fn is_ready(path: &Path, model: Model) -> bool {
 #[must_use]
 pub fn hex(bytes: &[u8]) -> String {
     use std::fmt::Write as _;
-    bytes.iter().fold(String::with_capacity(bytes.len() * 2), |mut s, b| {
-        let _ = write!(s, "{b:02x}");
-        s
-    })
+    bytes
+        .iter()
+        .fold(String::with_capacity(bytes.len() * 2), |mut s, b| {
+            let _ = write!(s, "{b:02x}");
+            s
+        })
 }
 
 /// sha256 of a file, streamed.
@@ -125,7 +133,9 @@ pub fn sha256_file(path: &Path) -> Result<String, VoiceError> {
     let mut hasher = Sha256::new();
     let mut buf = vec![0u8; 1 << 20];
     loop {
-        let n = file.read(&mut buf).map_err(|e| VoiceError::Model(e.to_string()))?;
+        let n = file
+            .read(&mut buf)
+            .map_err(|e| VoiceError::Model(e.to_string()))?;
         if n == 0 {
             break;
         }
@@ -139,7 +149,11 @@ pub fn sha256_file(path: &Path) -> Result<String, VoiceError> {
 #[serde(tag = "kind", rename_all = "lowercase")]
 #[ts(export, export_to = "voice/types.ts")]
 pub enum ModelEvent {
-    Downloading { done_mb: u32, total_mb: u32, percent: u32 },
+    Downloading {
+        done_mb: u32,
+        total_mb: u32,
+        percent: u32,
+    },
     Verifying,
     Ready,
 }
@@ -158,7 +172,10 @@ pub fn percent(done: u64, total: u64) -> u32 {
 /// # Errors
 /// Network failure, wrong size or checksum (the partial file is deleted), disk errors.
 #[cfg(feature = "voice")]
-pub async fn ensure(model: Model, mut on: impl FnMut(ModelEvent) + Send) -> Result<PathBuf, VoiceError> {
+pub async fn ensure(
+    model: Model,
+    mut on: impl FnMut(ModelEvent) + Send,
+) -> Result<PathBuf, VoiceError> {
     use std::time::Duration;
 
     use tokio::io::AsyncWriteExt as _;
@@ -168,16 +185,25 @@ pub async fn ensure(model: Model, mut on: impl FnMut(ModelEvent) + Send) -> Resu
         on(ModelEvent::Ready);
         return Ok(dest);
     }
-    tokio::fs::create_dir_all(models_dir()).await.map_err(|e| VoiceError::Download(e.to_string()))?;
+    tokio::fs::create_dir_all(models_dir())
+        .await
+        .map_err(|e| VoiceError::Download(e.to_string()))?;
     let part = dest.with_extension("bin.part");
     let fail = |e: String| VoiceError::Download(e);
     let client = reqwest::Client::builder()
         .connect_timeout(Duration::from_secs(15))
         .build()
         .map_err(|e| fail(e.to_string()))?;
-    let mut resp = client.get(model.url()).send().await.and_then(reqwest::Response::error_for_status).map_err(|e| fail(e.to_string()))?;
+    let mut resp = client
+        .get(model.url())
+        .send()
+        .await
+        .and_then(reqwest::Response::error_for_status)
+        .map_err(|e| fail(e.to_string()))?;
     let total = resp.content_length().unwrap_or(model.size());
-    let mut file = tokio::fs::File::create(&part).await.map_err(|e| fail(e.to_string()))?;
+    let mut file = tokio::fs::File::create(&part)
+        .await
+        .map_err(|e| fail(e.to_string()))?;
     let mut hasher = Sha256::new();
     let (mut done, mut last_pct) = (0u64, u32::MAX);
     let to_mb = |b: u64| u32::try_from(b / 1_048_576).unwrap_or(u32::MAX);
@@ -189,12 +215,18 @@ pub async fn ensure(model: Model, mut on: impl FnMut(ModelEvent) + Send) -> Resu
                 .map_err(|e| fail(e.to_string()))?;
             let Some(chunk) = chunk else { break };
             hasher.update(&chunk);
-            file.write_all(&chunk).await.map_err(|e| fail(e.to_string()))?;
+            file.write_all(&chunk)
+                .await
+                .map_err(|e| fail(e.to_string()))?;
             done += chunk.len() as u64;
             let pct = percent(done, total);
             if pct != last_pct {
                 last_pct = pct;
-                on(ModelEvent::Downloading { done_mb: to_mb(done), total_mb: to_mb(total), percent: pct });
+                on(ModelEvent::Downloading {
+                    done_mb: to_mb(done),
+                    total_mb: to_mb(total),
+                    percent: pct,
+                });
             }
         }
         file.flush().await.map_err(|e| fail(e.to_string()))
@@ -208,9 +240,13 @@ pub async fn ensure(model: Model, mut on: impl FnMut(ModelEvent) + Send) -> Resu
     on(ModelEvent::Verifying);
     if done != model.size() || hex(&hasher.finalize()) != model.sha256() {
         let _ = tokio::fs::remove_file(&part).await;
-        return Err(VoiceError::Download("checksum mismatch — the file was discarded".into()));
+        return Err(VoiceError::Download(
+            "checksum mismatch — the file was discarded".into(),
+        ));
     }
-    tokio::fs::rename(&part, &dest).await.map_err(|e| fail(e.to_string()))?;
+    tokio::fs::rename(&part, &dest)
+        .await
+        .map_err(|e| fail(e.to_string()))?;
     on(ModelEvent::Ready);
     Ok(dest)
 }

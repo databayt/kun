@@ -1,0 +1,46 @@
+{
+  "name": "rnd",
+  "title": "Research & development",
+  "title_ar": "البحث والتطوير",
+  "description": "Mine patterns, benchmark the engine, sync upstream and convert textbooks.",
+  "description_ar": "استخراج الأنماط، قياس المحرك، المزامنة مع المصادر وتحويل الكتب.",
+  "items": [
+    "skill:learn",
+    "skill:bench",
+    "skill:sync",
+    "skill:textbook",
+    "skill:convert",
+    "agent:analyst"
+  ],
+  "repos": [
+    "kun",
+    "catalog",
+    "codebase"
+  ],
+  "docs": [
+    "textbook",
+    "media",
+    "memory",
+    "configuration",
+    "references"
+  ],
+  "prompt": "prompt.md",
+  "defaultDriver": "claude",
+  "quickActions": [
+    {
+      "label_ar": "ما الجديد؟",
+      "label_en": "What's new?",
+      "prompt": "افحص إصدارات Anthropic والمكدس واقترح ما نعتمده الآن."
+    },
+    {
+      "label_ar": "قِس المحرك",
+      "label_en": "Bench the engine",
+      "prompt": "شغّل قياس توجيه المهارات واذكر الإخفاقات."
+    },
+    {
+      "label_ar": "حوّل ملفاً",
+      "label_en": "Convert a file",
+      "prompt": "حوّل هذا الملف أو الرابط إلى Markdown نظيف."
+    }
+  ]
+}

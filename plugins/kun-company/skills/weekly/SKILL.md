@@ -28,6 +28,15 @@ Steps:
    pointed at paying schools (the Drive). People: Abdout, Mutaz, Ali, Moed, Samia, Sedon, Ibrahim, Huwaida
    (Abobaker on leave since 2026-11-08). Keep hogwarts `content/docs-*/sprint.mdx` (EN + AR) as the live
    sprint page.
+   7.5. **Distribute as tasks (the machine app reads them).** Each allocated task becomes one GitHub issue
+   in the right databayt repo, in the captain skill's "Task shape" section (`.claude/skills/captain/SKILL.md`):
+   title, body (goal, acceptance, context), labels `dept:<d>` + `P<n>` (create missing via `gh label create`),
+   milestone `Sprint <yyyy>-W<ww>` for the week (create if missing, the week's goal as its description), and
+   the kun block with `repos`, `items` (from `departments/<d>/pack.json`) and `after=` for ordering. Never set
+   `holder:` or `status:` labels, and never close one: machines and the CEO own those. List the drafts in the
+   plan; create them only after Abdout's explicit "send", the same gate as step 9. At the Wednesday check and
+   Friday review, read the sprint's issues (open, `status:in-progress`, `status:review`) as the progress truth;
+   the CEO closes the ones in review that pass.
 8. Output concise summary for Slack posting
 9. **The team group gate («المدرسة 2.0», since 2026-11-08 — Abdout's rule: read everything, post nothing
    without his "send").**

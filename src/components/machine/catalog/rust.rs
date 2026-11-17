@@ -165,25 +165,38 @@ impl Env {
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {
-    Sha256::digest(bytes).iter().fold(String::new(), |mut s, b| {
-        let _ = write!(s, "{b:02x}");
-        s
-    })
+    Sha256::digest(bytes)
+        .iter()
+        .fold(String::new(), |mut s, b| {
+            let _ = write!(s, "{b:02x}");
+            s
+        })
 }
 
 /// Item names are ids in IPC and the lockfile: `[a-z0-9-:]`, never empty.
 fn validate_name(name: &str) -> Res<()> {
     let ok = !name.is_empty()
         && name.len() <= 80
-        && name.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-' || c == ':');
-    if ok { Ok(()) } else { Err(CatalogError::InvalidName) }
+        && name
+            .chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-' || c == ':');
+    if ok {
+        Ok(())
+    } else {
+        Err(CatalogError::InvalidName)
+    }
 }
 
 /// A relative path made only of plain components: no `..`, no root, no prefix.
 fn safe_rel(p: &str) -> Res<PathBuf> {
     let path = Path::new(p);
-    let plain = path.components().count() > 0 && path.components().all(|c| matches!(c, Component::Normal(_)));
-    if plain { Ok(path.to_path_buf()) } else { Err(CatalogError::Unsafe(p.to_string())) }
+    let plain = path.components().count() > 0
+        && path.components().all(|c| matches!(c, Component::Normal(_)));
+    if plain {
+        Ok(path.to_path_buf())
+    } else {
+        Err(CatalogError::Unsafe(p.to_string()))
+    }
 }
 
 /// The destination, after resolving symlinks in its existing ancestors, must stay inside `root`.
@@ -209,8 +222,10 @@ fn ensure_within(root: &Path, dest: &Path) -> Res<()> {
 
 fn read_registry(env: &Env) -> Res<Vec<CatalogItem>> {
     let path = env.registry_path();
-    let src = fs::read_to_string(&path).map_err(|_| CatalogError::NoRegistry(path.display().to_string()))?;
-    let reg: Registry = serde_json::from_str(&src).map_err(|e| CatalogError::Io(format!("registry: {e}")))?;
+    let src = fs::read_to_string(&path)
+        .map_err(|_| CatalogError::NoRegistry(path.display().to_string()))?;
+    let reg: Registry =
+        serde_json::from_str(&src).map_err(|e| CatalogError::Io(format!("registry: {e}")))?;
     Ok(reg.items)
 }
 
@@ -223,9 +238,14 @@ fn read_lock(env: &Env) -> Lock {
 
 /// Write `bytes` to `dest` by temp file + rename in the same directory, never in place.
 fn atomic_write(dest: &Path, bytes: &[u8], mode_from: Option<&Path>) -> Res<()> {
-    let dir = dest.parent().ok_or_else(|| CatalogError::Unsafe(dest.display().to_string()))?;
+    let dir = dest
+        .parent()
+        .ok_or_else(|| CatalogError::Unsafe(dest.display().to_string()))?;
     fs::create_dir_all(dir)?;
-    let base = dest.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    let base = dest
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default();
     let tmp = dir.join(format!(".{base}.kun-tmp.{}", std::process::id()));
     let result = (|| -> std::io::Result<()> {
         let mut f = fs::File::create(&tmp)?;
@@ -257,7 +277,11 @@ fn status_of(env: &Env, item: &CatalogItem, lock: &Lock) -> (ItemStatus, Option<
             .and_then(|t| fs::read(env.claude_dir.join(t)).ok())
             .is_some_and(|b| sha256_hex(&b) == f.sha256)
     });
-    let status = if current { ItemStatus::Installed } else { ItemStatus::Outdated };
+    let status = if current {
+        ItemStatus::Installed
+    } else {
+        ItemStatus::Outdated
+    };
     (status, Some(entry.version.clone()))
 }
 
@@ -312,12 +336,20 @@ pub fn list_items_scoped(env: &Env, allowed: Option<&BTreeSet<String>>) -> Res<V
 
 /// `id` and everything it needs, dependencies first.
 fn plan(items: &[CatalogItem], id: &str) -> Res<Vec<String>> {
-    fn visit(items: &[CatalogItem], id: &str, seen: &mut Vec<String>, order: &mut Vec<String>) -> Res<()> {
+    fn visit(
+        items: &[CatalogItem],
+        id: &str,
+        seen: &mut Vec<String>,
+        order: &mut Vec<String>,
+    ) -> Res<()> {
         if seen.iter().any(|s| s == id) {
             return Ok(()); // already planned, or a cycle: either way do not recurse again
         }
         seen.push(id.to_string());
-        let item = items.iter().find(|i| i.id == id).ok_or_else(|| CatalogError::UnknownItem(id.to_string()))?;
+        let item = items
+            .iter()
+            .find(|i| i.id == id)
+            .ok_or_else(|| CatalogError::UnknownItem(id.to_string()))?;
         for dep in &item.dependencies {
             visit(items, dep, seen, order)?;
         }
@@ -331,7 +363,9 @@ fn plan(items: &[CatalogItem], id: &str) -> Res<Vec<String>> {
 
 /// Is `target` still claimed by an installed item other than `except`?
 fn owned_elsewhere(lock: &Lock, except: &str, target: &str) -> bool {
-    lock.items.iter().any(|(id, e)| id != except && e.files.iter().any(|f| f == target))
+    lock.items
+        .iter()
+        .any(|(id, e)| id != except && e.files.iter().any(|f| f == target))
 }
 
 fn install_one(env: &Env, item: &CatalogItem, lock: &mut Lock) -> Res<()> {
@@ -361,7 +395,11 @@ fn install_one(env: &Env, item: &CatalogItem, lock: &mut Lock) -> Res<()> {
     }
     lock.items.insert(
         item.id.clone(),
-        Installed { version: item.version.clone(), files: new_targets, dependencies: item.dependencies.clone() },
+        Installed {
+            version: item.version.clone(),
+            files: new_targets,
+            dependencies: item.dependencies.clone(),
+        },
     );
     write_lock(env, lock)
 }
@@ -395,7 +433,11 @@ pub fn install_item(env: &Env, name: &str) -> Res<Vec<String>> {
 ///
 /// # Errors
 /// As [`install_item`], plus [`CatalogError::OutsideProfile`].
-pub fn install_item_scoped(env: &Env, name: &str, allowed: Option<&BTreeSet<String>>) -> Res<Vec<String>> {
+pub fn install_item_scoped(
+    env: &Env,
+    name: &str,
+    allowed: Option<&BTreeSet<String>>,
+) -> Res<Vec<String>> {
     validate_name(name)?;
     if allowed.is_some_and(|a| !a.contains(name)) {
         return Err(CatalogError::OutsideProfile(name.to_string()));
@@ -409,7 +451,10 @@ pub fn install_item_scoped(env: &Env, name: &str, allowed: Option<&BTreeSet<Stri
         if allowed.is_some_and(|a| !a.contains(&id)) {
             continue;
         }
-        let item = items.iter().find(|i| i.id == id).ok_or_else(|| CatalogError::UnknownItem(id.clone()))?;
+        let item = items
+            .iter()
+            .find(|i| i.id == id)
+            .ok_or_else(|| CatalogError::UnknownItem(id.clone()))?;
         // The asked-for item is always (re)written; dependencies only when not current.
         if id != name && item.status == ItemStatus::Installed {
             continue;
@@ -438,8 +483,16 @@ pub fn uninstall_item_scoped(env: &Env, name: &str, allowed: Option<&BTreeSet<St
         return Err(CatalogError::OutsideProfile(name.to_string()));
     }
     let mut lock = read_lock(env);
-    let entry = lock.items.get(name).cloned().ok_or_else(|| CatalogError::UnknownItem(name.to_string()))?;
-    if let Some((other, _)) = lock.items.iter().find(|(id, e)| id.as_str() != name && e.dependencies.iter().any(|d| d == name)) {
+    let entry = lock
+        .items
+        .get(name)
+        .cloned()
+        .ok_or_else(|| CatalogError::UnknownItem(name.to_string()))?;
+    if let Some((other, _)) = lock
+        .items
+        .iter()
+        .find(|(id, e)| id.as_str() != name && e.dependencies.iter().any(|d| d == name))
+    {
         return Err(CatalogError::InUse(name.to_string(), other.clone()));
     }
     lock.items.remove(name);
@@ -456,7 +509,9 @@ static WRITE: Mutex<()> = Mutex::new(());
 
 async fn blocking<T: Send + 'static>(f: impl FnOnce(&Env) -> Res<T> + Send + 'static) -> Res<T> {
     tokio::task::spawn_blocking(move || {
-        let _guard = WRITE.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _guard = WRITE
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         f(&Env::from_process())
     })
     .await
@@ -490,7 +545,9 @@ async fn uninstall(name: String) -> Res<()> {
 
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("catalog").invoke_handler(tauri::generate_handler![list, install, uninstall]).build()
+    Builder::new("catalog")
+        .invoke_handler(tauri::generate_handler![list, install, uninstall])
+        .build()
 }
 
 #[cfg(test)]

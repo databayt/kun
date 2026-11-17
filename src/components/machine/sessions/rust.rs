@@ -67,16 +67,24 @@ static LOCK: Mutex<()> = Mutex::new(());
 fn machine_dir() -> Result<PathBuf, SessionsError> {
     match std::env::var_os("KUN_HOME") {
         Some(p) if !p.is_empty() => Ok(PathBuf::from(p).join("machine")),
-        _ => dirs::home_dir().map(|h| h.join(".kun/machine")).ok_or(SessionsError::NoHome),
+        _ => dirs::home_dir()
+            .map(|h| h.join(".kun/machine"))
+            .ok_or(SessionsError::NoHome),
     }
 }
 
 fn valid_id(id: &str) -> bool {
-    !id.is_empty() && id.len() <= 128 && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    !id.is_empty()
+        && id.len() <= 128
+        && id
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
 }
 
 fn now() -> u64 {
-    SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_secs())
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs())
 }
 
 fn read(dir: &Path) -> Result<Vec<Session>, SessionsError> {
@@ -91,7 +99,8 @@ fn read(dir: &Path) -> Result<Vec<Session>, SessionsError> {
 
 fn write(dir: &Path, sessions: Vec<Session>) -> Result<(), SessionsError> {
     fs::create_dir_all(dir)?;
-    let json = serde_json::to_string_pretty(&File { sessions }).map_err(|e| SessionsError::Corrupt(e.to_string()))?;
+    let json = serde_json::to_string_pretty(&File { sessions })
+        .map_err(|e| SessionsError::Corrupt(e.to_string()))?;
     let tmp = dir.join("sessions.json.tmp");
     fs::write(&tmp, json)?;
     fs::rename(&tmp, dir.join("sessions.json"))?;
@@ -99,7 +108,9 @@ fn write(dir: &Path, sessions: Vec<Session>) -> Result<(), SessionsError> {
 }
 
 fn locked<T>(f: impl FnOnce() -> Result<T, SessionsError>) -> Result<T, SessionsError> {
-    let _guard = LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    let _guard = LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     f()
 }
 
@@ -116,14 +127,23 @@ pub fn list_in(dir: &Path) -> Result<Vec<Session>, SessionsError> {
 /// # Errors
 /// When the id is unknown or the file cannot be read.
 pub fn get_in(dir: &Path, id: &str) -> Result<Session, SessionsError> {
-    list_in(dir)?.into_iter().find(|s| s.id == id).ok_or(SessionsError::NotFound)
+    list_in(dir)?
+        .into_iter()
+        .find(|s| s.id == id)
+        .ok_or(SessionsError::NotFound)
 }
 
 /// Adds the session, or bumps `updated_at` on one that exists (its title is kept).
 ///
 /// # Errors
 /// On a bad id or title, or a file failure.
-pub fn upsert_in(dir: &Path, id: &str, title: &str, department: &str, driver: DriverKind) -> Result<Session, SessionsError> {
+pub fn upsert_in(
+    dir: &Path,
+    id: &str,
+    title: &str,
+    department: &str,
+    driver: DriverKind,
+) -> Result<Session, SessionsError> {
     if !valid_id(id) {
         return Err(SessionsError::BadId);
     }
@@ -135,7 +155,14 @@ pub fn upsert_in(dir: &Path, id: &str, title: &str, department: &str, driver: Dr
             s.updated_at = at;
             s.clone()
         } else {
-            let s = Session { id: id.into(), title, department: department.into(), driver, created_at: at, updated_at: at };
+            let s = Session {
+                id: id.into(),
+                title,
+                department: department.into(),
+                driver,
+                created_at: at,
+                updated_at: at,
+            };
             all.push(s.clone());
             s
         };
@@ -150,7 +177,10 @@ pub fn rename_in(dir: &Path, id: &str, title: &str) -> Result<Session, SessionsE
     let title = clean_title(title)?;
     locked(|| {
         let mut all = read(dir)?;
-        let s = all.iter_mut().find(|s| s.id == id).ok_or(SessionsError::NotFound)?;
+        let s = all
+            .iter_mut()
+            .find(|s| s.id == id)
+            .ok_or(SessionsError::NotFound)?;
         s.title = title;
         let out = s.clone();
         write(dir, all)?;
@@ -178,14 +208,23 @@ fn clean_title(title: &str) -> Result<String, SessionsError> {
     if n == 0 || t.chars().any(char::is_control) {
         return Err(SessionsError::BadTitle);
     }
-    Ok(if n > 120 { t.chars().take(120).collect() } else { t })
+    Ok(if n > 120 {
+        t.chars().take(120).collect()
+    } else {
+        t
+    })
 }
 
 /// Called by chat when a run reports its session id.
 ///
 /// # Errors
 /// See [`upsert_in`].
-pub fn touch(id: &str, title: &str, department: &str, driver: DriverKind) -> Result<Session, SessionsError> {
+pub fn touch(
+    id: &str,
+    title: &str,
+    department: &str,
+    driver: DriverKind,
+) -> Result<Session, SessionsError> {
     upsert_in(&machine_dir()?, id, title, department, driver)
 }
 
@@ -218,7 +257,9 @@ fn remove(id: String) -> Result<(), SessionsError> {
 
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("sessions").invoke_handler(tauri::generate_handler![list, get, rename, remove]).build()
+    Builder::new("sessions")
+        .invoke_handler(tauri::generate_handler![list, get, rename, remove])
+        .build()
 }
 
 #[cfg(test)]

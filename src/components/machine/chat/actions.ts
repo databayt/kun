@@ -8,18 +8,20 @@ export interface AskOptions {
   jobId: string
   session?: string | null
   driver?: DriverKind
+  /** A started task (`databayt/<repo>#<n>`): its repos open with the run and the prompt points at TASK.md. */
+  taskId?: string | null
 }
 
 /** Runs one prompt, calling `onEvent` for every streamed event. Resolves when the run ends. */
 export async function ask(
   prompt: string,
-  { jobId, session = null, driver }: AskOptions,
+  { jobId, session = null, driver, taskId = null }: AskOptions,
   onEvent: (event: Event) => void
 ): Promise<void> {
   if (!isTauri()) throw new Error("not in the machine app")
   const channel = new Channel<Event>()
   channel.onmessage = onEvent
-  await invoke("plugin:chat|ask", { prompt, session, driver: driver ?? null, jobId, channel })
+  await invoke("plugin:chat|ask", { prompt, session, driver: driver ?? null, jobId, taskId, channel })
 }
 
 /** Cancels a running job. False when it was not running. */

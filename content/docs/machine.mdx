@@ -64,6 +64,21 @@ Profile: `machines/moed.json` — departments **sales**, **marketing**, **video*
 - Publish anything on a brand page without a human approval.
 - Run the engine's hooks or its Mac-only scripts.
 
+## Tasks and the gate
+
+Work reaches the app as GitHub issues. The captain and weekly skills draft them; nothing is created until Abdout says "send". Each task carries a `dept:<department>` label, the sprint as its milestone (`Sprint <yyyy>-W<ww>`), a `P0` to `P3` priority and a hidden kun block naming the repos and catalog items it needs and the tasks it waits for (`after`).
+
+What a person sees in their department:
+
+- **The queue**, ordered by sprint, then priority, then what it waits for, then age.
+- **Readiness** on the top task: the repos it needs are local and fresh, its catalog items are installed, your profile allows them, every task it waits for is closed, and nobody else holds it. Anything missing is listed with a one-tap fix (clone the repo, install the items).
+- **Start**, once ready. It claims the task (it shows as in progress, with a comment saying which machine) and opens a chat seeded with the issue, its kun block and the repos.
+- **One task at a time.** Start is refused while you hold another in-progress task, unless the CEO has granted `wip:2`. Release hands a task back.
+- **Done** moves it to review with a summary comment. It is not finished yet.
+- **The CEO closes it.** Only a closed issue counts as done, so nothing is skipped silently, and tasks waiting on it become ready.
+
+Holder and status labels are managed by the machines, never set by hand.
+
 ## Troubleshooting
 
 | Symptom | Fix |

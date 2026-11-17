@@ -78,11 +78,23 @@ pub struct Job {
 #[serde(tag = "kind", rename_all = "lowercase")]
 #[ts(export, export_to = "driver/types.ts")]
 pub enum Event {
-    Started { session: String },
-    Text { text: String },
-    Tool { name: String },
-    Done { session: Option<String>, ok: bool, result: Option<String> },
-    Error { message: String },
+    Started {
+        session: String,
+    },
+    Text {
+        text: String,
+    },
+    Tool {
+        name: String,
+    },
+    Done {
+        session: Option<String>,
+        ok: bool,
+        result: Option<String>,
+    },
+    Error {
+        message: String,
+    },
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -109,14 +121,27 @@ const MAX_EXTRA_ARGS: usize = 32;
 /// The only flags a caller may add, each with one value.
 const EXTRA_FLAGS: [&str; 2] = ["--add-dir", "--settings"];
 /// Environment names a run may never override.
-const PROTECTED_ENV: [&str; 6] = ["PATH", "HOME", "USERPROFILE", "SHELL", "NODE_OPTIONS", "CLAUDE_CONFIG_DIR"];
+const PROTECTED_ENV: [&str; 6] = [
+    "PATH",
+    "HOME",
+    "USERPROFILE",
+    "SHELL",
+    "NODE_OPTIONS",
+    "CLAUDE_CONFIG_DIR",
+];
 
 /// Apps launched from the Finder or Start menu get a minimal PATH, so look where
 /// the CLIs' own installers put them before falling back to PATH.
 fn search_dirs() -> Vec<PathBuf> {
     let mut dirs: Vec<PathBuf> = Vec::new();
     if let Some(home) = dirs::home_dir() {
-        for sub in [".local/bin", ".opencode/bin", ".npm-global/bin", ".bun/bin", ".cargo/bin"] {
+        for sub in [
+            ".local/bin",
+            ".opencode/bin",
+            ".npm-global/bin",
+            ".bun/bin",
+            ".cargo/bin",
+        ] {
             dirs.push(home.join(sub));
         }
     }
@@ -136,7 +161,11 @@ fn search_dirs() -> Vec<PathBuf> {
 
 /// Where the Windows installers put the CLIs: `%LOCALAPPDATA%\Programs\claude`,
 /// `%USERPROFILE%\.local\bin` and the npm global `%APPDATA%\npm`.
-fn windows_dirs(local_app_data: Option<PathBuf>, user_profile: Option<PathBuf>, app_data: Option<PathBuf>) -> Vec<PathBuf> {
+fn windows_dirs(
+    local_app_data: Option<PathBuf>,
+    user_profile: Option<PathBuf>,
+    app_data: Option<PathBuf>,
+) -> Vec<PathBuf> {
     let mut dirs = Vec::new();
     if let Some(p) = local_app_data {
         dirs.push(p.join("Programs").join("claude"));
@@ -151,7 +180,11 @@ fn windows_dirs(local_app_data: Option<PathBuf>, user_profile: Option<PathBuf>, 
 }
 
 fn find_binary(name: &str, dirs: &[PathBuf]) -> Option<PathBuf> {
-    let candidates: &[&str] = if cfg!(windows) { &["", ".exe", ".cmd"] } else { &[""] };
+    let candidates: &[&str] = if cfg!(windows) {
+        &["", ".exe", ".cmd"]
+    } else {
+        &[""]
+    };
     dirs.iter().find_map(|dir| {
         candidates
             .iter()
@@ -168,7 +201,11 @@ pub fn detect() -> Vec<DriverStatus> {
         .into_iter()
         .map(|kind| {
             let path = find_binary(kind.binary(), &dirs);
-            DriverStatus { kind, installed: path.is_some(), path: path.map(|p| p.display().to_string()) }
+            DriverStatus {
+                kind,
+                installed: path.is_some(),
+                path: path.map(|p| p.display().to_string()),
+            }
         })
         .collect()
 }
@@ -181,11 +218,17 @@ fn validate_extras(job: &Job) -> Result<(), DriverError> {
         if job.driver != DriverKind::Claude {
             return Err(DriverError::Invalid("extra args are claude-only"));
         }
-        if job.extra_args.len() > MAX_EXTRA_ARGS || !job.extra_args.len().is_multiple_of(2) || !job.extra_args.iter().all(tame) {
+        if job.extra_args.len() > MAX_EXTRA_ARGS
+            || !job.extra_args.len().is_multiple_of(2)
+            || !job.extra_args.iter().all(tame)
+        {
             return Err(DriverError::Invalid("extra args"));
         }
         for pair in job.extra_args.chunks_exact(2) {
-            if !EXTRA_FLAGS.contains(&pair[0].as_str()) || pair[1].is_empty() || pair[1].starts_with('-') {
+            if !EXTRA_FLAGS.contains(&pair[0].as_str())
+                || pair[1].is_empty()
+                || pair[1].starts_with('-')
+            {
                 return Err(DriverError::Invalid("extra args"));
             }
         }
@@ -193,7 +236,9 @@ fn validate_extras(job: &Job) -> Result<(), DriverError> {
     for (name, value) in &job.env {
         let name_ok = !name.is_empty()
             && name.len() <= 64
-            && name.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
+            && name
+                .chars()
+                .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
             && !PROTECTED_ENV.contains(&name.as_str())
             && !name.starts_with("LD_")
             && !name.starts_with("DYLD_");
@@ -216,17 +261,26 @@ pub fn args_for(job: &Job) -> Result<Vec<String>, DriverError> {
         return Err(DriverError::Invalid("prompt too large"));
     }
     if let Some(s) = &job.session
-        && !s.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+        && !s
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
     {
         return Err(DriverError::Invalid("session id"));
     }
     validate_extras(job)?;
     let mut args: Vec<String> = match job.driver {
         DriverKind::Claude => {
-            let mut a: Vec<String> = ["-p", "--output-format", "stream-json", "--verbose", "--permission-mode", "auto"]
-                .into_iter()
-                .map(String::from)
-                .collect();
+            let mut a: Vec<String> = [
+                "-p",
+                "--output-format",
+                "stream-json",
+                "--verbose",
+                "--permission-mode",
+                "auto",
+            ]
+            .into_iter()
+            .map(String::from)
+            .collect();
             a.extend(job.extra_args.iter().cloned());
             if job.session.is_some() {
                 a.push("--resume".into());
@@ -235,7 +289,9 @@ pub fn args_for(job: &Job) -> Result<Vec<String>, DriverError> {
         }
         // Codex: workspace-write sandbox; docs discourage unattended ChatGPT-plan runs,
         // so machine only ever starts codex from the owner's own click.
-        DriverKind::Codex => ["exec", "--json", "--sandbox", "workspace-write"].map(String::from).to_vec(),
+        DriverKind::Codex => ["exec", "--json", "--sandbox", "workspace-write"]
+            .map(String::from)
+            .to_vec(),
         DriverKind::Opencode => {
             let mut a = vec!["run".to_string(), "--format".into(), "json".into()];
             if job.session.is_some() {
@@ -259,13 +315,16 @@ pub fn args_for(job: &Job) -> Result<Vec<String>, DriverError> {
 /// Turns one line of a driver's JSON stream into zero or more events.
 #[must_use]
 pub fn parse_line(kind: DriverKind, line: &str) -> Vec<Event> {
-    let Ok(v) = serde_json::from_str::<Value>(line) else { return Vec::new() };
+    let Ok(v) = serde_json::from_str::<Value>(line) else {
+        return Vec::new();
+    };
     let s = |v: &Value| v.as_str().map(str::to_owned);
     match kind {
         DriverKind::Claude => match v["type"].as_str() {
-            Some("system") if v["subtype"] == "init" => {
-                s(&v["session_id"]).map(|session| Event::Started { session }).into_iter().collect()
-            }
+            Some("system") if v["subtype"] == "init" => s(&v["session_id"])
+                .map(|session| Event::Started { session })
+                .into_iter()
+                .collect(),
             Some("assistant") => v["message"]["content"]
                 .as_array()
                 .into_iter()
@@ -284,24 +343,49 @@ pub fn parse_line(kind: DriverKind, line: &str) -> Vec<Event> {
             _ => Vec::new(),
         },
         DriverKind::Codex => match v["type"].as_str() {
-            Some("thread.started") => s(&v["thread_id"]).map(|session| Event::Started { session }).into_iter().collect(),
+            Some("thread.started") => s(&v["thread_id"])
+                .map(|session| Event::Started { session })
+                .into_iter()
+                .collect(),
             Some("item.completed") => match v["item"]["type"].as_str() {
-                Some("agent_message") => s(&v["item"]["text"]).map(|text| Event::Text { text }).into_iter().collect(),
-                Some("command_execution") => vec![Event::Tool { name: "shell".into() }],
-                Some(other) => vec![Event::Tool { name: other.to_owned() }],
+                Some("agent_message") => s(&v["item"]["text"])
+                    .map(|text| Event::Text { text })
+                    .into_iter()
+                    .collect(),
+                Some("command_execution") => vec![Event::Tool {
+                    name: "shell".into(),
+                }],
+                Some(other) => vec![Event::Tool {
+                    name: other.to_owned(),
+                }],
                 None => Vec::new(),
             },
-            Some("turn.completed") => vec![Event::Done { session: None, ok: true, result: None }],
-            Some("error") => s(&v["message"]).map(|message| Event::Error { message }).into_iter().collect(),
+            Some("turn.completed") => vec![Event::Done {
+                session: None,
+                ok: true,
+                result: None,
+            }],
+            Some("error") => s(&v["message"])
+                .map(|message| Event::Error { message })
+                .into_iter()
+                .collect(),
             _ => Vec::new(),
         },
         DriverKind::Opencode => match v["type"].as_str() {
             Some("error") => {
-                let message = s(&v["error"]["data"]["message"]).or_else(|| s(&v["error"]["name"])).unwrap_or_default();
+                let message = s(&v["error"]["data"]["message"])
+                    .or_else(|| s(&v["error"]["name"]))
+                    .unwrap_or_default();
                 vec![Event::Error { message }]
             }
-            Some("text") => s(&v["part"]["text"]).map(|text| Event::Text { text }).into_iter().collect(),
-            Some("tool_use") => s(&v["part"]["tool"]).map(|name| Event::Tool { name }).into_iter().collect(),
+            Some("text") => s(&v["part"]["text"])
+                .map(|text| Event::Text { text })
+                .into_iter()
+                .collect(),
+            Some("tool_use") => s(&v["part"]["tool"])
+                .map(|name| Event::Tool { name })
+                .into_iter()
+                .collect(),
             _ => Vec::new(),
         },
     }
@@ -312,7 +396,8 @@ pub fn parse_line(kind: DriverKind, line: &str) -> Vec<Event> {
 /// # Errors
 /// When the driver is missing, the job is invalid, the process cannot start, or it times out.
 pub async fn run(job: &Job, mut emit: impl FnMut(Event) + Send) -> Result<(), DriverError> {
-    let bin = find_binary(job.driver.binary(), &search_dirs()).ok_or(DriverError::NotInstalled(job.driver.binary()))?;
+    let bin = find_binary(job.driver.binary(), &search_dirs())
+        .ok_or(DriverError::NotInstalled(job.driver.binary()))?;
     let args = args_for(job)?;
     if !Path::new(&job.cwd).is_dir() {
         return Err(DriverError::Invalid("cwd is not a folder"));
@@ -328,7 +413,10 @@ pub async fn run(job: &Job, mut emit: impl FnMut(Event) + Send) -> Result<(), Dr
         .spawn()
         .map_err(|e| DriverError::Spawn(job.driver.binary(), e))?;
 
-    let stdout = child.stdout.take().ok_or(DriverError::Invalid("no stdout"))?;
+    let stdout = child
+        .stdout
+        .take()
+        .ok_or(DriverError::Invalid("no stdout"))?;
     let mut lines = BufReader::new(stdout).lines();
     let secs = job.timeout_secs.unwrap_or(DEFAULT_TIMEOUT_SECS);
     let mut finished = false;
@@ -342,7 +430,11 @@ pub async fn run(job: &Job, mut emit: impl FnMut(Event) + Send) -> Result<(), Dr
         let status = child.wait().await;
         if !finished {
             let ok = status.is_ok_and(|s| s.success());
-            emit(Event::Done { session: None, ok, result: None });
+            emit(Event::Done {
+                session: None,
+                ok,
+                result: None,
+            });
         }
     };
     tokio::time::timeout(Duration::from_secs(u64::from(secs)), read)
@@ -358,7 +450,9 @@ fn drivers() -> Vec<DriverStatus> {
 
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("driver").invoke_handler(tauri::generate_handler![drivers]).build()
+    Builder::new("driver")
+        .invoke_handler(tauri::generate_handler![drivers])
+        .build()
 }
 
 #[cfg(test)]

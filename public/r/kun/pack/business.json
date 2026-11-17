@@ -1,0 +1,33 @@
+{
+  "id": "pack:business",
+  "name": "business",
+  "type": "kun:pack",
+  "title": "Business",
+  "description": "Set the week, decide with the canon, price and propose — the CEO-desk department.",
+  "title_ar": "الأعمال",
+  "description_ar": "تحديد أولويات الأسبوع، القرار بالكتب المرجعية، التسعير والعروض — قسم مكتب الإدارة.",
+  "keywords": [],
+  "dependencies": [
+    "skill:captain",
+    "skill:pricing",
+    "skill:proposal",
+    "skill:canon",
+    "skill:decide",
+    "skill:weekly",
+    "agent:revenue",
+    "agent:analyst"
+  ],
+  "files": [
+    {
+      "path": "departments/business/pack.json",
+      "target": "departments/business/pack.json",
+      "sha256": "85d7f7428ab27910ab1aa88e2f7cfaaa0461dfe1138f981de4d2c4aae38a43a7"
+    },
+    {
+      "path": "departments/business/prompt.md",
+      "target": "departments/business/prompt.md",
+      "sha256": "68c79a429623b9eb907faafd8266c627549bbfaff0ccb14c96916b82a5d021ed"
+    }
+  ],
+  "version": "bede05c56aa96271b991610c79f703099ba10edd65a99087700f7518cd5ee1c7"
+}

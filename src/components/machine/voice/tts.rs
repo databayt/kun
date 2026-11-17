@@ -24,7 +24,10 @@ pub fn parse_say_voices(list: &str) -> Vec<SayVoice> {
             let left = line.split_once(" # ").map_or(line, |(l, _)| l).trim_end();
             let (name, locale) = left.rsplit_once(char::is_whitespace)?;
             let (name, locale) = (name.trim(), locale.trim());
-            (!name.is_empty() && locale.contains('_')).then(|| SayVoice { name: name.into(), locale: locale.into() })
+            (!name.is_empty() && locale.contains('_')).then(|| SayVoice {
+                name: name.into(),
+                locale: locale.into(),
+            })
         })
         .collect()
 }
@@ -35,7 +38,11 @@ pub fn parse_say_voices(list: &str) -> Vec<SayVoice> {
 pub fn pick_say_voice(voices: &[SayVoice], lang: &str) -> Option<String> {
     let prefix = format!("{lang}_");
     let ok = |v: &&SayVoice| v.locale.to_lowercase().starts_with(&prefix);
-    let preferred: &[&str] = if lang == "ar" { &["Majed", "Laila", "Tarik"] } else { &["Samantha", "Alex", "Daniel"] };
+    let preferred: &[&str] = if lang == "ar" {
+        &["Majed", "Laila", "Tarik"]
+    } else {
+        &["Samantha", "Alex", "Daniel"]
+    };
     preferred
         .iter()
         .find_map(|p| voices.iter().filter(ok).find(|v| v.name == *p))
@@ -64,8 +71,17 @@ pub fn clean_for_speech(text: &str) -> String {
         .filter(|w| !(w.starts_with("http://") || w.starts_with("https://")))
         .collect::<Vec<_>>()
         .join(" ");
-    let plain: String = no_links.chars().filter(|c| !matches!(c, '`' | '*' | '#' | '_' | '>' | '|')).collect();
-    plain.split_whitespace().collect::<Vec<_>>().join(" ").chars().take(MAX_CHARS).collect()
+    let plain: String = no_links
+        .chars()
+        .filter(|c| !matches!(c, '`' | '*' | '#' | '_' | '>' | '|'))
+        .collect();
+    plain
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .chars()
+        .take(MAX_CHARS)
+        .collect()
 }
 
 /// Whether this OS has a speech command, and the Arabic voice it would use (macOS only).
@@ -78,7 +94,12 @@ pub async fn availability() -> (bool, Option<String>) {
 }
 
 async fn list_voices() -> Vec<SayVoice> {
-    match Command::new("/usr/bin/say").args(["-v", "?"]).stdin(Stdio::null()).output().await {
+    match Command::new("/usr/bin/say")
+        .args(["-v", "?"])
+        .stdin(Stdio::null())
+        .output()
+        .await
+    {
         Ok(o) => parse_say_voices(&String::from_utf8_lossy(&o.stdout)),
         Err(_) => Vec::new(),
     }
@@ -118,20 +139,29 @@ pub async fn speak(text: &str, lang: &str) -> Result<(), VoiceError> {
         stdin_text = Some(said);
     } else if cfg!(windows) {
         cmd = Command::new("powershell");
-        cmd.args(["-NoProfile", "-NonInteractive", "-Command", WIN_SCRIPT]).env("KUN_SAY", said).env("KUN_LANG", lang);
+        cmd.args(["-NoProfile", "-NonInteractive", "-Command", WIN_SCRIPT])
+            .env("KUN_SAY", said)
+            .env("KUN_LANG", lang);
     } else if let Some(bin) = which_espeak() {
         cmd = Command::new(bin);
         cmd.args(["-v", lang, "--"]).arg(said);
     } else {
         return Err(VoiceError::Speak("no speech engine on this system".into()));
     }
-    cmd.stdin(if stdin_text.is_some() { Stdio::piped() } else { Stdio::null() })
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .kill_on_drop(true);
+    cmd.stdin(if stdin_text.is_some() {
+        Stdio::piped()
+    } else {
+        Stdio::null()
+    })
+    .stdout(Stdio::null())
+    .stderr(Stdio::null())
+    .kill_on_drop(true);
     let mut child = cmd.spawn().map_err(|e| VoiceError::Speak(e.to_string()))?;
     if let (Some(text), Some(mut stdin)) = (stdin_text, child.stdin.take()) {
-        stdin.write_all(text.as_bytes()).await.map_err(|e| VoiceError::Speak(e.to_string()))?;
+        stdin
+            .write_all(text.as_bytes())
+            .await
+            .map_err(|e| VoiceError::Speak(e.to_string()))?;
         drop(stdin);
     }
     tokio::select! {

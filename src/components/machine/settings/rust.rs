@@ -28,7 +28,12 @@ pub struct Settings {
 
 impl Default for Settings {
     fn default() -> Self {
-        Self { person: String::new(), department: "sales".into(), driver: DriverKind::Claude, login: String::new() }
+        Self {
+            person: String::new(),
+            department: "sales".into(),
+            driver: DriverKind::Claude,
+            login: String::new(),
+        }
     }
 }
 
@@ -78,7 +83,9 @@ impl Settings {
 fn machine_dir() -> Result<PathBuf, SettingsError> {
     match std::env::var_os("KUN_HOME") {
         Some(p) if !p.is_empty() => Ok(PathBuf::from(p).join("machine")),
-        _ => dirs::home_dir().map(|h| h.join(".kun/machine")).ok_or(SettingsError::NoHome),
+        _ => dirs::home_dir()
+            .map(|h| h.join(".kun/machine"))
+            .ok_or(SettingsError::NoHome),
     }
 }
 
@@ -101,7 +108,8 @@ pub fn load_in(dir: &Path) -> Result<Settings, SettingsError> {
 pub fn save_in(dir: &Path, settings: Settings) -> Result<Settings, SettingsError> {
     let settings = settings.validated()?;
     fs::create_dir_all(dir)?;
-    let json = serde_json::to_string_pretty(&settings).map_err(|e| SettingsError::Corrupt(e.to_string()))?;
+    let json = serde_json::to_string_pretty(&settings)
+        .map_err(|e| SettingsError::Corrupt(e.to_string()))?;
     let tmp = dir.join("settings.json.tmp");
     fs::write(&tmp, json)?;
     fs::rename(&tmp, dir.join("settings.json"))?;
@@ -136,7 +144,9 @@ fn detect() -> Vec<DriverStatus> {
 
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("settings").invoke_handler(tauri::generate_handler![load_settings, save, detect]).build()
+    Builder::new("settings")
+        .invoke_handler(tauri::generate_handler![load_settings, save, detect])
+        .build()
 }
 
 #[cfg(test)]

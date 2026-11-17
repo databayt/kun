@@ -25,7 +25,11 @@ pub fn decode_pcm(bytes: &[u8]) -> Result<Vec<f32>, VoiceError> {
         .chunks_exact(4)
         .map(|c| {
             let v = f32::from_le_bytes([c[0], c[1], c[2], c[3]]);
-            if v.is_finite() { v.clamp(-1.0, 1.0) } else { 0.0 }
+            if v.is_finite() {
+                v.clamp(-1.0, 1.0)
+            } else {
+                0.0
+            }
         })
         .collect())
 }
@@ -35,7 +39,11 @@ pub fn decode_pcm(bytes: &[u8]) -> Result<Vec<f32>, VoiceError> {
 ///
 /// # Errors
 /// If the source rate is outside 8–96 kHz.
-#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#[allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 pub fn resample_to_16k(samples: &[f32], from_hz: u32) -> Result<Vec<f32>, VoiceError> {
     if !(8_000..=96_000).contains(&from_hz) {
         return Err(VoiceError::Invalid("sample rate"));
@@ -50,9 +58,16 @@ pub fn resample_to_16k(samples: &[f32], from_hz: u32) -> Result<Vec<f32>, VoiceE
         let start = i as f64 * ratio;
         let end = start + ratio;
         if ratio > 1.0 {
-            let (a, b) = (start.floor() as usize, (end.ceil() as usize).min(samples.len()));
+            let (a, b) = (
+                start.floor() as usize,
+                (end.ceil() as usize).min(samples.len()),
+            );
             let slice = &samples[a.min(b)..b];
-            out.push(if slice.is_empty() { 0.0 } else { slice.iter().sum::<f32>() / slice.len() as f32 });
+            out.push(if slice.is_empty() {
+                0.0
+            } else {
+                slice.iter().sum::<f32>() / slice.len() as f32
+            });
         } else {
             let a = start.floor() as usize;
             let frac = (start - start.floor()) as f32;
@@ -76,7 +91,11 @@ pub fn rms(samples: &[f32]) -> f32 {
 
 /// Zero-pads a short clip up to just over a second, as whisper.cpp requires.
 #[must_use]
-#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#[allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 pub fn pad_for_whisper(mut samples: Vec<f32>) -> Vec<f32> {
     let min = (PAD_SECS * WHISPER_HZ as f32) as usize;
     if samples.len() < min {
