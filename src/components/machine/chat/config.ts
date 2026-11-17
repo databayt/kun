@@ -6,7 +6,8 @@ export interface Copy {
 
 export const copy = {
   name: { en: "Kun", ar: "كن" },
-  placeholder: { en: "Ask anything", ar: "اسأل أي شيء" },
+  placeholder: { en: "Ask Kun", ar: "اسأل كن" },
+  speak: { en: "Speak", ar: "تحدّث" },
   quick: { en: "Quick actions", ar: "إجراءات سريعة" },
   send: { en: "Send", ar: "إرسال" },
   stop: { en: "Stop", ar: "إيقاف" },

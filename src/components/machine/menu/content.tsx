@@ -69,7 +69,7 @@ export function MachineMenu({ lang }: { lang: Locale }) {
         onClick={open}
         aria-label={t(copy.open)}
         aria-haspopup="dialog"
-        className="fixed start-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 inline-flex size-11 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur transition-colors hover:bg-muted"
+        className="fixed start-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 inline-flex size-11 items-center justify-center rounded-full text-foreground transition-colors hover:bg-foreground/5"
       >
         {/* Two-line menu mark, as in space. */}
         <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="size-6">
