@@ -27,7 +27,9 @@ fn builds_folder_with_context_and_skill_links() {
 
     let claude = fs::read_to_string(dir.join("CLAUDE.md")).unwrap();
     assert!(claude.starts_with("You are Sales.\n"));
-    assert!(claude.contains(&format!("@{}/CLAUDE.md", kun.path().display())));
+    // Written with forward slashes on every OS, so the @import reads the same on Windows.
+    let import = format!("@{}", kun.path().join("CLAUDE.md").display()).replace('\\', "/");
+    assert!(claude.contains(&import));
     assert!(fs::read_to_string(dir.join("AGENTS.md")).unwrap().contains("Company rules: read"));
 
     let skills = dir.join(".claude/skills");

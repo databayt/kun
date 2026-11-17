@@ -56,12 +56,12 @@ async fn sync_one(base: &str, root: &Path, name: &str, emit: &mut impl FnMut(Syn
         state: if pulling { SyncState::Pulling } else { SyncState::Cloning },
         message: None,
     });
-    let mut cmd = Command::new("git");
-    cmd.args(&args).env("GIT_TERMINAL_PROMPT", "0").kill_on_drop(true);
+    let mut git = Command::new("git");
+    git.args(&args).env("GIT_TERMINAL_PROMPT", "0").kill_on_drop(true);
     if let Some(dir) = cwd {
-        cmd.current_dir(dir);
+        git.current_dir(dir);
     }
-    let event = match cmd.output().await {
+    let event = match git.output().await {
         Ok(out) if out.status.success() => SyncEvent { repo: name.to_owned(), state: SyncState::Done, message: None },
         Ok(out) => SyncEvent {
             repo: name.to_owned(),

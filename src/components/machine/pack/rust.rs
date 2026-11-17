@@ -191,7 +191,7 @@ pub fn ensure_in(kun: &Path, machine: &Path, dept: &str) -> Result<PathBuf, Pack
 
     let rules = kun.join("CLAUDE.md");
     let body = prompt.trim_end();
-    write_if_changed(&dir.join("CLAUDE.md"), &format!("{body}\n\n---\n\n@{}\n", rules.display()))?;
+    write_if_changed(&dir.join("CLAUDE.md"), &format!("{body}\n\n---\n\n@{}\n", rules.display().to_string().replace('\\', "/")))?;
     write_if_changed(
         &dir.join("AGENTS.md"),
         &format!("{body}\n\n---\n\nCompany rules: read {} before you start.\n", rules.display()),
