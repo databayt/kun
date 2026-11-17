@@ -1,0 +1,21 @@
+{
+  "id": "machine:abdout",
+  "name": "abdout",
+  "type": "kun:machine",
+  "title": "Abdout",
+  "description": "macos machine · sales, marketing, video · code write",
+  "keywords": [],
+  "dependencies": [
+    "pack:sales",
+    "pack:marketing",
+    "pack:video"
+  ],
+  "files": [
+    {
+      "path": "machines/abdout.json",
+      "target": "machines/abdout.json",
+      "sha256": "450e724305593c57454f16bf373b67083fff6a05a6f48c34a5e65e311b7aabbd"
+    }
+  ],
+  "version": "7c5ef9b98cbd18114737d2beb3eb5fb8d7d57902f7c82f9d6792433eafed9303"
+}

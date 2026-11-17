@@ -6,6 +6,15 @@
 export type ModelEvent = { "kind": "downloading", done_mb: number, total_mb: number, percent: number, } | { "kind": "verifying" } | { "kind": "ready" };
 
 /**
+ * One selectable speech model.
+ */
+export type ModelStatus = { 
+/**
+ * `base` or `small`.
+ */
+id: string, mb: number, ready: boolean, default: boolean, };
+
+/**
  * One transcription.
  */
 export type Transcript = { text: string, 
@@ -21,7 +30,15 @@ export type VoiceStatus = {
 /**
  * Whisper is compiled in.
  */
-built: boolean, model_ready: boolean, model_mb: number, models_dir: string, 
+built: boolean, 
+/**
+ * The default model (`base`) is downloaded.
+ */
+model_ready: boolean, model_mb: number, 
+/**
+ * Every selectable model and whether it is on disk.
+ */
+models: Array<ModelStatus>, models_dir: string, 
 /**
  * The OS can speak replies.
  */

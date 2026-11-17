@@ -1,0 +1,34 @@
+{
+  "login": "moed",
+  "name": "معد",
+  "os": "windows",
+  "driver": "claude",
+  "departments": [
+    "sales",
+    "marketing",
+    "video"
+  ],
+  "repos": [
+    "kun",
+    "hogwarts",
+    "mkan"
+  ],
+  "access": {
+    "code": "read",
+    "workspace": "write",
+    "catalog": "profile",
+    "engine": false
+  },
+  "secrets": [
+    "TWENTY_API_KEY",
+    "TWENTY_API_URL",
+    "GEMINI_API_KEY"
+  ],
+  "hidden": [
+    "skill:funnel",
+    "skill:social",
+    "skill:measure",
+    "skill:record",
+    "skill:edit"
+  ]
+}

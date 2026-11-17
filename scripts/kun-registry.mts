@@ -4,7 +4,8 @@
 //   public/r/kun/<type>/<name>.json      one item
 //
 // Items: skills (.claude/skills/<name>/ whole dir), agents, rules (.claude/rules-global),
-// hooks (.claude/hooks/*.sh) and department packs (departments/<dept>/pack.json).
+// hooks (.claude/hooks/*.sh), department packs (departments/<dept>/pack.json) and machine
+// profiles (machines/<login>.json — depends on its departments' packs).
 // An item NEVER embeds file contents: it lists files with a sha256, and `machine` installs by
 // copying from the local kun checkout. Nothing that crossed a webview is ever written to disk.
 //
@@ -18,7 +19,7 @@ import { fileURLToPath } from "url"
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const OUT = path.join(ROOT, "public", "r", "kun")
 
-const TYPES = ["skill", "agent", "rule", "hook", "pack"] as const
+const TYPES = ["skill", "agent", "rule", "hook", "pack", "machine"] as const
 type Type = (typeof TYPES)[number]
 const NAME_RE = /^[a-z0-9-]+$/
 
@@ -179,6 +180,28 @@ function build(): RegistryItem[] {
       .filter((f) => fs.existsSync(f))
       .map((f) => file(f, `departments/${d.name}/${path.basename(f)}`))
     push(make("pack", pack.name, { title: pack.title, description: pack.description, title_ar: pack.title_ar, description_ar: pack.description_ar }, files, pack.items, kw))
+  }
+
+  // machines — machines/<login>.json; installing one installs its departments' packs
+  const machinesDir = path.join(ROOT, "machines")
+  if (fs.existsSync(machinesDir)) {
+    for (const f of fs.readdirSync(machinesDir).sort()) {
+      if (!f.endsWith(".json")) continue
+      const abs = path.join(machinesDir, f)
+      const m = JSON.parse(fs.readFileSync(abs, "utf8"))
+      if (m.login !== f.slice(0, -5)) throw new Error(`machine ${f}: login must match the file name`)
+      const deps = (m.departments as string[]).map((d) => `pack:${d}`)
+      push(
+        make(
+          "machine",
+          m.login,
+          { title: m.name, description: `${m.os} machine · ${(m.departments as string[]).join(", ")} · code ${m.access?.code ?? "read"}` },
+          [file(abs, `machines/${f}`)],
+          deps,
+          kw
+        )
+      )
+    }
   }
 
   // every dependency must resolve

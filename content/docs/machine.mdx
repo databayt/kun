@@ -1,0 +1,74 @@
+---
+title: Machine
+description: Kun's desktop app — catalog, chat, voice and dispatch on a teammate's own computer, installed on Windows 11 with one PowerShell line
+---
+
+# Machine
+
+> The desktop app for people who do not live in a terminal. It wraps the same Claude Code the engine uses, shows the skills and agents of **their department**, and keeps everything on their own computer.
+
+Machine is a small Rust + Tauri 2 app (`machine/` in the kun repo). The window loads kun's own `/ar/machine` pages; every feature's Rust lives beside its UI in `src/components/machine/<feature>/rust.rs`. It never proxies a model: it starts the unmodified `claude` binary, signed in with the teammate's own account.
+
+## Install on Windows 11
+
+Needs Windows 11, an internet connection and GitHub access to `databayt/kun`. Open **PowerShell** and run (one line):
+
+```powershell
+irm https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/setup.ps1 -OutFile $env:TEMP\kun-setup.ps1; powershell -ExecutionPolicy Bypass -File $env:TEMP\kun-setup.ps1 -Machine moed -MsiUrl <installer-url>
+```
+
+If the repo is private, or the installer is a file you were handed, clone first (Git opens a browser sign-in) and run from the clone:
+
+```powershell
+cd $env:USERPROFILE\kun; powershell -ExecutionPolicy Bypass -File .\.claude\scripts\setup.ps1 -Machine moed -MsiPath $env:USERPROFILE\Downloads\Kun.msi
+```
+
+`-Machine <login>` is the **only** thing the script does for a machine login. It is safe to re-run: every step checks first.
+
+| Step | What happens |
+| --- | --- |
+| Windows 11 | Checks the build; warns on anything older |
+| Git | Installs it with `winget` if missing |
+| WebView2 | Checked; Windows 11 ships it, and the installer downloads it if not |
+| Claude Code | Installed with the official installer (`irm https://claude.ai/install.ps1 \| iex`) |
+| kun | Cloned to `%USERPROFILE%\kun` (machine reads `machines\` and `departments\` from it) |
+| Settings | Writes `%USERPROFILE%\.kun\machine\settings.json` from `machines\<login>.json` |
+| Machine | Installs the `.msi` you pass with `-MsiPath` or `-MsiUrl` |
+
+It does **not** run the engine install: no hooks, no rules, no full skill set. The app's catalog installs the items of the person's profile.
+
+The `.msi` comes from the **Machine** GitHub Actions workflow (an unsigned build artifact, not a release). Because it is unsigned, Windows SmartScreen shows **More info → Run anyway** once on first launch.
+
+## First run
+
+1. In PowerShell run `claude` once and sign in with **your own** Claude account. Nobody signs in for you.
+2. Open **Kun** from the Start menu. The app picks up your name, department and agent from `settings.json`.
+3. Open the catalog and install your department's pack, then ask in Arabic or English.
+4. Voice (optional): press the microphone, and the app downloads a small speech model once (about 142 MB). It runs on the CPU and nothing leaves the computer. A larger, slower, more accurate model (`small`, about 465 MB) can be chosen instead. Spoken replies use the Windows voices.
+
+## What Moed's machine can and cannot do
+
+Profile: `machines/moed.json` — departments **sales**, **marketing**, **video**; agent **Claude**.
+
+**Can**
+
+- Sales: proposals, pricing, scrape and funnel once the Twenty key is set.
+- Marketing: draft, calendar, social, carousel, measure and approve. Publishing stays behind kun's approve queue.
+- Read the kun, hogwarts and mkan repos; write only in his own workspace.
+- Talk to the agent in Arabic or English, by text or voice, and hear replies.
+
+**Cannot**
+
+- Change code in the repos (read-only) or touch the engine (hidden for this login).
+- Use the video lanes (edit, shoot, record, higgs) until each is ported: they still have macOS-only steps and are marked Mac-only in his menu.
+- Publish anything on a brand page without a human approval.
+- Run the engine's hooks or its Mac-only scripts.
+
+## Troubleshooting
+
+| Symptom | Fix |
+| --- | --- |
+| "running scripts is disabled" | Run it through `powershell -ExecutionPolicy Bypass -File ...` as shown above |
+| Clone fails | Sign in to GitHub in the browser prompt Git opens, then re-run |
+| `claude` not found after install | Open a new PowerShell window |
+| Voice is slow | Keep the default `base` model; do not switch to `small` on a laptop without a GPU |

@@ -1,30 +1,21 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { ArrowDownIcon, CheckIcon, MoreHorizontalIcon, RotateCcwIcon, SquarePenIcon, Trash2Icon, Volume2Icon } from "lucide-react"
+import { ArrowDownIcon, RotateCcwIcon } from "lucide-react"
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
 import type { Locale } from "@/components/local/config"
-import type { DriverKind, DriverStatus, Event } from "../driver/types"
+import type { Event } from "../driver/types"
 import { packInfo } from "../pack/actions"
 import type { PackInfo } from "../pack/types"
-import { getSession, removeSession } from "../sessions/actions"
-import { detectDrivers, loadSettings, saveSettings } from "../settings/actions"
+import { CHAT_DELETED_EVENT, NEW_CHAT_EVENT } from "../menu/config"
+import { useReadAloud } from "../menu/use-read-aloud"
+import { getSession } from "../sessions/actions"
+import { loadSettings } from "../settings/actions"
 import type { Settings } from "../settings/types"
 import { OpenInMachine, useInMachine } from "../shell/content"
-import { ChatHeader, headerButton, MenuGlyph } from "../shell/header"
 import { storedLang, swapLocale } from "../shell/lang"
-import { speak, stopSpeaking } from "../voice/actions"
+import { speak } from "../voice/actions"
 import { ask, stop } from "./actions"
 import { ActivityRows, StatusLine } from "./activity"
 import { Composer } from "./composer"
@@ -32,9 +23,6 @@ import { copy, greeting, tr } from "./config"
 import { Suggestions } from "./suggestions"
 import { AgentTurn, Prose, TurnActions, UserTurn } from "./turn"
 import { useStickToBottom } from "./use-stick-to-bottom"
-
-// The ☰ drawer loads on its first open; a person who never opens it never pays for it.
-const ChatsDrawer = dynamic(() => import("./drawer").then((m) => m.ChatsDrawer), { ssr: false })
 
 interface Message {
   role: "user" | "assistant"
@@ -47,27 +35,23 @@ interface Message {
   error?: string
 }
 
-const menuItem = "gap-2.5 rounded-xl px-3 py-2.5 text-[15px]"
-
 /**
- * The machine's home — the chat in mkan's /find shell: a slim bar (☰ · name · ✎ · ⋯), the greeting
- * mid-screen with starter cards above a pill composer pinned to the bottom, user bubbles, plain agent
- * text, folded tool steps and an orange working line.
+ * The machine's home — the chat in mkan's /find shell, with no bar: the greeting mid-screen with
+ * starter cards above a pill composer pinned to the bottom, user bubbles, plain agent text, folded tool
+ * steps and an orange working line. The mega menu (layout) holds chats, lanes and settings.
  */
-export default function ChatContent({ lang, session: resume }: { lang: Locale; session?: string }) {
+export default function ChatContent({ lang, session: resume, prompt }: { lang: Locale; session?: string; prompt?: string }) {
   const isAr = lang === "ar"
   const t = tr(isAr)
   const router = useRouter()
   const inApp = useInMachine()
   const [settings, setSettings] = useState<Settings | null>(null)
-  const [drivers, setDrivers] = useState<DriverStatus[]>([])
   const [pack, setPack] = useState<PackInfo | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [session, setSession] = useState<string | null>(resume ?? null)
   const [resumed, setResumed] = useState<string | null>(null)
   const [jobId, setJobId] = useState<string | null>(null)
-  const [speakReplies, setSpeakReplies] = useState(false)
-  const [drawer, setDrawer] = useState<"never" | "open" | "closed">("never")
+  const [speakReplies] = useReadAloud()
   const speakRef = useRef(false)
   speakRef.current = speakReplies
 
@@ -83,14 +67,13 @@ export default function ChatContent({ lang, session: resume }: { lang: Locale; s
       const s = await loadSettings()
       setSettings(s)
       if (s) setPack(await packInfo(s.department).catch(() => null))
-      setDrivers(await detectDrivers().catch(() => []))
       if (resume) setResumed((await getSession(resume).catch(() => null))?.title ?? null)
     })()
   }, [inApp, resume])
 
   const busy = jobId !== null
   const last = messages.at(-1)
-  const { ref: scrollRef, onScroll, away, scrolled, scrollToBottom } = useStickToBottom(`${messages.length}.${last?.text.length ?? 0}.${last?.tools.length ?? 0}.${last?.live}`)
+  const { ref: scrollRef, onScroll, away, scrollToBottom } = useStickToBottom(`${messages.length}.${last?.text.length ?? 0}.${last?.tools.length ?? 0}.${last?.live}`)
 
   const patchLast = useCallback((f: (m: Message) => Message) => {
     setMessages((all) => all.map((m, i) => (i === all.length - 1 ? f(m) : m)))
@@ -159,86 +142,36 @@ export default function ChatContent({ lang, session: resume }: { lang: Locale; s
     setMessages([])
     setSession(null)
     setResumed(null)
-    setDrawer((v) => (v === "never" ? v : "closed"))
     if (resume) router.replace(`/${lang}/machine`)
   }
 
-  const deleteChat = async () => {
-    if (!session || !window.confirm(t(copy.deleteConfirm))) return
-    await removeSession(session).catch(() => {})
-    newChat()
-  }
-
-  const pickDriver = async (driver: DriverKind) => {
-    if (!settings || settings.driver === driver) return
-    setSettings(await saveSettings({ ...settings, driver }).catch(() => settings))
-  }
+  // The menu's "New chat" and its delete both reach the open chat through window events.
+  const newChatRef = useRef(newChat)
+  newChatRef.current = newChat
+  const sessionRef = useRef(session)
+  sessionRef.current = session
+  useEffect(() => {
+    const onNew = () => newChatRef.current()
+    const onDeleted = (e: globalThis.Event) => {
+      if ((e as CustomEvent<string>).detail === sessionRef.current) newChatRef.current()
+    }
+    window.addEventListener(NEW_CHAT_EVENT, onNew)
+    window.addEventListener(CHAT_DELETED_EVENT, onDeleted)
+    return () => {
+      window.removeEventListener(NEW_CHAT_EVENT, onNew)
+      window.removeEventListener(CHAT_DELETED_EVENT, onDeleted)
+    }
+  }, [])
 
   if (inApp === null) return null
   if (!inApp) return <OpenInMachine lang={lang} />
 
   const empty = messages.length === 0
   const name = settings?.person.trim()
-  const label = pack ? (isAr ? pack.title_ar : pack.title_en) : undefined
   const quick = pack?.quick_actions ?? []
 
   return (
     <div className="flex h-full flex-col overflow-x-clip bg-background">
-      <ChatHeader
-        title={t(copy.name)}
-        label={label}
-        scrolled={scrolled}
-        start={
-          <button type="button" onClick={() => setDrawer("open")} aria-label={t(copy.menu)} title={t(copy.menu)} className={headerButton}>
-            <MenuGlyph />
-          </button>
-        }
-        end={
-          <>
-            <button type="button" onClick={newChat} disabled={empty || busy} aria-label={t(copy.newChat)} title={t(copy.newChat)} className={headerButton}>
-              <SquarePenIcon aria-hidden />
-            </button>
-            <DropdownMenu dir={isAr ? "rtl" : "ltr"}>
-              <DropdownMenuTrigger className={headerButton} aria-label={t(copy.more)} title={t(copy.more)}>
-                <MoreHorizontalIcon aria-hidden />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-56 rounded-2xl p-1.5">
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault()
-                    if (speakReplies) void stopSpeaking().catch(() => {})
-                    setSpeakReplies((on) => !on)
-                  }}
-                  className={menuItem}
-                >
-                  <Volume2Icon className="size-4" aria-hidden />
-                  <span className="flex-1">{t(copy.readAloud)}</span>
-                  {speakReplies && <CheckIcon className="size-4" aria-hidden />}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="px-3 pb-1 pt-2 text-xs font-normal text-muted-foreground">{t(copy.driver)}</DropdownMenuLabel>
-                {drivers.map((d) => (
-                  <DropdownMenuItem key={d.kind} disabled={!d.installed} onSelect={() => void pickDriver(d.kind)} className={menuItem}>
-                    <span dir="ltr" className="flex-1 text-start">{d.kind}</span>
-                    <span className="text-xs text-muted-foreground">{d.installed ? t(copy.installed) : t(copy.notInstalled)}</span>
-                    {settings?.driver === d.kind && <CheckIcon className="size-4" aria-hidden />}
-                  </DropdownMenuItem>
-                ))}
-                {session && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem disabled={busy} onSelect={() => void deleteChat()} className={cn(menuItem, "text-destructive focus:text-destructive")}>
-                      <Trash2Icon className="size-4 text-current" aria-hidden />
-                      {t(copy.deleteChat)}
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
-        }
-      />
-
       <div className="relative flex min-h-0 flex-1 flex-col">
         <div ref={scrollRef} onScroll={onScroll} className="relative flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
           {empty ? (
@@ -251,7 +184,7 @@ export default function ChatContent({ lang, session: resume }: { lang: Locale; s
               )}
             </div>
           ) : (
-            <ol className="mx-auto w-full max-w-3xl list-none space-y-7 px-4 pb-6 pt-4">
+            <ol className="mx-auto w-full max-w-3xl list-none space-y-7 px-4 pb-6 pt-16">
               {messages.map((m, i) =>
                 m.role === "user" ? (
                   <UserTurn key={i} text={m.text} />
@@ -295,28 +228,9 @@ export default function ChatContent({ lang, session: resume }: { lang: Locale; s
             <Suggestions actions={quick} isAr={isAr} onPick={(p) => void send(p)} disabled={busy} />
           </div>
         )}
-        <Composer lang={lang} onSend={(text) => void send(text)} onStop={() => jobId && void stop(jobId)} busy={busy} actions={quick} autoFocus />
+        <Composer lang={lang} onSend={(text) => void send(text)} onStop={() => jobId && void stop(jobId)} busy={busy} actions={quick} initialText={prompt} autoFocus />
         <div className="h-2" aria-hidden />
       </div>
-
-      {drawer !== "never" && (
-        <ChatsDrawer
-          lang={lang}
-          open={drawer === "open"}
-          onOpenChange={(o) => setDrawer(o ? "open" : "closed")}
-          activeId={session}
-          onOpenChat={(id) => {
-            setDrawer("closed")
-            router.push(`/${lang}/machine?s=${encodeURIComponent(id)}`)
-          }}
-          onNewChat={() => {
-            setDrawer("closed")
-            newChat()
-            router.push(`/${lang}/machine`)
-          }}
-          onDeleted={(id) => id === session && newChat()}
-        />
-      )}
     </div>
   )
 }

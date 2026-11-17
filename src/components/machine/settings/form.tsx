@@ -16,16 +16,18 @@ interface Props {
   initial: Settings
   drivers: DriverStatus[]
   departments: string[]
+  /** The machine profile's agent: shown, not chosen. */
+  lockedDriver?: DriverStatus["kind"]
 }
 
-export function SettingsForm({ isAr, initial, drivers, departments }: Props) {
+export function SettingsForm({ isAr, initial, drivers, departments, lockedDriver }: Props) {
   const [values, setValues] = useState<Settings>(initial)
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const parsed = settingsSchema.safeParse(values)
+    const parsed = settingsSchema.safeParse(lockedDriver ? { ...values, driver: lockedDriver } : values)
     if (!parsed.success) {
       setMessage({ ok: false, text: isAr ? "تحقق من الحقول." : "Check the fields." })
       return
@@ -70,6 +72,11 @@ export function SettingsForm({ isAr, initial, drivers, departments }: Props) {
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">{isAr ? "الوكيل" : "Agent"}</legend>
+        {lockedDriver ? (
+          <p dir="ltr" className="bg-muted/70 rounded-2xl p-3 text-sm font-medium">
+            {lockedDriver} <span className="text-muted-foreground text-xs">· {isAr ? "يحدده ملف جهازك" : "set by this machine's profile"}</span>
+          </p>
+        ) : (
         <div className="grid gap-2 sm:grid-cols-3">
           {drivers.map((d) => (
             <button
@@ -90,6 +97,7 @@ export function SettingsForm({ isAr, initial, drivers, departments }: Props) {
             </button>
           ))}
         </div>
+        )}
       </fieldset>
 
       <div className="flex items-center gap-3">

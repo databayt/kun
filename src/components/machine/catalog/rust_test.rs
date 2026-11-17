@@ -229,3 +229,87 @@ fn executable_bit_is_kept() {
     let mode = fs::metadata(w.env.claude_dir.join("skills/funnel/scripts/run.sh")).unwrap().permissions().mode();
     assert_eq!(mode & 0o111, 0o111);
 }
+
+// ---- profile scope ----
+
+fn profile_for(depts: &[&str], catalog: CatalogAccess) -> MachineProfile {
+    use crate::{
+        driver::DriverKind,
+        profile::{Access, Department},
+    };
+    MachineProfile {
+        login: "moed".into(),
+        name: String::new(),
+        os: "windows".into(),
+        driver: DriverKind::Claude,
+        departments: depts
+            .iter()
+            .map(|d| Department { name: (*d).into(), title: (*d).into(), title_ar: None, quick_actions: Vec::new(), skills: Vec::new() })
+            .collect(),
+        repos: Vec::new(),
+        access: Access { catalog, ..Access::FULL },
+        hidden: Vec::new(),
+    }
+}
+
+/// `standard()` plus a second pack and a skill that only it needs.
+fn two_packs() -> World {
+    let w = standard();
+    let reg = w.env.kun_dir.join("public/r/kun/index.json");
+    let mut json: serde_json::Value = serde_json::from_str(&fs::read_to_string(&reg).unwrap()).unwrap();
+    let items = json["items"].as_array_mut().unwrap();
+    items.push(item("skill:edit", &[], &[(".claude/skills/edit/SKILL.md", "skills/edit/SKILL.md", "# edit")]));
+    items.push(item("pack:video", &["skill:edit"], &[("departments/video/pack.json", "departments/video/pack.json", "{}")]));
+    fs::write(&reg, json.to_string()).unwrap();
+    for (p, body) in [(".claude/skills/edit/SKILL.md", "# edit"), ("departments/video/pack.json", "{}")] {
+        let path = w.env.kun_dir.join(p);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(path, body).unwrap();
+    }
+    w
+}
+
+#[test]
+fn a_profile_lists_only_its_packs_and_what_they_need() {
+    let w = two_packs();
+    let profile = profile_for(&["sales"], CatalogAccess::Profile);
+    let allowed = allowed_ids(&w.env, &profile).unwrap();
+    let ids: Vec<String> = list_items_scoped(&w.env, allowed.as_ref()).unwrap().into_iter().map(|i| i.id).collect();
+    assert_eq!(ids, vec!["skill:funnel", "agent:lead", "pack:sales"]);
+    assert_eq!(list_items(&w.env).unwrap().len(), 5, "unscoped still lists everything");
+}
+
+#[test]
+fn full_catalog_access_means_no_limit() {
+    let w = two_packs();
+    assert!(allowed_ids(&w.env, &profile_for(&["sales"], CatalogAccess::All)).unwrap().is_none());
+}
+
+#[test]
+fn install_and_uninstall_refuse_outside_the_profile() {
+    let w = two_packs();
+    let allowed = allowed_ids(&w.env, &profile_for(&["sales"], CatalogAccess::Profile)).unwrap();
+    for outside in ["pack:video", "skill:edit"] {
+        assert!(matches!(install_item_scoped(&w.env, outside, allowed.as_ref()), Err(CatalogError::OutsideProfile(_))), "{outside}");
+        assert!(matches!(uninstall_item_scoped(&w.env, outside, allowed.as_ref()), Err(CatalogError::OutsideProfile(_))), "{outside}");
+    }
+    assert!(!w.env.claude_dir.join("skills/edit").exists(), "nothing was written");
+
+    let done = install_item_scoped(&w.env, "pack:sales", allowed.as_ref()).unwrap();
+    assert_eq!(done.last().map(String::as_str), Some("pack:sales"));
+    uninstall_item_scoped(&w.env, "pack:sales", allowed.as_ref()).unwrap();
+}
+
+#[test]
+fn hidden_lanes_never_install_even_through_their_pack() {
+    let w = two_packs();
+    let mut profile = profile_for(&["video"], CatalogAccess::Profile);
+    profile.hidden = vec!["skill:edit".into()];
+    let allowed = allowed_ids(&w.env, &profile).unwrap();
+    let ids: Vec<String> = list_items_scoped(&w.env, allowed.as_ref()).unwrap().into_iter().map(|i| i.id).collect();
+    assert_eq!(ids, vec!["pack:video"], "the hidden skill is not listed");
+    assert!(matches!(install_item_scoped(&w.env, "skill:edit", allowed.as_ref()), Err(CatalogError::OutsideProfile(_))));
+    let done = install_item_scoped(&w.env, "pack:video", allowed.as_ref()).unwrap();
+    assert_eq!(done, vec!["pack:video"], "the pack installs without its hidden lane");
+    assert!(!w.env.claude_dir.join("skills/edit").exists());
+}

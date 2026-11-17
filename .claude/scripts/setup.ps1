@@ -4,13 +4,157 @@
 # The role persists to %USERPROFILE%\.claude\.kun-role, so refresh runs (and
 # the daily maintain heartbeat) can omit it: .\setup.ps1 -Quiet
 # Mirrors setup.sh — keep the two in lockstep.
+# Machine mode (a teammate's laptop, desktop app only): .\setup.ps1 -Machine <login> [-MsiPath <file> | -MsiUrl <url>]
 
 param(
     [string]$Role,
-    [switch]$Quiet
+    [switch]$Quiet,
+    [string]$Machine,
+    [string]$MsiPath,
+    [string]$MsiUrl
 )
 
 $ErrorActionPreference = "Stop"
+
+# ── Machine mode ─────────────────────────────────────────────────
+# `-Machine <login>` provisions a teammate's laptop for the machine desktop app only:
+# Git, Claude Code (they sign in themselves), the machine .msi, a kun clone, and the
+# machine settings for that login. It does NOT run the engine install below — no hooks,
+# rules or the full skill set; the app's catalog installs the profile's own items.
+# Usage: .\setup.ps1 -Machine moed [-MsiPath C:\path\Kun.msi | -MsiUrl https://...]
+# Idempotent: every step checks first; re-run anytime.
+if ($Machine) {
+    # Native tools (git, winget) write progress to stderr; every step below checks its own result.
+    $ErrorActionPreference = "Continue"
+    # Console text is English then Arabic. Arabic is stored as \uXXXX escapes because Windows
+    # PowerShell 5.1 reads a BOM-less script as ANSI and would garble literal Arabic.
+    function MsgAr($ar) { [regex]::Unescape($ar) }
+    function MOk($en, $ar) { Write-Host "  [ok] $en" -ForegroundColor Green; Write-Host ("       " + (MsgAr $ar)) -ForegroundColor DarkGreen }
+    function MInfo($en, $ar) { Write-Host "  [..] $en" -ForegroundColor DarkGray; Write-Host ("       " + (MsgAr $ar)) -ForegroundColor DarkGray }
+    function MWarn($en, $ar) { Write-Host "  [!]  $en" -ForegroundColor Yellow; Write-Host ("       " + (MsgAr $ar)) -ForegroundColor Yellow }
+    function MDie($en, $ar) { Write-Host "  [x]  $en" -ForegroundColor Red; Write-Host ("       " + (MsgAr $ar)) -ForegroundColor Red; exit 1 }
+    function RefreshPath { $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User") }
+    function ReadJson($p) { Get-Content -LiteralPath $p -Raw -Encoding UTF8 | ConvertFrom-Json }
+
+    $login = $Machine.Trim().ToLower()
+    if ($login -notmatch '^[a-z][a-z0-9_-]{0,31}$') { MDie "Invalid login: $Machine" '\u0627\u0633\u0645 \u062f\u062e\u0648\u0644 \u063a\u064a\u0631 \u0635\u0627\u0644\u062d' }
+
+    Write-Host ""
+    Write-Host "Kun machine setup - $login" -ForegroundColor Cyan
+    Write-Host ("  " + (MsgAr '\u062a\u062b\u0628\u064a\u062a \u0643\u0646 (\u0627\u0644\u0622\u0644\u0629)')) -ForegroundColor Cyan
+    Write-Host ""
+
+    # 1. Windows 11 (build 22000+). A warning only: Windows 10 can run machine, it is just untested.
+    $build = [Environment]::OSVersion.Version.Build
+    if ($build -ge 22000) { MOk "Windows 11 (build $build)" '\u0646\u0638\u0627\u0645 \u0648\u064a\u0646\u062f\u0648\u0632 11' }
+    else { MWarn "This is not Windows 11 (build $build) - continuing" '\u0647\u0630\u0627 \u0644\u064a\u0633 \u0648\u064a\u0646\u062f\u0648\u0632 11 \u2014 \u0633\u0646\u0643\u0645\u0644 \u0644\u0643\u0646 \u0642\u062f \u0644\u0627 \u064a\u0639\u0645\u0644 \u0643\u0644 \u0634\u064a\u0621' }
+
+    # 2. Git
+    if (-not (Get-Command git -EA SilentlyContinue)) {
+        MInfo "Installing Git with winget..." '\u062a\u062b\u0628\u064a\u062a \u062c\u0650\u062a \u0639\u0628\u0631 winget...'
+        if (Get-Command winget -EA SilentlyContinue) {
+            winget install --id Git.Git -e --source winget --silent --accept-package-agreements --accept-source-agreements | Out-Null
+            RefreshPath
+        }
+    }
+    if (-not (Get-Command git -EA SilentlyContinue)) { MDie "Git is missing and could not be installed. Install it from https://git-scm.com then re-run." '\u062a\u0639\u0630\u0651\u0631 \u062a\u062b\u0628\u064a\u062a \u062c\u0650\u062a \u2014 \u062b\u0628\u0651\u062a\u0647 \u0645\u0646 git-scm.com \u062b\u0645 \u0623\u0639\u062f \u0627\u0644\u062a\u0634\u063a\u064a\u0644' }
+    MOk "Git" '\u062c\u0650\u062a \u0645\u0648\u062c\u0648\u062f'
+
+    # 3. WebView2 (preinstalled on Windows 11; machine's own installer bootstraps it if absent)
+    $wvKeys = @(
+        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}",
+        "HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}",
+        "HKCU:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+    )
+    $wv = $wvKeys | Where-Object { (Get-ItemProperty $_ -Name pv -EA SilentlyContinue).pv } | Select-Object -First 1
+    if ($wv) { MOk "WebView2 runtime" 'WebView2 \u0645\u0648\u062c\u0648\u062f' } else { MWarn "WebView2 not found - the machine installer will download it" 'WebView2 \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f \u2014 \u0633\u064a\u062d\u0645\u0651\u0644\u0647 \u0645\u062b\u0628\u0651\u062a \u0627\u0644\u0622\u0644\u0629 \u062a\u0644\u0642\u0627\u0626\u064a\u064b\u0627' }
+
+    # 4. Claude Code (official installer). The teammate signs in with THEIR OWN account.
+    $claudeBin = "$env:USERPROFILE\.local\bin\claude.exe"
+    if (-not (Get-Command claude -EA SilentlyContinue) -and -not (Test-Path $claudeBin)) {
+        MInfo "Installing Claude Code..." '\u062a\u062b\u0628\u064a\u062a \u0643\u0644\u0648\u062f \u0643\u0648\u062f...'
+        try { irm https://claude.ai/install.ps1 | iex } catch { }
+        RefreshPath
+    }
+    if ((Get-Command claude -EA SilentlyContinue) -or (Test-Path $claudeBin)) { MOk "Claude Code" '\u0643\u0644\u0648\u062f \u0643\u0648\u062f \u0645\u0648\u062c\u0648\u062f' }
+    else { MDie "Claude Code could not be installed. See https://code.claude.com/docs then re-run." '\u062a\u0639\u0630\u0651\u0631 \u062a\u062b\u0628\u064a\u062a \u0643\u0644\u0648\u062f \u0643\u0648\u062f \u2014 \u0623\u0639\u062f \u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629 \u0644\u0627\u062d\u0642\u064b\u0627' }
+
+    # 5. kun clone - machine reads machines\ and departments\ from it.
+    $kunHome = "$env:USERPROFILE\kun"
+    if (-not (Test-Path "$kunHome\.git")) {
+        MInfo "Cloning kun into $kunHome ..." '\u0646\u0633\u062e \u0645\u0633\u062a\u0648\u062f\u0639 \u0643\u0646 \u0625\u0644\u0649'
+        git clone https://github.com/databayt/kun.git $kunHome 2>$null
+    } else {
+        git -C $kunHome pull --ff-only --quiet 2>$null
+    }
+    if (-not (Test-Path "$kunHome\departments\team.json")) { MDie "Could not clone databayt/kun (is GitHub access set up for this account?)." '\u062a\u0639\u0630\u0651\u0631 \u0646\u0633\u062e \u0645\u0633\u062a\u0648\u062f\u0639 \u0643\u0646 \u2014 \u062a\u062d\u0642\u0642 \u0645\u0646 \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0648\u0635\u0644\u0627\u062d\u064a\u0629 \u0627\u0644\u0648\u0635\u0648\u0644 \u0625\u0644\u0649 GitHub' }
+    MOk "kun repo at $kunHome" '\u0645\u0633\u062a\u0648\u062f\u0639 \u0643\u0646 \u062c\u0627\u0647\u0632'
+
+    # 6. Profile -> %USERPROFILE%\.kun\machine\settings.json (keys match machine's Settings:
+    #    person, department, driver; `login` is extra and ignored by the app).
+    $name = $null; $dept = $null; $drv = $null
+    $profileFile = "$kunHome\machines\$login.json"
+    if (Test-Path $profileFile) {
+        $prof = ReadJson $profileFile
+        $name = if ($prof.name) { $prof.name } else { $prof.person }
+        $dept = if ($prof.department) { $prof.department } elseif ($prof.departments) { @($prof.departments)[0] } else { $null }
+        $drv = $prof.driver
+    }
+    if (-not $name -or -not $dept) {
+        $team = ReadJson "$kunHome\departments\team.json"
+        $who = @($team.people) | Where-Object { $_.login -eq $login } | Select-Object -First 1
+        if ($who) {
+            if (-not $name) { $name = $who.name }
+            if (-not $dept) { $dept = @($who.departments)[0] }
+        }
+    }
+    if (-not $name -or -not $dept) { MDie "No profile for '$login' in machines\ or departments\team.json." '\u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0644\u0641 \u062a\u0639\u0631\u064a\u0641 \u0644\u0647\u0630\u0627 \u0627\u0644\u062f\u062e\u0648\u0644' }
+    if (-not $drv -and (Test-Path "$kunHome\departments\$dept\pack.json")) { $drv = (ReadJson "$kunHome\departments\$dept\pack.json").defaultDriver }
+    if ($drv -notin @("claude", "codex", "opencode")) { $drv = "claude" }
+
+    $machineDir = "$env:USERPROFILE\.kun\machine"
+    New-Item -ItemType Directory -Force -Path $machineDir | Out-Null
+    $settings = [ordered]@{}
+    if (Test-Path "$machineDir\settings.json") {
+        try { (ReadJson "$machineDir\settings.json").PSObject.Properties | ForEach-Object { $settings[$_.Name] = $_.Value } } catch { }
+    }
+    $settings["login"] = $login
+    $settings["person"] = $name
+    $settings["department"] = $dept
+    $settings["driver"] = $drv
+    # UTF-8 WITHOUT a BOM: Set-Content -Encoding UTF8 adds one on 5.1 and serde_json rejects it.
+    [IO.File]::WriteAllText("$machineDir\settings.json", ($settings | ConvertTo-Json), (New-Object Text.UTF8Encoding($false)))
+    MOk "settings: $name / $dept / $drv" '\u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a'
+
+    # 7. The machine .msi (-MsiPath, or -MsiUrl to download). No release URL is baked in.
+    $installed = @("HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*") |
+        ForEach-Object { Get-ItemProperty $_ -EA SilentlyContinue } | Where-Object { $_.DisplayName -eq "Kun" } | Select-Object -First 1
+    $msi = $null
+    if ($MsiPath) {
+        if (-not (Test-Path -LiteralPath $MsiPath)) { MDie "MsiPath not found: $MsiPath" '\u0641\u0634\u0644 \u062a\u062b\u0628\u064a\u062a \u0645\u0644\u0641 msi' }
+        $msi = (Resolve-Path -LiteralPath $MsiPath).Path
+    } elseif ($MsiUrl) {
+        $msi = Join-Path $env:TEMP "kun-machine.msi"
+        MInfo "Downloading the installer..." '\u062c\u0627\u0631\u064d \u062a\u0646\u0632\u064a\u0644 \u0645\u0644\u0641 \u0627\u0644\u062a\u062b\u0628\u064a\u062a...'
+        Invoke-WebRequest -Uri $MsiUrl -OutFile $msi -UseBasicParsing
+    }
+    if ($msi) {
+        $p = Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /passive /norestart" -Wait -PassThru
+        if ($p.ExitCode -in @(0, 3010)) { MOk "machine installed" '\u062a\u0645 \u062a\u062b\u0628\u064a\u062a \u0627\u0644\u0622\u0644\u0629' } else { MDie "msiexec failed with exit code $($p.ExitCode)" '\u0641\u0634\u0644 \u062a\u062b\u0628\u064a\u062a \u0645\u0644\u0641 msi' }
+    } elseif ($installed) {
+        MOk "machine already installed (pass -MsiPath or -MsiUrl to update)" '\u0627\u0644\u0622\u0644\u0629 \u0645\u062b\u0628\u0651\u062a\u0629 \u0628\u0627\u0644\u0641\u0639\u0644 (\u0645\u0631\u0651\u0631 -MsiPath \u0623\u0648 -MsiUrl \u0644\u0644\u062a\u062d\u062f\u064a\u062b)'
+    } else {
+        MWarn "No installer given - pass -MsiPath <file> or -MsiUrl <url> (the .msi artifact of the Machine workflow)" '\u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0644\u0641 \u062a\u062b\u0628\u064a\u062a \u2014 \u0645\u0631\u0651\u0631 -MsiPath \u0623\u0648 -MsiUrl'
+    }
+
+    Write-Host ""
+    Write-Host "Done. Next:" -ForegroundColor Cyan
+    Write-Host "  1. Open PowerShell and run:  claude   - sign in with YOUR OWN account, once." -ForegroundColor White
+    Write-Host ("     " + (MsgAr '\u0634\u063a\u0651\u0644 \u0627\u0644\u0623\u0645\u0631 claude \u0645\u0631\u0629 \u0648\u0627\u062d\u062f\u0629 \u0648\u0633\u062c\u0651\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0628\u062d\u0633\u0627\u0628\u0643 \u0623\u0646\u062a')) -ForegroundColor White
+    Write-Host "  2. Open Kun from the Start menu (first launch: SmartScreen > More info > Run anyway)." -ForegroundColor White
+    Write-Host ("  " + (MsgAr '\u0627\u0643\u062a\u0645\u0644 \u0627\u0644\u0625\u0639\u062f\u0627\u062f')) -ForegroundColor Green
+    exit 0
+}
 
 $KUN_DIR = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 $CLAUDE_DIR = "$env:USERPROFILE\.claude"

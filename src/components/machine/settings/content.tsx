@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import type { Locale } from "@/components/local/config"
 import type { DriverStatus } from "../driver/types"
 import { departments as listDepartments } from "../pack/actions"
+import { getProfile, type MachineProfile } from "../profile/actions"
 import { OpenInMachine, PageShell, useInMachine } from "../shell/content"
 import { detectDrivers, loadSettings } from "./actions"
 import { SettingsForm } from "./form"
@@ -15,10 +16,12 @@ export default function SettingsContent({ lang }: { lang: Locale }) {
   const isAr = lang === "ar"
   const inApp = useInMachine()
   const [state, setState] = useState<{ settings: Settings; drivers: DriverStatus[]; departments: string[] } | null>(null)
+  const [profile, setProfile] = useState<MachineProfile | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!inApp) return
+    getProfile().then(setProfile).catch(() => setProfile(null))
     Promise.all([loadSettings(), detectDrivers(), listDepartments()])
       .then(([settings, drivers, departments]) => {
         if (settings) setState({ settings, drivers, departments })
@@ -41,7 +44,7 @@ export default function SettingsContent({ lang }: { lang: Locale }) {
               {isAr ? "من أنت، وفي أي قسم تعمل، وأي وكيل يجيب." : "Who you are, which department you work in, and which agent answers."}
             </p>
             {error && <p className="text-destructive text-sm">{error}</p>}
-            {state && <SettingsForm isAr={isAr} initial={state.settings} drivers={state.drivers} departments={state.departments} />}
+            {state && <SettingsForm isAr={isAr} initial={state.settings} drivers={state.drivers} departments={state.departments} lockedDriver={profile?.driver} />}
           </>
         )}
       </div>

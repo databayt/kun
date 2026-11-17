@@ -1,4 +1,4 @@
-//! settings — who the teammate is, which department they work in, which agent CLI to use.
+//! settings — who the teammate is, their machine login, department and agent CLI.
 //! Stored in `~/.kun/machine/settings.json` (`KUN_HOME` overrides the base for tests).
 
 use std::{
@@ -22,11 +22,13 @@ pub struct Settings {
     pub person: String,
     pub department: String,
     pub driver: DriverKind,
+    /// The machine profile to load (`machines/<login>.json`); empty means full access.
+    pub login: String,
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Self { person: String::new(), department: "sales".into(), driver: DriverKind::Claude }
+        Self { person: String::new(), department: "sales".into(), driver: DriverKind::Claude, login: String::new() }
     }
 }
 
@@ -36,6 +38,8 @@ pub enum SettingsError {
     BadPerson,
     #[error("department name is invalid")]
     BadDepartment,
+    #[error("login must be lowercase letters, digits and -")]
+    BadLogin,
     #[error("could not find the home folder")]
     NoHome,
     #[error("settings.json is damaged ({0}); fix or delete it")]
@@ -54,7 +58,7 @@ impl Settings {
     /// Trims the name and checks every field.
     ///
     /// # Errors
-    /// When the name is too long or has control characters, or the department name is unsafe.
+    /// When the name is too long or has control characters, or the department or login is unsafe.
     pub fn validated(mut self) -> Result<Self, SettingsError> {
         self.person = self.person.trim().to_owned();
         if self.person.chars().count() > 80 || self.person.chars().any(char::is_control) {
@@ -62,6 +66,10 @@ impl Settings {
         }
         if !crate::pack::valid_name(&self.department) {
             return Err(SettingsError::BadDepartment);
+        }
+        self.login = self.login.trim().to_owned();
+        if !self.login.is_empty() && !crate::profile::valid_login(&self.login) {
+            return Err(SettingsError::BadLogin);
         }
         Ok(self)
     }

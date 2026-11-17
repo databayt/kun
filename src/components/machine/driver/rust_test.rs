@@ -12,6 +12,8 @@ fn job(driver: DriverKind, prompt: &str, session: Option<&str>) -> Job {
         cwd: ".".into(),
         session: session.map(str::to_owned),
         timeout_secs: None,
+        extra_args: Vec::new(),
+        env: Vec::new(),
     }
 }
 
@@ -86,4 +88,61 @@ fn invalid_jobs_are_refused() {
 fn detect_lists_every_driver() {
     let got = detect();
     assert_eq!(got.len(), DriverKind::ALL.len());
+}
+
+fn with_extras(extra: &[&str], env: &[(&str, &str)]) -> Job {
+    Job {
+        extra_args: extra.iter().map(|s| (*s).to_owned()).collect(),
+        env: env.iter().map(|(k, v)| ((*k).to_owned(), (*v).to_owned())).collect(),
+        ..job(DriverKind::Claude, "hi", Some("s-1"))
+    }
+}
+
+#[test]
+fn claude_extras_sit_before_resume_and_the_prompt() {
+    let j = with_extras(&["--add-dir", "/r/kun", "--add-dir", "/r/mkan", "--settings", "/w/.claude-settings.json"], &[]);
+    let args = args_for(&j).unwrap();
+    let pos = |needle: &str| args.iter().position(|a| a == needle).unwrap();
+    assert!(args.windows(2).any(|w| w == ["--add-dir", "/r/kun"]));
+    assert!(args.windows(2).any(|w| w == ["--settings", "/w/.claude-settings.json"]));
+    assert!(pos("--settings") < pos("--resume") && pos("--resume") < pos("--"));
+    assert_eq!(args.last().map(String::as_str), Some("hi"));
+}
+
+#[test]
+fn extras_are_validated() {
+    for bad in [
+        &["--dangerously-skip-permissions", "x"][..],
+        &["--add-dir"],
+        &["--add-dir", "--settings"],
+        &["--add-dir", ""],
+        &["--"," x"],
+    ] {
+        assert!(args_for(&with_extras(bad, &[])).is_err(), "{bad:?}");
+    }
+    let mut codex = with_extras(&["--add-dir", "/r"], &[]);
+    codex.driver = DriverKind::Codex;
+    assert!(args_for(&codex).is_err());
+}
+
+#[test]
+fn env_is_validated() {
+    assert!(args_for(&with_extras(&[], &[("TWENTY_API_KEY", "k")])).is_ok());
+    for bad in ["PATH", "lower", "", "LD_PRELOAD", "DYLD_INSERT_LIBRARIES", "A-B"] {
+        assert!(args_for(&with_extras(&[], &[(bad, "v")])).is_err(), "{bad}");
+    }
+}
+
+#[test]
+fn windows_search_paths() {
+    let dirs = windows_dirs(Some("C:/L".into()), Some("C:/U".into()), Some("C:/A".into()));
+    assert_eq!(
+        dirs,
+        vec![
+            PathBuf::from("C:/L/Programs/claude"),
+            PathBuf::from("C:/U/.local/bin"),
+            PathBuf::from("C:/A/npm"),
+        ]
+    );
+    assert!(windows_dirs(None, None, None).is_empty());
 }

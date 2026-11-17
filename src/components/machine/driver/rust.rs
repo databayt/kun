@@ -64,6 +64,13 @@ pub struct Job {
     pub cwd: String,
     pub session: Option<String>,
     pub timeout_secs: Option<u32>,
+    /// Extra flags, already paired as `[flag, value, flag, value…]`. Only an allow-listed few
+    /// are accepted (`--add-dir`, `--settings`, claude only); see [`args_for`].
+    #[serde(default)]
+    pub extra_args: Vec<String>,
+    /// Environment for this one run (a profile's secrets). Never sent to or from JS.
+    #[serde(default)]
+    pub env: Vec<(String, String)>,
 }
 
 /// What the UI sees while a job runs. Normalized across drivers.
@@ -98,6 +105,11 @@ impl Serialize for DriverError {
 
 const DEFAULT_TIMEOUT_SECS: u32 = 30 * 60;
 const MAX_PROMPT_BYTES: usize = 64 * 1024;
+const MAX_EXTRA_ARGS: usize = 32;
+/// The only flags a caller may add, each with one value.
+const EXTRA_FLAGS: [&str; 2] = ["--add-dir", "--settings"];
+/// Environment names a run may never override.
+const PROTECTED_ENV: [&str; 6] = ["PATH", "HOME", "USERPROFILE", "SHELL", "NODE_OPTIONS", "CLAUDE_CONFIG_DIR"];
 
 /// Apps launched from the Finder or Start menu get a minimal PATH, so look where
 /// the CLIs' own installers put them before falling back to PATH.
@@ -107,13 +119,33 @@ fn search_dirs() -> Vec<PathBuf> {
         for sub in [".local/bin", ".opencode/bin", ".npm-global/bin", ".bun/bin", ".cargo/bin"] {
             dirs.push(home.join(sub));
         }
-        if cfg!(windows) {
-            dirs.push(home.join("AppData/Roaming/npm"));
-        }
+    }
+    if cfg!(windows) {
+        dirs.extend(windows_dirs(
+            std::env::var_os("LOCALAPPDATA").map(PathBuf::from),
+            std::env::var_os("USERPROFILE").map(PathBuf::from),
+            std::env::var_os("APPDATA").map(PathBuf::from),
+        ));
     }
     dirs.extend(["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"].map(PathBuf::from));
     if let Some(path) = std::env::var_os("PATH") {
         dirs.extend(std::env::split_paths(&path));
+    }
+    dirs
+}
+
+/// Where the Windows installers put the CLIs: `%LOCALAPPDATA%\Programs\claude`,
+/// `%USERPROFILE%\.local\bin` and the npm global `%APPDATA%\npm`.
+fn windows_dirs(local_app_data: Option<PathBuf>, user_profile: Option<PathBuf>, app_data: Option<PathBuf>) -> Vec<PathBuf> {
+    let mut dirs = Vec::new();
+    if let Some(p) = local_app_data {
+        dirs.push(p.join("Programs").join("claude"));
+    }
+    if let Some(p) = user_profile {
+        dirs.push(p.join(".local").join("bin"));
+    }
+    if let Some(p) = app_data {
+        dirs.push(p.join("npm"));
     }
     dirs
 }
@@ -141,6 +173,37 @@ pub fn detect() -> Vec<DriverStatus> {
         .collect()
 }
 
+/// Extra flags are `--add-dir <dir>` / `--settings <file>` pairs and only for claude; the
+/// environment may not touch the variables that decide which binary or config runs.
+fn validate_extras(job: &Job) -> Result<(), DriverError> {
+    if !job.extra_args.is_empty() {
+        let tame = |a: &String| a.len() <= 4096 && !a.chars().any(char::is_control);
+        if job.driver != DriverKind::Claude {
+            return Err(DriverError::Invalid("extra args are claude-only"));
+        }
+        if job.extra_args.len() > MAX_EXTRA_ARGS || !job.extra_args.len().is_multiple_of(2) || !job.extra_args.iter().all(tame) {
+            return Err(DriverError::Invalid("extra args"));
+        }
+        for pair in job.extra_args.chunks_exact(2) {
+            if !EXTRA_FLAGS.contains(&pair[0].as_str()) || pair[1].is_empty() || pair[1].starts_with('-') {
+                return Err(DriverError::Invalid("extra args"));
+            }
+        }
+    }
+    for (name, value) in &job.env {
+        let name_ok = !name.is_empty()
+            && name.len() <= 64
+            && name.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
+            && !PROTECTED_ENV.contains(&name.as_str())
+            && !name.starts_with("LD_")
+            && !name.starts_with("DYLD_");
+        if !name_ok || value.len() > 8192 || value.contains('\0') {
+            return Err(DriverError::Invalid("env"));
+        }
+    }
+    Ok(())
+}
+
 /// The exact argv for a job. Pure, so it is unit-tested.
 ///
 /// # Errors
@@ -157,13 +220,18 @@ pub fn args_for(job: &Job) -> Result<Vec<String>, DriverError> {
     {
         return Err(DriverError::Invalid("session id"));
     }
+    validate_extras(job)?;
     let mut args: Vec<String> = match job.driver {
         DriverKind::Claude => {
-            let mut a = vec!["-p", "--output-format", "stream-json", "--verbose", "--permission-mode", "auto"];
+            let mut a: Vec<String> = ["-p", "--output-format", "stream-json", "--verbose", "--permission-mode", "auto"]
+                .into_iter()
+                .map(String::from)
+                .collect();
+            a.extend(job.extra_args.iter().cloned());
             if job.session.is_some() {
-                a.push("--resume");
+                a.push("--resume".into());
             }
-            a.into_iter().map(String::from).collect()
+            a
         }
         // Codex: workspace-write sandbox; docs discourage unattended ChatGPT-plan runs,
         // so machine only ever starts codex from the owner's own click.
@@ -252,6 +320,7 @@ pub async fn run(job: &Job, mut emit: impl FnMut(Event) + Send) -> Result<(), Dr
     let mut child = Command::new(bin)
         .args(&args)
         .current_dir(&job.cwd)
+        .envs(job.env.iter().map(|(k, v)| (k, v)))
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())

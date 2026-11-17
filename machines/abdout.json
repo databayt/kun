@@ -1,0 +1,14 @@
+{
+  "login": "abdout",
+  "name": "Abdout",
+  "os": "macos",
+  "departments": ["sales", "marketing", "video"],
+  "repos": ["kun", "hogwarts", "mkan", "codebase"],
+  "access": {
+    "code": "write",
+    "workspace": "write",
+    "catalog": "all",
+    "engine": true
+  },
+  "secrets": []
+}

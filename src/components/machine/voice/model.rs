@@ -1,5 +1,10 @@
-//! The speech model: one multilingual `ggml-small.bin`, downloaded once from the official
-//! whisper.cpp repo on Hugging Face into `~/.kun/machine/models`, size- and sha256-checked.
+//! The speech models: multilingual whisper.cpp ggml files, downloaded once from the official
+//! repo on Hugging Face into `~/.kun/machine/models`, size- and sha256-checked.
+//!
+//! The default is `base` (~142 MB), not `small` (~465 MB): whisper runs on the CPU, and on a
+//! mid-range laptop (an 11th-gen i5, no GPU) `small` takes several times the length of the clip
+//! to decode, which is too slow for push-to-talk. `base` is multilingual and good enough for
+//! short Arabic and English commands; `small` stays selectable for machines that can afford it.
 
 use std::path::{Path, PathBuf};
 
@@ -7,11 +12,78 @@ use sha2::{Digest, Sha256};
 
 use super::VoiceError;
 
-pub const FILE: &str = "ggml-small.bin";
-pub const URL: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin";
-/// Exact size and sha256 published by the repo (LFS oid).
-pub const SIZE: u64 = 487_601_967;
-pub const SHA256: &str = "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b";
+/// A selectable speech model. Sizes and sha256 are the LFS oids published by the repo.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Model {
+    Base,
+    Small,
+}
+
+impl Model {
+    pub const ALL: [Model; 2] = [Model::Base, Model::Small];
+    /// Used when the page names no model.
+    pub const DEFAULT: Model = Model::Base;
+
+    #[must_use]
+    pub const fn id(self) -> &'static str {
+        match self {
+            Model::Base => "base",
+            Model::Small => "small",
+        }
+    }
+
+    #[must_use]
+    pub const fn file(self) -> &'static str {
+        match self {
+            Model::Base => "ggml-base.bin",
+            Model::Small => "ggml-small.bin",
+        }
+    }
+
+    #[must_use]
+    pub const fn url(self) -> &'static str {
+        match self {
+            Model::Base => "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
+            Model::Small => "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin",
+        }
+    }
+
+    #[must_use]
+    pub const fn size(self) -> u64 {
+        match self {
+            Model::Base => 147_951_465,
+            Model::Small => 487_601_967,
+        }
+    }
+
+    #[must_use]
+    pub const fn sha256(self) -> &'static str {
+        match self {
+            Model::Base => "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+            Model::Small => "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+        }
+    }
+
+    #[must_use]
+    #[allow(clippy::cast_possible_truncation)] // the largest model is under 500 MiB
+    pub const fn mb(self) -> u32 {
+        // Whole MiB, rounded down (the figure the UI shows).
+        (self.size() / 1_048_576) as u32
+    }
+
+    /// Parses the page's `model` argument: absent or empty means the default.
+    ///
+    /// # Errors
+    /// For any name that is not a known model.
+    pub fn parse(raw: Option<&str>) -> Result<Model, VoiceError> {
+        match raw.map(str::trim) {
+            None | Some("") => Ok(Model::DEFAULT),
+            Some("base") => Ok(Model::Base),
+            Some("small") => Ok(Model::Small),
+            Some(_) => Err(VoiceError::Invalid("model must be base or small")),
+        }
+    }
+}
 
 /// `KUN_MODELS_DIR` or `~/.kun/machine/models`.
 #[must_use]
@@ -23,14 +95,14 @@ pub fn models_dir() -> PathBuf {
 }
 
 #[must_use]
-pub fn model_path() -> PathBuf {
-    models_dir().join(FILE)
+pub fn model_path(model: Model) -> PathBuf {
+    models_dir().join(model.file())
 }
 
 /// Cheap readiness check (size only — the sha256 is verified once, at download).
 #[must_use]
-pub fn is_ready(path: &Path) -> bool {
-    std::fs::metadata(path).is_ok_and(|m| m.len() == SIZE)
+pub fn is_ready(path: &Path, model: Model) -> bool {
+    std::fs::metadata(path).is_ok_and(|m| m.len() == model.size())
 }
 
 /// Lowercase hex of a digest.
@@ -86,13 +158,13 @@ pub fn percent(done: u64, total: u64) -> u32 {
 /// # Errors
 /// Network failure, wrong size or checksum (the partial file is deleted), disk errors.
 #[cfg(feature = "voice")]
-pub async fn ensure(mut on: impl FnMut(ModelEvent) + Send) -> Result<PathBuf, VoiceError> {
+pub async fn ensure(model: Model, mut on: impl FnMut(ModelEvent) + Send) -> Result<PathBuf, VoiceError> {
     use std::time::Duration;
 
     use tokio::io::AsyncWriteExt as _;
 
-    let dest = model_path();
-    if is_ready(&dest) {
+    let dest = model_path(model);
+    if is_ready(&dest, model) {
         on(ModelEvent::Ready);
         return Ok(dest);
     }
@@ -103,8 +175,8 @@ pub async fn ensure(mut on: impl FnMut(ModelEvent) + Send) -> Result<PathBuf, Vo
         .connect_timeout(Duration::from_secs(15))
         .build()
         .map_err(|e| fail(e.to_string()))?;
-    let mut resp = client.get(URL).send().await.and_then(reqwest::Response::error_for_status).map_err(|e| fail(e.to_string()))?;
-    let total = resp.content_length().unwrap_or(SIZE);
+    let mut resp = client.get(model.url()).send().await.and_then(reqwest::Response::error_for_status).map_err(|e| fail(e.to_string()))?;
+    let total = resp.content_length().unwrap_or(model.size());
     let mut file = tokio::fs::File::create(&part).await.map_err(|e| fail(e.to_string()))?;
     let mut hasher = Sha256::new();
     let (mut done, mut last_pct) = (0u64, u32::MAX);
@@ -134,7 +206,7 @@ pub async fn ensure(mut on: impl FnMut(ModelEvent) + Send) -> Result<PathBuf, Vo
         return Err(e);
     }
     on(ModelEvent::Verifying);
-    if done != SIZE || hex(&hasher.finalize()) != SHA256 {
+    if done != model.size() || hex(&hasher.finalize()) != model.sha256() {
         let _ = tokio::fs::remove_file(&part).await;
         return Err(VoiceError::Download("checksum mismatch — the file was discarded".into()));
     }

@@ -4261,37 +4261,36 @@
       "version": "38feff422c084b6434895d2418cf4ba81bbe53562de958f6ccad4d9caa50f4ad"
     },
     {
-      "id": "pack:media",
-      "name": "media",
+      "id": "pack:marketing",
+      "name": "marketing",
       "type": "kun:pack",
-      "title": "Media",
-      "description": "Shoot, record, edit, generate and publish brand content — with a QA agent before anything goes out.",
-      "title_ar": "الوسائط",
-      "description_ar": "التصوير والتسجيل والمونتاج وتوليد المحتوى ونشره — مع وكيل مراجعة قبل أي نشر.",
+      "title": "Marketing",
+      "description": "Plan the calendar, draft Arabic-first posts, build carousels, get approval, publish and measure.",
+      "title_ar": "التسويق",
+      "description_ar": "تخطيط التقويم، كتابة منشورات عربية أولاً، تصميم الكاروسيل، الاعتماد، النشر وقياس الأداء.",
       "keywords": [],
       "dependencies": [
-        "skill:edit",
-        "skill:shoot",
-        "skill:record",
-        "skill:higgs",
-        "skill:carousel",
         "skill:draft",
+        "skill:calendar",
         "skill:social",
-        "agent:media-qa"
+        "skill:carousel",
+        "skill:measure",
+        "skill:approve",
+        "skill:publish"
       ],
       "files": [
         {
-          "path": "departments/media/pack.json",
-          "target": "departments/media/pack.json",
-          "sha256": "4b8197afd2916c9ab985060087a3b1a67ae843a81d574a3282f3b09d6ff54f56"
+          "path": "departments/marketing/pack.json",
+          "target": "departments/marketing/pack.json",
+          "sha256": "3b9e170ea4e3e0a1b1023c231b67f17c3bad333a16031c8bbb137c1bfb178205"
         },
         {
-          "path": "departments/media/prompt.md",
-          "target": "departments/media/prompt.md",
-          "sha256": "a6a6091ae7cf97a91082814edbdd2b7e6ad740d1e51b69248ac14eb1a84eaf88"
+          "path": "departments/marketing/prompt.md",
+          "target": "departments/marketing/prompt.md",
+          "sha256": "14024ec25b79d596841f7518bd2d69e3293f625dc0e67b3f7c37c9d93a4b6141"
         }
       ],
-      "version": "758d45d358a2856aa02fdfa66eaa6e1437875a4c543099ce550df5e04ef13d32"
+      "version": "ff34e056406bac60f00158a5c92dac470db641b00d6f6cf38aab45544c72af20"
     },
     {
       "id": "pack:sales",
@@ -4324,6 +4323,79 @@
         }
       ],
       "version": "a2473a98f8d7d05ac6af4cc03d33dffd9cba8cdb3481f7423a0b09cb109000c3"
+    },
+    {
+      "id": "pack:video",
+      "name": "video",
+      "type": "kun:pack",
+      "title": "Video production",
+      "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
+      "title_ar": "إنتاج الفيديو",
+      "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
+      "keywords": [],
+      "dependencies": [
+        "skill:edit",
+        "skill:shoot",
+        "skill:record",
+        "skill:higgs",
+        "skill:carousel",
+        "agent:media-qa"
+      ],
+      "files": [
+        {
+          "path": "departments/video/pack.json",
+          "target": "departments/video/pack.json",
+          "sha256": "df13dce598c62cb24f77e6c47d48d1cd76d8cfb60fa81eaf0166c713cabe815d"
+        },
+        {
+          "path": "departments/video/prompt.md",
+          "target": "departments/video/prompt.md",
+          "sha256": "79b64693c9e4c5095d8908c38fe65791002b17a83202c656ebef79cad656c7a9"
+        }
+      ],
+      "version": "3e9fc16af88cf9709ab9220cb5d420573ff22e478e6731d23f19755da487f428"
+    },
+    {
+      "id": "machine:abdout",
+      "name": "abdout",
+      "type": "kun:machine",
+      "title": "Abdout",
+      "description": "macos machine · sales, marketing, video · code write",
+      "keywords": [],
+      "dependencies": [
+        "pack:sales",
+        "pack:marketing",
+        "pack:video"
+      ],
+      "files": [
+        {
+          "path": "machines/abdout.json",
+          "target": "machines/abdout.json",
+          "sha256": "450e724305593c57454f16bf373b67083fff6a05a6f48c34a5e65e311b7aabbd"
+        }
+      ],
+      "version": "7c5ef9b98cbd18114737d2beb3eb5fb8d7d57902f7c82f9d6792433eafed9303"
+    },
+    {
+      "id": "machine:moed",
+      "name": "moed",
+      "type": "kun:machine",
+      "title": "معد",
+      "description": "windows machine · sales, marketing, video · code read",
+      "keywords": [],
+      "dependencies": [
+        "pack:sales",
+        "pack:marketing",
+        "pack:video"
+      ],
+      "files": [
+        {
+          "path": "machines/moed.json",
+          "target": "machines/moed.json",
+          "sha256": "f62f96ed9efb52235588a4ae147cad865910973ac8373bd8ec5d1b068cc67d4e"
+        }
+      ],
+      "version": "e863124f1231eba6a0843ece27218942e7db39200b3e5566f44847c474df3c33"
     }
   ]
 }

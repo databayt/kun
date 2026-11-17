@@ -12,17 +12,25 @@ export async function voiceStatus(): Promise<VoiceStatus | null> {
   return invoke<VoiceStatus>("plugin:voice|voice_status")
 }
 
-export async function downloadModel(onProgress: (e: ModelEvent) => void): Promise<void> {
+/** `base` (~142 MB, the default — fast on a CPU-only laptop) or `small` (~465 MB, slower, more accurate). */
+export type VoiceModel = "base" | "small"
+
+export async function downloadModel(onProgress: (e: ModelEvent) => void, model?: VoiceModel): Promise<void> {
   if (!isTauri()) return
   const channel = new Channel<ModelEvent>()
   channel.onmessage = onProgress
-  await invoke("plugin:voice|download_model", { onProgress: channel })
+  await invoke("plugin:voice|download_model", { model: model ?? null, onProgress: channel })
 }
 
-export async function transcribe(pcm: Float32Array, sampleRate: number, lang: VoiceLang): Promise<Transcript> {
+export async function transcribe(
+  pcm: Float32Array,
+  sampleRate: number,
+  lang: VoiceLang,
+  model?: VoiceModel,
+): Promise<Transcript> {
   const body = new Uint8Array(pcm.buffer, pcm.byteOffset, pcm.byteLength)
   return invoke<Transcript>("plugin:voice|transcribe", body, {
-    headers: { "x-rate": String(sampleRate), "x-lang": lang },
+    headers: { "x-rate": String(sampleRate), "x-lang": lang, ...(model ? { "x-model": model } : {}) },
   })
 }
 

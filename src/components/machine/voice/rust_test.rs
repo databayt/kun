@@ -64,9 +64,34 @@ fn sha_and_ready_check() {
     let f = dir.path().join("x.bin");
     std::fs::write(&f, b"abc").unwrap();
     assert_eq!(sha256_file(&f).unwrap(), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
-    assert!(!is_ready(&f));
+    assert!(!is_ready(&f, Model::Base));
     assert!(sha256_file(&dir.path().join("none")).is_err());
-    assert_eq!(SHA256.len(), 64);
+    for m in Model::ALL {
+        assert_eq!(m.sha256().len(), 64);
+        assert!(m.sha256().bytes().all(|b| b.is_ascii_hexdigit()));
+        assert!(m.url().ends_with(m.file()));
+    }
+}
+
+#[test]
+fn ready_means_the_exact_size_of_that_model() {
+    let dir = tempfile::tempdir().unwrap();
+    let f = dir.path().join("m.bin");
+    let file = std::fs::File::create(&f).unwrap();
+    file.set_len(Model::Base.size()).unwrap();
+    assert!(is_ready(&f, Model::Base));
+    assert!(!is_ready(&f, Model::Small));
+}
+
+#[test]
+fn model_argument_is_validated() {
+    assert_eq!(Model::parse(None).unwrap(), Model::Base);
+    assert_eq!(Model::parse(Some("")).unwrap(), Model::Base);
+    assert_eq!(Model::parse(Some(" small ")).unwrap(), Model::Small);
+    assert!(Model::parse(Some("large")).is_err());
+    assert!(Model::parse(Some("../small")).is_err());
+    assert_eq!(Model::DEFAULT.file(), "ggml-base.bin");
+    assert_eq!(Model::Base.size(), 147_951_465);
 }
 
 #[test]
@@ -126,6 +151,8 @@ fn speech_text_is_cleaned() {
 async fn status_reports_the_build() {
     let status = voice_status().await;
     assert_eq!(status.built, cfg!(feature = "voice"));
-    assert_eq!(status.model_mb, 465);
+    assert_eq!(status.model_mb, 141);
+    assert_eq!(status.models.len(), 2);
+    assert!(status.models.iter().any(|m| m.id == "small" && m.mb == 465 && !m.default));
     assert!(status.models_dir.ends_with("models"));
 }

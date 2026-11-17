@@ -1,4 +1,23 @@
-// The machine app has no top bar: each page draws its own (the chat's slim bar, or ‹ back + title).
-export default function MachineLayout({ children }: { children: React.ReactNode }) {
-  return <main className="h-dvh overflow-hidden bg-background">{children}</main>
+import { Suspense } from "react"
+
+import type { Locale } from "@/components/local/config"
+import { MachineMenu } from "@/components/machine/menu/content"
+
+// The machine app has no chrome: the page, and one floating two-line button that opens the mega menu.
+export default async function MachineLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ lang: string }>
+}) {
+  const { lang } = await params
+  return (
+    <main className="h-dvh overflow-hidden bg-background">
+      {children}
+      <Suspense fallback={null}>
+        <MachineMenu lang={lang as Locale} />
+      </Suspense>
+    </main>
+  )
 }

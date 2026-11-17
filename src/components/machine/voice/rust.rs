@@ -2,7 +2,7 @@
 //!
 //! The webview captures the microphone (`getUserMedia` + `AudioWorklet`) and sends raw f32 mono
 //! PCM; Rust resamples to 16 kHz and runs whisper.cpp (`whisper-rs`, cargo feature `voice`)
-//! on the multilingual `ggml-small.bin`. Replies are spoken with the OS voices.
+//! on a multilingual ggml model (`base` by default, `small` on request). Replies are spoken with the OS voices.
 
 #[path = "audio.rs"]
 pub mod audio;
@@ -21,7 +21,7 @@ use tauri::{
 };
 use ts_rs::TS;
 
-pub use model::ModelEvent;
+pub use model::{Model, ModelEvent};
 
 #[derive(Debug, thiserror::Error)]
 pub enum VoiceError {
@@ -59,13 +59,27 @@ impl Serialize for VoiceError {
 pub struct VoiceStatus {
     /// Whisper is compiled in.
     pub built: bool,
+    /// The default model (`base`) is downloaded.
     pub model_ready: bool,
     pub model_mb: u32,
+    /// Every selectable model and whether it is on disk.
+    pub models: Vec<ModelStatus>,
     pub models_dir: String,
     /// The OS can speak replies.
     pub tts: bool,
     /// The Arabic voice that will be used, when the OS reports one.
     pub arabic_voice: Option<String>,
+}
+
+/// One selectable speech model.
+#[derive(Debug, Clone, Serialize, TS)]
+#[ts(export, export_to = "voice/types.ts")]
+pub struct ModelStatus {
+    /// `base` or `small`.
+    pub id: String,
+    pub mb: u32,
+    pub ready: bool,
+    pub default: bool,
 }
 
 /// One transcription.
@@ -115,7 +129,7 @@ pub fn clean_transcript(raw: &str) -> String {
 #[cfg(feature = "voice")]
 mod engine {
     use std::{
-        path::Path,
+        path::{Path, PathBuf},
         sync::{Arc, Mutex},
     };
 
@@ -123,18 +137,21 @@ mod engine {
 
     use super::{VoiceError, clean_transcript, needs_rerun};
 
-    static CTX: Mutex<Option<Arc<WhisperContext>>> = Mutex::new(None);
+    /// The loaded context and the file it came from, so switching models reloads.
+    static CTX: Mutex<Option<(PathBuf, Arc<WhisperContext>)>> = Mutex::new(None);
 
     fn context(path: &Path) -> Result<Arc<WhisperContext>, VoiceError> {
         let mut guard = CTX.lock().map_err(|_| VoiceError::Whisper("lock poisoned".into()))?;
-        if let Some(c) = guard.as_ref() {
+        if let Some((loaded, c)) = guard.as_ref()
+            && loaded == path
+        {
             return Ok(Arc::clone(c));
         }
-        let path = path.to_str().ok_or(VoiceError::Invalid("model path"))?;
-        let ctx = WhisperContext::new_with_params(path, WhisperContextParameters::default())
+        let name = path.to_str().ok_or(VoiceError::Invalid("model path"))?;
+        let ctx = WhisperContext::new_with_params(name, WhisperContextParameters::default())
             .map_err(|e| VoiceError::Whisper(e.to_string()))?;
         let ctx = Arc::new(ctx);
-        *guard = Some(Arc::clone(&ctx));
+        *guard = Some((path.to_path_buf(), Arc::clone(&ctx)));
         Ok(ctx)
     }
 
@@ -195,17 +212,28 @@ async fn voice_status() -> VoiceStatus {
     let (tts, arabic_voice) = tts::availability().await;
     VoiceStatus {
         built: cfg!(feature = "voice"),
-        model_ready: model::is_ready(&model::model_path()),
-        model_mb: u32::try_from(model::SIZE / 1_048_576).unwrap_or(0),
+        model_ready: model::is_ready(&model::model_path(Model::DEFAULT), Model::DEFAULT),
+        model_mb: Model::DEFAULT.mb(),
+        models: Model::ALL
+            .iter()
+            .map(|&m| ModelStatus {
+                id: m.id().into(),
+                mb: m.mb(),
+                ready: model::is_ready(&model::model_path(m), m),
+                default: m == Model::DEFAULT,
+            })
+            .collect(),
         models_dir: model::models_dir().display().to_string(),
         tts,
         arabic_voice,
     }
 }
 
-/// `download_model` — fetch the speech model once, streaming progress to the UI.
+/// `download_model` — fetch a speech model once (`model`: `base` by default, or `small`),
+/// streaming progress to the UI.
 #[tauri::command]
-async fn download_model(on_progress: Channel<ModelEvent>) -> Result<(), VoiceError> {
+async fn download_model(model: Option<String>, on_progress: Channel<ModelEvent>) -> Result<(), VoiceError> {
+    let model = Model::parse(model.as_deref())?;
     #[cfg(feature = "voice")]
     {
         use std::sync::atomic::{AtomicBool, Ordering};
@@ -213,7 +241,7 @@ async fn download_model(on_progress: Channel<ModelEvent>) -> Result<(), VoiceErr
         if BUSY.swap(true, Ordering::AcqRel) {
             return Err(VoiceError::Busy);
         }
-        let result = model::ensure(|e| {
+        let result = model::ensure(model, |e| {
             let _ = on_progress.send(e);
         })
         .await;
@@ -222,13 +250,13 @@ async fn download_model(on_progress: Channel<ModelEvent>) -> Result<(), VoiceErr
     }
     #[cfg(not(feature = "voice"))]
     {
-        let _ = on_progress;
+        let _ = (model, on_progress);
         Err(VoiceError::NotBuilt)
     }
 }
 
 /// `transcribe` — raw body: little-endian f32 mono samples. Headers: `x-rate` (Hz of the
-/// samples) and `x-lang` (`ar` / `en` / `auto`).
+/// samples), `x-lang` (`ar` / `en` / `auto`) and optional `x-model` (`base` default / `small`).
 #[tauri::command]
 async fn transcribe(request: Request<'_>) -> Result<Transcript, VoiceError> {
     let InvokeBody::Raw(bytes) = request.body() else {
@@ -237,11 +265,12 @@ async fn transcribe(request: Request<'_>) -> Result<Transcript, VoiceError> {
     let rate: u32 = header(&request, "x-rate").and_then(|v| v.parse().ok()).ok_or(VoiceError::Invalid("x-rate header"))?;
     let hint = parse_hint(header(&request, "x-lang"));
     let pcm = audio::prepare(bytes, rate)?;
-    let path = model::model_path();
+    let model = Model::parse(header(&request, "x-model"))?;
+    let path = model::model_path(model);
     if !cfg!(feature = "voice") {
         return Err(VoiceError::NotBuilt);
     }
-    if !model::is_ready(&path) {
+    if !model::is_ready(&path, model) {
         return Err(VoiceError::NoModel);
     }
     let started = Instant::now();

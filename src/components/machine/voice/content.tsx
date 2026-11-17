@@ -39,7 +39,7 @@ export function VoiceButton({ lang, onTranscript, className }: VoiceButtonProps)
   const t = {
     off: isAr ? "الصوت يعمل داخل تطبيق كن فقط" : "Voice works inside the Kun app only",
     notBuilt: isAr ? "الصوت غير مفعّل في هذا الإصدار" : "Voice is not built into this version",
-    download: isAr ? `نزّل نموذج الصوت (${status?.model_mb ?? 465} م.ب)` : `Download the speech model (${status?.model_mb ?? 465} MB)`,
+    download: isAr ? `نزّل نموذج الصوت (${status?.model_mb ?? 141} م.ب)` : `Download the speech model (${status?.model_mb ?? 141} MB)`,
     talk: isAr ? "اضغط للتحدث" : "Tap to talk",
     stop: isAr ? "اضغط للإيقاف" : "Tap to stop",
     working: isAr ? "جارٍ التحويل…" : "Transcribing…",

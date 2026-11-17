@@ -1,0 +1,40 @@
+{
+  "name": "marketing",
+  "title": "Marketing",
+  "title_ar": "التسويق",
+  "description": "Plan the calendar, draft Arabic-first posts, build carousels, get approval, publish and measure.",
+  "description_ar": "تخطيط التقويم، كتابة منشورات عربية أولاً، تصميم الكاروسيل، الاعتماد، النشر وقياس الأداء.",
+  "items": [
+    "skill:draft",
+    "skill:calendar",
+    "skill:social",
+    "skill:carousel",
+    "skill:measure",
+    "skill:approve",
+    "skill:publish"
+  ],
+  "prompt": "prompt.md",
+  "defaultDriver": "claude",
+  "quickActions": [
+    {
+      "label_ar": "منشور عن ميزة",
+      "label_en": "Post about a feature",
+      "prompt": "اكتب منشوراً عن ميزة الحضور في هوغورتس، عربي أولاً، بعد أن تقرأ الكود والوثائق."
+    },
+    {
+      "label_ar": "تقويم الأسبوع",
+      "label_en": "This week's calendar",
+      "prompt": "ما الذي ننشره هذا الأسبوع ولأي علامة؟ اقترح خطة من المنشورات."
+    },
+    {
+      "label_ar": "كاروسيل",
+      "label_en": "Carousel",
+      "prompt": "صمّم كاروسيل من ٥ شرائح يشرح ميزة من هوغورتس لمدير مدرسة."
+    },
+    {
+      "label_ar": "أداء المنشورات",
+      "label_en": "How did the posts do",
+      "prompt": "كيف كان أداء آخر منشوراتنا؟ اعرض الوصول والتفاعل."
+    }
+  ]
+}

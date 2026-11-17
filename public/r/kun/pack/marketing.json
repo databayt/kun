@@ -1,0 +1,32 @@
+{
+  "id": "pack:marketing",
+  "name": "marketing",
+  "type": "kun:pack",
+  "title": "Marketing",
+  "description": "Plan the calendar, draft Arabic-first posts, build carousels, get approval, publish and measure.",
+  "title_ar": "التسويق",
+  "description_ar": "تخطيط التقويم، كتابة منشورات عربية أولاً، تصميم الكاروسيل، الاعتماد، النشر وقياس الأداء.",
+  "keywords": [],
+  "dependencies": [
+    "skill:draft",
+    "skill:calendar",
+    "skill:social",
+    "skill:carousel",
+    "skill:measure",
+    "skill:approve",
+    "skill:publish"
+  ],
+  "files": [
+    {
+      "path": "departments/marketing/pack.json",
+      "target": "departments/marketing/pack.json",
+      "sha256": "3b9e170ea4e3e0a1b1023c231b67f17c3bad333a16031c8bbb137c1bfb178205"
+    },
+    {
+      "path": "departments/marketing/prompt.md",
+      "target": "departments/marketing/prompt.md",
+      "sha256": "14024ec25b79d596841f7518bd2d69e3293f625dc0e67b3f7c37c9d93a4b6141"
+    }
+  ],
+  "version": "ff34e056406bac60f00158a5c92dac470db641b00d6f6cf38aab45544c72af20"
+}

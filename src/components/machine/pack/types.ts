@@ -10,3 +10,13 @@ export type PackInfo = { department: string, title_ar: string, title_en: string,
  * A one-tap prompt shown under the greeting.
  */
 export type QuickAction = { label_ar: string, label_en: string, prompt: string, };
+
+/**
+ * One progress step of `sync_repos`.
+ */
+export type SyncEvent = { repo: string, state: SyncState, message: string | null, };
+
+/**
+ * What happened to one repo.
+ */
+export type SyncState = "cloning" | "pulling" | "done" | "failed";

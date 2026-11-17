@@ -1,0 +1,126 @@
+name: Machine
+
+# The Rust/Tauri desktop app in machine/. Runs only when something it is built from changes.
+#   rust    — fmt, clippy -D warnings, tests (Linux: the cheapest runner, same code)
+#   windows — tests on Windows, then an UNSIGNED .msi uploaded as a build artifact.
+# It never creates a release: publishing the installer is outward-facing and stays a human step.
+
+on:
+  pull_request:
+    paths:
+      - "machine/**"
+      - "src/components/machine/**/*.rs"
+      - "src/components/machine/**/capability.json"
+      - "departments/**"
+      - "machines/**"
+      - ".github/workflows/machine.yml"
+  push:
+    branches: [main]
+    paths:
+      - "machine/**"
+      - "src/components/machine/**/*.rs"
+      - "src/components/machine/**/capability.json"
+      - "departments/**"
+      - "machines/**"
+      - ".github/workflows/machine.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: machine-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # Keep in step with `rust-version` in machine/Cargo.toml.
+  RUST_MSRV: "1.90"
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: machine
+    steps:
+      - uses: actions/checkout@v4
+
+      # What Tauri (webkit2gtk) and whisper.cpp (cmake + libclang for bindgen) need on Linux.
+      - name: Install system dependencies
+        working-directory: .
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake clang libclang-dev pkg-config curl wget file \
+            libwebkit2gtk-4.1-dev libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev librsvg2-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_MSRV }}
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "machine -> target"
+
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo test --locked
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_MSRV }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "machine -> target"
+
+      # whisper-rs compiles whisper.cpp: it needs cmake (preinstalled with Visual Studio on the
+      # runner) and libclang for bindgen. The runner image ships LLVM; install it only if not.
+      - name: Make LLVM and cmake available
+        shell: pwsh
+        run: |
+          $llvm = 'C:\Program Files\LLVM\bin'
+          if (-not (Test-Path "$llvm\libclang.dll")) {
+            choco install llvm --no-progress -y
+          }
+          "LIBCLANG_PATH=$llvm" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
+            choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' --no-progress -y
+          }
+
+      - name: cargo test
+        working-directory: machine
+        run: cargo test --locked
+
+      # Only the Tauri CLI is needed from node: the window loads a remote URL, so there is no
+      # frontend build here. --ignore-scripts skips the web app's postinstall hooks.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # Unsigned: Windows SmartScreen shows "More info -> Run anyway" once on first launch.
+      # Run from the repo root: the Tauri CLI finds machine/tauri.conf.json there (checked with `pnpm tauri info`).
+      - name: Build the .msi
+        run: pnpm tauri build --bundles msi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: machine-windows-msi
+          path: machine/target/release/bundle/msi/*.msi
+          if-no-files-found: error
+          retention-days: 14

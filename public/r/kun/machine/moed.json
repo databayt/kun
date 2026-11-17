@@ -1,0 +1,21 @@
+{
+  "id": "machine:moed",
+  "name": "moed",
+  "type": "kun:machine",
+  "title": "معد",
+  "description": "windows machine · sales, marketing, video · code read",
+  "keywords": [],
+  "dependencies": [
+    "pack:sales",
+    "pack:marketing",
+    "pack:video"
+  ],
+  "files": [
+    {
+      "path": "machines/moed.json",
+      "target": "machines/moed.json",
+      "sha256": "f62f96ed9efb52235588a4ae147cad865910973ac8373bd8ec5d1b068cc67d4e"
+    }
+  ],
+  "version": "e863124f1231eba6a0843ece27218942e7db39200b3e5566f44847c474df3c33"
+}

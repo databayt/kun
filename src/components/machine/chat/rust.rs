@@ -1,6 +1,7 @@
 //! chat — sends a prompt to the teammate's agent CLI and streams what comes back.
 //!
-//! `ask` builds a [`driver::Job`] that runs inside the department's pack folder, streams
+//! `ask` builds a [`driver::Job`] that runs inside the profile's workspace (or the department's
+//! pack folder when there is no profile), streams
 //! every normalized event down a Tauri `Channel`, and remembers the session so the
 //! conversation can be reopened. `stop` cancels a running job; dropping the run kills the
 //! child process (`kill_on_drop`), so a stopped job leaves nothing behind.
@@ -20,7 +21,8 @@ use tokio::sync::oneshot;
 
 use crate::{
     driver::{self, DriverError, DriverKind, Event, Job},
-    pack::PackError,
+    pack::{self, PackError, Workspace},
+    profile::{self, OsStore, ProfileError, Resolved},
     sessions,
     settings::{self, SettingsError},
 };
@@ -35,6 +37,8 @@ pub enum ChatError {
     Settings(#[from] SettingsError),
     #[error(transparent)]
     Pack(#[from] PackError),
+    #[error(transparent)]
+    Profile(#[from] ProfileError),
     #[error(transparent)]
     Driver(#[from] DriverError),
 }
@@ -89,11 +93,55 @@ fn title_from(prompt: &str) -> String {
     if title.is_empty() { "…".into() } else { title }
 }
 
-fn build_job(job_id: &str, driver: DriverKind, prompt: String, cwd: String, session: Option<String>) -> Result<Job, ChatError> {
+/// The flags that give a run its world: every repo of the profile that is on disk, then the
+/// generated settings file. Only claude takes them.
+fn job_extras(kind: DriverKind, repos: &[String], ws: &Workspace) -> Vec<String> {
+    if kind != DriverKind::Claude {
+        return Vec::new();
+    }
+    let mut args = Vec::new();
+    for name in repos {
+        let dir = ws.repos.join(name);
+        if dir.is_dir() {
+            args.extend(["--add-dir".to_owned(), dir.display().to_string()]);
+        }
+    }
+    args.extend(["--settings".to_owned(), ws.settings_file.display().to_string()]);
+    args
+}
+
+/// The driver for a run: the profile's when it fixes one, else the request, else the saved default.
+fn pick_driver(resolved: &Resolved, requested: Option<DriverKind>, saved: DriverKind) -> DriverKind {
+    if resolved.driver_locked { resolved.profile.driver } else { requested.unwrap_or(saved) }
+}
+
+fn build_job(
+    job_id: &str,
+    driver: DriverKind,
+    prompt: String,
+    cwd: String,
+    session: Option<String>,
+    extra_args: Vec<String>,
+    env: Vec<(String, String)>,
+) -> Result<Job, ChatError> {
     if !valid_job_id(job_id) {
         return Err(ChatError::BadJobId);
     }
-    Ok(Job { job_id: job_id.to_owned(), driver, prompt, cwd, session, timeout_secs: None })
+    Ok(Job { job_id: job_id.to_owned(), driver, prompt, cwd, session, timeout_secs: None, extra_args, env })
+}
+
+/// Where and how a run starts: its folder, extra flags and secrets. Blocking (filesystem, keychain).
+/// Folder, extra flags and environment of one run.
+type RunSetup = (String, Vec<String>, Vec<(String, String)>);
+
+fn prepare_run(resolved: &Resolved, department: &str, kind: DriverKind) -> Result<RunSetup, ChatError> {
+    if !resolved.explicit {
+        return Ok((pack::workdir(department)?.display().to_string(), Vec::new(), Vec::new()));
+    }
+    let ws = pack::workspace(&resolved.profile)?;
+    let extras = job_extras(kind, &resolved.profile.repos, &ws);
+    let env = profile::secret_env(&OsStore, resolved)?;
+    Ok((ws.dir.display().to_string(), extras, env))
 }
 
 /// `ask` — runs one prompt, streaming events to `channel`. The frontend supplies `job_id`
@@ -108,9 +156,13 @@ async fn ask(
     channel: Channel<Event>,
 ) -> Result<(), ChatError> {
     let settings = settings::load()?;
-    let kind = driver.unwrap_or(settings.driver);
-    let cwd = crate::pack::workdir(&settings.department)?;
-    let job = build_job(&job_id, kind, prompt, cwd.display().to_string(), session)?;
+    let resolved = profile::current()?;
+    let kind = pick_driver(&resolved, driver, settings.driver);
+    let department = settings.department.clone();
+    let (cwd, extras, env) = tokio::task::spawn_blocking(move || prepare_run(&resolved, &department, kind))
+        .await
+        .map_err(|e| ChatError::Pack(PackError::Profile(e.to_string())))??;
+    let job = build_job(&job_id, kind, prompt, cwd, session, extras, env)?;
     let (tx, rx) = oneshot::channel();
     let _registration = register(&job.job_id, tx)?;
 

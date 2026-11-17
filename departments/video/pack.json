@@ -1,0 +1,34 @@
+{
+  "name": "video",
+  "title": "Video production",
+  "title_ar": "إنتاج الفيديو",
+  "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
+  "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
+  "items": [
+    "skill:edit",
+    "skill:shoot",
+    "skill:record",
+    "skill:higgs",
+    "skill:carousel",
+    "agent:media-qa"
+  ],
+  "prompt": "prompt.md",
+  "defaultDriver": "claude",
+  "quickActions": [
+    {
+      "label_ar": "ريلز من فيديو",
+      "label_en": "Reel from a video",
+      "prompt": "اصنع ريلز قصيرة من آخر فيديو في مجلد العمل مع ترجمة عربية."
+    },
+    {
+      "label_ar": "سكربت فيديو",
+      "label_en": "Video script",
+      "prompt": "اكتب سكربت فيديو ٦٠ ثانية لميزة من هوغورتس: الفكرة، اللقطات، والتعليق الصوتي."
+    },
+    {
+      "label_ar": "لقطات شاشة",
+      "label_en": "Screenshots",
+      "prompt": "خذ لقطات شاشة لصفحة الحضور في هوغورتس."
+    }
+  ]
+}

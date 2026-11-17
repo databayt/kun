@@ -1,7 +1,7 @@
 // pack — the TS face of rust.rs (IPC to the local Rust plugin).
-import { invoke, isTauri } from "@tauri-apps/api/core"
+import { Channel, invoke, isTauri } from "@tauri-apps/api/core"
 
-import type { PackInfo } from "./types"
+import type { PackInfo, SyncEvent } from "./types"
 
 /** A department's title and quick actions; null outside the machine app. */
 export async function packInfo(department: string): Promise<PackInfo | null> {
@@ -13,4 +13,12 @@ export async function packInfo(department: string): Promise<PackInfo | null> {
 export async function departments(): Promise<string[]> {
   if (!isTauri()) return []
   return invoke<string[]>("plugin:pack|departments")
+}
+
+/** Clones the profile's repos into ~/Kun/repos (or fast-forwards them); one event per step. Never pushes. */
+export async function syncRepos(onEvent: (event: SyncEvent) => void): Promise<void> {
+  if (!isTauri()) return
+  const channel = new Channel<SyncEvent>()
+  channel.onmessage = onEvent
+  return invoke<void>("plugin:pack|sync_repos", { channel })
 }

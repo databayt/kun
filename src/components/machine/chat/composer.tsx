@@ -1,6 +1,6 @@
 "use client"
 
-import { useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { ArrowUpIcon, PlusIcon, SquareIcon } from "lucide-react"
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -25,6 +25,7 @@ export function Composer({
   busy,
   actions,
   autoFocus,
+  initialText,
 }: {
   lang: Locale
   onSend: (text: string) => void
@@ -32,10 +33,12 @@ export function Composer({
   busy: boolean
   actions: QuickAction[]
   autoFocus?: boolean
+  /** Fills the box without sending (a starter from the menu). */
+  initialText?: string
 }) {
   const isAr = lang === "ar"
   const t = tr(isAr)
-  const [text, setText] = useState("")
+  const [text, setText] = useState(initialText ?? "")
   const [plus, setPlus] = useState(false)
   const ref = useRef<HTMLTextAreaElement>(null)
 
@@ -46,6 +49,12 @@ export function Composer({
     el.style.height = "auto"
     el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT_PX)}px`
   }, [text])
+
+  // A starter fills the box; the caret goes to its end so the person carries on typing.
+  useEffect(() => {
+    const el = ref.current
+    if (el && initialText) el.setSelectionRange(el.value.length, el.value.length)
+  }, [initialText])
 
   const canSend = !busy && !!text.trim()
   const submit = () => {

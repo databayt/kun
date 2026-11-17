@@ -1,6 +1,6 @@
 "use client"
 
-// The machine app shell: the page bar the secondary pages share (catalog, engine, settings),
+// The machine app shell: the page frame the secondary pages share (catalog, engine, settings),
 // and the "open in machine" state every machine page shows when it is loaded in a plain browser.
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -9,7 +9,6 @@ import { ChevronLeftIcon } from "lucide-react"
 
 import type { Locale } from "@/components/local/config"
 import { copy, tr } from "../chat/config"
-import { ChatHeader, headerButton } from "./header"
 
 /** null while unknown (first render), then whether the page runs inside the machine app. */
 export function useInMachine(): boolean | null {
@@ -19,8 +18,8 @@ export function useInMachine(): boolean | null {
 }
 
 /**
- * A secondary page in the chat's frame: the same bar (‹ back to the chat · title start-aligned),
- * then a scrolling column as wide as the chat's.
+ * A secondary page: no bar, only the floating menu button above it. A scrolling column as wide as the
+ * chat's, the title as its first line, and an optional small link back (the catalog's item pages).
  */
 export function PageShell({
   lang,
@@ -31,27 +30,22 @@ export function PageShell({
 }: {
   lang: Locale
   title: string
-  /** Where ‹ goes; the chat by default. */
+  /** A small link above the title (item page → catalog). None by default: the menu is the way around. */
   backHref?: string
   backLabel?: string
   children: React.ReactNode
 }) {
-  const t = tr(lang === "ar")
-  const [scrolled, setScrolled] = useState(false)
-  const label = backLabel ?? t(copy.back)
   return (
-    <div className="flex h-full flex-col bg-background">
-      <ChatHeader
-        title={title}
-        scrolled={scrolled}
-        start={
-          <Link href={backHref ?? `/${lang}/machine`} aria-label={label} title={label} className={headerButton}>
-            <ChevronLeftIcon className="rtl:rotate-180" aria-hidden />
+    <div className="h-full overflow-y-auto overscroll-contain bg-background">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.75rem))]">
+        {backHref && (
+          <Link href={backHref} className="mb-2 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <ChevronLeftIcon className="size-4 rtl:rotate-180" aria-hidden />
+            {backLabel}
           </Link>
-        }
-      />
-      <div onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-4">{children}</div>
+        )}
+        <h1 className="mb-4 text-balance text-2xl font-semibold tracking-tight">{title}</h1>
+        {children}
       </div>
     </div>
   )

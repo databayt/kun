@@ -1,0 +1,31 @@
+{
+  "id": "pack:video",
+  "name": "video",
+  "type": "kun:pack",
+  "title": "Video production",
+  "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
+  "title_ar": "إنتاج الفيديو",
+  "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
+  "keywords": [],
+  "dependencies": [
+    "skill:edit",
+    "skill:shoot",
+    "skill:record",
+    "skill:higgs",
+    "skill:carousel",
+    "agent:media-qa"
+  ],
+  "files": [
+    {
+      "path": "departments/video/pack.json",
+      "target": "departments/video/pack.json",
+      "sha256": "df13dce598c62cb24f77e6c47d48d1cd76d8cfb60fa81eaf0166c713cabe815d"
+    },
+    {
+      "path": "departments/video/prompt.md",
+      "target": "departments/video/prompt.md",
+      "sha256": "79b64693c9e4c5095d8908c38fe65791002b17a83202c656ebef79cad656c7a9"
+    }
+  ],
+  "version": "3e9fc16af88cf9709ab9220cb5d420573ff22e478e6731d23f19755da487f428"
+}

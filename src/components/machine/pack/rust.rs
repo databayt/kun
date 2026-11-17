@@ -1,9 +1,15 @@
-//! pack — builds the working folder a department's agent runs in.
+//! pack — builds the working folder an agent runs in.
 //!
-//! `~/.kun/machine/<dept>/` holds a `CLAUDE.md` and `AGENTS.md` generated from the
+//! Without a machine profile, `~/.kun/machine/<dept>/` holds a `CLAUDE.md` and `AGENTS.md` generated from the
 //! department's `prompt.md` (plus a pointer to kun's own rules), and the pack's skills
 //! symlinked in, so every run starts with the right context and nothing else. The folder
 //! is rebuilt from kun's checkout on every call, so it is idempotent and never drifts.
+//!
+//! With a profile (`machines/<login>.json`) the run lives in `~/Kun/<login>/` instead
+//! (`workspace.rs`): CLAUDE.md, a generated KNOWLEDGE.md, the profile's skills, a `work/`
+//! folder and the `--settings` file that enforces read-only code. The profile's public repos
+//! are cloned into `~/Kun/repos/` and only ever fast-forwarded (`repos.rs`). Skill links
+//! (`link.rs`) use junctions on Windows.
 
 use std::{
     fs, io,
@@ -14,11 +20,22 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tauri::{
     Runtime,
+    ipc::Channel,
     plugin::{Builder, TauriPlugin},
 };
 use ts_rs::TS;
 
 use crate::driver::DriverKind;
+
+#[path = "link.rs"]
+mod link;
+#[path = "repos.rs"]
+mod repos;
+#[path = "workspace.rs"]
+mod workspace;
+
+pub use repos::{SyncEvent, SyncState};
+pub use workspace::{Workspace, ensure_workspace_in, settings_json};
 
 #[derive(Debug, thiserror::Error)]
 pub enum PackError {
@@ -30,6 +47,10 @@ pub enum PackError {
     Missing(String, String),
     #[error("{0}: {1}")]
     Io(String, io::Error),
+    #[error("repo name is invalid: {0}")]
+    BadRepo(String),
+    #[error("{0}")]
+    Profile(String),
 }
 
 impl Serialize for PackError {
@@ -79,6 +100,8 @@ struct RawPack {
     #[serde(default)]
     title: Value,
     #[serde(default)]
+    title_ar: Option<String>,
+    #[serde(default)]
     items: Vec<Value>,
     #[serde(default, rename = "defaultDriver")]
     default_driver: Option<DriverKind>,
@@ -125,49 +148,6 @@ fn write_if_changed(path: &Path, content: &str) -> Result<(), PackError> {
     let tmp = path.with_extension("tmp");
     fs::write(&tmp, content).map_err(io_err(&tmp))?;
     fs::rename(&tmp, path).map_err(io_err(path))
-}
-
-#[cfg(unix)]
-fn symlink(target: &Path, link: &Path) -> io::Result<()> {
-    std::os::unix::fs::symlink(target, link)
-}
-#[cfg(windows)]
-fn symlink(target: &Path, link: &Path) -> io::Result<()> {
-    std::os::windows::fs::symlink_dir(target, link)
-}
-
-/// Makes `dest/<name>` point at `src/<name>` for every wanted name that exists, and removes
-/// our own stale links (symlinks into `src` that are no longer wanted). Real files are never touched.
-fn link_skills(src: &Path, dest: &Path, wanted: &[String]) -> Result<(), PackError> {
-    fs::create_dir_all(dest).map_err(io_err(dest))?;
-    for name in wanted {
-        let target = src.join(name);
-        if !target.exists() {
-            continue;
-        }
-        let link = dest.join(name);
-        match fs::symlink_metadata(&link) {
-            Ok(m) if m.file_type().is_symlink() => {
-                if fs::read_link(&link).is_ok_and(|t| t == target) {
-                    continue;
-                }
-                fs::remove_file(&link).map_err(io_err(&link))?;
-            }
-            Ok(_) => continue,
-            Err(e) if e.kind() == io::ErrorKind::NotFound => {}
-            Err(e) => return Err(io_err(&link)(e)),
-        }
-        symlink(&target, &link).map_err(io_err(&link))?;
-    }
-    for entry in fs::read_dir(dest).map_err(io_err(dest))?.flatten() {
-        let path = entry.path();
-        let ours = fs::read_link(&path).is_ok_and(|t| t.starts_with(src));
-        let keep = wanted.iter().any(|w| path.file_name().is_some_and(|n| n == w.as_str()));
-        if ours && !keep {
-            fs::remove_file(&path).map_err(io_err(&path))?;
-        }
-    }
-    Ok(())
 }
 
 /// Skill names an `items` list asks for: the catalog id `"skill:edit"`, `"skills/edit"`,
@@ -218,10 +198,10 @@ pub fn ensure_in(kun: &Path, machine: &Path, dept: &str) -> Result<PathBuf, Pack
     )?;
 
     let wanted = item_names(&read_pack(kun, dept).items);
-    link_skills(&kun.join(".claude/skills"), &dir.join(".claude/skills"), &wanted)?;
+    link::link_skills(&kun.join(".claude/skills"), &dir.join(".claude/skills"), &wanted)?;
     let agents = kun.join(".agents/skills");
     if agents.is_dir() {
-        link_skills(&agents, &dir.join(".agents/skills"), &wanted)?;
+        link::link_skills(&agents, &dir.join(".agents/skills"), &wanted)?;
     }
     Ok(dir)
 }
@@ -234,25 +214,37 @@ pub fn workdir(dept: &str) -> Result<PathBuf, PackError> {
     ensure_in(&kun_dir()?, &machine_dir()?, dept)
 }
 
-/// A department's pack as the UI needs it. A missing `pack.json` gives an empty pack.
+/// A pack's titles, quick actions and skill names: what profiles and the UI read.
+#[derive(Debug, Clone, Default)]
+pub struct PackMeta {
+    pub title_ar: Option<String>,
+    pub title_en: Option<String>,
+    pub quick_actions: Vec<QuickAction>,
+    pub skills: Vec<String>,
+    pub default_driver: Option<DriverKind>,
+}
+
+/// Reads `departments/<dept>/pack.json`. A missing file gives an empty meta.
 ///
 /// # Errors
 /// On a bad name.
-pub fn info_in(kun: &Path, dept: &str) -> Result<PackInfo, PackError> {
+pub fn meta_in(kun: &Path, dept: &str) -> Result<PackMeta, PackError> {
     if !valid_name(dept) {
         return Err(PackError::BadName);
     }
     let raw = read_pack(kun, dept);
     let pick = |key: &str| match &raw.title {
-        Value::String(s) => Some(s.clone()),
         Value::Object(o) => o.get(key).and_then(Value::as_str).map(str::to_owned),
         _ => None,
     };
-    let fallback = raw.name.clone().unwrap_or_else(|| dept.to_owned());
-    Ok(PackInfo {
-        department: dept.to_owned(),
-        title_ar: pick("ar").unwrap_or_else(|| fallback.clone()),
-        title_en: pick("en").unwrap_or(fallback),
+    let plain = match &raw.title {
+        Value::String(s) => Some(s.clone()),
+        _ => None,
+    };
+    Ok(PackMeta {
+        title_ar: raw.title_ar.clone().or_else(|| pick("ar")),
+        title_en: pick("en").or(plain),
+        skills: item_names(&raw.items),
         default_driver: raw.default_driver,
         quick_actions: raw
             .quick_actions
@@ -260,6 +252,22 @@ pub fn info_in(kun: &Path, dept: &str) -> Result<PackInfo, PackError> {
             .filter(|q| !q.prompt.trim().is_empty())
             .map(|q| QuickAction { label_ar: q.label_ar, label_en: q.label_en, prompt: q.prompt })
             .collect(),
+    })
+}
+
+/// A department's pack as the UI needs it. A missing `pack.json` gives an empty pack.
+///
+/// # Errors
+/// On a bad name.
+pub fn info_in(kun: &Path, dept: &str) -> Result<PackInfo, PackError> {
+    let meta = meta_in(kun, dept)?;
+    let fallback = read_pack(kun, dept).name.unwrap_or_else(|| dept.to_owned());
+    Ok(PackInfo {
+        department: dept.to_owned(),
+        title_ar: meta.title_ar.unwrap_or_else(|| fallback.clone()),
+        title_en: meta.title_en.unwrap_or(fallback),
+        default_driver: meta.default_driver,
+        quick_actions: meta.quick_actions,
     })
 }
 
@@ -291,16 +299,52 @@ fn info(department: String) -> Result<PackInfo, PackError> {
     info_in(&kun_dir()?, &department)
 }
 
-/// `prepare` — builds the working folder and returns its path.
+/// The base folder for profile workspaces: `KUN_HOME/Kun` when `KUN_HOME` is set, else `~/Kun`.
+///
+/// # Errors
+/// When there is no home folder and no override.
+pub fn workspace_root() -> Result<PathBuf, PackError> {
+    match std::env::var_os("KUN_HOME") {
+        Some(p) if !p.is_empty() => Ok(PathBuf::from(p).join("Kun")),
+        _ => dirs::home_dir().map(|h| h.join("Kun")).ok_or(PackError::NoHome),
+    }
+}
+
+/// The profile's workspace (`<root>/<login>/`), built on demand.
+///
+/// # Errors
+/// See [`ensure_workspace_in`].
+pub fn workspace(profile: &crate::profile::MachineProfile) -> Result<Workspace, PackError> {
+    ensure_workspace_in(&kun_dir()?, &workspace_root()?, profile)
+}
+
+/// `prepare` — builds the working folder and returns its path. A signed-in profile gets its
+/// workspace, anyone else the department folder.
 #[tauri::command]
 #[allow(clippy::needless_pass_by_value)]
 fn prepare(department: String) -> Result<String, PackError> {
+    let resolved = crate::profile::current().map_err(|e| PackError::Profile(e.to_string()))?;
+    if resolved.explicit {
+        return workspace(&resolved.profile).map(|w| w.dir.display().to_string());
+    }
     workdir(&department).map(|p| p.display().to_string())
+}
+
+/// `sync_repos` — clones the profile's repos into `~/Kun/repos/` or fast-forwards them,
+/// streaming one event per step. Never pushes.
+#[tauri::command]
+async fn sync_repos(channel: Channel<SyncEvent>) -> Result<(), PackError> {
+    let resolved = crate::profile::current().map_err(|e| PackError::Profile(e.to_string()))?;
+    let root = workspace_root()?.join("repos");
+    repos::sync_all(&root, &resolved.profile.repos, repos::GITHUB_BASE, |e| {
+        let _ = channel.send(e);
+    })
+    .await
 }
 
 #[must_use]
 pub fn plugin<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("pack").invoke_handler(tauri::generate_handler![departments, info, prepare]).build()
+    Builder::new("pack").invoke_handler(tauri::generate_handler![departments, info, prepare, sync_repos]).build()
 }
 
 #[cfg(test)]

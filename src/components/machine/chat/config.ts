@@ -6,15 +6,6 @@ export interface Copy {
 
 export const copy = {
   name: { en: "Kun", ar: "كن" },
-  menu: { en: "Menu", ar: "القائمة" },
-  newChat: { en: "New chat", ar: "محادثة جديدة" },
-  more: { en: "More", ar: "المزيد" },
-  readAloud: { en: "Read replies aloud", ar: "قراءة الردود بصوت" },
-  driver: { en: "Agent", ar: "الوكيل" },
-  installed: { en: "Installed", ar: "مثبّت" },
-  notInstalled: { en: "Not installed", ar: "غير مثبّت" },
-  deleteChat: { en: "Delete chat", ar: "حذف المحادثة" },
-  deleteConfirm: { en: "Delete this chat?", ar: "حذف هذه المحادثة؟" },
   placeholder: { en: "Ask anything", ar: "اسأل أي شيء" },
   quick: { en: "Quick actions", ar: "إجراءات سريعة" },
   send: { en: "Send", ar: "إرسال" },
@@ -36,25 +27,6 @@ export const copy = {
     ar: "المحادثة والجلسات والإعدادات تعمل على جهازك داخل التطبيق فقط.",
   },
   openButton: { en: "Browse the catalog", ar: "تصفّح الكتالوج" },
-  // the drawer
-  tiles: {
-    catalog: { en: "Catalog", ar: "الكتالوج" },
-    engine: { en: "Engine", ar: "المحرك" },
-    settings: { en: "Settings", ar: "الإعدادات" },
-  },
-  chat: { en: "Chat", ar: "محادثة" },
-  empty: { en: "No chats yet. Ask something and it is kept here.", ar: "لا محادثات بعد. اسأل شيئاً وستُحفظ هنا." },
-  options: { en: "Chat options", ar: "خيارات المحادثة" },
-  delete: { en: "Delete", ar: "حذف" },
-  cancel: { en: "Cancel", ar: "إلغاء" },
-  groups: {
-    today: { en: "Today", ar: "اليوم" },
-    yesterday: { en: "Yesterday", ar: "أمس" },
-    week: { en: "Previous 7 days", ar: "آخر 7 أيام" },
-    older: { en: "Older", ar: "أقدم" },
-  },
-  // page bar
-  back: { en: "Back to chat", ar: "العودة إلى المحادثة" },
 } satisfies Record<string, Copy | Record<string, Copy>>
 
 /** Rotating words of the orange working line — they claim no action; the rows above name the step. */

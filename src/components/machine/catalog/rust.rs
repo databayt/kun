@@ -7,7 +7,7 @@
 //! removes exactly those files and nothing the teammate made themselves.
 
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     fmt::Write as _,
     fs,
     io::Write as _,
@@ -22,6 +22,8 @@ use tauri::{
     plugin::{Builder, TauriPlugin},
 };
 use ts_rs::TS;
+
+use crate::profile::{CatalogAccess, MachineProfile};
 
 /// Where an item stands on this computer.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -108,6 +110,10 @@ pub enum CatalogError {
     Unsafe(String),
     #[error("{0} is required by installed {1}")]
     InUse(String, String),
+    #[error("{0} is not part of this machine's profile")]
+    OutsideProfile(String),
+    #[error("profile: {0}")]
+    Profile(String),
     #[error("{0}")]
     Io(String),
 }
@@ -255,13 +261,47 @@ fn status_of(env: &Env, item: &CatalogItem, lock: &Lock) -> (ItemStatus, Option<
     (status, Some(entry.version.clone()))
 }
 
+/// The ids a profile-limited machine may touch: its departments' packs and everything they need.
+/// `None` means the profile sees the whole catalog.
+///
+/// # Errors
+/// When the registry is missing or unreadable.
+pub fn allowed_ids(env: &Env, profile: &MachineProfile) -> Res<Option<BTreeSet<String>>> {
+    if profile.access.catalog == CatalogAccess::All {
+        return Ok(None);
+    }
+    let items = read_registry(env)?;
+    let mut allowed = BTreeSet::new();
+    for dept in &profile.departments {
+        let id = format!("pack:{}", dept.name);
+        if items.iter().any(|i| i.id == id) {
+            allowed.extend(plan(&items, &id)?);
+        }
+    }
+    for id in &profile.hidden {
+        allowed.remove(id);
+    }
+    Ok(Some(allowed))
+}
+
 /// Every registry item with its status here.
 ///
 /// # Errors
 /// When the registry is missing or unreadable.
 pub fn list_items(env: &Env) -> Res<Vec<CatalogItem>> {
+    list_items_scoped(env, None)
+}
+
+/// [`list_items`], limited to `allowed` when it is `Some`.
+///
+/// # Errors
+/// When the registry is missing or unreadable.
+pub fn list_items_scoped(env: &Env, allowed: Option<&BTreeSet<String>>) -> Res<Vec<CatalogItem>> {
     let lock = read_lock(env);
     let mut items = read_registry(env)?;
+    if let Some(allowed) = allowed {
+        items.retain(|i| allowed.contains(&i.id));
+    }
     for item in &mut items {
         let (status, installed_version) = status_of(env, item, &lock);
         item.status = status;
@@ -347,12 +387,28 @@ fn remove_target(env: &Env, target: &str) {
 /// # Errors
 /// On an invalid or unknown name, a stale registry, a path that would leave `~/.claude`, or I/O.
 pub fn install_item(env: &Env, name: &str) -> Res<Vec<String>> {
+    install_item_scoped(env, name, None)
+}
+
+/// [`install_item`], refusing `name` when `allowed` is `Some` and does not list it. Dependencies
+/// of an allowed item are allowed by construction ([`allowed_ids`]).
+///
+/// # Errors
+/// As [`install_item`], plus [`CatalogError::OutsideProfile`].
+pub fn install_item_scoped(env: &Env, name: &str, allowed: Option<&BTreeSet<String>>) -> Res<Vec<String>> {
     validate_name(name)?;
+    if allowed.is_some_and(|a| !a.contains(name)) {
+        return Err(CatalogError::OutsideProfile(name.to_string()));
+    }
     let items = list_items(env)?;
     let order = plan(&items, name)?;
     let mut lock = read_lock(env);
     let mut done = Vec::new();
     for id in order {
+        // A dependency the profile hides (a pack's Mac-only lane) is skipped, never installed.
+        if allowed.is_some_and(|a| !a.contains(&id)) {
+            continue;
+        }
         let item = items.iter().find(|i| i.id == id).ok_or_else(|| CatalogError::UnknownItem(id.clone()))?;
         // The asked-for item is always (re)written; dependencies only when not current.
         if id != name && item.status == ItemStatus::Installed {
@@ -369,7 +425,18 @@ pub fn install_item(env: &Env, name: &str) -> Res<Vec<String>> {
 /// # Errors
 /// On an invalid or not-installed name, or when another installed item depends on it.
 pub fn uninstall_item(env: &Env, name: &str) -> Res<()> {
+    uninstall_item_scoped(env, name, None)
+}
+
+/// [`uninstall_item`], refusing `name` when `allowed` is `Some` and does not list it.
+///
+/// # Errors
+/// As [`uninstall_item`], plus [`CatalogError::OutsideProfile`].
+pub fn uninstall_item_scoped(env: &Env, name: &str, allowed: Option<&BTreeSet<String>>) -> Res<()> {
     validate_name(name)?;
+    if allowed.is_some_and(|a| !a.contains(name)) {
+        return Err(CatalogError::OutsideProfile(name.to_string()));
+    }
     let mut lock = read_lock(env);
     let entry = lock.items.get(name).cloned().ok_or_else(|| CatalogError::UnknownItem(name.to_string()))?;
     if let Some((other, _)) = lock.items.iter().find(|(id, e)| id.as_str() != name && e.dependencies.iter().any(|d| d == name)) {
@@ -396,22 +463,29 @@ async fn blocking<T: Send + 'static>(f: impl FnOnce(&Env) -> Res<T> + Send + 'st
     .map_err(|e| CatalogError::Io(e.to_string()))?
 }
 
-/// `list` — the registry with each item's status on this computer.
-#[tauri::command]
-async fn list() -> Res<Vec<CatalogItem>> {
-    blocking(list_items).await
+/// This machine's allowed ids from its profile; `None` when the catalog is unrestricted.
+fn scope(env: &Env) -> Res<Option<BTreeSet<String>>> {
+    let resolved = crate::profile::current().map_err(|e| CatalogError::Profile(e.to_string()))?;
+    allowed_ids(env, &resolved.profile)
 }
 
-/// `install` — an item and its dependencies; returns the ids written.
+/// `list` — the registry with each item's status on this computer, limited to the profile.
+#[tauri::command]
+async fn list() -> Res<Vec<CatalogItem>> {
+    blocking(|env| list_items_scoped(env, scope(env)?.as_ref())).await
+}
+
+/// `install` — an item and its dependencies; returns the ids written. Refuses anything
+/// outside the profile.
 #[tauri::command]
 async fn install(name: String) -> Res<Vec<String>> {
-    blocking(move |env| install_item(env, &name)).await
+    blocking(move |env| install_item_scoped(env, &name, scope(env)?.as_ref())).await
 }
 
 /// `uninstall` — only the files this catalog installed for the item.
 #[tauri::command]
 async fn uninstall(name: String) -> Res<()> {
-    blocking(move |env| uninstall_item(env, &name)).await
+    blocking(move |env| uninstall_item_scoped(env, &name, scope(env)?.as_ref())).await
 }
 
 #[must_use]
