@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Kun",
+  "mainBinaryName": "machine",
+  "version": "0.1.0",
+  "identifier": "org.databayt.machine",
+  "build": {
+    "devUrl": "http://localhost:3000/ar/machine",
+    "frontendDist": "https://kun.databayt.org/ar/machine"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Kun",
+        "width": 1100,
+        "height": 760,
+        "minWidth": 380,
+        "minHeight": 520
+      }
+    ],
+    "security": {
+      "capabilities": ["features"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+  }
+}

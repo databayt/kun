@@ -1,0 +1,3 @@
+# ts-rs writes each feature's generated TS next to its rust.rs.
+[env]
+TS_RS_EXPORT_DIR = { value = "../src/components/machine", relative = true }
