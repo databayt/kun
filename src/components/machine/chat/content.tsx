@@ -220,7 +220,7 @@ export default function ChatContent({
           {empty ? (
             <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col items-center justify-center gap-8 px-4 pb-[12vh] pt-16">
               <div className="text-center">
-                <h1 className="text-balance text-[28px] font-normal leading-tight tracking-tight">
+                <h1 className="text-balance text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
                   {greeting(isAr, name)}
                 </h1>
                 {resumed && (

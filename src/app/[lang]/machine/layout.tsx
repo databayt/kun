@@ -13,7 +13,7 @@ export default async function MachineLayout({
 }) {
   const { lang } = await params
   return (
-    <main className="fixed inset-0 overflow-hidden bg-muted/40">
+    <main className="fixed inset-0 overflow-hidden bg-muted">
       {children}
       <Suspense fallback={null}>
         <MachineMenu lang={lang as Locale} />

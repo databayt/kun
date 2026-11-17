@@ -3,7 +3,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ArrowUpIcon,
-  AudioLinesIcon,
   PlusIcon,
   SquareIcon,
 } from "lucide-react";
@@ -24,9 +23,8 @@ const MAX_HEIGHT_PX = 168;
 
 /**
  * The chatgpt.com composer: one white pill with a soft shadow. `+` sits inside at the start (the quick
- * actions), the text grows to six lines, then the mic (dictation) and one round accent button at the end:
- * the voice mark while the box is empty (it starts the mic), an arrow once there is text, a stop square
- * while a turn runs. Enter sends, Shift+Enter breaks a line.
+ * actions), the text grows to six lines, then the mic (dictation) and one dark round button at the end:
+ * a send arrow (faded until there is text), or a stop square while a turn runs. Enter sends, Shift+Enter breaks a line.
  */
 export function Composer({
   lang,
@@ -51,7 +49,6 @@ export function Composer({
   const [text, setText] = useState(initialText ?? "");
   const [plus, setPlus] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
-  const mic = useRef<HTMLSpanElement>(null);
 
   // `field-sizing: content` is not in Safari yet.
   useLayoutEffect(() => {
@@ -161,7 +158,7 @@ export function Composer({
       />
 
       {!busy && (
-        <span ref={mic} className="contents">
+        <span className="contents">
           <VoiceButton
             lang={lang}
             onTranscript={(v) =>
@@ -181,30 +178,15 @@ export function Composer({
         >
           <SquareIcon className="size-3.5 fill-current" aria-hidden />
         </button>
-      ) : hasText ? (
+      ) : (
         <button
           type="submit"
           aria-label={t(copy.send)}
           title={t(copy.send)}
-          className={cn(
-            icon,
-            "size-11 bg-action text-action-foreground hover:bg-action/90",
-          )}
+          disabled={!hasText}
+          className={cn(icon, "bg-foreground text-background hover:bg-foreground/85 disabled:bg-foreground/15 disabled:text-background")}
         >
           <ArrowUpIcon className="size-5" strokeWidth={2.5} aria-hidden />
-        </button>
-      ) : (
-        <button
-          type="button"
-          aria-label={t(copy.speak)}
-          title={t(copy.speak)}
-          onClick={() => mic.current?.querySelector("button")?.click()}
-          className={cn(
-            icon,
-            "size-11 bg-action text-action-foreground hover:bg-action/90",
-          )}
-        >
-          <AudioLinesIcon className="size-5" aria-hidden />
         </button>
       )}
     </form>

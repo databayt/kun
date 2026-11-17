@@ -1,14 +1,29 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-/** One card of the mega menu's grid. */
-export function Section({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
+/** One column of the mega menu, apple.com's flyout: a small gray heading over big bold links. No card. */
+export function Section({
+  title,
+  children,
+  className,
+}: {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <section className={cn("min-w-0 rounded-3xl bg-muted/50 p-4", className)}>
-      <h2 className="px-2 pb-2 text-sm font-semibold text-muted-foreground">{title}</h2>
+    <section className={cn("min-w-0", className)}>
+      <h2 className="pb-3 text-xs font-normal text-muted-foreground">
+        {title}
+      </h2>
       {children}
     </section>
-  )
+  );
 }
 
+/** A big bold link; hover only greys the text, no fill. */
 export const rowClass =
-  "flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-start text-[15px] transition-colors hover:bg-foreground/5"
+  "flex w-full items-center gap-2 py-1.5 text-start text-2xl font-semibold leading-tight tracking-tight text-foreground transition-colors hover:text-muted-foreground";
+
+/** A smaller sub-heading inside a column (a department, a repo). */
+export const subClass =
+  "pb-1 pt-4 text-xs font-normal text-muted-foreground first:pt-0";

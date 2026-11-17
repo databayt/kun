@@ -5,6 +5,7 @@ import {
   GlobeIcon,
   LightbulbIcon,
   PenLineIcon,
+  PlusIcon,
   VideoIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -24,8 +25,9 @@ const iconFor = (q: QuickAction): LucideIcon =>
   )?.[1] ?? LightbulbIcon;
 
 /**
- * The starters under the empty composer, as on chatgpt.com: a plain list, an outline icon and a muted
- * line each, no cards. They come from the department pack's quick actions; a tap sends.
+ * The starters under the empty composer, apple.com-style: each row spreads end to end, the starter at
+ * the start and a round + at the end (Apple's card button). No hover fill: the + darkens instead.
+ * They come from the department pack's quick actions; a tap sends.
  */
 export function Suggestions({
   actions,
@@ -40,7 +42,7 @@ export function Suggestions({
 }) {
   if (actions.length === 0) return null;
   return (
-    <ul className="flex w-full flex-col">
+    <ul className="flex w-full flex-col divide-y divide-border/70">
       {actions.map((q) => {
         const Icon = iconFor(q);
         return (
@@ -49,14 +51,24 @@ export function Suggestions({
               type="button"
               onClick={() => onPick(q.prompt)}
               disabled={disabled}
-              className="flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-start text-[17px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-50"
+              className="group flex w-full items-center justify-between gap-4 px-2 py-4 text-start text-[17px] text-foreground disabled:opacity-50"
             >
-              <Icon
-                className="size-5 shrink-0 text-foreground/70"
-                strokeWidth={1.5}
+              <span className="flex min-w-0 items-center gap-4">
+                <Icon
+                  className="size-5 shrink-0 text-muted-foreground"
+                  strokeWidth={1.5}
+                  aria-hidden
+                />
+                <span dir="auto" className="truncate">
+                  {isAr ? q.label_ar : q.label_en}
+                </span>
+              </span>
+              <span
                 aria-hidden
-              />
-              <span dir="auto">{isAr ? q.label_ar : q.label_en}</span>
+                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground/80 text-background transition-colors group-hover:bg-foreground"
+              >
+                <PlusIcon className="size-4" strokeWidth={2.5} />
+              </span>
             </button>
           </li>
         );
