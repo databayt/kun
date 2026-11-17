@@ -19,7 +19,7 @@
     {
       "path": "departments/rnd/pack.json",
       "target": "departments/rnd/pack.json",
-      "sha256": "9135da405cf879ee273c3e8820e83fee54471f6d2db0d6997d9e2699d0b2bd58"
+      "sha256": "eb66c09d974a48f0c489076ac1ee1452c0dce49b99ab72bf1256c09441bde0cc"
     },
     {
       "path": "departments/rnd/prompt.md",
@@ -27,5 +27,5 @@
       "sha256": "3c199fa7704f3bcea32ed87afab09fcab7023a3974c0a7de8276f27fca375731"
     }
   ],
-  "version": "4179cb50348e8d68b177102b1df7d03b3d8461104ee1d44423715d50d75c20d0"
+  "version": "62ceb00111668592cb366740ed6da3607243a28c991600d9390f95468260546c"
 }

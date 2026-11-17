@@ -50,5 +50,12 @@
       "description_en": "Record a decision with its type, risks, expected outcome and a review date.",
       "description_ar": "سجّل قراراً بنوعه ومخاطره والنتيجة المتوقعة وتاريخ مراجعته."
     }
+  ],
+  "cards": [
+    "captain",
+    "team",
+    "dispatch",
+    "cowork",
+    "memory"
   ]
 }

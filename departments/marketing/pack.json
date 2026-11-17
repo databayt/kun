@@ -56,5 +56,12 @@
       "description_en": "Reach and engagement for our latest posts, and what to do more of.",
       "description_ar": "الوصول والتفاعل لآخر منشوراتنا، وما الذي نكثر منه."
     }
+  ],
+  "cards": [
+    "social-hub",
+    "media",
+    "tweets",
+    "voice",
+    "apps"
   ]
 }

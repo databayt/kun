@@ -53,5 +53,15 @@
       "description_en": "Check the latest production deploy: a screenshot, console and network errors.",
       "description_ar": "افحص آخر نشر في الإنتاج: لقطة شاشة وأخطاء الكونسول والشبكة."
     }
+  ],
+  "cards": [
+    "claude-md",
+    "rules",
+    "hooks",
+    "skills",
+    "commands",
+    "mcp",
+    "agents",
+    "quality"
   ]
 }

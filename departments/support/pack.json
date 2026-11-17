@@ -46,5 +46,12 @@
       "description_en": "Domain expiry, DNS and mail checked, with what needs renewing first.",
       "description_ar": "انتهاء النطاقات وDNS والبريد، مع ما يحتاج تجديداً أولاً."
     }
+  ],
+  "cards": [
+    "quality",
+    "credentials",
+    "connectors",
+    "dispatch",
+    "hooks"
   ]
 }

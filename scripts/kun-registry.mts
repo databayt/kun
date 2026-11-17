@@ -226,5 +226,27 @@ write(path.join(OUT, "index.json"), {
   homepage: "https://kun.databayt.org",
   items,
 })
+// The kun.databayt.org home cards — one source for the site's grid and the machine app's
+// department cards (each department pack names the card ids it shows under `cards`).
+const { homeItems } = await import("../src/components/root/home/config.ts")
+const homeIds = new Set(homeItems.map((h: { id: string }) => h.id))
+for (const dir of fs.readdirSync(path.join(ROOT, "departments"), { withFileTypes: true })) {
+  const packJson = path.join(ROOT, "departments", dir.name, "pack.json")
+  if (!dir.isDirectory() || !fs.existsSync(packJson)) continue
+  for (const id of JSON.parse(fs.readFileSync(packJson, "utf8")).cards ?? [])
+    if (!homeIds.has(id)) throw new Error(`pack ${dir.name} names unknown home card ${id}`)
+}
+write(path.join(OUT, "home.json"), {
+  $schema: "kun-home-v1",
+  homepage: "https://kun.databayt.org",
+  cards: homeItems.map((h: { id: string; title: string; description: string; image?: string; href: string; group: string }) => ({
+    id: h.id,
+    title: h.title,
+    description: h.description,
+    image: h.image ?? null,
+    href: h.href,
+    group: h.group,
+  })),
+})
 const count = Object.fromEntries(TYPES.map((t) => [t, items.filter((i) => i.id.startsWith(t + ":")).length]))
 console.log(`kun registry: ${items.length} items`, count)

@@ -19,7 +19,7 @@
     {
       "path": "departments/video/pack.json",
       "target": "departments/video/pack.json",
-      "sha256": "5fba6559db437b85a8f4cda34615e783e486eb413fe74cab76e9f2e37af36bad"
+      "sha256": "22d15b88c186114d4f8799c73e6b956a445c09dc91c67222a9c3aee93040a044"
     },
     {
       "path": "departments/video/prompt.md",
@@ -27,5 +27,5 @@
       "sha256": "79b64693c9e4c5095d8908c38fe65791002b17a83202c656ebef79cad656c7a9"
     }
   ],
-  "version": "7b0ba256f15c13f7a1c3fcd3d252f7719e645aef32c2af7319c42a36c7d71df1"
+  "version": "5e64bcba0fd4d1025c5493870cf35eb27b1dec4342a4657cb3701824658e65e8"
 }

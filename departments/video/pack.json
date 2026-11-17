@@ -47,5 +47,11 @@
       "description_en": "Clean screenshots of the Hogwarts attendance page, framed and ready to post.",
       "description_ar": "لقطات شاشة نظيفة لصفحة الحضور في هوغورتس، جاهزة للنشر."
     }
+  ],
+  "cards": [
+    "media",
+    "voice",
+    "social-hub",
+    "apps"
   ]
 }

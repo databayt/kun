@@ -48,5 +48,13 @@
       "description_en": "Turn a file or a link into clean Markdown you can read, search and reuse.",
       "description_ar": "حوّل ملفاً أو رابطاً إلى Markdown نظيف تقرؤه وتبحث فيه وتعيد استخدامه."
     }
+  ],
+  "cards": [
+    "tips",
+    "tweets",
+    "memory",
+    "mcp",
+    "skills",
+    "agents"
   ]
 }

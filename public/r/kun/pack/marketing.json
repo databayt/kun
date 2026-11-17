@@ -20,7 +20,7 @@
     {
       "path": "departments/marketing/pack.json",
       "target": "departments/marketing/pack.json",
-      "sha256": "262f8aed997a87541da07da13da2bfbcbf3cd770f0fd13d01597a50bd22dced8"
+      "sha256": "93ab7c0868de36635ad6e95dc7ea6590390e2f3a9e493977abf42c2e6b688bf5"
     },
     {
       "path": "departments/marketing/prompt.md",
@@ -28,5 +28,5 @@
       "sha256": "14024ec25b79d596841f7518bd2d69e3293f625dc0e67b3f7c37c9d93a4b6141"
     }
   ],
-  "version": "94989c43ce123fda1c82eea8e4c4965f4f7af6c5a7b1c882aa5dc3627fa669d3"
+  "version": "2ba27952105847b2abb08e87b462058d2da68165baf32ce1d84efb3cf9a8629f"
 }

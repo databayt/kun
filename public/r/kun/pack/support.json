@@ -18,7 +18,7 @@
     {
       "path": "departments/support/pack.json",
       "target": "departments/support/pack.json",
-      "sha256": "558956db97b9782496407798b5e5581b923984d99b04b27060eb9c9321effea9"
+      "sha256": "a6ba794b30b634c7972f2858f813b0d329cee2a33eb166b4720177b70d18d68e"
     },
     {
       "path": "departments/support/prompt.md",
@@ -26,5 +26,5 @@
       "sha256": "d5aa966be852b33e507c3ac04760192b30c86ffdd1229e5372ecfaedf5bdeb0c"
     }
   ],
-  "version": "4d1b7375794ef2a6ac1e50e78d78c87f2a87624ce14b24402fb0b0d404d84df3"
+  "version": "7a07987cdec93b17c9f6ed677a84b883ba1955aeaa4fe613ec77f72e1e709e69"
 }

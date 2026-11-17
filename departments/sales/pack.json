@@ -48,5 +48,12 @@
       "description_en": "Ten new schools worth contacting this week, with why each one fits.",
       "description_ar": "عشر مدارس جديدة تستحق التواصل هذا الأسبوع، مع سبب مناسبة كل منها."
     }
+  ],
+  "cards": [
+    "captain",
+    "social-hub",
+    "connectors",
+    "dispatch",
+    "voice"
   ]
 }
