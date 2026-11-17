@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   FileTextIcon,
   GlobeIcon,
   LightbulbIcon,
   PenLineIcon,
-  PlusIcon,
   VideoIcon,
+  XIcon,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,9 +27,9 @@ const iconFor = (q: QuickAction): LucideIcon =>
   )?.[1] ?? LightbulbIcon;
 
 /**
- * The starters under the empty composer, apple.com-style: each row spreads end to end, the starter at
- * the start and a round + at the end (Apple's card button). No hover fill: the + darkens instead.
- * They come from the department pack's quick actions; a tap sends.
+ * The starters under the empty composer: a plain list, no borders, no dividers, no hover fill. The
+ * end of a row is empty until it is hovered; then a ✕ appears that clears that starter. A tap on the
+ * starter sends it. They come from the department pack's quick actions.
  */
 export function Suggestions({
   actions,
@@ -40,35 +42,38 @@ export function Suggestions({
   onPick: (prompt: string) => void;
   disabled?: boolean;
 }) {
-  if (actions.length === 0) return null;
+  // Starters the person cleared with ✕ — gone for this visit.
+  const [cleared, setCleared] = useState<string[]>([]);
+  const shown = actions.filter((q) => !cleared.includes(q.prompt));
+  if (shown.length === 0) return null;
   return (
-    <ul className="flex w-full flex-col divide-y divide-border/70">
-      {actions.map((q) => {
+    <ul className="flex w-full flex-col">
+      {shown.map((q) => {
         const Icon = iconFor(q);
+        const label = isAr ? q.label_ar : q.label_en;
         return (
-          <li key={q.prompt}>
+          <li
+            key={q.prompt}
+            className="group flex items-center justify-between gap-2"
+          >
             <button
               type="button"
               onClick={() => onPick(q.prompt)}
               disabled={disabled}
-              className="group flex w-full items-center justify-between gap-4 px-2 py-4 text-start text-[17px] text-foreground disabled:opacity-50"
+              className="flex min-w-0 flex-1 items-center gap-4 px-2 py-3.5 text-start text-[17px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
             >
-              <span className="flex min-w-0 items-center gap-4">
-                <Icon
-                  className="size-5 shrink-0 text-muted-foreground"
-                  strokeWidth={1.5}
-                  aria-hidden
-                />
-                <span dir="auto" className="truncate">
-                  {isAr ? q.label_ar : q.label_en}
-                </span>
+              <Icon className="size-5 shrink-0" strokeWidth={1.5} aria-hidden />
+              <span dir="auto" className="truncate">
+                {label}
               </span>
-              <span
-                aria-hidden
-                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground/80 text-background transition-colors group-hover:bg-foreground"
-              >
-                <PlusIcon className="size-4" strokeWidth={2.5} />
-              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCleared((c) => [...c, q.prompt])}
+              aria-label={isAr ? `إخفاء: ${label}` : `Clear: ${label}`}
+              className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+            >
+              <XIcon className="size-4" aria-hidden />
             </button>
           </li>
         );
