@@ -1,4 +1,4 @@
-# Pricing: the agreed SAR anchors, charged in proportion to students
+# Pricing: 24 SAR per student — the agreed anchor, charged in proportion
 
 **ID**: D-20261117-pricing-proportional-sar
 **Date**: 2026-11-17
@@ -11,14 +11,12 @@
 
 ## Decision
 
-1. **The anchors from the 2026-10-09 rationale stay as agreed.** 250 students cost 6,000 SAR a year,
-   500 students 10,000 SAR and 1,000 students 17,000 SAR. The price is quoted in riyal.
-2. **A school pays in proportion to its students, with no flat bands.** The rate is graduated, so the total
-   has no cliff at the anchors.
-   - Students 1–250: 24 SAR each.
-   - Students 251–500: 16 SAR each.
-   - Students 501 and up: 14 SAR each. Over 1,000 the school gets its own contract.
-   - Example: 48 students cost 1,152 SAR, and 300 students cost 6,800 SAR.
+1. **The anchor from the 2026-10-09 rationale stays as agreed:** 250 students cost 6,000 SAR a year.
+   The rationale's higher bands (500 = 10,000, 1,000 = 17,000) are not used. The price is quoted in riyal.
+2. **One rate for every student: 24 SAR a year** (6,000 ÷ 250), at every size. Over 1,000 students the
+   same rate with its own contract. Graduated 24/16/14 tiers were drafted the same morning and dropped —
+   Abdout: "make it 24 per student along the way, no need for from–to". 48 students = 1,152 SAR; 300 =
+   7,200.
 3. **No free allowance at any size.** The only offer is a 1-month free trial, and every school pays after it.
 4. **Payment.**
    - 50% is due at signing, or when the trial ends.
@@ -40,10 +38,10 @@
 ## Context
 
 - On 11-15 Ali wrote that the price we approved was 6,000 SAR a year and that the $6.40 contract looked
-  wrong. On 11-17 Abdout decided to keep that rate but make the charge proportional, so that no flat band
-  charges a small school 60 SAR per student.
-- Effect: the base rate (24 SAR = $6.40) is the same as on 11-08. What is new is the volume tiers above 250
-  students, SAR as the quoting currency, and the contract terms.
+  wrong. On 11-17 Abdout kept that anchor but charged it per student, so no flat band charges a small school
+  60 SAR per student.
+- Effect: the rate (24 SAR = $6.40) is the same as on 11-08. What is new is SAR as the quoting currency,
+  the school-year schedule, no VAT line, the live-class allowance and the contract terms.
 
 ## Premortem
 
@@ -51,7 +49,7 @@
   student, full cost (about $2,700–4,000 a month) needs about 5,000–7,500 students. Mitigation: chains and
   Al-Ibda's Dammam branch, and offers only as a % off for a set time.
 - *"It failed because the docs, site and contract disagreed again."* Mitigation:
-  - hogwarts `rates.ts` and marketing `billing/terms.ts` share the same tier table.
+  - hogwarts `rates.ts` and marketing `billing/terms.ts` carry the same single rate (24).
   - Tests pin the anchors.
 
 ## Expected outcome
