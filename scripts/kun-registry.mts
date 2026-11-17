@@ -218,6 +218,15 @@ function write(p: string, data: unknown) {
 }
 
 const items = build()
+// Read before the output is cleared: a repo not checked out on this machine keeps its last entry.
+const previous: Record<string, string[]> = (() => {
+  try {
+    const p = JSON.parse(fs.readFileSync(path.join(ROOT, "public/r/kun/repos.json"), "utf8"))
+    return Object.fromEntries(p.repos.map((r: { name: string; blocks: string[] }) => [r.name, r.blocks]))
+  } catch {
+    return {}
+  }
+})()
 fs.rmSync(OUT, { recursive: true, force: true }) // drop items that no longer exist
 for (const i of items) write(path.join(OUT, i.type.slice(4), `${i.name}.json`), i)
 write(path.join(OUT, "index.json"), {
@@ -248,5 +257,26 @@ write(path.join(OUT, "home.json"), {
     group: h.group,
   })),
 })
+// The repositories the departments work in, with their feature blocks — the machine app's tag
+// cloud shows these as repository keywords. Read from each repo's committed .claude/blocks.json
+// (a sibling checkout of kun, e.g. ~/hogwarts); a repo not checked out here is skipped, keeping the
+// last published entry. Plumbing blocks (ui, atom, auth…) are not features, so they are left out.
+const PLUMBING = new Set(["atom", "ui", "auth", "docs", "local", "root", "template", "providers", "icons", "ha-ui", "billingsdk", "common", "base", "forms", "form", "file", "export", "context", "internationalization", "menu-pages", "table", "theme", "mdx", "monitoring", "offline", "tenant", "sidebar"])
+const repoNames = new Set<string>()
+for (const dir of fs.readdirSync(path.join(ROOT, "departments"), { withFileTypes: true })) {
+  const packJson = path.join(ROOT, "departments", dir.name, "pack.json")
+  if (dir.isDirectory() && fs.existsSync(packJson)) for (const r of JSON.parse(fs.readFileSync(packJson, "utf8")).repos ?? []) repoNames.add(r)
+}
+const repos = [...repoNames].sort().map((name) => {
+  const file = name === "kun" ? path.join(ROOT, ".claude/blocks.json") : path.join(ROOT, "..", name, ".claude/blocks.json")
+  let blocks = previous[name] ?? []
+  if (fs.existsSync(file)) {
+    const raw = JSON.parse(fs.readFileSync(file, "utf8"))
+    const all: string[] = Array.isArray(raw.blocks) ? raw.blocks.map((b: { name: string }) => b.name) : Object.keys(raw.blocks ?? raw)
+    blocks = all.filter((b) => /^[a-z0-9-]+$/.test(b) && !PLUMBING.has(b)).sort()
+  }
+  return { name, blocks }
+})
+write(path.join(OUT, "repos.json"), { $schema: "kun-repos-v1", repos })
 const count = Object.fromEntries(TYPES.map((t) => [t, items.filter((i) => i.id.startsWith(t + ":")).length]))
 console.log(`kun registry: ${items.length} items`, count)
