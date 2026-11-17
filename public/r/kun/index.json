@@ -4329,7 +4329,7 @@
       "id": "pack:rnd",
       "name": "rnd",
       "type": "kun:pack",
-      "title": "Research & development",
+      "title": "R&D",
       "description": "Mine patterns, benchmark the engine, sync upstream and convert textbooks.",
       "title_ar": "البحث والتطوير",
       "description_ar": "استخراج الأنماط، قياس المحرك، المزامنة مع المصادر وتحويل الكتب.",
@@ -4346,7 +4346,7 @@
         {
           "path": "departments/rnd/pack.json",
           "target": "departments/rnd/pack.json",
-          "sha256": "c1ee81de3dcea7577bd850ef9aec79de0c611939e221a3c9d9e96fadb18dd1e7"
+          "sha256": "efd722f1b7189d08a6598435aedb92f9415e20464db1f6a80088a2d3dd6cf0e0"
         },
         {
           "path": "departments/rnd/prompt.md",
@@ -4354,7 +4354,7 @@
           "sha256": "3c199fa7704f3bcea32ed87afab09fcab7023a3974c0a7de8276f27fca375731"
         }
       ],
-      "version": "8c849b0d459be2c0fbbc6147dbbd57389e0a7c66c6884a3ff226015ecc1d85ac"
+      "version": "4d3d1c846ce382133946f5ee58200c47d068540d55bc1b7d4a68bf61822e78ca"
     },
     {
       "id": "pack:sales",
@@ -4456,9 +4456,9 @@
       "id": "pack:video",
       "name": "video",
       "type": "kun:pack",
-      "title": "Media production",
+      "title": "Media",
       "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
-      "title_ar": "الإنتاج الإعلامي",
+      "title_ar": "الإعلام",
       "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
       "keywords": [],
       "dependencies": [
@@ -4473,7 +4473,7 @@
         {
           "path": "departments/video/pack.json",
           "target": "departments/video/pack.json",
-          "sha256": "e58085480c4edf8c6e2291de6a4ab75287aea51b1e57531245cac9a5aac8ff17"
+          "sha256": "188b79701a9a6a39859e4c2f274bc6c88a43d475b7376aea68d39bac7940c815"
         },
         {
           "path": "departments/video/prompt.md",
@@ -4481,7 +4481,7 @@
           "sha256": "79b64693c9e4c5095d8908c38fe65791002b17a83202c656ebef79cad656c7a9"
         }
       ],
-      "version": "a74d79622963f73595a44449de0b9cfc0dbdd68ae51bf5e83ae0ef42e28b1b49"
+      "version": "2b8a16e1345e2faf73d60ca4dbdf12faf9ab5a3259909d2c9c0e2b9e35222e8e"
     },
     {
       "id": "machine:abdout",

@@ -2,7 +2,7 @@
   "id": "pack:rnd",
   "name": "rnd",
   "type": "kun:pack",
-  "title": "Research & development",
+  "title": "R&D",
   "description": "Mine patterns, benchmark the engine, sync upstream and convert textbooks.",
   "title_ar": "البحث والتطوير",
   "description_ar": "استخراج الأنماط، قياس المحرك، المزامنة مع المصادر وتحويل الكتب.",
@@ -19,7 +19,7 @@
     {
       "path": "departments/rnd/pack.json",
       "target": "departments/rnd/pack.json",
-      "sha256": "c1ee81de3dcea7577bd850ef9aec79de0c611939e221a3c9d9e96fadb18dd1e7"
+      "sha256": "efd722f1b7189d08a6598435aedb92f9415e20464db1f6a80088a2d3dd6cf0e0"
     },
     {
       "path": "departments/rnd/prompt.md",
@@ -27,5 +27,5 @@
       "sha256": "3c199fa7704f3bcea32ed87afab09fcab7023a3974c0a7de8276f27fca375731"
     }
   ],
-  "version": "8c849b0d459be2c0fbbc6147dbbd57389e0a7c66c6884a3ff226015ecc1d85ac"
+  "version": "4d3d1c846ce382133946f5ee58200c47d068540d55bc1b7d4a68bf61822e78ca"
 }

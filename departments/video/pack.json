@@ -1,7 +1,7 @@
 {
   "name": "video",
-  "title": "Media production",
-  "title_ar": "الإنتاج الإعلامي",
+  "title": "Media",
+  "title_ar": "الإعلام",
   "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
   "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
   "items": [
