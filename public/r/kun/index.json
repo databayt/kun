@@ -362,10 +362,10 @@
         {
           "path": ".claude/skills/captain/SKILL.md",
           "target": "skills/captain/SKILL.md",
-          "sha256": "7bdcfb6e9d5281028bdbb7fc7e3bb6315bc5ffded5bb9ad87f3be16c58bd8501"
+          "sha256": "91fe269c0da80cb0be00eb9932a7a123d0e7215d7797f9491bc4ba0ed7a192c3"
         }
       ],
-      "version": "4c254f470c5f96bfa8a1a783fb4ba2192a461ff940c734b951119b74832aad31"
+      "version": "4efc30c439f982342e8aed89af0e7d72df95b743334fb50676d34f3f15f90a4a"
     },
     {
       "id": "skill:carousel",
@@ -1048,10 +1048,10 @@
         {
           "path": ".claude/skills/issue/SKILL.md",
           "target": "skills/issue/SKILL.md",
-          "sha256": "9ca3f72897e9d8cd995d887c1b781c69c9de3223d509aa6c84ffe56c4f305950"
+          "sha256": "fd95cbfae4ffc71c956c1c805414cc7a0a13bec4bd53f23a37619a6167bd023a"
         }
       ],
-      "version": "20948cd0d22ba35ba03dc0b76d92b75e40a0334426e1e3c7d2b89db5b48d91a4"
+      "version": "d564422bee29f9fd36e969c0c24f6051315b55781f4f260317703d2706352e6e"
     },
     {
       "id": "skill:jobs",
@@ -2488,10 +2488,10 @@
         {
           "path": ".claude/skills/weekly/SKILL.md",
           "target": "skills/weekly/SKILL.md",
-          "sha256": "5a4c0890c56957de251113e01923f2fae32dfa7499a734a00d5855e6ec8df27f"
+          "sha256": "64a0d418cd4027af4549a149fd3fd62b45958638ecd4abcfb7cdf397352d5b03"
         }
       ],
-      "version": "e0b1691c516c2e397282b55b8e7d67beef2018aab7c93be0f57efddb5b52ff86"
+      "version": "90ed66341ee22225a4774f67b06710c46203090bd54dab8a9bcb16d118c0f724"
     },
     {
       "id": "skill:wire",
@@ -3502,10 +3502,10 @@
         {
           "path": ".claude/agents/rust.md",
           "target": "agents/rust.md",
-          "sha256": "6ee4230647fa9fc7bccf43eb975421cf82707bb366ea34dc809b67474420561f"
+          "sha256": "ba97f55d77189bd06af9b5b54d10f8aeb0de62345b0c36883e45a05ebda1d8ef"
         }
       ],
-      "version": "aa4c4d366c8d506de493b49cfd9411f5be28c09eb62c9a47335bbd4e8992af55"
+      "version": "d8c0f04077a208cb7c4a74d29fc971744c13b754ac6f9cd0b30fce712e3e580a"
     },
     {
       "id": "agent:semantic",

@@ -12,8 +12,8 @@
     {
       "path": ".claude/skills/weekly/SKILL.md",
       "target": "skills/weekly/SKILL.md",
-      "sha256": "5a4c0890c56957de251113e01923f2fae32dfa7499a734a00d5855e6ec8df27f"
+      "sha256": "64a0d418cd4027af4549a149fd3fd62b45958638ecd4abcfb7cdf397352d5b03"
     }
   ],
-  "version": "e0b1691c516c2e397282b55b8e7d67beef2018aab7c93be0f57efddb5b52ff86"
+  "version": "90ed66341ee22225a4774f67b06710c46203090bd54dab8a9bcb16d118c0f724"
 }

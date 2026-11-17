@@ -102,3 +102,6 @@ pt.json
 # opennext build output + local worker vars
 /.open-next/
 .dev.vars
+
+# machine moved to databayt/machine; only the local build cache (CARGO_TARGET_DIR reuse) stays here
+/machine/

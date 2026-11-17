@@ -4,7 +4,6 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-working: var(--working);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -81,7 +80,6 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --working: oklch(0.646 0.222 41.116); /* machine: the agent is working */
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -137,7 +135,6 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --working: oklch(0.75 0.183 55.934);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -379,58 +376,4 @@ html.stage-engaged footer {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-}
-
-/* machine chat — the agent's thinking mark (components/machine/chat/activity.tsx <Dots>)
-   and the shimmer of the step running now. Ported from mkan's agent chat. */
-@keyframes machine-dot-a {
-  0%, 50%, 100% { translate: 0.02em 0.38em; }
-  25% { translate: 0.12em 0.66em; }
-  75% { translate: 0.12em 0.1em; }
-}
-@keyframes machine-dot-b {
-  0%, 50%, 100% { translate: 0.38em 0.38em; }
-  25% { translate: 0.38em 0.1em; }
-  75% { translate: 0.64em 0.1em; }
-}
-@keyframes machine-dot-c {
-  0%, 50%, 100% { translate: 0.74em 0.38em; }
-  25% { translate: 0.64em 0.66em; }
-  75% { translate: 0.38em 0.66em; }
-}
-.machine-dots {
-  position: relative;
-  display: inline-block;
-  flex: none;
-  width: 1em;
-  height: 1em;
-}
-.machine-dots > i {
-  position: absolute;
-  inset-inline-start: 0;
-  top: 0;
-  width: 0.24em;
-  height: 0.24em;
-  border-radius: 9999px;
-  background: currentColor;
-  animation: 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-.machine-dots > i:nth-child(1) { translate: 0.02em 0.38em; animation-name: machine-dot-a; }
-.machine-dots > i:nth-child(2) { translate: 0.38em 0.38em; animation-name: machine-dot-b; }
-.machine-dots > i:nth-child(3) { translate: 0.74em 0.38em; animation-name: machine-dot-c; }
-@keyframes machine-shimmer {
-  from { background-position: 100% 0; }
-  to { background-position: -100% 0; }
-}
-.machine-shimmer {
-  background-image: linear-gradient(90deg, var(--muted-foreground) 30%, var(--border) 50%, var(--muted-foreground) 70%);
-  background-size: 200% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: machine-shimmer 1.8s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .machine-dots > i, .machine-shimmer { animation: none; }
-  .machine-shimmer { color: var(--muted-foreground); background-image: none; }
 }

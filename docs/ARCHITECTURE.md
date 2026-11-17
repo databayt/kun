@@ -427,9 +427,9 @@ All products and workflows must be accessible:
 
 ### ADR-006: machine — a thin Rust shell over native CLIs
 
-**Decision**: Ship `machine`, a Tauri 2 desktop app (`machine/` + `src/components/machine/<feature>/rust.rs`) that spawns the unmodified `claude` / `codex` / `opencode` binaries on the owner's own login. No model proxy, no embedded agent runtime, no Agent SDK on subscription logins.
+**Decision**: Ship `machine`, a Tauri 2 desktop app (`machine/` + `src/components/<feature>/rust.rs`; lives in databayt/machine since 2026-11-17 — bundled UI, local-only IPC) that spawns the unmodified `claude` / `codex` / `opencode` binaries on the owner's own login. No model proxy, no embedded agent runtime, no Agent SDK on subscription logins.
 
-**Rationale**: Amends ADR-001, does not override it: the engine is still configuration on native Anthropic products, and machine only gives non-engineers a window onto them. A Cowork plugin was the alternative and is rejected: it is Claude-only, has no dispatch across lanes, no per-item catalog, and no local Arabic voice. Rust gives a small signed binary with least-privilege IPC (capability scoped to kun's `/*/machine/*` pages). Pattern: `.claude/patterns/cards/rust.md`; agent `rust`.
+**Rationale**: Amends ADR-001, does not override it: the engine is still configuration on native Anthropic products, and machine only gives non-engineers a window onto them. A Cowork plugin was the alternative and is rejected: it is Claude-only, has no dispatch across lanes, no per-item catalog, and no local Arabic voice. Rust gives a small signed binary with least-privilege IPC (local-only capability). Pattern: `.claude/patterns/cards/rust.md`; agent `rust`.
 
 **Kill criterion**: if Sales is not using it weekly 4 weeks after install, stop at v1.
 

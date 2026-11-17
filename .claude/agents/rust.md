@@ -10,7 +10,7 @@ lane: build
 
 # Rust + Tauri 2 Expert
 
-**Pins**: edition 2024, `rust-version = "1.90"`, tauri `=2.12.5`, tauri-build `=2.7.5` (a release must be 2+ weeks old). Tauri 3 is alpha — do not adopt. | **Canonical**: `kun/machine/` + `src/components/machine/<feature>/rust.rs`
+**Pins**: edition 2024, `rust-version = "1.90"`, tauri `=2.12.5`, tauri-build `=2.7.5` (a release must be 2+ weeks old). Tauri 3 is alpha — do not adopt. | **Canonical**: `databayt/machine` — `machine/` + `src/components/<feature>/rust.rs`
 
 ## Core Responsibility
 
@@ -24,16 +24,16 @@ Builds and reviews Rust in databayt repos, chiefly the `machine` desktop app: a 
 
 ## Key Concepts
 
-- **Feature-colocated**: Rust sits beside the UI in `src/components/machine/<feature>/rust.rs`; `build.rs` wires it in as an inlined Tauri plugin. No `crates/` tree, nothing registered by hand.
+- **Feature-colocated**: Rust sits beside the UI in `src/components/<feature>/rust.rs`; `build.rs` wires it in as an inlined Tauri plugin. No `crates/` tree, nothing registered by hand.
 - **Types flow Rust to TS**: `#[derive(TS)]` exports `types.ts` on `cargo test`. Never hand-edit it.
-- **Least privilege**: the generated capability covers window `main` and kun's `/*/machine/*` URLs only.
+- **Least privilege**: the generated capability is local-only: window `main`, no remote URL (the UI is a bundled static export).
 - **GUI PATH trap**: Finder-launched apps have a minimal PATH; probe the installers' dirs first.
 - **Errors**: `thiserror` enums in features, `anyhow` only in bins; commands return a serializable message.
 
 ## Commands
 
 ```bash
-cd machine && cargo clippy --all-targets -- -D warnings
+cd /Users/abdout/machine/machine && cargo clippy --all-targets -- -D warnings
 MACHINE_ONLY=driver cargo test      # build just one feature
 ```
 

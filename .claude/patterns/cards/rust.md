@@ -2,25 +2,25 @@
 
 ## Status
 
-| Repo | Pattern                                                | Maturity    | Features | Canonical |
-| ---- | ------------------------------------------------------ | ----------- | -------- | --------- |
-| kun  | `machine/` Tauri shell + `rust.rs` beside each feature | development | driver   | **yes**   |
+| Repo    | Pattern                                                          | Maturity    | Features | Canonical |
+| ------- | ---------------------------------------------------------------- | ----------- | -------- | --------- |
+| machine | `machine/` Tauri shell + `src/components/<feature>/rust.rs`      | development | driver   | **yes**   |
 
-Started 2026-11-17. Agent: `rust` · rule: `.claude/rules/rust/rust.md` · ADR-006 in `docs/ARCHITECTURE.md`.
+Started 2026-11-17; moved to databayt/machine the same day (kun keeps only the server side: `src/app/api/machine/**`, `src/lib/machine/**`). Agent: `rust` · rule: `.claude/rules/rust/rust.md` · ADR-006 in `docs/ARCHITECTURE.md`.
 
-## Canonical: kun/machine
+## Canonical: databayt/machine
 
 ### File Structure
 
 ```
 machine/                                # the shell — the folder Tauri calls src-tauri
   Cargo.toml                            # pins, lints, profiles (one crate, no crates/ tree)
-  clippy.toml  .cargo/config.toml       # unwrap allowed in tests · TS_RS_EXPORT_DIR → src/components/machine
-  tauri.conf.json  icons/               # window loads kun's own /<lang>/machine routes
+  clippy.toml  .cargo/config.toml       # unwrap allowed in tests · TS_RS_EXPORT_DIR → src/components
+  tauri.conf.json  icons/               # window loads the bundled static export (no remote origin)
   build.rs                              # scans features → modules + inlined plugins + capability
   src/lib.rs  src/main.rs               # include!(features.rs) + run(); nothing feature-specific
-src/app/[lang]/machine/<feature>/page.tsx      # the mirror route
-src/components/machine/<feature>/
+src/app/<feature>/page.tsx                     # the route (Next static export, bundled)
+src/components/<feature>/
   content.tsx  form.tsx                 # UI (copy lives here: isAr inline or config.ts)
   actions.ts                            # Tauri IPC wrappers — NOT "use server"; isTauri() guard
   validation.ts                         # zod for forms; Rust re-validates every input
@@ -34,16 +34,15 @@ src/lib/<shared>/rust.rs                # non-feature shared Rust, same home as 
 ### Architecture
 
 - **Feature-based.** Every file a feature needs sits in one directory, Rust beside `content.tsx`.
-  `build.rs` wires `src/components/machine/*/rust.rs` in with `#[path]` — like codebase
+  `build.rs` wires `src/components/*/rust.rs` in with `#[path]` — like codebase
   generates `__registry__`, nothing is registered by hand. Split `rust.rs` past ~300 lines into
   sibling `actions.rs` / `types.rs` / `validation.rs` (`#[path = "actions.rs"] mod actions;`).
 - **A feature is an inlined Tauri plugin.** `#[must_use] pub fn plugin<R: Runtime>() -> TauriPlugin<R>`
   with `Builder::new("<folder>")`. `build.rs` finds its `#[tauri::command]`s and declares them via
   `tauri_build::InlinedPlugin::commands` with `DefaultPermissionRule::AllowAllCommands`, so TS calls
   `invoke("plugin:<feature>|<command>")` and the capability grants `<feature>:default`.
-- **Least privilege by origin.** The generated capability applies to window `main` and the remote
-  URLs `https://kun.databayt.org/*/machine/*` + `http://localhost:3000/*/machine/*` only
-  (URLPattern, path-scoped). Any other page of kun gets no IPC.
+- **Least privilege by origin.** The UI is a bundled static export, so the generated capability is
+  local-only: it applies to window `main` and no remote URL. No web page, kun's included, gets IPC.
 - **Types flow Rust → TS.** `#[derive(TS)] #[ts(export, export_to = "<feature>/types.ts")]`;
   ts-rs merges every type of a feature into its one `types.ts` when `cargo test` runs.
 - **Never proxy a model.** machine spawns the unmodified `claude` / `codex` / `opencode` binaries

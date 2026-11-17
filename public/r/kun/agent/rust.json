@@ -15,8 +15,8 @@
     {
       "path": ".claude/agents/rust.md",
       "target": "agents/rust.md",
-      "sha256": "6ee4230647fa9fc7bccf43eb975421cf82707bb366ea34dc809b67474420561f"
+      "sha256": "ba97f55d77189bd06af9b5b54d10f8aeb0de62345b0c36883e45a05ebda1d8ef"
     }
   ],
-  "version": "aa4c4d366c8d506de493b49cfd9411f5be28c09eb62c9a47335bbd4e8992af55"
+  "version": "d8c0f04077a208cb7c4a74d29fc971744c13b754ac6f9cd0b30fce712e3e580a"
 }

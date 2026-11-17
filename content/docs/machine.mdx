@@ -7,14 +7,14 @@ description: Kun's desktop app — catalog, chat, voice and dispatch on a teamma
 
 > The desktop app for people who do not live in a terminal. It wraps the same Claude Code the engine uses, shows the skills and agents of **their department**, and keeps everything on their own computer.
 
-Machine is a small Rust + Tauri 2 app (`machine/` in the kun repo). The window loads kun's own `/ar/machine` pages; every feature's Rust lives beside its UI in `src/components/machine/<feature>/rust.rs`. It never proxies a model: it starts the unmodified `claude` binary, signed in with the teammate's own account.
+Machine is a small Rust + Tauri 2 app that lives in its own repo, [databayt/machine](https://github.com/databayt/machine) (moved out of kun on 2026-11-17). The window shows a bundled static export of the UI (local-only IPC, no remote origin); every feature's Rust lives beside its UI in `src/components/<feature>/rust.rs`. It talks to kun.databayt.org (`/api/machine/*`, served by this repo) and GitHub. Development instructions (build, test, CI) are in that repo's README. It never proxies a model: it starts the unmodified `claude` binary, signed in with the teammate's own account.
 
 ## Install on Windows 11
 
 Needs Windows 11, an internet connection and GitHub access to `databayt/kun`. Open **PowerShell** and run (one line):
 
 ```powershell
-irm https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/setup.ps1 -OutFile $env:TEMP\kun-setup.ps1; powershell -ExecutionPolicy Bypass -File $env:TEMP\kun-setup.ps1 -Machine moed -MsiUrl <installer-url>
+irm https://raw.githubusercontent.com/databayt/kun/main/.claude/scripts/setup.ps1 -OutFile $env:TEMP\kun-setup.ps1; powershell -ExecutionPolicy Bypass -File $env:TEMP\kun-setup.ps1 -Machine moed
 ```
 
 If the repo is private, or the installer is a file you were handed, clone first (Git opens a browser sign-in) and run from the clone:
@@ -33,11 +33,11 @@ cd $env:USERPROFILE\kun; powershell -ExecutionPolicy Bypass -File .\.claude\scri
 | Claude Code | Installed with the official installer (`irm https://claude.ai/install.ps1 \| iex`) |
 | kun | Cloned to `%USERPROFILE%\kun` (machine reads `machines\` and `departments\` from it) |
 | Settings | Writes `%USERPROFILE%\.kun\machine\settings.json` from `machines\<login>.json` |
-| Machine | Installs the `.msi` you pass with `-MsiPath` or `-MsiUrl` |
+| Machine | Installs the `.msi` you pass with `-MsiPath` or `-MsiUrl`, else the latest release of `databayt/machine` |
 
 It does **not** run the engine install: no hooks, no rules, no full skill set. The app's catalog installs the items of the person's profile.
 
-The `.msi` comes from the **Machine** GitHub Actions workflow (an unsigned build artifact, not a release). Because it is unsigned, Windows SmartScreen shows **More info → Run anyway** once on first launch.
+With no `-MsiPath` or `-MsiUrl`, the script downloads the `.msi` of the [latest release of databayt/machine](https://github.com/databayt/machine/releases/latest); a build artifact of that repo's CI also works (pass it with `-MsiPath`). The installer is unsigned. Because it is unsigned, Windows SmartScreen shows **More info → Run anyway** once on first launch.
 
 ## First run
 

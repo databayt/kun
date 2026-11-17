@@ -1,4 +1,6 @@
 /**
+ * Mirrored in databayt/machine src/lib/contract.ts — change both together.
+ *
  * The machine ↔ kun.databayt.org contract — one source for the server (`src/app/api/machine/*`), the
  * menu UI and the Rust `network`/`tasks` features (which mirror these shapes with serde; keep them in
  * step). Machines never talk to each other: every machine talks to kun.databayt.org and GitHub

@@ -126,7 +126,7 @@ if ($Machine) {
     [IO.File]::WriteAllText("$machineDir\settings.json", ($settings | ConvertTo-Json), (New-Object Text.UTF8Encoding($false)))
     MOk "settings: $name / $dept / $drv" '\u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a'
 
-    # 7. The machine .msi (-MsiPath, or -MsiUrl to download). No release URL is baked in.
+    # 7. The machine .msi (-MsiPath, or -MsiUrl to download; neither -> the latest release of databayt/machine).
     $installed = @("HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*", "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*") |
         ForEach-Object { Get-ItemProperty $_ -EA SilentlyContinue } | Where-Object { $_.DisplayName -eq "Kun" } | Select-Object -First 1
     $msi = $null
@@ -137,6 +137,17 @@ if ($Machine) {
         $msi = Join-Path $env:TEMP "kun-machine.msi"
         MInfo "Downloading the installer..." '\u062c\u0627\u0631\u064d \u062a\u0646\u0632\u064a\u0644 \u0645\u0644\u0641 \u0627\u0644\u062a\u062b\u0628\u064a\u062a...'
         Invoke-WebRequest -Uri $MsiUrl -OutFile $msi -UseBasicParsing
+    } elseif (-not $installed) {
+        # No -MsiPath/-MsiUrl: take the .msi of https://github.com/databayt/machine/releases/latest
+        try {
+            $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/databayt/machine/releases/latest" -Headers @{ "User-Agent" = "kun-setup" } -UseBasicParsing
+            $asset = $rel.assets | Where-Object { $_.name -like "*.msi" } | Select-Object -First 1
+            if ($asset) {
+                $msi = Join-Path $env:TEMP "kun-machine.msi"
+                MInfo "Downloading the installer ($($asset.name))..." '\u062c\u0627\u0631\u064d \u062a\u0646\u0632\u064a\u0644 \u0645\u0644\u0641 \u0627\u0644\u062a\u062b\u0628\u064a\u062a...'
+                Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $msi -UseBasicParsing
+            }
+        } catch { $msi = $null }
     }
     if ($msi) {
         $p = Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /passive /norestart" -Wait -PassThru
@@ -144,7 +155,7 @@ if ($Machine) {
     } elseif ($installed) {
         MOk "machine already installed (pass -MsiPath or -MsiUrl to update)" '\u0627\u0644\u0622\u0644\u0629 \u0645\u062b\u0628\u0651\u062a\u0629 \u0628\u0627\u0644\u0641\u0639\u0644 (\u0645\u0631\u0651\u0631 -MsiPath \u0623\u0648 -MsiUrl \u0644\u0644\u062a\u062d\u062f\u064a\u062b)'
     } else {
-        MWarn "No installer given - pass -MsiPath <file> or -MsiUrl <url> (the .msi artifact of the Machine workflow)" '\u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0644\u0641 \u062a\u062b\u0628\u064a\u062a \u2014 \u0645\u0631\u0651\u0631 -MsiPath \u0623\u0648 -MsiUrl'
+        MWarn "No installer given - pass -MsiPath <file> or -MsiUrl <url> (or publish a release at https://github.com/databayt/machine/releases)" '\u0644\u0627 \u064a\u0648\u062c\u062f \u0645\u0644\u0641 \u062a\u062b\u0628\u064a\u062a \u2014 \u0645\u0631\u0651\u0631 -MsiPath \u0623\u0648 -MsiUrl'
     }
 
     Write-Host ""

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>NSMicrophoneUsageDescription</key>
-  <string>Kun listens only while you hold the microphone button, to turn your speech into text on this computer. Nothing is uploaded. · كن يستمع فقط عندما تضغط زر الميكروفون، ليحوّل كلامك إلى نص على جهازك. لا يُرفع شيء.</string>
-</dict>
-</plist>

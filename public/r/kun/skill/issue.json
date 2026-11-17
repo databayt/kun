@@ -12,8 +12,8 @@
     {
       "path": ".claude/skills/issue/SKILL.md",
       "target": "skills/issue/SKILL.md",
-      "sha256": "9ca3f72897e9d8cd995d887c1b781c69c9de3223d509aa6c84ffe56c4f305950"
+      "sha256": "fd95cbfae4ffc71c956c1c805414cc7a0a13bec4bd53f23a37619a6167bd023a"
     }
   ],
-  "version": "20948cd0d22ba35ba03dc0b76d92b75e40a0334426e1e3c7d2b89db5b48d91a4"
+  "version": "d564422bee29f9fd36e969c0c24f6051315b55781f4f260317703d2706352e6e"
 }

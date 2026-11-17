@@ -1,7 +1,7 @@
 {
   "$schema": "repository-registry-schema",
   "description": "Track all databayt organization repositories for deep reference",
-  "lastUpdated": "2026-11-14",
+  "lastUpdated": "2026-11-17",
   "organization": {
     "name": "databayt",
     "url": "https://github.com/databayt",
@@ -149,6 +149,32 @@
           "caie-igcse/",
           "schema/",
           "vocab/"
+        ]
+      },
+      {
+        "id": "machine",
+        "name": "Machine",
+        "url": "https://github.com/databayt/machine",
+        "local": "/Users/abdout/machine",
+        "description": "The machine desktop app — a thin Tauri shell over native claude/codex/opencode CLIs; talks to kun.databayt.org (api/machine) and GitHub",
+        "stack": [
+          "Tauri 2",
+          "Rust",
+          "Next.js static export"
+        ],
+        "purpose": [
+          "desktop",
+          "machine",
+          "rust",
+          "ipc"
+        ],
+        "agent": "rust",
+        "priority": 2,
+        "status": "active",
+        "lastSync": null,
+        "watchPaths": [
+          "machine/",
+          "src/"
         ]
       }
     ],
