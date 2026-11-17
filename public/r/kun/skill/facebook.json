@@ -1,0 +1,19 @@
+{
+  "id": "skill:facebook",
+  "name": "facebook",
+  "type": "kun:skill",
+  "title": "facebook",
+  "description": "Connect a brand's Facebook Page to the publishing pipeline",
+  "keywords": [
+    "facebook"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/facebook/SKILL.md",
+      "target": "skills/facebook/SKILL.md",
+      "sha256": "41341c8e6d07178a4f5c1087569b96adacd6ecc8fab1f714f3e17193bbc506ed"
+    }
+  ],
+  "version": "f249248065968ce21b4fed6f3dd01d332451650436ea3ab9eeb1a1871a0a2163"
+}

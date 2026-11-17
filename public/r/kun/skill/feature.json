@@ -1,0 +1,19 @@
+{
+  "id": "skill:feature",
+  "name": "feature",
+  "type": "kun:skill",
+  "title": "feature",
+  "description": "Full pipeline — idea to production (chains every stage)",
+  "keywords": [
+    "feature"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/feature/SKILL.md",
+      "target": "skills/feature/SKILL.md",
+      "sha256": "0e743d331e73e8c87c9f8656265b222a2a0cbb818f1610b31b3483d84f8c849f"
+    }
+  ],
+  "version": "58fa00920fde21a08cc630a0fb90f3f4939f79c50a9db68d881196295be150a3"
+}

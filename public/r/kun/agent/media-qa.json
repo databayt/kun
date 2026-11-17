@@ -1,0 +1,17 @@
+{
+  "id": "agent:media-qa",
+  "name": "media-qa",
+  "type": "kun:agent",
+  "title": "media-qa",
+  "description": "Media QA — checks finished stills, tutorials, support clips and reels against the numbers and by eye (Arabic shaping, RTL, brand, PII, safe areas) before anything is published; never edits pixels",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/media-qa.md",
+      "target": "agents/media-qa.md",
+      "sha256": "cff46f5719ffcf0ae726413935ef26a89de997b8648c88b0151ac224f59ab5e7"
+    }
+  ],
+  "version": "a404ce1a2c1435823fa450575468a6213997da22a3ce096be27f950e19010eb9"
+}

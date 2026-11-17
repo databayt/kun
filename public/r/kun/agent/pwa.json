@@ -1,0 +1,19 @@
+{
+  "id": "agent:pwa",
+  "name": "pwa",
+  "type": "kun:agent",
+  "title": "pwa",
+  "description": "PWA expert — installability, per-tenant manifests, auth-aware service-worker caching, offline outboxes, Web Push",
+  "keywords": [
+    "pwa"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/pwa.md",
+      "target": "agents/pwa.md",
+      "sha256": "23258e5d52397857ffc6b03ad5172cc5ff3101d10fbc38d5da487fa9ed2b32e8"
+    }
+  ],
+  "version": "943c9b17c8538639e11d98aacf27a6aa30f474f47767dcdeaae4adc53d992ae9"
+}

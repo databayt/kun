@@ -1,0 +1,19 @@
+{
+  "id": "hook:session-media-stale",
+  "name": "session-media-stale",
+  "type": "kun:hook",
+  "title": "session-media-stale",
+  "description": "SessionStart — stale-recording nudge (the iterate half of the /record loop).",
+  "keywords": [
+    "record"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/session-media-stale.sh",
+      "target": "hooks/session-media-stale.sh",
+      "sha256": "fa1bee2af600c032268f80ad1c36ca11162673952ef570397b8e3eaa5eb54562"
+    }
+  ],
+  "version": "a5593b228d3b5648925ce120b4bc76b8688ca933e16e6a892f6582b6765b5dbd"
+}

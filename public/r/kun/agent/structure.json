@@ -1,0 +1,20 @@
+{
+  "id": "agent:structure",
+  "name": "structure",
+  "type": "kun:agent",
+  "title": "structure",
+  "description": "File organization — naming, directory structure, project layout",
+  "keywords": [
+    "barrel",
+    "page"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/structure.md",
+      "target": "agents/structure.md",
+      "sha256": "319e58ae567a66074ce8c55ffbe95d2e9a4f7b14107bf7e55ecaf0a7f7369dec"
+    }
+  ],
+  "version": "066ac980a74a46338d40c0f2eb7fdc56560ba717aa1c7bfda6b507ebfd8e271e"
+}

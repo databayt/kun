@@ -1,0 +1,19 @@
+{
+  "id": "skill:captain",
+  "name": "captain",
+  "type": "kun:skill",
+  "title": "captain",
+  "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
+  "keywords": [
+    "captain"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/captain/SKILL.md",
+      "target": "skills/captain/SKILL.md",
+      "sha256": "7bdcfb6e9d5281028bdbb7fc7e3bb6315bc5ffded5bb9ad87f3be16c58bd8501"
+    }
+  ],
+  "version": "4c254f470c5f96bfa8a1a783fb4ba2192a461ff940c734b951119b74832aad31"
+}

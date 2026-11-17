@@ -1,0 +1,28 @@
+{
+  "id": "agent:funnel",
+  "name": "funnel",
+  "type": "kun:agent",
+  "title": "funnel",
+  "description": "Conversion — gate state, segments, value ladder, stall clock from first reply to paying customer",
+  "keywords": [
+    "chatbot",
+    "follow up",
+    "funnel",
+    "nurture",
+    "qualify",
+    "segment",
+    "stalled",
+    "تأهيل",
+    "قمع",
+    "متابعة"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/funnel.md",
+      "target": "agents/funnel.md",
+      "sha256": "a9a057ab3fb23887008b660e8c8a502498dae63478b8564f088dd4371d93ceca"
+    }
+  ],
+  "version": "e32d26dffcb6720304c11919b361818733a4b91f04c8cc61cd44bb920bbef82d"
+}

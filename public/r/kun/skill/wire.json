@@ -1,0 +1,19 @@
+{
+  "id": "skill:wire",
+  "name": "wire",
+  "type": "kun:skill",
+  "title": "wire",
+  "description": "UI layer — page (mirror pattern), content, form, table columns, i18n",
+  "keywords": [
+    "wire"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/wire/SKILL.md",
+      "target": "skills/wire/SKILL.md",
+      "sha256": "29d5c29bc54067a475c940058041cf9d9844262da479def1f1c3624b3f16d06b"
+    }
+  ],
+  "version": "3fc55360af10b8301f0b82163e94e8e194ddd49035fffc846bb76c39a2b8c71d"
+}

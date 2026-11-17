@@ -1,0 +1,19 @@
+{
+  "id": "agent:record",
+  "name": "record",
+  "type": "kun:agent",
+  "title": "record",
+  "description": "Flow videographer — records demo videos and screenshot sets of real product flows (login walls, OTPs) into the media library",
+  "keywords": [
+    "record"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/record.md",
+      "target": "agents/record.md",
+      "sha256": "cbb92d00b7e5fdf546ab461d4b58044e197014c7a92ce28e96200720029d4794"
+    }
+  ],
+  "version": "60fdbbb8e4afd4aaff0006443f8c7842da272d2ecfc0488a3f5ff7c34b1d30d7"
+}

@@ -1,0 +1,139 @@
+{
+  "id": "skill:edit",
+  "name": "edit",
+  "type": "kun:skill",
+  "title": "edit",
+  "description": "Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels",
+  "keywords": [
+    "edit"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/edit/patches/video-use-local-asr.patch",
+      "target": "skills/edit/patches/video-use-local-asr.patch",
+      "sha256": "f8b5ac3fca84e4ecb5bfad5ef91f6c6307d41b8cc7c2570a5a6fd52360d5394b"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/blender/stills.py",
+      "target": "skills/edit/scripts/blender/stills.py",
+      "sha256": "7f8e67cb0908ebd7ed49353eacdad12e32c8602fd40649b8d2ab9f752fdb6ed0"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/blender/stills.schema.md",
+      "target": "skills/edit/scripts/blender/stills.schema.md",
+      "sha256": "e969f50546795e649da540965ee10aa952ae3d7fd3d6cbbc7cd45b3a7268dee2"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/fc/assemble.mjs",
+      "target": "skills/edit/scripts/fc/assemble.mjs",
+      "sha256": "21ea805ec9680393d9446d9b2eb234b863efb1d6dbd6580ce71dbe92c933cdf0"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/fc/lesson.mjs",
+      "target": "skills/edit/scripts/fc/lesson.mjs",
+      "sha256": "504e845e553a295e4479daac9bda66109a8373dc5de70ddb29b8ebc67b76cbfe"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/hf.sh",
+      "target": "skills/edit/scripts/hf.sh",
+      "sha256": "3fb0667e6e8181c4fc4924f74841d645e28bb06ef6f7fb99c8b3417628f6cef9"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/lib.sh",
+      "target": "skills/edit/scripts/lib.sh",
+      "sha256": "38be0d9a695c3ff7f157075b04558a1d7c641b505fd621b91092567b18ade981"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/asr_batch.py",
+      "target": "skills/edit/scripts/media/asr_batch.py",
+      "sha256": "b31298fb10aa431e45766e3293360171ef02b172155885bf64f1ecce1ea50eb2"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/brand.mjs",
+      "target": "skills/edit/scripts/media/brand.mjs",
+      "sha256": "9fb5a1f04d7bcaeef9daf9c4afdf5cdd13c6edf1c01633d10d208615c89ac68c"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/derive.mjs",
+      "target": "skills/edit/scripts/media/derive.mjs",
+      "sha256": "6dce2aab81e498a93b15bd1fe38a4a34fca65e3a63856f2e6e8c9b13af982977"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/lyria.py",
+      "target": "skills/edit/scripts/media/lyria.py",
+      "sha256": "a904f7f4d4d52c9b35795c2409856729f0eb0cf914c646405ce46c68a8f0ee04"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/probe.mjs",
+      "target": "skills/edit/scripts/media/probe.mjs",
+      "sha256": "34b7bf31eb1bc5457a69770ed26de3fbcccfbbc6f54d18b61ccadaed3e553d68"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/prune.mjs",
+      "target": "skills/edit/scripts/media/prune.mjs",
+      "sha256": "fbd90f9a3dcb2fd9293c089bb36721ec66e7521a2db23ad8bd81d84d6b58b318"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/publish.mjs",
+      "target": "skills/edit/scripts/media/publish.mjs",
+      "sha256": "384fd6351ffd13d86ff5fdfc1810c9eac045576cb7778aa977eaf68b4f128b65"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/qa.mjs",
+      "target": "skills/edit/scripts/media/qa.mjs",
+      "sha256": "5dc6be4b31bf7bee347fdf540ac767d7f4e439b2d3ca14ae19f0e2a339fb06eb"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/rt.mjs",
+      "target": "skills/edit/scripts/media/rt.mjs",
+      "sha256": "2dfd0ac88c38a18a69851144caab3403dcf5450d0bbfcda469faefa8117e6de1"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/tts_batch.py",
+      "target": "skills/edit/scripts/media/tts_batch.py",
+      "sha256": "cfadf6ea5684ea8596ee9a85e2b7682f7f329a2652f39fd65213dabf6a82d97d"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/voice.mjs",
+      "target": "skills/edit/scripts/media/voice.mjs",
+      "sha256": "4a18650b1bce2dc26edab8d5ad8d34e57b736540a6144ae1df295b4ddf05241c"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/vtt.mjs",
+      "target": "skills/edit/scripts/media/vtt.mjs",
+      "sha256": "c0e5b6e6b93bc11ee43102c134e2c001689a63e9281d8a5673926cbc329d76a8"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media/wa-pull.py",
+      "target": "skills/edit/scripts/media/wa-pull.py",
+      "sha256": "f58cfbe85bfe21babefea479d46260631d433fb46652580df302a3438d3a5e65"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/media.sh",
+      "target": "skills/edit/scripts/media.sh",
+      "sha256": "654a6001711212c3cc79306ef4fad232ca97c5d18da8882b0778beaddd56654c"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/reel.sh",
+      "target": "skills/edit/scripts/reel.sh",
+      "sha256": "43a8b3b43c9b0089308acd75737cbd236c28507261c5c75b18a96738e3d87206"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/setup.sh",
+      "target": "skills/edit/scripts/setup.sh",
+      "sha256": "b8ba57f7667b46359797dd8a846096371eee30ebdcf574b087c83a89cc62f57a"
+    },
+    {
+      "path": ".claude/skills/edit/scripts/vu.sh",
+      "target": "skills/edit/scripts/vu.sh",
+      "sha256": "bb4d67add4ef4e600190d072884077a38dab313e0b4e74651890cdf6420098ad"
+    },
+    {
+      "path": ".claude/skills/edit/SKILL.md",
+      "target": "skills/edit/SKILL.md",
+      "sha256": "89ad07dccac4418842264e02b0ed24f14d67d09ccd561dd3e0935cf4488fd6e4"
+    }
+  ],
+  "version": "b3feb5a584e70474a001cf6978f6261f5243a36a7d7d634aa972cda0553a8772"
+}

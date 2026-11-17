@@ -1,0 +1,19 @@
+{
+  "id": "skill:ship",
+  "name": "ship",
+  "type": "kun:skill",
+  "title": "ship",
+  "description": "Promote a checked build to production (Vercel --prod)",
+  "keywords": [
+    "ship"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/ship/SKILL.md",
+      "target": "skills/ship/SKILL.md",
+      "sha256": "8bc6aae8237fc5382289b6b281f03885e91c7a83875a63431aa511aa066db477"
+    }
+  ],
+  "version": "69a23e69287781309a22200575d57ae6b178f70ed8d3b2c4aa5ef395c0983242"
+}

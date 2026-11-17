@@ -1,0 +1,26 @@
+{
+  "id": "agent:github",
+  "name": "github",
+  "type": "kun:agent",
+  "title": "github",
+  "description": "GitHub — issues, Actions, releases, code search (databayt is main-only, no PRs)",
+  "keywords": [
+    "clone",
+    "copy",
+    "extend",
+    "fork",
+    "github",
+    "push",
+    "quick",
+    "upstream"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/github.md",
+      "target": "agents/github.md",
+      "sha256": "21b34e9b37404670dd3ef3c110fc3fabbc34b097998c3d70385c13bbaa532626"
+    }
+  ],
+  "version": "b8cde1dad630edc524de3173c3d255f5dc1cd2cc6c3458682eef40ae066fa675"
+}

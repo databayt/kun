@@ -1,0 +1,17 @@
+{
+  "id": "hook:delegate-nudge",
+  "name": "delegate-nudge",
+  "type": "kun:hook",
+  "title": "delegate-nudge",
+  "description": "Stop — delegate nudge (\"Opus plans, lanes build\").",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/delegate-nudge.sh",
+      "target": "hooks/delegate-nudge.sh",
+      "sha256": "b0ffa23029eff02eb0809e8c12c9c3eeeece8ac47cc6623b0259cabf4a1ce7aa"
+    }
+  ],
+  "version": "57cb9a214bf88f4593dc3ddb833cdee29466755eb725fdc1a26193ea961959e9"
+}

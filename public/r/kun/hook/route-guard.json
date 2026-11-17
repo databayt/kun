@@ -1,0 +1,17 @@
+{
+  "id": "hook:route-guard",
+  "name": "route-guard",
+  "type": "kun:hook",
+  "title": "route-guard",
+  "description": "PreToolUse (Agent) — route-guard: the last line of lane enforcement for subagents.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/route-guard.sh",
+      "target": "hooks/route-guard.sh",
+      "sha256": "c5cec58c9374a59cef669c340a31be6e5f65494fd133e6a52db2ade060218055"
+    }
+  ],
+  "version": "3724a7f73cad0f0b7b1d5ee3fcd809f6fccf598ad40d701455437b4fee944782"
+}

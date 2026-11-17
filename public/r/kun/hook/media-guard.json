@@ -1,0 +1,17 @@
+{
+  "id": "hook:media-guard",
+  "name": "media-guard",
+  "type": "kun:hook",
+  "title": "media-guard",
+  "description": "media-guard.sh — PreToolUse(Bash): keep media binaries out of git, in every repo.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/media-guard.sh",
+      "target": "hooks/media-guard.sh",
+      "sha256": "4bf519870ad92739eb6dd823d4bc6f45e574f9e7ad932670d5af47dcc1a1d135"
+    }
+  ],
+  "version": "41de2ae47c6aa6e741138de26f53b69f39943d014305774c07a7dd888b4e33ee"
+}

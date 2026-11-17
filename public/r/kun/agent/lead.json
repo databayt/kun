@@ -1,0 +1,36 @@
+{
+  "id": "agent:lead",
+  "name": "lead",
+  "type": "kun:agent",
+  "title": "lead",
+  "description": "Lead acquisition — contact gap, enrichment, tiering, outreach drafts against the Twenty CRM",
+  "keywords": [
+    "contact gap",
+    "enrich",
+    "leads",
+    "outreach",
+    "pipeline health",
+    "prospect",
+    "scrap",
+    "scrap facebook",
+    "scrap facebook for mkan",
+    "scrap for hogwarts",
+    "scrap for mkan",
+    "scrap tiktok",
+    "scrap whatsapp",
+    "scrape",
+    "tiktok homes",
+    "اسحب",
+    "جمع بيانات",
+    "عملاء محتملين"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/lead.md",
+      "target": "agents/lead.md",
+      "sha256": "60a5a6b80c2f157ebe605b1e5492e2973887eb62ef20088e9e274ecabfb53099"
+    }
+  ],
+  "version": "582f18b5f7e342679e2171303f7d60c6e3c999efc6488b0efa332244c5b26558"
+}

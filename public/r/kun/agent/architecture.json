@@ -1,0 +1,37 @@
+{
+  "id": "agent:architecture",
+  "name": "architecture",
+  "type": "kun:agent",
+  "title": "architecture",
+  "description": "System architecture — mirror pattern, Prisma, multi-tenant design",
+  "keywords": [
+    "analyze",
+    "checkout",
+    "constitution",
+    "feature",
+    "like hogwarts",
+    "like mkan",
+    "like shifa",
+    "like souq",
+    "machine",
+    "migration",
+    "page",
+    "plan",
+    "prisma",
+    "ready",
+    "review",
+    "rust",
+    "saas",
+    "spec",
+    "tauri"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/architecture.md",
+      "target": "agents/architecture.md",
+      "sha256": "1e334aaf89bbbb01d72ae130469211ea3f40a2e59ac6d27fab191117b87e52cb"
+    }
+  ],
+  "version": "a846d51b8f58909752b7b911191952652e563cbd29a372f2e6137b859ff7c9b2"
+}

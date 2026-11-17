@@ -1,0 +1,17 @@
+{
+  "id": "skill:codebase",
+  "name": "codebase",
+  "type": "kun:skill",
+  "title": "codebase",
+  "description": "Access reference codebase at /Users/abdout/codebase or databayt/codebase",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/codebase/SKILL.md",
+      "target": "skills/codebase/SKILL.md",
+      "sha256": "103e52a55e69d173f63f71dd930f61a40d4cbfbb6a563cd20abf670af23836d2"
+    }
+  ],
+  "version": "9e8ddc188c0a3ff905e258cbc77f7901fc729a09a9e91b229a5f3d78387a00b3"
+}

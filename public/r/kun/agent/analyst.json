@@ -1,0 +1,19 @@
+{
+  "id": "agent:analyst",
+  "name": "analyst",
+  "type": "kun:agent",
+  "title": "analyst",
+  "description": "Market intelligence per vertical — competitors, usage analytics, churn, pricing research",
+  "keywords": [
+    "reverse"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/analyst.md",
+      "target": "agents/analyst.md",
+      "sha256": "9798200618801ee1629ad16a0f27a552e2ac855525deb9550e80447bf47eb21c"
+    }
+  ],
+  "version": "9d4a0c2939cd24120399e9559e3b194adfac9433a62e340bb2be2dbe47d21e4f"
+}

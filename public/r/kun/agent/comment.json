@@ -1,0 +1,23 @@
+{
+  "id": "agent:comment",
+  "name": "comment",
+  "type": "kun:agent",
+  "title": "comment",
+  "description": "Writes short, insightful code comments",
+  "keywords": [
+    "api-docs",
+    "changelog",
+    "docs",
+    "readme",
+    "storybook"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/comment.md",
+      "target": "agents/comment.md",
+      "sha256": "e3cec6ae523442890e9a20f585e640c12d8a710276d115f6460b400584a3cd60"
+    }
+  ],
+  "version": "5f00cd2f3e05ed2584ecea52c1df428e712c7db055db2e26bec50fd12c3e8af1"
+}

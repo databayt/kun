@@ -1,0 +1,20 @@
+{
+  "id": "agent:guardian",
+  "name": "guardian",
+  "type": "kun:agent",
+  "title": "guardian",
+  "description": "Security and quality — OWASP Top 10, performance budgets, dependency health, SSPL compliance",
+  "keywords": [
+    "audit",
+    "security"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/guardian.md",
+      "target": "agents/guardian.md",
+      "sha256": "a253ebfc51499aab74ec9673f36ba1d46b8a7947fc9bf75747d256d33604bbaf"
+    }
+  ],
+  "version": "ad3a44758c6ec0d9fa2518875c3cd5a46fb17ec00092bc9d25b70449842abbd3"
+}

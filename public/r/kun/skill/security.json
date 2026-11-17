@@ -1,0 +1,19 @@
+{
+  "id": "skill:security",
+  "name": "security",
+  "type": "kun:skill",
+  "title": "security",
+  "description": "Security audit - OWASP Top 10, dependency scanning",
+  "keywords": [
+    "security"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/security/SKILL.md",
+      "target": "skills/security/SKILL.md",
+      "sha256": "f04476c7363c22ff742b9f8e84779251a1075c59edd732379e10a777cdefff19"
+    }
+  ],
+  "version": "8ef841b7073e1aab3d3c138b3cfecfaa1b373b281908a74c0c98182f77b3ef10"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "agent:test",
+  "name": "test",
+  "type": "kun:agent",
+  "title": "test",
+  "description": "Testing — Vitest, Playwright, TDD, coverage",
+  "keywords": [
+    "audit",
+    "coverage",
+    "e2e",
+    "test"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/test.md",
+      "target": "agents/test.md",
+      "sha256": "f255a4b7acf867094b633e22214e4076bc6cec0a944d7c1fdc6142ec62010a9f"
+    }
+  ],
+  "version": "5662b2e0c86ca049e86f69751c47ac82baf5b3907f9ce15dfb03f61e6197e3b6"
+}

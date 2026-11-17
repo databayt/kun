@@ -1,0 +1,25 @@
+{
+  "id": "agent:atom",
+  "name": "atom",
+  "type": "kun:agent",
+  "title": "atom",
+  "description": "Atoms — compose 2+ shadcn/ui primitives into reusable patterns",
+  "keywords": [
+    "atom",
+    "block",
+    "card",
+    "landing",
+    "modal",
+    "shadcn",
+    "template"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/atom.md",
+      "target": "agents/atom.md",
+      "sha256": "1cfd56ab67de8b5f8b682d9fd9b677883a4f64e9df7a3803cdda42796622ca23"
+    }
+  ],
+  "version": "a4a9afa6406b6f3aa9e5ba22b15fe31ebe44aaa648777d5b9693f65881703d0f"
+}

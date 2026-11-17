@@ -1,0 +1,19 @@
+{
+  "id": "skill:cloudflare",
+  "name": "cloudflare",
+  "type": "kun:skill",
+  "title": "cloudflare",
+  "description": "Cloudflare platform operator — Workers + Containers deploys, DNS cutover, crons and logs",
+  "keywords": [
+    "cloudflare"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/cloudflare/SKILL.md",
+      "target": "skills/cloudflare/SKILL.md",
+      "sha256": "198658c0538c9d73c929a30b6408092e61d996cb3cdf092374c8889c4e56292d"
+    }
+  ],
+  "version": "c3e0c68cceab1a93c96ef9c66297943e8164c446a62108f61a16f48ab0048666"
+}

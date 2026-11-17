@@ -1,0 +1,17 @@
+{
+  "id": "hook:block-touch",
+  "name": "block-touch",
+  "type": "kun:hook",
+  "title": "block-touch",
+  "description": "PostToolUse (Write|Edit) — log files touched this session, per session id.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/block-touch.sh",
+      "target": "hooks/block-touch.sh",
+      "sha256": "ffbb073fb0a09f5fbf286dcf584bc563c2b434ec2c186dcc2b0b50f7a403d9eb"
+    }
+  ],
+  "version": "9fd28435e0efa5626b5920bf584ddbdd2e459275e8ed59c5ecc931034ac235a5"
+}

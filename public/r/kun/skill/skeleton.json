@@ -1,0 +1,19 @@
+{
+  "id": "skill:skeleton",
+  "name": "skeleton",
+  "type": "kun:skill",
+  "title": "skeleton",
+  "description": "Skeleton loading states — layout-matching shimmer while data loads",
+  "keywords": [
+    "skeleton"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/skeleton/SKILL.md",
+      "target": "skills/skeleton/SKILL.md",
+      "sha256": "65356c69a0bb285255ab8701d94a2e08a3b0daff0a9e861cfaeed86ddecb77a3"
+    }
+  ],
+  "version": "2c5a1c683bcc38bc6c703727b1d945a1046f01ff56817ddaeca9a5bb674db47d"
+}

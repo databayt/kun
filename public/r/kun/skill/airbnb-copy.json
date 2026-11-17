@@ -1,0 +1,17 @@
+{
+  "id": "skill:airbnb-copy",
+  "name": "airbnb-copy",
+  "type": "kun:skill",
+  "title": "airbnb-copy",
+  "description": "Airbnb-voice rental listing titles, descriptions and marketing copy — Arabic-first, English mirrored",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/airbnb-copy/SKILL.md",
+      "target": "skills/airbnb-copy/SKILL.md",
+      "sha256": "438622a1a7cb373a0e7604bb87f77b6dcf57b5a8143cb71c9cfd5c3e9f979657"
+    }
+  ],
+  "version": "ddca46e7ae193c0d1ffe9f928d5039b09dc0b028e2bf0226de5853e323397c48"
+}

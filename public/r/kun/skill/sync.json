@@ -1,0 +1,19 @@
+{
+  "id": "skill:sync",
+  "name": "sync",
+  "type": "kun:skill",
+  "title": "sync",
+  "description": "Self-update — diff upstream releases and kun's own run evidence against the engine, adopt or propose",
+  "keywords": [
+    "sync"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/sync/SKILL.md",
+      "target": "skills/sync/SKILL.md",
+      "sha256": "20f5488409687d2746f99a73d2db3e0c83be27eb3fdece144304b5c3a1d1656c"
+    }
+  ],
+  "version": "3042bd30866201b549006510bdadaa51664e77e55c455c63e1b50583b13faaf9"
+}

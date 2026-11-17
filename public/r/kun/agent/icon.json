@@ -1,0 +1,17 @@
+{
+  "id": "agent:icon",
+  "name": "icon",
+  "type": "kun:agent",
+  "title": "icon",
+  "description": "Icons — SVG, lucide-react, shadcn/ui icon patterns",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/icon.md",
+      "target": "agents/icon.md",
+      "sha256": "40359fae7e3b1334ee38e5560d1f3bdcc5dad954d1194c86c4cc16e46952ae9a"
+    }
+  ],
+  "version": "650af595b3b9f474f8e9a352abbb1248bf9699960d7e71c301178f0d14f0596c"
+}

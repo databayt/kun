@@ -1,0 +1,19 @@
+{
+  "id": "skill:jobs",
+  "name": "jobs",
+  "type": "kun:skill",
+  "title": "jobs",
+  "description": "Abdout's instance of seek — his + Databayt's income lane (jobs, gigs, tenders, client requests, funding) across Rwanda, Kenya, Nigeria, Gulf, Sudan; on sales.databayt.org",
+  "keywords": [
+    "jobs"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/jobs/SKILL.md",
+      "target": "skills/jobs/SKILL.md",
+      "sha256": "71b5c63b1f79737331691cdda27ddf15e25998358b9d5e8fe8f2dd26e08e4e3c"
+    }
+  ],
+  "version": "06353f0fc2d03283fc2bf2429ad659445b2d8967cdf2e5353c5d2f88b92c1c14"
+}

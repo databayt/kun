@@ -1,0 +1,26 @@
+{
+  "id": "agent:growth",
+  "name": "growth",
+  "type": "kun:agent",
+  "title": "growth",
+  "description": "Content strategy, SEO, social, developer relations, community",
+  "keywords": [
+    "approve",
+    "calendar",
+    "carousel",
+    "draft",
+    "facebook",
+    "measure",
+    "publish",
+    "social"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/growth.md",
+      "target": "agents/growth.md",
+      "sha256": "c95416d0ad3b2df4a418e8cab5a363869dae2e0c268d257e224d1bfaebbffbc4"
+    }
+  ],
+  "version": "6af32947cf8826e658009170b5c08d1242a801f1cfc8e2bccca6873783ae0714"
+}

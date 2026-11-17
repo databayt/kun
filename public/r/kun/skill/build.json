@@ -1,0 +1,19 @@
+{
+  "id": "skill:build",
+  "name": "build",
+  "type": "kun:skill",
+  "title": "build",
+  "description": "Smart build with TypeScript check and auto-fix",
+  "keywords": [
+    "build"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/build/SKILL.md",
+      "target": "skills/build/SKILL.md",
+      "sha256": "f14e567445e2db70554a07eb9b1924a67033100d0212cee5e77ab57e4efdc793"
+    }
+  ],
+  "version": "99b91aa1729eec84feadc309dd4dc0d0d62246e743b6f17ef19c9e7cf8ed1e56"
+}

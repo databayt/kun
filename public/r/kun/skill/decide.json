@@ -1,0 +1,19 @@
+{
+  "id": "skill:decide",
+  "name": "decide",
+  "type": "kun:skill",
+  "title": "decide",
+  "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
+  "keywords": [
+    "decide"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/decide/SKILL.md",
+      "target": "skills/decide/SKILL.md",
+      "sha256": "75cde23d7804e5680c06deb4b6b5d3295f34a00dd20344d399b2109e063a3a33"
+    }
+  ],
+  "version": "ed327a0dcdd847c55b70596e1d24df841d3ad4bb2fb9bc18ebecd172a8052d98"
+}

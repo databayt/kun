@@ -1,0 +1,119 @@
+{
+  "id": "skill:blender",
+  "name": "blender",
+  "type": "kun:skill",
+  "title": "blender",
+  "description": "3D as code in Blender 5.x — flythroughs, product shots, rendered headless",
+  "keywords": [
+    "blender"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/blender/scripts/kit/__init__.py",
+      "target": "skills/blender/scripts/kit/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/_util.py",
+      "target": "skills/blender/scripts/kit/_util.py",
+      "sha256": "01bd266f70fe07d02f393048906394963ccd4ee9329e61f64b4d21aeb5ba7645"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/camrig.py",
+      "target": "skills/blender/scripts/kit/camrig.py",
+      "sha256": "53c67b6fccce9211903069e315c3a9508dd268bf02e1cf35120a41c828bab468"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/examples/toy/common.py",
+      "target": "skills/blender/scripts/kit/examples/toy/common.py",
+      "sha256": "67718b439765390a1f3fa21656f40ef0d007a2295ae936f687442f34b8982a35"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/examples/toy/s1_terrain.py",
+      "target": "skills/blender/scripts/kit/examples/toy/s1_terrain.py",
+      "sha256": "de6d3434371664112c0f07393dff23a87b22a6a91740091c1323d4bb116e863f"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/examples/toy/s2_water_sky.py",
+      "target": "skills/blender/scripts/kit/examples/toy/s2_water_sky.py",
+      "sha256": "9e330e85dfb0aeff13e54c680d4159c5163891308256e66bf451a149ca4026d7"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/examples/toy/s3_scatter.py",
+      "target": "skills/blender/scripts/kit/examples/toy/s3_scatter.py",
+      "sha256": "b23fbfeaa24a607228cbe5ba3d4f47ee1e18216402acc433ac0267f57a0ba3ae"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/examples/toy/s4_camera_grade.py",
+      "target": "skills/blender/scripts/kit/examples/toy/s4_camera_grade.py",
+      "sha256": "80be3d89eeaa55dc824c14d3546d02badae1ae27ea443f701234f2c0575c2150"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/grade.py",
+      "target": "skills/blender/scripts/kit/grade.py",
+      "sha256": "6f7fe0d958c9fdfb6dbbf47b5f3942313730c387d0c7cd6bc1e25defe73e2cfb"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/introspect.py",
+      "target": "skills/blender/scripts/kit/introspect.py",
+      "sha256": "77ebc58e0f16b04dd2453881411fa6d00eac2d9ceb022c14f0618a20dcbdd99e"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/materials.py",
+      "target": "skills/blender/scripts/kit/materials.py",
+      "sha256": "f90524c9d252e002b5bb3b355e4d53c34298c877af8be2d20ac201e822ce2a9b"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/polyhaven.py",
+      "target": "skills/blender/scripts/kit/polyhaven.py",
+      "sha256": "6f9d08e86fc101c72cab37cf80a3e4586b55ab1ed02a6f414d098536806c3631"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/README.md",
+      "target": "skills/blender/scripts/kit/README.md",
+      "sha256": "c673a88d7e997a0799d514069b94cd11f5375e527f29889afb11632da5b509dd"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/render_chunks.sh",
+      "target": "skills/blender/scripts/kit/render_chunks.sh",
+      "sha256": "2079cf28c096119b5539016b466e867b634760ed2c61d1e60451869b786cfeea"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/render_settings.py",
+      "target": "skills/blender/scripts/kit/render_settings.py",
+      "sha256": "fb4dcebd0e616ec1b2fbee20e40bd4111bf02277c863c3991a38e59ac43cfb9f"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/scatter.py",
+      "target": "skills/blender/scripts/kit/scatter.py",
+      "sha256": "f214ee88b0152cd430220d9f0e4f7f815480c4af817ee1aaefea6bdc680e7e4c"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/sky.py",
+      "target": "skills/blender/scripts/kit/sky.py",
+      "sha256": "a22c684deddc2134982dfa560336d5f92fe512e33cab54a7e904602f7d2def07"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/stage.py",
+      "target": "skills/blender/scripts/kit/stage.py",
+      "sha256": "95b54ca4682d8b71572d85334aeadbcaad3825d57d95371b53a92bcfde79f8a7"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/terrain.py",
+      "target": "skills/blender/scripts/kit/terrain.py",
+      "sha256": "fcc9f672c18cac4f83dc4d91afd5f4f775806f83e3acdb67ddd756f0c21d0e19"
+    },
+    {
+      "path": ".claude/skills/blender/scripts/kit/water.py",
+      "target": "skills/blender/scripts/kit/water.py",
+      "sha256": "520ef26557f52fe9a501c3ac496bd23f77b6f306022faa5c5a005836fbd0a092"
+    },
+    {
+      "path": ".claude/skills/blender/SKILL.md",
+      "target": "skills/blender/SKILL.md",
+      "sha256": "5bccebfee8ce8879b78458cde9e53d92682c38af0c7d8d5551e27a6a9e871c49"
+    }
+  ],
+  "version": "c001d88d5bc618234f4164576eff3405fdfd10fe458b4b150026dc317d55cf05"
+}

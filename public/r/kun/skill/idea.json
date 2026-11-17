@@ -1,0 +1,19 @@
+{
+  "id": "skill:idea",
+  "name": "idea",
+  "type": "kun:skill",
+  "title": "idea",
+  "description": "Capture a feature idea as a structured GitHub issue",
+  "keywords": [
+    "idea"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/idea/SKILL.md",
+      "target": "skills/idea/SKILL.md",
+      "sha256": "dcec9efaaabdd3219604cd99a8e2fdb8f915d8a1f2924edf4f55fe1ea59be8eb"
+    }
+  ],
+  "version": "6813531773a00bd32dfa39511dfcb42c75981503b6af9c350eaa9c6d2ecb38f2"
+}

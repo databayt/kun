@@ -1,0 +1,19 @@
+{
+  "id": "skill:qa",
+  "name": "qa",
+  "type": "kun:skill",
+  "title": "qa",
+  "description": "Autonomous block QA with one human signoff on the residual",
+  "keywords": [
+    "qa"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/qa/SKILL.md",
+      "target": "skills/qa/SKILL.md",
+      "sha256": "1719227d371dc571a4cb393a058b12551ad7d8e4c656cdb790c47556b8e29882"
+    }
+  ],
+  "version": "613739e013b2f059640c8b8ea1f841b153c5fa0dbc5e6a1e2b7c7efd7033e39c"
+}

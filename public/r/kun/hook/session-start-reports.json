@@ -1,0 +1,17 @@
+{
+  "id": "hook:session-start-reports",
+  "name": "session-start-reports",
+  "type": "kun:hook",
+  "title": "session-start-reports",
+  "description": "SessionStart hook — surface the open report-an-issue queue across databayt repos.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/session-start-reports.sh",
+      "target": "hooks/session-start-reports.sh",
+      "sha256": "a3d3d834f29abd0b57383ee84e0b66327f5737ba837acf73f3a2f22f19c2f3c1"
+    }
+  ],
+  "version": "38feff422c084b6434895d2418cf4ba81bbe53562de958f6ccad4d9caa50f4ad"
+}

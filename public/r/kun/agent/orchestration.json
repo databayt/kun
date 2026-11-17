@@ -1,0 +1,23 @@
+{
+  "id": "agent:orchestration",
+  "name": "orchestration",
+  "type": "kun:agent",
+  "title": "orchestration",
+  "description": "Coordinates multi-agent workflows and delegation",
+  "keywords": [
+    "dispatch",
+    "feature",
+    "saas",
+    "story",
+    "workflow"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/orchestration.md",
+      "target": "agents/orchestration.md",
+      "sha256": "9e36f934c77217bcd8ff8c455b2bab297a9c38bc7c4666753f5506b841d70813"
+    }
+  ],
+  "version": "76a5886e6483a14fb2b0b2cf24b00a046cc0e729d7e26d4d2fc6603a88f4e823"
+}

@@ -1,0 +1,4329 @@
+{
+  "$schema": "kun-registry-v1",
+  "name": "kun",
+  "homepage": "https://kun.databayt.org",
+  "items": [
+    {
+      "id": "skill:airbnb-copy",
+      "name": "airbnb-copy",
+      "type": "kun:skill",
+      "title": "airbnb-copy",
+      "description": "Airbnb-voice rental listing titles, descriptions and marketing copy — Arabic-first, English mirrored",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/airbnb-copy/SKILL.md",
+          "target": "skills/airbnb-copy/SKILL.md",
+          "sha256": "438622a1a7cb373a0e7604bb87f77b6dcf57b5a8143cb71c9cfd5c3e9f979657"
+        }
+      ],
+      "version": "ddca46e7ae193c0d1ffe9f928d5039b09dc0b028e2bf0226de5853e323397c48"
+    },
+    {
+      "id": "skill:analyze",
+      "name": "analyze",
+      "type": "kun:skill",
+      "title": "analyze",
+      "description": "Analyze a repo's patterns and generate a tailored Claude Code config",
+      "keywords": [
+        "analyze"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/analyze/SKILL.md",
+          "target": "skills/analyze/SKILL.md",
+          "sha256": "e4c63e317e63095d25549f3b2a461dcecf8b74b5cf3747110b09da04ae337b7e"
+        }
+      ],
+      "version": "69640965221aad7cd99ef2f51e4d6832bb5c753e1c8969a7a99e9f81ae5391b8"
+    },
+    {
+      "id": "skill:approve",
+      "name": "approve",
+      "type": "kun:skill",
+      "title": "approve",
+      "description": "The human gate — the /social/publish review queue, or a signed link for a remote approver",
+      "keywords": [
+        "approve"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/approve/SKILL.md",
+          "target": "skills/approve/SKILL.md",
+          "sha256": "b4df0e562bf7d89e2da2bea9085e99beeec3785fbece753a815216301d5e2e53"
+        }
+      ],
+      "version": "647c6f582e9d5375ffe8f41acfa2a7637bc3a1b588ca2c34832bb95f64b8e7ee"
+    },
+    {
+      "id": "skill:atom",
+      "name": "atom",
+      "type": "kun:skill",
+      "title": "atom",
+      "description": "Create atoms - compositions of 2+ shadcn/ui primitives",
+      "keywords": [
+        "atom"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/atom/SKILL.md",
+          "target": "skills/atom/SKILL.md",
+          "sha256": "2f48a2b560d687df6b27483ce8e2629c66ba6934689abae328c59282126ffd9e"
+        }
+      ],
+      "version": "3a7606d91d1879827203561000f007ec3ae8651661f9928ed167094997400146"
+    },
+    {
+      "id": "skill:auth",
+      "name": "auth",
+      "type": "kun:skill",
+      "title": "auth",
+      "description": "Sign in to any web service or CLI with the Keychain-stored databayt identities and reach what sits behind the login wall",
+      "keywords": [
+        "auth"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/auth/SKILL.md",
+          "target": "skills/auth/SKILL.md",
+          "sha256": "13c21cdf288d7a12a0057cd8a8bda5ce12392eb00c1f1cbbec5125cb796f94c1"
+        }
+      ],
+      "version": "05599d5adb2ce9bea039e260707d4aedf6817c1fc83585c3f778d0a9a11b0f5b"
+    },
+    {
+      "id": "skill:behalf",
+      "name": "behalf",
+      "type": "kun:skill",
+      "title": "behalf",
+      "description": "Web errands as Abdout — sign up, confirm, get keys",
+      "keywords": [
+        "behalf"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/behalf/SKILL.md",
+          "target": "skills/behalf/SKILL.md",
+          "sha256": "4c5682f6f3e7ffd6f5d757bae358088f4dfcce1ec43db3b4876a78baa8ff24b5"
+        }
+      ],
+      "version": "761426520497efdf13886e77403f54b74404f5ce05101b658026199d95bccd10"
+    },
+    {
+      "id": "skill:bench",
+      "name": "bench",
+      "type": "kun:skill",
+      "title": "bench",
+      "description": "Score the engine's own config on its labeled cases, and propose holdout-gated fixes",
+      "keywords": [
+        "bench"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/bench/SKILL.md",
+          "target": "skills/bench/SKILL.md",
+          "sha256": "cabe0e21f2b82a2e24293888cc0f918b24af1a2dd2a29bbdccda86f73605b625"
+        }
+      ],
+      "version": "ed0ef1402a085212faae919bf26d003b4553c5e83870e406ba79c9fea78dfe9b"
+    },
+    {
+      "id": "skill:blender",
+      "name": "blender",
+      "type": "kun:skill",
+      "title": "blender",
+      "description": "3D as code in Blender 5.x — flythroughs, product shots, rendered headless",
+      "keywords": [
+        "blender"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/blender/scripts/kit/__init__.py",
+          "target": "skills/blender/scripts/kit/__init__.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/_util.py",
+          "target": "skills/blender/scripts/kit/_util.py",
+          "sha256": "01bd266f70fe07d02f393048906394963ccd4ee9329e61f64b4d21aeb5ba7645"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/camrig.py",
+          "target": "skills/blender/scripts/kit/camrig.py",
+          "sha256": "53c67b6fccce9211903069e315c3a9508dd268bf02e1cf35120a41c828bab468"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/examples/toy/common.py",
+          "target": "skills/blender/scripts/kit/examples/toy/common.py",
+          "sha256": "67718b439765390a1f3fa21656f40ef0d007a2295ae936f687442f34b8982a35"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/examples/toy/s1_terrain.py",
+          "target": "skills/blender/scripts/kit/examples/toy/s1_terrain.py",
+          "sha256": "de6d3434371664112c0f07393dff23a87b22a6a91740091c1323d4bb116e863f"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/examples/toy/s2_water_sky.py",
+          "target": "skills/blender/scripts/kit/examples/toy/s2_water_sky.py",
+          "sha256": "9e330e85dfb0aeff13e54c680d4159c5163891308256e66bf451a149ca4026d7"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/examples/toy/s3_scatter.py",
+          "target": "skills/blender/scripts/kit/examples/toy/s3_scatter.py",
+          "sha256": "b23fbfeaa24a607228cbe5ba3d4f47ee1e18216402acc433ac0267f57a0ba3ae"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/examples/toy/s4_camera_grade.py",
+          "target": "skills/blender/scripts/kit/examples/toy/s4_camera_grade.py",
+          "sha256": "80be3d89eeaa55dc824c14d3546d02badae1ae27ea443f701234f2c0575c2150"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/grade.py",
+          "target": "skills/blender/scripts/kit/grade.py",
+          "sha256": "6f7fe0d958c9fdfb6dbbf47b5f3942313730c387d0c7cd6bc1e25defe73e2cfb"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/introspect.py",
+          "target": "skills/blender/scripts/kit/introspect.py",
+          "sha256": "77ebc58e0f16b04dd2453881411fa6d00eac2d9ceb022c14f0618a20dcbdd99e"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/materials.py",
+          "target": "skills/blender/scripts/kit/materials.py",
+          "sha256": "f90524c9d252e002b5bb3b355e4d53c34298c877af8be2d20ac201e822ce2a9b"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/polyhaven.py",
+          "target": "skills/blender/scripts/kit/polyhaven.py",
+          "sha256": "6f9d08e86fc101c72cab37cf80a3e4586b55ab1ed02a6f414d098536806c3631"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/README.md",
+          "target": "skills/blender/scripts/kit/README.md",
+          "sha256": "c673a88d7e997a0799d514069b94cd11f5375e527f29889afb11632da5b509dd"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/render_chunks.sh",
+          "target": "skills/blender/scripts/kit/render_chunks.sh",
+          "sha256": "2079cf28c096119b5539016b466e867b634760ed2c61d1e60451869b786cfeea"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/render_settings.py",
+          "target": "skills/blender/scripts/kit/render_settings.py",
+          "sha256": "fb4dcebd0e616ec1b2fbee20e40bd4111bf02277c863c3991a38e59ac43cfb9f"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/scatter.py",
+          "target": "skills/blender/scripts/kit/scatter.py",
+          "sha256": "f214ee88b0152cd430220d9f0e4f7f815480c4af817ee1aaefea6bdc680e7e4c"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/sky.py",
+          "target": "skills/blender/scripts/kit/sky.py",
+          "sha256": "a22c684deddc2134982dfa560336d5f92fe512e33cab54a7e904602f7d2def07"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/stage.py",
+          "target": "skills/blender/scripts/kit/stage.py",
+          "sha256": "95b54ca4682d8b71572d85334aeadbcaad3825d57d95371b53a92bcfde79f8a7"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/terrain.py",
+          "target": "skills/blender/scripts/kit/terrain.py",
+          "sha256": "fcc9f672c18cac4f83dc4d91afd5f4f775806f83e3acdb67ddd756f0c21d0e19"
+        },
+        {
+          "path": ".claude/skills/blender/scripts/kit/water.py",
+          "target": "skills/blender/scripts/kit/water.py",
+          "sha256": "520ef26557f52fe9a501c3ac496bd23f77b6f306022faa5c5a005836fbd0a092"
+        },
+        {
+          "path": ".claude/skills/blender/SKILL.md",
+          "target": "skills/blender/SKILL.md",
+          "sha256": "5bccebfee8ce8879b78458cde9e53d92682c38af0c7d8d5551e27a6a9e871c49"
+        }
+      ],
+      "version": "c001d88d5bc618234f4164576eff3405fdfd10fe458b4b150026dc317d55cf05"
+    },
+    {
+      "id": "skill:block",
+      "name": "block",
+      "type": "kun:skill",
+      "title": "block",
+      "description": "Create blocks - UI components with integrated business logic",
+      "keywords": [
+        "block"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/block/SKILL.md",
+          "target": "skills/block/SKILL.md",
+          "sha256": "ebb049f7e173f4d794436a7085cf558aba39f4bb970e5153505b4ca6cdfbccb2"
+        }
+      ],
+      "version": "82c8ae78f04306091cf8e6b2c6f02ba7e992de2858f3b2f5951e2e9ceac557b9"
+    },
+    {
+      "id": "skill:blur",
+      "name": "blur",
+      "type": "kun:skill",
+      "title": "blur",
+      "description": "Blur-up images — photos arrive blurred and sharpen into focus as they load",
+      "keywords": [
+        "blur"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/blur/SKILL.md",
+          "target": "skills/blur/SKILL.md",
+          "sha256": "bc6f07b05dfc25e535f6bb6bf4a1d640e438b532856790ea38bfb9aca2eaed13"
+        }
+      ],
+      "version": "3d0bd6485f1dd6ba82ab5d6e1ab506d4bbfe4203531f0a390ee16b42c57c4352"
+    },
+    {
+      "id": "skill:build",
+      "name": "build",
+      "type": "kun:skill",
+      "title": "build",
+      "description": "Smart build with TypeScript check and auto-fix",
+      "keywords": [
+        "build"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/build/SKILL.md",
+          "target": "skills/build/SKILL.md",
+          "sha256": "f14e567445e2db70554a07eb9b1924a67033100d0212cee5e77ab57e4efdc793"
+        }
+      ],
+      "version": "99b91aa1729eec84feadc309dd4dc0d0d62246e743b6f17ef19c9e7cf8ed1e56"
+    },
+    {
+      "id": "skill:calendar",
+      "name": "calendar",
+      "type": "kun:skill",
+      "title": "calendar",
+      "description": "The content calendar — which brand publishes what, on which day",
+      "keywords": [
+        "calendar"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/calendar/SKILL.md",
+          "target": "skills/calendar/SKILL.md",
+          "sha256": "66008e46903107c5e04897ba9d50a685bc37fb4c464812487939533e4367735d"
+        }
+      ],
+      "version": "910d9e56b0dee4fd2b898b672c7adb439fcc199d930c68eb0fd341c4916450ed"
+    },
+    {
+      "id": "skill:canon",
+      "name": "canon",
+      "type": "kun:skill",
+      "title": "canon",
+      "description": "The right CEO book + operating move for a business or leadership decision; /canon lists all 10",
+      "keywords": [
+        "canon"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/canon/SKILL.md",
+          "target": "skills/canon/SKILL.md",
+          "sha256": "e73767272109c2e40f3fa548e7292a65f450a7c40f645f634457568a68ebc2d8"
+        }
+      ],
+      "version": "e809454a284cf6c53c6bfb16f9127ff4e11c0269b7c6d6d4e25ba12294a9e104"
+    },
+    {
+      "id": "skill:captain",
+      "name": "captain",
+      "type": "kun:skill",
+      "title": "captain",
+      "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
+      "keywords": [
+        "captain"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/captain/SKILL.md",
+          "target": "skills/captain/SKILL.md",
+          "sha256": "7bdcfb6e9d5281028bdbb7fc7e3bb6315bc5ffded5bb9ad87f3be16c58bd8501"
+        }
+      ],
+      "version": "4c254f470c5f96bfa8a1a783fb4ba2192a461ff940c734b951119b74832aad31"
+    },
+    {
+      "id": "skill:carousel",
+      "name": "carousel",
+      "type": "kun:skill",
+      "title": "carousel",
+      "description": "Multi-slide bilingual brand carousels — deck written, slides rendered at exact platform sizes, human-approved",
+      "keywords": [
+        "carousel"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/carousel/SKILL.md",
+          "target": "skills/carousel/SKILL.md",
+          "sha256": "7ab721415bf12543b0ed66b5aa76bfce01eabee6790ac30749b1cdf0d1f37044"
+        }
+      ],
+      "version": "42057c9980a0a233f295abe377b1b6be41ca35777f0e0caf99462d8d8013ed46"
+    },
+    {
+      "id": "skill:check",
+      "name": "check",
+      "type": "kun:skill",
+      "title": "check",
+      "description": "Quality gate — typecheck + build + visual verify before shipping",
+      "keywords": [
+        "check"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/check/SKILL.md",
+          "target": "skills/check/SKILL.md",
+          "sha256": "3920b7cc3e17b57829efde8c41a841b872cd714075cab1c1947a6568883d6003"
+        }
+      ],
+      "version": "270ad55f04f00fd104eed44d96df52ea259122d3f4c61556204870e7131fea96"
+    },
+    {
+      "id": "skill:clone",
+      "name": "clone",
+      "type": "kun:skill",
+      "title": "clone",
+      "description": "Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact",
+      "keywords": [
+        "clone"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/clone/references/rtl-logical.md",
+          "target": "skills/clone/references/rtl-logical.md",
+          "sha256": "8355904b2d9fd98fba98f90c054173744dad1280ea926af78f1ebb8545316f2f"
+        },
+        {
+          "path": ".claude/skills/clone/references/snapshot-schema.md",
+          "target": "skills/clone/references/snapshot-schema.md",
+          "sha256": "f39e2f585144a9120cd2437b93ae1ff5a65d9b6ff7dc2dcec25c0ef68fd2c596"
+        },
+        {
+          "path": ".claude/skills/clone/references/style-mapping.md",
+          "target": "skills/clone/references/style-mapping.md",
+          "sha256": "65fbbdc5b46cffbedae1719b2d6c1c1b4e7bd30f4325f7516a23972c0208714b"
+        },
+        {
+          "path": ".claude/skills/clone/scripts/clone-capture.mjs",
+          "target": "skills/clone/scripts/clone-capture.mjs",
+          "sha256": "7cb9f4251713e39474ab3e3893b32ae4022c25d06790b0c838833889d88f854d"
+        },
+        {
+          "path": ".claude/skills/clone/scripts/clone.workflow.mjs",
+          "target": "skills/clone/scripts/clone.workflow.mjs",
+          "sha256": "ea7e59f7f05f26fdeeacbbd1a9d7cbda7718d02663c4709135447d07a0c60446"
+        },
+        {
+          "path": ".claude/skills/clone/scripts/package.json",
+          "target": "skills/clone/scripts/package.json",
+          "sha256": "975476c16365e5aef6a326188ae9aa2d109566e58254439a56fbc98dbb2b13ed"
+        },
+        {
+          "path": ".claude/skills/clone/SKILL.md",
+          "target": "skills/clone/SKILL.md",
+          "sha256": "090408a309575baa1743f65351c0104cb8a9421898a75d7350d7f2e5a80655ed"
+        }
+      ],
+      "version": "1555c2a0ea4813f6369d174061b1229108af662539d5ee33db3d62605cd17cd1"
+    },
+    {
+      "id": "skill:cloudflare",
+      "name": "cloudflare",
+      "type": "kun:skill",
+      "title": "cloudflare",
+      "description": "Cloudflare platform operator — Workers + Containers deploys, DNS cutover, crons and logs",
+      "keywords": [
+        "cloudflare"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/cloudflare/SKILL.md",
+          "target": "skills/cloudflare/SKILL.md",
+          "sha256": "198658c0538c9d73c929a30b6408092e61d996cb3cdf092374c8889c4e56292d"
+        }
+      ],
+      "version": "c3e0c68cceab1a93c96ef9c66297943e8164c446a62108f61a16f48ab0048666"
+    },
+    {
+      "id": "skill:code",
+      "name": "code",
+      "type": "kun:skill",
+      "title": "code",
+      "description": "Logic layer — server actions with auth, validation, tenant isolation",
+      "keywords": [
+        "code"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/code/SKILL.md",
+          "target": "skills/code/SKILL.md",
+          "sha256": "072c6309f4575eacdd66bc817b034de875fbb43d2551924acc682e238961daeb"
+        }
+      ],
+      "version": "675aa2f717b050e65ba004f99e89574a8ffca741783ec801d511e07c0c525438"
+    },
+    {
+      "id": "skill:codebase",
+      "name": "codebase",
+      "type": "kun:skill",
+      "title": "codebase",
+      "description": "Access reference codebase at /Users/abdout/codebase or databayt/codebase",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/codebase/SKILL.md",
+          "target": "skills/codebase/SKILL.md",
+          "sha256": "103e52a55e69d173f63f71dd930f61a40d4cbfbb6a563cd20abf670af23836d2"
+        }
+      ],
+      "version": "9e8ddc188c0a3ff905e258cbc77f7901fc729a09a9e91b229a5f3d78387a00b3"
+    },
+    {
+      "id": "skill:convert",
+      "name": "convert",
+      "type": "kun:skill",
+      "title": "convert",
+      "description": "Convert a file or URL to Markdown via MarkItDown",
+      "keywords": [
+        "convert"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/convert/SKILL.md",
+          "target": "skills/convert/SKILL.md",
+          "sha256": "631222bbe6d54c9af015087d937d3881af2841c890e51fa893587c3eddbf7f42"
+        }
+      ],
+      "version": "d0695f68a0a1aec0aeec287dbfd97c362eff8cde06d00cd4624fc87ab0fbb94d"
+    },
+    {
+      "id": "skill:costs",
+      "name": "costs",
+      "type": "kun:skill",
+      "title": "costs",
+      "description": "API spend breakdown and cost-optimization analysis",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/costs/SKILL.md",
+          "target": "skills/costs/SKILL.md",
+          "sha256": "0339ad98b87f5952c54641755e38a776c1a52768403fe40b6dd5b35706daf2bb"
+        }
+      ],
+      "version": "cfdfefb63c998619110d58b140d383e0d8b725fb3ca81a6f56b3cba683ec2035"
+    },
+    {
+      "id": "skill:crawl-anthropic",
+      "name": "crawl-anthropic",
+      "type": "kun:skill",
+      "title": "crawl-anthropic",
+      "description": "Crawl and snapshot Anthropic docs/assets",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/crawl-anthropic/SKILL.md",
+          "target": "skills/crawl-anthropic/SKILL.md",
+          "sha256": "2b7f6e1259f395694d849d374d79f63a3ccc2fb70d68ef615b7325f6f83a5c73"
+        }
+      ],
+      "version": "1d764f08aaf075fb8537e172f9333f3435d17c3b4f1bd6a1fb8c0694801108a8"
+    },
+    {
+      "id": "skill:credentials",
+      "name": "credentials",
+      "type": "kun:skill",
+      "title": "credentials",
+      "description": "Databayt API keys in the macOS Keychain — store, read, export",
+      "keywords": [
+        "credentials"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/credentials/SKILL.md",
+          "target": "skills/credentials/SKILL.md",
+          "sha256": "0d668329566997795de0b9dd0da8cae2fcc08c8f7c1d4ccd4558e97d0af9cda4"
+        }
+      ],
+      "version": "718331aa482333610d805ad531a07cbcd4304acd20b824d8339f103a98a328dd"
+    },
+    {
+      "id": "skill:decide",
+      "name": "decide",
+      "type": "kun:skill",
+      "title": "decide",
+      "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
+      "keywords": [
+        "decide"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/decide/SKILL.md",
+          "target": "skills/decide/SKILL.md",
+          "sha256": "75cde23d7804e5680c06deb4b6b5d3295f34a00dd20344d399b2109e063a3a33"
+        }
+      ],
+      "version": "ed327a0dcdd847c55b70596e1d24df841d3ad4bb2fb9bc18ebecd172a8052d98"
+    },
+    {
+      "id": "skill:deploy",
+      "name": "deploy",
+      "type": "kun:skill",
+      "title": "deploy",
+      "description": "Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane",
+      "keywords": [
+        "deploy"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/deploy/SKILL.md",
+          "target": "skills/deploy/SKILL.md",
+          "sha256": "9ff930a1e7c2f6532e3718437d7f4a3e830144531a6d00d0618fb904f0094e18"
+        }
+      ],
+      "version": "a999204c9532b437ffa5e437e916533b087ff9a4593885734215d47385b15179"
+    },
+    {
+      "id": "skill:dev",
+      "name": "dev",
+      "type": "kun:skill",
+      "title": "dev",
+      "description": "Start dev server on port 3000",
+      "keywords": [
+        "dev"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/dev/SKILL.md",
+          "target": "skills/dev/SKILL.md",
+          "sha256": "4e2a72f5f88a125c53f0f5f2fda41936929c9a3ab3c46eb149ce2318b3c3625d"
+        }
+      ],
+      "version": "87dc93417bd103c0af328082f7a7bcf1303da2ecc08cb9c90862b9ef19a19d9a"
+    },
+    {
+      "id": "skill:docs",
+      "name": "docs",
+      "type": "kun:skill",
+      "title": "docs",
+      "description": "Generate documentation - component MDX, API docs, Storybook stories",
+      "keywords": [
+        "docs"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/docs/SKILL.md",
+          "target": "skills/docs/SKILL.md",
+          "sha256": "3bf61f09648044c13372f1b340d5c8e3bf04cd11840b7eec2201edc6024d984e"
+        }
+      ],
+      "version": "62763f120a238d927d2852dd9d5dc06e8f989d94c9b7616df8f28036174bdb91"
+    },
+    {
+      "id": "skill:domains",
+      "name": "domains",
+      "type": "kun:skill",
+      "title": "domains",
+      "description": "Domain + mail health — expiry, renewal, DNS, inboxes",
+      "keywords": [
+        "domains"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/domains/SKILL.md",
+          "target": "skills/domains/SKILL.md",
+          "sha256": "4483f9399a6bbb050fde10effe32d495a082ce56d5956e0aca339fe57d7d97b5"
+        }
+      ],
+      "version": "55b23d3c1580cd919f7ef63da0069545dd58b761e3f8f87a0a308ecd0c9602ae"
+    },
+    {
+      "id": "skill:draft",
+      "name": "draft",
+      "type": "kun:skill",
+      "title": "draft",
+      "description": "Full brand draft — Arabic-first copy, English mirrored, plus media",
+      "keywords": [
+        "draft"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/draft/references/golden-set.md",
+          "target": "skills/draft/references/golden-set.md",
+          "sha256": "5dba17d8922448263c950bdfaadfb8c37277838affd86a3805a33972c4cad7d9"
+        },
+        {
+          "path": ".claude/skills/draft/references/scene-bank.md",
+          "target": "skills/draft/references/scene-bank.md",
+          "sha256": "076e776573c3b7ac4174a5061760ec6a705354bc15af0bfe33f479b424ebaffd"
+        },
+        {
+          "path": ".claude/skills/draft/SKILL.md",
+          "target": "skills/draft/SKILL.md",
+          "sha256": "7d051fa1d2917d729f6f12bc2a49ad5f2fa246e3ab6e321251533f95e507c9f0"
+        }
+      ],
+      "version": "6ff5f6288de3ed85992089239f136d7572c1a45e8a6724fa90048e0cdbe4bff7"
+    },
+    {
+      "id": "skill:economy",
+      "name": "economy",
+      "type": "kun:skill",
+      "title": "economy",
+      "description": "Token economy — audit consumption and delegate across model × effort × product lane",
+      "keywords": [
+        "economy"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/economy/SKILL.md",
+          "target": "skills/economy/SKILL.md",
+          "sha256": "85d937a43663bf1f3a09c62f9254ba1b6f8669fd551db8f2e1d5268419037952"
+        }
+      ],
+      "version": "11f2d1cc640e643c15a9812ce8683ea3c6e47c54be05ed0db5f30130ccd16926"
+    },
+    {
+      "id": "skill:edit",
+      "name": "edit",
+      "type": "kun:skill",
+      "title": "edit",
+      "description": "Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels",
+      "keywords": [
+        "edit"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/edit/patches/video-use-local-asr.patch",
+          "target": "skills/edit/patches/video-use-local-asr.patch",
+          "sha256": "f8b5ac3fca84e4ecb5bfad5ef91f6c6307d41b8cc7c2570a5a6fd52360d5394b"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/blender/stills.py",
+          "target": "skills/edit/scripts/blender/stills.py",
+          "sha256": "7f8e67cb0908ebd7ed49353eacdad12e32c8602fd40649b8d2ab9f752fdb6ed0"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/blender/stills.schema.md",
+          "target": "skills/edit/scripts/blender/stills.schema.md",
+          "sha256": "e969f50546795e649da540965ee10aa952ae3d7fd3d6cbbc7cd45b3a7268dee2"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/fc/assemble.mjs",
+          "target": "skills/edit/scripts/fc/assemble.mjs",
+          "sha256": "21ea805ec9680393d9446d9b2eb234b863efb1d6dbd6580ce71dbe92c933cdf0"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/fc/lesson.mjs",
+          "target": "skills/edit/scripts/fc/lesson.mjs",
+          "sha256": "504e845e553a295e4479daac9bda66109a8373dc5de70ddb29b8ebc67b76cbfe"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/hf.sh",
+          "target": "skills/edit/scripts/hf.sh",
+          "sha256": "3fb0667e6e8181c4fc4924f74841d645e28bb06ef6f7fb99c8b3417628f6cef9"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/lib.sh",
+          "target": "skills/edit/scripts/lib.sh",
+          "sha256": "38be0d9a695c3ff7f157075b04558a1d7c641b505fd621b91092567b18ade981"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/asr_batch.py",
+          "target": "skills/edit/scripts/media/asr_batch.py",
+          "sha256": "b31298fb10aa431e45766e3293360171ef02b172155885bf64f1ecce1ea50eb2"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/brand.mjs",
+          "target": "skills/edit/scripts/media/brand.mjs",
+          "sha256": "9fb5a1f04d7bcaeef9daf9c4afdf5cdd13c6edf1c01633d10d208615c89ac68c"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/derive.mjs",
+          "target": "skills/edit/scripts/media/derive.mjs",
+          "sha256": "6dce2aab81e498a93b15bd1fe38a4a34fca65e3a63856f2e6e8c9b13af982977"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/lyria.py",
+          "target": "skills/edit/scripts/media/lyria.py",
+          "sha256": "a904f7f4d4d52c9b35795c2409856729f0eb0cf914c646405ce46c68a8f0ee04"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/probe.mjs",
+          "target": "skills/edit/scripts/media/probe.mjs",
+          "sha256": "34b7bf31eb1bc5457a69770ed26de3fbcccfbbc6f54d18b61ccadaed3e553d68"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/prune.mjs",
+          "target": "skills/edit/scripts/media/prune.mjs",
+          "sha256": "fbd90f9a3dcb2fd9293c089bb36721ec66e7521a2db23ad8bd81d84d6b58b318"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/publish.mjs",
+          "target": "skills/edit/scripts/media/publish.mjs",
+          "sha256": "384fd6351ffd13d86ff5fdfc1810c9eac045576cb7778aa977eaf68b4f128b65"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/qa.mjs",
+          "target": "skills/edit/scripts/media/qa.mjs",
+          "sha256": "5dc6be4b31bf7bee347fdf540ac767d7f4e439b2d3ca14ae19f0e2a339fb06eb"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/rt.mjs",
+          "target": "skills/edit/scripts/media/rt.mjs",
+          "sha256": "2dfd0ac88c38a18a69851144caab3403dcf5450d0bbfcda469faefa8117e6de1"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/tts_batch.py",
+          "target": "skills/edit/scripts/media/tts_batch.py",
+          "sha256": "cfadf6ea5684ea8596ee9a85e2b7682f7f329a2652f39fd65213dabf6a82d97d"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/voice.mjs",
+          "target": "skills/edit/scripts/media/voice.mjs",
+          "sha256": "4a18650b1bce2dc26edab8d5ad8d34e57b736540a6144ae1df295b4ddf05241c"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/vtt.mjs",
+          "target": "skills/edit/scripts/media/vtt.mjs",
+          "sha256": "c0e5b6e6b93bc11ee43102c134e2c001689a63e9281d8a5673926cbc329d76a8"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media/wa-pull.py",
+          "target": "skills/edit/scripts/media/wa-pull.py",
+          "sha256": "f58cfbe85bfe21babefea479d46260631d433fb46652580df302a3438d3a5e65"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/media.sh",
+          "target": "skills/edit/scripts/media.sh",
+          "sha256": "654a6001711212c3cc79306ef4fad232ca97c5d18da8882b0778beaddd56654c"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/reel.sh",
+          "target": "skills/edit/scripts/reel.sh",
+          "sha256": "43a8b3b43c9b0089308acd75737cbd236c28507261c5c75b18a96738e3d87206"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/setup.sh",
+          "target": "skills/edit/scripts/setup.sh",
+          "sha256": "b8ba57f7667b46359797dd8a846096371eee30ebdcf574b087c83a89cc62f57a"
+        },
+        {
+          "path": ".claude/skills/edit/scripts/vu.sh",
+          "target": "skills/edit/scripts/vu.sh",
+          "sha256": "bb4d67add4ef4e600190d072884077a38dab313e0b4e74651890cdf6420098ad"
+        },
+        {
+          "path": ".claude/skills/edit/SKILL.md",
+          "target": "skills/edit/SKILL.md",
+          "sha256": "89ad07dccac4418842264e02b0ed24f14d67d09ccd561dd3e0935cf4488fd6e4"
+        }
+      ],
+      "version": "b3feb5a584e70474a001cf6978f6261f5243a36a7d7d634aa972cda0553a8772"
+    },
+    {
+      "id": "skill:facebook",
+      "name": "facebook",
+      "type": "kun:skill",
+      "title": "facebook",
+      "description": "Connect a brand's Facebook Page to the publishing pipeline",
+      "keywords": [
+        "facebook"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/facebook/SKILL.md",
+          "target": "skills/facebook/SKILL.md",
+          "sha256": "41341c8e6d07178a4f5c1087569b96adacd6ecc8fab1f714f3e17193bbc506ed"
+        }
+      ],
+      "version": "f249248065968ce21b4fed6f3dd01d332451650436ea3ab9eeb1a1871a0a2163"
+    },
+    {
+      "id": "skill:feature",
+      "name": "feature",
+      "type": "kun:skill",
+      "title": "feature",
+      "description": "Full pipeline — idea to production (chains every stage)",
+      "keywords": [
+        "feature"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/feature/SKILL.md",
+          "target": "skills/feature/SKILL.md",
+          "sha256": "0e743d331e73e8c87c9f8656265b222a2a0cbb818f1610b31b3483d84f8c849f"
+        }
+      ],
+      "version": "58fa00920fde21a08cc630a0fb90f3f4939f79c50a9db68d881196295be150a3"
+    },
+    {
+      "id": "skill:fix",
+      "name": "fix",
+      "type": "kun:skill",
+      "title": "fix",
+      "description": "Auto-fix all detected issues - TypeScript, lint, build errors",
+      "keywords": [
+        "fix"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/fix/SKILL.md",
+          "target": "skills/fix/SKILL.md",
+          "sha256": "01689b4ac0265ac5dfb6aec9fd83cb9bfc43775219fbfd43724e44edbe2af22c"
+        }
+      ],
+      "version": "636a7ff015944dc21c9bc0aabc665cbeed307016f13984b6ec4aa9d0b381ce8b"
+    },
+    {
+      "id": "skill:funnel",
+      "name": "funnel",
+      "type": "kun:skill",
+      "title": "funnel",
+      "description": "Conversation to conversion — gates, segments, assets, the stall clock",
+      "keywords": [
+        "funnel"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/funnel/SKILL.md",
+          "target": "skills/funnel/SKILL.md",
+          "sha256": "74113e1760ad0289e637aaf17cebcde5f420e5f2faa88fc1dc579ff1ddc7f0d5"
+        }
+      ],
+      "version": "d5d8f67ca16f0fcdfa3ff26d7a7d540f499273c4760398e5ce8b44a1bb6ed0a9"
+    },
+    {
+      "id": "skill:handover",
+      "name": "handover",
+      "type": "kun:skill",
+      "title": "handover",
+      "description": "UI verification — runs niche quality keywords on a URL or block",
+      "keywords": [
+        "handover"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/handover/SKILL.md",
+          "target": "skills/handover/SKILL.md",
+          "sha256": "cd657a762ca97110a3dc6657355433d8ab43c468981059d91ab6e92d6548d9b9"
+        }
+      ],
+      "version": "0012cd67d1572fd2b4ee111b50a56841d5e278c01368f713c65a25511d6ece30"
+    },
+    {
+      "id": "skill:health",
+      "name": "health",
+      "type": "kun:skill",
+      "title": "health",
+      "description": "Check Claude Code config health across the team + engine drift",
+      "keywords": [
+        "health"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/health/SKILL.md",
+          "target": "skills/health/SKILL.md",
+          "sha256": "60cff657f683ae6e991c4b2a8e6fd723f331d77ce85f58b3cdc933008eb73af7"
+        }
+      ],
+      "version": "9db566a76170b0e2fa0a1673097d5ec7edb0eb991b24885eddb50ec942460885"
+    },
+    {
+      "id": "skill:higgs",
+      "name": "higgs",
+      "type": "kun:skill",
+      "title": "higgs",
+      "description": "Marketing photos and video — Google (Nano Banana, Veo, Omni) direct, or Higgsfield",
+      "keywords": [
+        "higgs"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/higgs/SKILL.md",
+          "target": "skills/higgs/SKILL.md",
+          "sha256": "e60e468281d7fc10f3b92f79d6cd8b7b554ec83072bbcfd7cc2973de0b78fd8a"
+        }
+      ],
+      "version": "ca32424db8c5237593137dbee763e9f96cd4a1c93d6f62d057ea3d336df754e0"
+    },
+    {
+      "id": "skill:idea",
+      "name": "idea",
+      "type": "kun:skill",
+      "title": "idea",
+      "description": "Capture a feature idea as a structured GitHub issue",
+      "keywords": [
+        "idea"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/idea/SKILL.md",
+          "target": "skills/idea/SKILL.md",
+          "sha256": "dcec9efaaabdd3219604cd99a8e2fdb8f915d8a1f2924edf4f55fe1ea59be8eb"
+        }
+      ],
+      "version": "6813531773a00bd32dfa39511dfcb42c75981503b6af9c350eaa9c6d2ecb38f2"
+    },
+    {
+      "id": "skill:incident",
+      "name": "incident",
+      "type": "kun:skill",
+      "title": "incident",
+      "description": "Incident response workflow for production issues",
+      "keywords": [
+        "incident"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/incident/SKILL.md",
+          "target": "skills/incident/SKILL.md",
+          "sha256": "9f3b7cbfb774f2cf56f2240ab5e6749b2cc999b029bd1789ff8f4076247968f8"
+        }
+      ],
+      "version": "5cd12aeac157d9290e0c2ef06245bcb95c251b08212de3b02150bc8e52e61ec2"
+    },
+    {
+      "id": "skill:issue",
+      "name": "issue",
+      "type": "kun:skill",
+      "title": "issue",
+      "description": "Create a GitHub issue in the appropriate databayt repo",
+      "keywords": [
+        "issue"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/issue/SKILL.md",
+          "target": "skills/issue/SKILL.md",
+          "sha256": "9ca3f72897e9d8cd995d887c1b781c69c9de3223d509aa6c84ffe56c4f305950"
+        }
+      ],
+      "version": "20948cd0d22ba35ba03dc0b76d92b75e40a0334426e1e3c7d2b89db5b48d91a4"
+    },
+    {
+      "id": "skill:jobs",
+      "name": "jobs",
+      "type": "kun:skill",
+      "title": "jobs",
+      "description": "Abdout's instance of seek — his + Databayt's income lane (jobs, gigs, tenders, client requests, funding) across Rwanda, Kenya, Nigeria, Gulf, Sudan; on sales.databayt.org",
+      "keywords": [
+        "jobs"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/jobs/SKILL.md",
+          "target": "skills/jobs/SKILL.md",
+          "sha256": "71b5c63b1f79737331691cdda27ddf15e25998358b9d5e8fe8f2dd26e08e4e3c"
+        }
+      ],
+      "version": "06353f0fc2d03283fc2bf2429ad659445b2d8967cdf2e5353c5d2f88b92c1c14"
+    },
+    {
+      "id": "skill:learn",
+      "name": "learn",
+      "type": "kun:skill",
+      "title": "learn",
+      "description": "Extract organizational patterns and conventions from repos + history",
+      "keywords": [
+        "learn"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/learn/SKILL.md",
+          "target": "skills/learn/SKILL.md",
+          "sha256": "0db49051678813bf2ae0086a9e6b9bcc38e6aae91992fab5d302bd910a07a243"
+        }
+      ],
+      "version": "829eb2034f685bca56c86864fcc56f11ca51c1e2285225392758337952d9f66f"
+    },
+    {
+      "id": "skill:mcp-doctor",
+      "name": "mcp-doctor",
+      "type": "kun:skill",
+      "title": "mcp-doctor",
+      "description": "Diagnose and recover the browser/Playwright MCP server",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/mcp-doctor/ERRORS.md",
+          "target": "skills/mcp-doctor/ERRORS.md",
+          "sha256": "aba468d14c4308564a6d015f5b5aad68994718c5afb71dee1cb8fee0634b94e2"
+        },
+        {
+          "path": ".claude/skills/mcp-doctor/SKILL.md",
+          "target": "skills/mcp-doctor/SKILL.md",
+          "sha256": "152ba17b767f797cafa309f452d808308189bce031c774e7fc9e538c3e0aaf09"
+        }
+      ],
+      "version": "2735ef88bf211de554f23d7d6fbe59b6b24a21a846b49f4a12bebfad83670495"
+    },
+    {
+      "id": "skill:md",
+      "name": "md",
+      "type": "kun:skill",
+      "title": "md",
+      "description": "House standard for machine-produced Markdown — schema, RTL rules, grading by agreement",
+      "keywords": [
+        "md"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/md/SKILL.md",
+          "target": "skills/md/SKILL.md",
+          "sha256": "55a919bf9ac695e38b6bd368cff83047cf7a7b14a68150c4637caf8e48e3eb69"
+        }
+      ],
+      "version": "7349d51c5d3b82b87be61997f64fd3f12bb3f4e98e9818c3674b52f7f0c90d27"
+    },
+    {
+      "id": "skill:measure",
+      "name": "measure",
+      "type": "kun:skill",
+      "title": "measure",
+      "description": "Read the numbers back — reach, engagement and UTM attribution per post and brand",
+      "keywords": [
+        "measure"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/measure/SKILL.md",
+          "target": "skills/measure/SKILL.md",
+          "sha256": "5061df371db277f9c9e1316e85f014202fef86b6cba39b244904e89795d31f24"
+        }
+      ],
+      "version": "fef5ef74e6021197df22dd1060f49fbbb9fca8c046afbe5b3fa44100cf78d177"
+    },
+    {
+      "id": "skill:monitor",
+      "name": "monitor",
+      "type": "kun:skill",
+      "title": "monitor",
+      "description": "Check all deployments, costs, and uptime across databayt products",
+      "keywords": [
+        "monitor"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/monitor/SKILL.md",
+          "target": "skills/monitor/SKILL.md",
+          "sha256": "c290b8e664a0a410c5fc53a3995dfbec9da3a88a938649a8fcc8792b407ba1df"
+        }
+      ],
+      "version": "77ae28870c56daf4fb56e0622dd89bee2a0735a77e38bdd0cf118e63f11c9a44"
+    },
+    {
+      "id": "skill:motion",
+      "name": "motion",
+      "type": "kun:skill",
+      "title": "motion",
+      "description": "Add Framer Motion animations to components",
+      "keywords": [
+        "motion"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/motion/SKILL.md",
+          "target": "skills/motion/SKILL.md",
+          "sha256": "1d54fee86afafd96e6012db891c43f7fe56504766f75914318b9d06698424074"
+        }
+      ],
+      "version": "bd3bfb6beb6c66cb402316afde8cfd10c8b775956e819a2a782f380b1d4f8183"
+    },
+    {
+      "id": "skill:package",
+      "name": "package",
+      "type": "kun:skill",
+      "title": "package",
+      "description": "Cross-repo dependency audit and upgrade coordination",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/package/SKILL.md",
+          "target": "skills/package/SKILL.md",
+          "sha256": "de2623b9cbc695e9e21e47bf7b8244827621d0d6e0250768b33a4b318274cc05"
+        }
+      ],
+      "version": "10af228fdf8b7758e0ae18a1d52fb9a419b8526a4827d47701966a2f95b9601d"
+    },
+    {
+      "id": "skill:pattern",
+      "name": "pattern",
+      "type": "kun:skill",
+      "title": "pattern",
+      "description": "Look up a canonical cross-repo pattern (form, table, auth, ...)",
+      "keywords": [
+        "pattern"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/pattern/SKILL.md",
+          "target": "skills/pattern/SKILL.md",
+          "sha256": "4f7467df8dc637aabda6bb7fa0659d2a4a21a10f7ab839851c29ae9c7ecaf0a8"
+        }
+      ],
+      "version": "ccc5397901e7598773998096e9db0c1a8676e7db86db19b4acedb0b6f6dd3d5c"
+    },
+    {
+      "id": "skill:performance",
+      "name": "performance",
+      "type": "kun:skill",
+      "title": "performance",
+      "description": "Performance audit - Core Web Vitals, bundle, database queries",
+      "keywords": [
+        "performance"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/performance/SKILL.md",
+          "target": "skills/performance/SKILL.md",
+          "sha256": "e40be075f789c8679230695765fa713ee5cf8a1dd0adb79d3eddd08ace5271ba"
+        }
+      ],
+      "version": "8692ae89591d9b1b68c0b72d0b677ee5c3c4345828a0d6978cbf5b95deac45b4"
+    },
+    {
+      "id": "skill:plan",
+      "name": "plan",
+      "type": "kun:skill",
+      "title": "plan",
+      "description": "Architecture plan — tech decisions from an approved spec, before code",
+      "keywords": [
+        "plan"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/plan/SKILL.md",
+          "target": "skills/plan/SKILL.md",
+          "sha256": "2c01248a83be58df6a17ead8c8ae6bb760bfdee1f1e60b7e9a0b4f6e300d15cb"
+        }
+      ],
+      "version": "375b1f2ad22f1328c26ef82eeccbc4cb59b569ba569670b07c0112607c75a7cf"
+    },
+    {
+      "id": "skill:premortem",
+      "name": "premortem",
+      "type": "kun:skill",
+      "title": "premortem",
+      "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
+      "keywords": [
+        "premortem"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/premortem/SKILL.md",
+          "target": "skills/premortem/SKILL.md",
+          "sha256": "9c9908bba51e90dc4f6192949b7e33177009454f5fc62655c3c2dcf2344e6977"
+        }
+      ],
+      "version": "7483e2f7588dc7a188205917584107623944f143dd80dc74c05e3e87d0a0c1a7"
+    },
+    {
+      "id": "skill:pricing",
+      "name": "pricing",
+      "type": "kun:skill",
+      "title": "pricing",
+      "description": "Calculate and compare pricing tiers for a databayt product",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/pricing/SKILL.md",
+          "target": "skills/pricing/SKILL.md",
+          "sha256": "8416ff1ab4d73b438d0d86e7e3d3a9522e7953099cf6ee7dfad25676be2c5f7e"
+        }
+      ],
+      "version": "deae47e5418e2ba2aaff6c5eb84f8d936c0f820e43886d8d4dbc4135d7e2ab36"
+    },
+    {
+      "id": "skill:profile",
+      "name": "profile",
+      "type": "kun:skill",
+      "title": "profile",
+      "description": "Load a selective config profile by role (engineer/business/content/ops)",
+      "keywords": [
+        "profile"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/profile/SKILL.md",
+          "target": "skills/profile/SKILL.md",
+          "sha256": "972d82926950b52654ca6273ab28781ce6e1711800990407a7b39d3bca67bbbb"
+        }
+      ],
+      "version": "4ad1974bb22ab6c75d7e1da3b957fb9f5d3411b5784a5b34a7160fc26f20758a"
+    },
+    {
+      "id": "skill:proposal",
+      "name": "proposal",
+      "type": "kun:skill",
+      "title": "proposal",
+      "description": "Generate a client proposal via the revenue agent",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/proposal/SKILL.md",
+          "target": "skills/proposal/SKILL.md",
+          "sha256": "8a01e452062fe1197b9e1ca35f9fd69dab0d1a69cd89d6ec848ce5fe43e44a82"
+        }
+      ],
+      "version": "f4a1089ad42c37a03260973209d5cec848dab6ed5aba4678894517db0173503a"
+    },
+    {
+      "id": "skill:publish",
+      "name": "publish",
+      "type": "kun:skill",
+      "title": "publish",
+      "description": "Deliver approved full drafts to the brand channels",
+      "keywords": [
+        "publish"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/publish/SKILL.md",
+          "target": "skills/publish/SKILL.md",
+          "sha256": "089786675c61d87eb2e82b8618048c81cc48744e849e10da14b28b992dcd736f"
+        }
+      ],
+      "version": "e196d884b61d2ad64168000c7b7859441a204936708d9af2b26e697ab300ff7c"
+    },
+    {
+      "id": "skill:pwa",
+      "name": "pwa",
+      "type": "kun:skill",
+      "title": "pwa",
+      "description": "Progressive Web App lane — install, offline, Web Push",
+      "keywords": [
+        "pwa"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/pwa/scripts/pwa-audit.mjs",
+          "target": "skills/pwa/scripts/pwa-audit.mjs",
+          "sha256": "d813e1c37e622db4251b59f65404f53a6ac721a7d4dcbf8f545ff8a2c50fabc1"
+        },
+        {
+          "path": ".claude/skills/pwa/SKILL.md",
+          "target": "skills/pwa/SKILL.md",
+          "sha256": "ce947ba18b8a4c78d0abc26ecd07d0e992ff732cf7f03e7c02f565139d89e48d"
+        }
+      ],
+      "version": "29ca89d23ce0e32a5cd1cb8345e5316782f605f93a2df1ca1d246aa1b230d4bb"
+    },
+    {
+      "id": "skill:qa",
+      "name": "qa",
+      "type": "kun:skill",
+      "title": "qa",
+      "description": "Autonomous block QA with one human signoff on the residual",
+      "keywords": [
+        "qa"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/qa/SKILL.md",
+          "target": "skills/qa/SKILL.md",
+          "sha256": "1719227d371dc571a4cb393a058b12551ad7d8e4c656cdb790c47556b8e29882"
+        }
+      ],
+      "version": "613739e013b2f059640c8b8ea1f841b153c5fa0dbc5e6a1e2b7c7efd7033e39c"
+    },
+    {
+      "id": "skill:quick",
+      "name": "quick",
+      "type": "kun:skill",
+      "title": "quick",
+      "description": "Fastest commit cycle - lint, fix, commit, push",
+      "keywords": [
+        "quick"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/quick/SKILL.md",
+          "target": "skills/quick/SKILL.md",
+          "sha256": "74092d429c2bc480f67124719403ac22ff851a246da4c2ba09b8477604710c05"
+        }
+      ],
+      "version": "2133ad0f96e90a576a3d7be582a78320c8c4980b7e09607a88b704d479453ba2"
+    },
+    {
+      "id": "skill:record",
+      "name": "record",
+      "type": "kun:skill",
+      "title": "record",
+      "description": "Screen-record demo videos of real product flows, mirrored to Google Drive",
+      "keywords": [
+        "record"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/record/SKILL.md",
+          "target": "skills/record/SKILL.md",
+          "sha256": "57f58b49d973d7bfd514349f14d7a682996f05117e12f2db2272c81c3fb27f52"
+        }
+      ],
+      "version": "2b10265e262d25285aaa3af4c9112a854f255fc497f60b1460de54c7cb2b34ad"
+    },
+    {
+      "id": "skill:release",
+      "name": "release",
+      "type": "kun:skill",
+      "title": "release",
+      "description": "One spell — handover, check, ship, watch, then comment + close the issue",
+      "keywords": [
+        "release"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/release/SKILL.md",
+          "target": "skills/release/SKILL.md",
+          "sha256": "c4d9420c1409a3c732c2ade8f1355b47f34e59b391cdd47604f7e998ae99263d"
+        }
+      ],
+      "version": "2d62590e758e417132006203f0e8c9c68d75218f25bcc3defb476f2a064a0311"
+    },
+    {
+      "id": "skill:report",
+      "name": "report",
+      "type": "kun:skill",
+      "title": "report",
+      "description": "Triage and fix the open user reports across databayt repos",
+      "keywords": [
+        "report"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/report/SKILL.md",
+          "target": "skills/report/SKILL.md",
+          "sha256": "7f28953a41cd60f8054964a175f1db5ee166565eb50a6f57b687a8590097ff48"
+        }
+      ],
+      "version": "030b090654fee7bd76bfbfd8bec05846fa50773aa2be70a31ed6eed58b260dce"
+    },
+    {
+      "id": "skill:repos",
+      "name": "repos",
+      "type": "kun:skill",
+      "title": "repos",
+      "description": "Explore databayt organization repositories",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/repos/SKILL.md",
+          "target": "skills/repos/SKILL.md",
+          "sha256": "204632fe3e52a164ec8491b245965d1c793a89743acb23b4e01072730e044d07"
+        }
+      ],
+      "version": "4f10824a6aa834859be391ad2107cf0dac38ffa68f3e97e0a6d7ae52454894a0"
+    },
+    {
+      "id": "skill:reverse",
+      "name": "reverse",
+      "type": "kun:skill",
+      "title": "reverse",
+      "description": "Competitor feature teardown, with evidence (REA)",
+      "keywords": [
+        "reverse"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/reverse/scripts/rea.sh",
+          "target": "skills/reverse/scripts/rea.sh",
+          "sha256": "86f9405aba4608ad63f6f7a0b52bd8f7f7fcafc3a24427e7f1ad8cd9499a2961"
+        },
+        {
+          "path": ".claude/skills/reverse/SKILL.md",
+          "target": "skills/reverse/SKILL.md",
+          "sha256": "c5d73a04e81eb077a6b4bb3ea15430bf0ab490047c077dbfa857c39870c82602"
+        }
+      ],
+      "version": "164d6cdb625dc02ec53b4e8b417efc8b6afdca77e8a07cacc8cfad1f3be34571"
+    },
+    {
+      "id": "skill:saas",
+      "name": "saas",
+      "type": "kun:skill",
+      "title": "saas",
+      "description": "Generate complete SaaS feature with all layers",
+      "keywords": [
+        "saas"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/saas/SKILL.md",
+          "target": "skills/saas/SKILL.md",
+          "sha256": "63a1479d3ac4a68eaed0ec81971e93b148c656c17eb4b52f66c888592d0db81b"
+        }
+      ],
+      "version": "ba557b597c2915285a8d708def2ce0e934acf5a424c34db468af971cbb2188a6"
+    },
+    {
+      "id": "skill:schema",
+      "name": "schema",
+      "type": "kun:skill",
+      "title": "schema",
+      "description": "Data layer — Prisma model, migration, and Zod validation",
+      "keywords": [
+        "schema"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/schema/SKILL.md",
+          "target": "skills/schema/SKILL.md",
+          "sha256": "317bae180cb01fa5e375343f198483e65929340e019e96a5de99c6bce3f23db9"
+        }
+      ],
+      "version": "7119080049b429392fd651ebc9bcf90194c0dd04c7d1375055a62e2bd30e6a85"
+    },
+    {
+      "id": "skill:scrape",
+      "name": "scrape",
+      "type": "kun:skill",
+      "title": "scrape",
+      "description": "Lead acquisition — contact gap first, discovery last",
+      "keywords": [
+        "scrape"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/scrape/references/backends.md",
+          "target": "skills/scrape/references/backends.md",
+          "sha256": "dd2b0569642146b28d8bfb7da285ad92e55b43b7d12d7adb09e3dea491b0e619"
+        },
+        {
+          "path": ".claude/skills/scrape/SKILL.md",
+          "target": "skills/scrape/SKILL.md",
+          "sha256": "65ee9839e5f65ad70d01a24ec68f920e14d49ddc2ca4c6ccbb543f33c6c76527"
+        }
+      ],
+      "version": "964d03bf55c236317b6ee3fb18c9799e1d87b24126cfb02a831964d7b86df107"
+    },
+    {
+      "id": "skill:screenshot",
+      "name": "screenshot",
+      "type": "kun:skill",
+      "title": "screenshot",
+      "description": "View most recent screenshot from Desktop or Downloads",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/screenshot/SKILL.md",
+          "target": "skills/screenshot/SKILL.md",
+          "sha256": "d59e0c82379d5bc0667dbbca2fc3866b859944dc3f12859c2541cfed403f6a1d"
+        }
+      ],
+      "version": "81b596190e61aea8e78f71ea39fb18100f6a9867eba429ce8283e63857a072e7"
+    },
+    {
+      "id": "skill:security",
+      "name": "security",
+      "type": "kun:skill",
+      "title": "security",
+      "description": "Security audit - OWASP Top 10, dependency scanning",
+      "keywords": [
+        "security"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/security/SKILL.md",
+          "target": "skills/security/SKILL.md",
+          "sha256": "f04476c7363c22ff742b9f8e84779251a1075c59edd732379e10a777cdefff19"
+        }
+      ],
+      "version": "8ef841b7073e1aab3d3c138b3cfecfaa1b373b281908a74c0c98182f77b3ef10"
+    },
+    {
+      "id": "skill:seek",
+      "name": "seek",
+      "type": "kun:skill",
+      "title": "seek",
+      "description": "The open opportunity loop anyone runs from their own profile — find, tailor, apply, follow up",
+      "keywords": [
+        "seek"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/seek/SKILL.md",
+          "target": "skills/seek/SKILL.md",
+          "sha256": "f12b63c435430bfdf9773386fa6963b92104727f8299b5d98dd971b840bb650e"
+        }
+      ],
+      "version": "31914b7fc8c75827cea0f4dc32eaf66fa06602dfe9c662a6175df92715dc3f61"
+    },
+    {
+      "id": "skill:shadcn",
+      "name": "shadcn",
+      "type": "kun:skill",
+      "title": "shadcn",
+      "description": "shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say \"shadcn\" to load it; \"shadcn docs\" = the docs-block style.",
+      "keywords": [
+        "shadcn"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/shadcn/references/docs-block.md",
+          "target": "skills/shadcn/references/docs-block.md",
+          "sha256": "b8147e2c22547d5fc194259ad7fd507d1d0bc5448831455361f1388229675686"
+        },
+        {
+          "path": ".claude/skills/shadcn/references/registry-and-cli.md",
+          "target": "skills/shadcn/references/registry-and-cli.md",
+          "sha256": "9f6205eaab9381ecb1be765445706017a16db87135c8f3cf81652b560a1668f4"
+        },
+        {
+          "path": ".claude/skills/shadcn/SKILL.md",
+          "target": "skills/shadcn/SKILL.md",
+          "sha256": "2e3977db236fcce961b2d9cbca090892ed37fa7b462a8b6a83c9645c08720bb1"
+        }
+      ],
+      "version": "f2509e3a7154cf5aa10186ee8111740ad215c70bcdbaa690625fdfc299c5abfd"
+    },
+    {
+      "id": "skill:ship",
+      "name": "ship",
+      "type": "kun:skill",
+      "title": "ship",
+      "description": "Promote a checked build to production (Vercel --prod)",
+      "keywords": [
+        "ship"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/ship/SKILL.md",
+          "target": "skills/ship/SKILL.md",
+          "sha256": "8bc6aae8237fc5382289b6b281f03885e91c7a83875a63431aa511aa066db477"
+        }
+      ],
+      "version": "69a23e69287781309a22200575d57ae6b178f70ed8d3b2c4aa5ef395c0983242"
+    },
+    {
+      "id": "skill:shoot",
+      "name": "shoot",
+      "type": "kun:skill",
+      "title": "shoot",
+      "description": "Stills of real product pages and flows, framed like Abdout's MacBook",
+      "keywords": [
+        "shoot"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/clean-bg.py",
+          "target": "skills/shoot/assets/hogwarts/clean-bg.py",
+          "sha256": "ec186093865fbd1203a5d578aee655de847d65810500e814d4388e941d2aef37"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/degree.jpg",
+          "target": "skills/shoot/assets/hogwarts/degree.jpg",
+          "sha256": "67f89af2901a431c2963da9687481db74c53c128310ee78dd61c7119f8d9fb26"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/id.jpg",
+          "target": "skills/shoot/assets/hogwarts/id.jpg",
+          "sha256": "ffe1d6d800df6f6c3c72fac1dc495a3b5a92e6c7dcab8d417f144d7cf2c8786a"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/make-docs.mjs",
+          "target": "skills/shoot/assets/hogwarts/make-docs.mjs",
+          "sha256": "6164fb6afdd4764b78ef4f132542348256b86cc53a14b5922ba593ff2d4438ab"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/make-sheets.mjs",
+          "target": "skills/shoot/assets/hogwarts/make-sheets.mjs",
+          "sha256": "a551fd2bc4e3429beae278d6b4acf29384e9c9b889c616755af38efa9e3be840"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/other.jpg",
+          "target": "skills/shoot/assets/hogwarts/other.jpg",
+          "sha256": "38fc29dab5fefe92f7db3eb613264d851e363bfd1e766e30aa7f46f8194749ec"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/photo.jpg",
+          "target": "skills/shoot/assets/hogwarts/photo.jpg",
+          "sha256": "1e6e83f08f5a0b96c7f889d5443871650432713eff56fbb5515dd239dec82da5"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/resume.jpg",
+          "target": "skills/shoot/assets/hogwarts/resume.jpg",
+          "sha256": "eadaacfe4ea46e23136bf7a229adaaf0d4ad783dff9e024b58d432054b0b2a5e"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/transcript.jpg",
+          "target": "skills/shoot/assets/hogwarts/transcript.jpg",
+          "sha256": "dd27782929205971b5b07db34e492cbb75a4ea8db888f21b58a0df64129445a3"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/طلاب-الصف-الأول.csv",
+          "target": "skills/shoot/assets/hogwarts/طلاب-الصف-الأول.csv",
+          "sha256": "21f098bf75cc1597da84b046cf07a2fac9ab88c5777aa97c029365afbe2b6bfa"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/طلاب-الصف-الأول.thumb.jpg",
+          "target": "skills/shoot/assets/hogwarts/طلاب-الصف-الأول.thumb.jpg",
+          "sha256": "1a447e67e9dd1e665f9a184629ee48bd6ff8f395df2aa36e8808fb5dd520ca68"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/معلمون-جدد.csv",
+          "target": "skills/shoot/assets/hogwarts/معلمون-جدد.csv",
+          "sha256": "428e06e0b9b0929c1b9337a4cdc5ac029112364a7bd94b12ae2a5a0fe9d9851b"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/hogwarts/معلمون-جدد.thumb.jpg",
+          "target": "skills/shoot/assets/hogwarts/معلمون-جدد.thumb.jpg",
+          "sha256": "a784539d9b4128c73fe454a7655856f5f657bc8d9243c0684005a0afcd6b3cdd"
+        },
+        {
+          "path": ".claude/skills/shoot/assets/student-avatar.png",
+          "target": "skills/shoot/assets/student-avatar.png",
+          "sha256": "f26211c1289c63d836a2d8e8d1924ef4dfb95bd9f18de7668f913f8dee49fa2a"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/_bulk.mjs",
+          "target": "skills/shoot/flows/hogwarts/_bulk.mjs",
+          "sha256": "c4192fa00e5a056ac104308787691a1f0db6f80244a5345eebf3a52a93cb8956"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/_feature.mjs",
+          "target": "skills/shoot/flows/hogwarts/_feature.mjs",
+          "sha256": "d219cb473eda26f440f2081049226d5611a5666fb2374a87ddb6b27f3cf4d5d1"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/_live-join.mjs",
+          "target": "skills/shoot/flows/hogwarts/_live-join.mjs",
+          "sha256": "9c52fbd9fc3d88b91e55d4f80eb02446252f2a1796007f1620a8bfc8bcb6ad69"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/_tour.mjs",
+          "target": "skills/shoot/flows/hogwarts/_tour.mjs",
+          "sha256": "05fa783b6f0cb277b64c833a5b63e2644976a4d55221a3e23bade946fda522a5"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/add-student.mjs",
+          "target": "skills/shoot/flows/hogwarts/add-student.mjs",
+          "sha256": "ca8b908aeafb3c58319947bba6aece55390bce29af90ab4b93dc8c629875e7fe"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/add-teacher.mjs",
+          "target": "skills/shoot/flows/hogwarts/add-teacher.mjs",
+          "sha256": "eabd4dc1ab8f4a3ccd906c7f249b79ebccb11f09172577305f3bfdaa6fb8152f"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/admin-login.mjs",
+          "target": "skills/shoot/flows/hogwarts/admin-login.mjs",
+          "sha256": "1401a9548a8f3d7fb53a0bf7a4a97a3fb45bc38e6cd817ded28ea3a440fe67b3"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/bulk-student.mjs",
+          "target": "skills/shoot/flows/hogwarts/bulk-student.mjs",
+          "sha256": "3afdc4bbb4f742e92d72d876f89b7e1baf6fa95aacd5e03c61e11fbde25644bc"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/bulk-teacher.mjs",
+          "target": "skills/shoot/flows/hogwarts/bulk-teacher.mjs",
+          "sha256": "cb58c620a40020d5758ee5617490f8d05dda6925a675077a279f5207d4999229"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/create-exam.mjs",
+          "target": "skills/shoot/flows/hogwarts/create-exam.mjs",
+          "sha256": "7d2375a83e4516c9b69f03b53e7ee0806f2a2de3632fb47c92a5e04143aa37a9"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/enter-grades.mjs",
+          "target": "skills/shoot/flows/hogwarts/enter-grades.mjs",
+          "sha256": "41b33bcff71de46c78bfda77c59d24f165a8ee407041e7afb72be06fa6de8d9c"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-admission.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-admission.mjs",
+          "sha256": "7254b79d360ce98e9233b99b534ddc9b38d4c61628d85bfec14e378bcbba5197"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-announcement.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-announcement.mjs",
+          "sha256": "ccb74e790f18c7bd3a75f69a6411191f8192687d7310c05653c1cf43fc0f7675"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-attendance.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-attendance.mjs",
+          "sha256": "7368d6a3c2df6f58617767d5056ee996f2f4d1ebefd2bdcc35b01235558f67ec"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-dashboard.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-dashboard.mjs",
+          "sha256": "702142a8bf4992b2c51cde7ceab57d4682cccb2c905984c67388a320c0ccffa4"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-exam.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-exam.mjs",
+          "sha256": "6d72431892d9c634961c92a46445fb887ee57f1a0d8d567fb32d1939d3e3139e"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-gradebook.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-gradebook.mjs",
+          "sha256": "f409c9baa71b99bae4eabf5e9193c4af962ef037a9bceafb272a535c47240f35"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-parent-login.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-parent-login.mjs",
+          "sha256": "5251f16db94347d1ca469e1d34e3b7dd325921d72ca6fe31a92fb13aac496347"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-payment.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-payment.mjs",
+          "sha256": "11cf0d9e7fa4a91caae63ad47f0cadfbf3f3cd74253fe0af4f0ffaa091f9c455"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-student.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-student.mjs",
+          "sha256": "a33f3f648f0fc28f86fd950053e2f645277f04829895c50643e5d37d24430c16"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/feature-timetable.mjs",
+          "target": "skills/shoot/flows/hogwarts/feature-timetable.mjs",
+          "sha256": "2aa10f735cbf3fabd3d4babac3db25ef42678b679faf2f3e0d4fdd0616a9e2f8"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/install-app.mjs",
+          "target": "skills/shoot/flows/hogwarts/install-app.mjs",
+          "sha256": "6c01aa61568d825d4dbb0741062bda2c2231a63c4b46e7a0e6f2517a05b00c1e"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/live-attendance.mjs",
+          "target": "skills/shoot/flows/hogwarts/live-attendance.mjs",
+          "sha256": "7bc94abd20a6bbf5bd5a7c1bfeac114cad19627d0e207adfe35d515b17dc7e56"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/live-join-banner.mjs",
+          "target": "skills/shoot/flows/hogwarts/live-join-banner.mjs",
+          "sha256": "fb242de78be355cd8723348d0b58a6730142b713dbb80580ef6185f406a02c28"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/live-join-notice.mjs",
+          "target": "skills/shoot/flows/hogwarts/live-join-notice.mjs",
+          "sha256": "75f34a3469638b3756b84d79706096f76ce532bfdf600bd72e8d4f930e0b9259"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/live-join-timetable.mjs",
+          "target": "skills/shoot/flows/hogwarts/live-join-timetable.mjs",
+          "sha256": "b1dc3c23072c5049834db3eb68da3d0500db86673d27ca5c27488d26a6d934b8"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/live-settings.mjs",
+          "target": "skills/shoot/flows/hogwarts/live-settings.mjs",
+          "sha256": "26c8239235fd9a00ec2847a6a275cb4b120c1c30d44c31fb4760cdb45eeb81fb"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/live-setup.mjs",
+          "target": "skills/shoot/flows/hogwarts/live-setup.mjs",
+          "sha256": "b87d189f40966299f4a190f429a3b5d609f802248f12a166b9f1e10289388bde"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/live-student.mjs",
+          "target": "skills/shoot/flows/hogwarts/live-student.mjs",
+          "sha256": "a36f7fd0ac20b3295c84855b4727637e7206fd76feab195655a3d1cdc54643ea"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/live-teacher.mjs",
+          "target": "skills/shoot/flows/hogwarts/live-teacher.mjs",
+          "sha256": "e74c0d801ff68766a403526e75b7a4417a46c5bae1233f35af2a289476423f55"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/login.mjs",
+          "target": "skills/shoot/flows/hogwarts/login.mjs",
+          "sha256": "e4b57d1b3103327434fcddb586abf9954d7258673034745ab883912fbc25d05f"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/manage-admission.mjs",
+          "target": "skills/shoot/flows/hogwarts/manage-admission.mjs",
+          "sha256": "59fad2d8e2b77007fe658d3a10b67b28a2c91984eafa09bb335695ffb6eca77a"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/manage-roles.mjs",
+          "target": "skills/shoot/flows/hogwarts/manage-roles.mjs",
+          "sha256": "cc6adc9824e8afe1d90d7a7e52fc1ace6ca22d50198c484c479456b8b124c983"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/mark-attendance.mjs",
+          "target": "skills/shoot/flows/hogwarts/mark-attendance.mjs",
+          "sha256": "3bbaaddf957dd9715d62ed238c5a2bbe53f029b4b3996e957881b21e8e26e9df"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/parent-portal.mjs",
+          "target": "skills/shoot/flows/hogwarts/parent-portal.mjs",
+          "sha256": "cb106648aa9d71b52ecbedb41758a47586686845a2079b662c1afc7edf4a997b"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/review-security.mjs",
+          "target": "skills/shoot/flows/hogwarts/review-security.mjs",
+          "sha256": "c3fa0bfe03e059a9c96b196160c5ff2e6cfd7007c601a2361498a274eb7b9fc2"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/send-message.mjs",
+          "target": "skills/shoot/flows/hogwarts/send-message.mjs",
+          "sha256": "9afaceac97f32497788d2bd42c3a9f11ce24542122aa5a77f9ecdefec2344b16"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/set-fees.mjs",
+          "target": "skills/shoot/flows/hogwarts/set-fees.mjs",
+          "sha256": "6ec23a39f7ac2c3f77ce350a020616a2421607284c19797a668e45a8c899514c"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/setup-academics.mjs",
+          "target": "skills/shoot/flows/hogwarts/setup-academics.mjs",
+          "sha256": "20f08690fad17e0cf4d385af7ea35acd7f8f2771330c090960f09cacadae1f43"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/student-credentials.mjs",
+          "target": "skills/shoot/flows/hogwarts/student-credentials.mjs",
+          "sha256": "7f7af7a81c6a2346b82d4bbccc1f6e8baf642815af2cb311637422c7e14f8c41"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/switch-language.mjs",
+          "target": "skills/shoot/flows/hogwarts/switch-language.mjs",
+          "sha256": "f76409462ed26f187ca45edd3aff1d5258a2738f99f157b5959b82f4c9521755"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/teacher-credentials.mjs",
+          "target": "skills/shoot/flows/hogwarts/teacher-credentials.mjs",
+          "sha256": "a840260dd1de7277e06c70e5ea33d863b8bdfe133e4f596106a5df8ce2a4f54a"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/teacher-profile.mjs",
+          "target": "skills/shoot/flows/hogwarts/teacher-profile.mjs",
+          "sha256": "f9752245a38c0f0e6da94ec362c397437de1ed771930d15e64eba65f81c25394"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/teacher-start.mjs",
+          "target": "skills/shoot/flows/hogwarts/teacher-start.mjs",
+          "sha256": "a5060d71316ea507a273b884a99ef593c3c8997e97be6f97bd5f716f0f55ef9c"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/teacher-timetables.mjs",
+          "target": "skills/shoot/flows/hogwarts/teacher-timetables.mjs",
+          "sha256": "f765bbd31b29979741b9e903f5fd92ce89fbe7737d9819983c5cda2cfa552f5d"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/timetable-edit.mjs",
+          "target": "skills/shoot/flows/hogwarts/timetable-edit.mjs",
+          "sha256": "2ee3fc2e1f478a4c8af1ad37a1eebc75b771f6d4ed1e3c972909d3d6202817c4"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/track-transport.mjs",
+          "target": "skills/shoot/flows/hogwarts/track-transport.mjs",
+          "sha256": "7d0f362cec9a32c384510cdc8c0c36cfa6a86d365f62198db0170ae2799a0e4a"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/view-documents.mjs",
+          "target": "skills/shoot/flows/hogwarts/view-documents.mjs",
+          "sha256": "666d57ce963e299abb05f07bf31d8054e5bf924aec50970f3d2ed4db58824f4c"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/view-reports.mjs",
+          "target": "skills/shoot/flows/hogwarts/view-reports.mjs",
+          "sha256": "ebdf7f90c2efecb9f84e3173cab3e448ca81bed74d312a280db07dc0c2c2a4a5"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/hogwarts/view-timetable.mjs",
+          "target": "skills/shoot/flows/hogwarts/view-timetable.mjs",
+          "sha256": "9878a2e7f4e476b81d4ad9cfb470287b7ab159c9fc6a02749fa9be4582fd1621"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/mkan/ask-agent.mjs",
+          "target": "skills/shoot/flows/mkan/ask-agent.mjs",
+          "sha256": "6cd441a01b7e300142634cf022a10ea6e2411eadd9a85f10262251605907bffe"
+        },
+        {
+          "path": ".claude/skills/shoot/flows/mkan/find-stay.mjs",
+          "target": "skills/shoot/flows/mkan/find-stay.mjs",
+          "sha256": "938b2522ea89090e42eb78ad64a449f69bf772192642256db76ecc76ede54779"
+        },
+        {
+          "path": ".claude/skills/shoot/motion/hogwarts/add-student.html",
+          "target": "skills/shoot/motion/hogwarts/add-student.html",
+          "sha256": "e9e9e28097afd173ff61b4f10450796899ae1b05898e11b1b93c8b496aa8d1b9"
+        },
+        {
+          "path": ".claude/skills/shoot/motion/hogwarts/feature-admission.html",
+          "target": "skills/shoot/motion/hogwarts/feature-admission.html",
+          "sha256": "4770e0ec005a5853dd56429ada7126f2a226650ed714f345572b4e1e5e89d42b"
+        },
+        {
+          "path": ".claude/skills/shoot/motion/hogwarts/feature-hero.html",
+          "target": "skills/shoot/motion/hogwarts/feature-hero.html",
+          "sha256": "126d3c037f194a6df1326e98a105f8785ac8b8b76133788ee79f011e2ee92769"
+        },
+        {
+          "path": ".claude/skills/shoot/scripts/finder.mjs",
+          "target": "skills/shoot/scripts/finder.mjs",
+          "sha256": "65d04b7408d09b23f0a30a75027e42bee1391c928add1622ba07462983d612e5"
+        },
+        {
+          "path": ".claude/skills/shoot/scripts/hero.mjs",
+          "target": "skills/shoot/scripts/hero.mjs",
+          "sha256": "6029b33ea51dfa596ea0193c23360d7d70cc1f823599c7f5f3098c07da4ed5dd"
+        },
+        {
+          "path": ".claude/skills/shoot/scripts/motion.mjs",
+          "target": "skills/shoot/scripts/motion.mjs",
+          "sha256": "4b2f0e3135612b1a7c4e1ac9cb5b6bd08fc38b9a3b13bf7247b0a241120caf33"
+        },
+        {
+          "path": ".claude/skills/shoot/scripts/publish.mjs",
+          "target": "skills/shoot/scripts/publish.mjs",
+          "sha256": "56157f3b2fa7f4dd5a9622bd511fb7ceed50993f80d905488647b4e072477747"
+        },
+        {
+          "path": ".claude/skills/shoot/scripts/shoot.mjs",
+          "target": "skills/shoot/scripts/shoot.mjs",
+          "sha256": "360c96d85f7a52bb49d65fb28d2b01948bdce8fc327232de6d5d3defbb139daf"
+        },
+        {
+          "path": ".claude/skills/shoot/scripts/sim.mjs",
+          "target": "skills/shoot/scripts/sim.mjs",
+          "sha256": "ef67d9dbb6d4a346d5ac597034fea68be15e00cf34c73a9413b09a36443f1625"
+        },
+        {
+          "path": ".claude/skills/shoot/scripts/story.mjs",
+          "target": "skills/shoot/scripts/story.mjs",
+          "sha256": "25423735c36ea719b73648039008080cccebbe9f98cc305b3ae6724d5bd0ac36"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/_bulk.mjs",
+          "target": "skills/shoot/sims/hogwarts/_bulk.mjs",
+          "sha256": "3f431610d7aaa7d64ba49c93590dd70067c86d9766b2eb09ca09a783e948c554"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/_live-room.mjs",
+          "target": "skills/shoot/sims/hogwarts/_live-room.mjs",
+          "sha256": "1cf144fa78f978a4fe5a5c791e88a8e8feca9ec32ed7af7bcd2be50524fc9bdf"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/add-student.mjs",
+          "target": "skills/shoot/sims/hogwarts/add-student.mjs",
+          "sha256": "f57684f0aeced6214bfa2c145ea1c932caa78066eb2af605f86b49f6efdbc48d"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/add-student.story.json",
+          "target": "skills/shoot/sims/hogwarts/add-student.story.json",
+          "sha256": "b2b8a2dbed7ba42ba058a1a08c9337c9911c17c69b4d51ab33080d3140537ca2"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/add-student.voice.ar.json",
+          "target": "skills/shoot/sims/hogwarts/add-student.voice.ar.json",
+          "sha256": "2b86564a89f374a9e7ec5506af8b7209b015ce555fd376a4fd289f30d6d106a5"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/add-teacher.mjs",
+          "target": "skills/shoot/sims/hogwarts/add-teacher.mjs",
+          "sha256": "fe7ed500147693600be775805736c1b62a948e7207cf2b8aa4461cf3071b7ee6"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/admin-login.mjs",
+          "target": "skills/shoot/sims/hogwarts/admin-login.mjs",
+          "sha256": "0921742868fc9a54382821d6aaaf04968dddd56c8adaff24f54f9e2d20d0f7b6"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/bulk-student.mjs",
+          "target": "skills/shoot/sims/hogwarts/bulk-student.mjs",
+          "sha256": "612dd02d12ae0953d53cc6414378d4a412072de2f22889459ac214ab08125796"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/bulk-teacher.mjs",
+          "target": "skills/shoot/sims/hogwarts/bulk-teacher.mjs",
+          "sha256": "248dc9971bd8e39004d1f3d65597f5d00c4f6ee7d5ad03a1e7d69696db236009"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-attendance.mjs",
+          "target": "skills/shoot/sims/hogwarts/live-attendance.mjs",
+          "sha256": "8a49346587b408a5449be200b17abb8b106f22e507da5311431a52c44300b3f2"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-join-banner.mjs",
+          "target": "skills/shoot/sims/hogwarts/live-join-banner.mjs",
+          "sha256": "cb0182dc60811fe099309dc96501f0743d9caaabb850b6f6b9a2ec6d82fbecaf"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-join-banner.voice.ar.json",
+          "target": "skills/shoot/sims/hogwarts/live-join-banner.voice.ar.json",
+          "sha256": "f6b953bf0718cbec5f6a3caaf6947e3063e8915e729783ca593ea1a32139e27a"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-join-notice.mjs",
+          "target": "skills/shoot/sims/hogwarts/live-join-notice.mjs",
+          "sha256": "357d0b723328abcd779094406a5cdb951ac174733a798b53f3e645ae048e3189"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-join-notice.voice.ar.json",
+          "target": "skills/shoot/sims/hogwarts/live-join-notice.voice.ar.json",
+          "sha256": "d0f24b6a5fd5c9c9c952017f9d88a6ba877e6c5aba83e83ef4e6367aa7a2f27d"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-join-timetable.mjs",
+          "target": "skills/shoot/sims/hogwarts/live-join-timetable.mjs",
+          "sha256": "ffb07d34b5164ab153990d232dcf2c2b1c3851638e51df4026d09fb73c9fb77a"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-join-timetable.voice.ar.json",
+          "target": "skills/shoot/sims/hogwarts/live-join-timetable.voice.ar.json",
+          "sha256": "71c52c04153dcdf448dc5638040449e7c95c942fa3dd9e8cbfedd1e9b6de25b9"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-settings.mjs",
+          "target": "skills/shoot/sims/hogwarts/live-settings.mjs",
+          "sha256": "d71624091aa3552df0b24959e0ff7e092230f85673ade5b90b4c46a0eecc9da1"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-setup.mjs",
+          "target": "skills/shoot/sims/hogwarts/live-setup.mjs",
+          "sha256": "0b6267f307a086547e6dfa50af274f19a1122675b77632883617ae8d01de0557"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-student.mjs",
+          "target": "skills/shoot/sims/hogwarts/live-student.mjs",
+          "sha256": "17ec1daf4b25966c092a24c6ab44a31928d8ee7d7adfe87cfb6088b52264dac6"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-teacher.mjs",
+          "target": "skills/shoot/sims/hogwarts/live-teacher.mjs",
+          "sha256": "17d7f85f10fcbdd162756cc050a802030cba2248afb08f62e43552744e264891"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/live-teacher.voice.ar.json",
+          "target": "skills/shoot/sims/hogwarts/live-teacher.voice.ar.json",
+          "sha256": "148fa93c8ca07142936fcb5209d5a0b38949360a64caedd9183dd67ccd80aa32"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/prepare-lesson.mjs",
+          "target": "skills/shoot/sims/hogwarts/prepare-lesson.mjs",
+          "sha256": "3269c299592b99c09e6fc59af9ff90e27d255bf7bc2400f997d676fbb0291b95"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/student-credentials.mjs",
+          "target": "skills/shoot/sims/hogwarts/student-credentials.mjs",
+          "sha256": "667e03bfd6638a9d87f4923f65a45ee301cef9b476d726e6ed2e5b60fe19a385"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/teacher-credentials.mjs",
+          "target": "skills/shoot/sims/hogwarts/teacher-credentials.mjs",
+          "sha256": "b27ce5b810269456b7247f1c10fd64cf922f42c48808ed660407992211ca23c5"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/teacher-profile.mjs",
+          "target": "skills/shoot/sims/hogwarts/teacher-profile.mjs",
+          "sha256": "6952e38cb3fc205e592ae1d9086f9f6b73be2120dab35657517c02dcd8a98921"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/teacher-start.mjs",
+          "target": "skills/shoot/sims/hogwarts/teacher-start.mjs",
+          "sha256": "e13a229d490bf292fb0250739c9268648b318a930042b2bbb308ab3437b578a2"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/teacher-timetables.mjs",
+          "target": "skills/shoot/sims/hogwarts/teacher-timetables.mjs",
+          "sha256": "5187d2ca8ba1ac3bcdca54985b48c2ac97c66c09003e1700ffece7d1a08a0b1c"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/hogwarts/timetable-edit.mjs",
+          "target": "skills/shoot/sims/hogwarts/timetable-edit.mjs",
+          "sha256": "ddef12fa3c598b8a7416c54127bf5105abd59b00c688936315a8cddab871f45f"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/mkan/ask-agent-wa.voice.ar.json",
+          "target": "skills/shoot/sims/mkan/ask-agent-wa.voice.ar.json",
+          "sha256": "b18bd15a05391da75577c1aae7398b3be28fb61fc299ed07791b679af5d9685d"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/mkan/ask-agent.mjs",
+          "target": "skills/shoot/sims/mkan/ask-agent.mjs",
+          "sha256": "a737cf89053eaa18420b41e4c528962175f7226ac4ee8c61f869ada726ec1d28"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/mkan/ask-agent.voice.ar.json",
+          "target": "skills/shoot/sims/mkan/ask-agent.voice.ar.json",
+          "sha256": "22f682ef885a7f9393540792ee0e50e3fb7dd210a84143555c1e1b07bfaed231"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/mkan/find-stay.mjs",
+          "target": "skills/shoot/sims/mkan/find-stay.mjs",
+          "sha256": "05306fcd4b886de7e3a0498eb829dfc3150fd95b8489fff8b55729951c05d175"
+        },
+        {
+          "path": ".claude/skills/shoot/sims/mkan/find-stay.voice.ar.json",
+          "target": "skills/shoot/sims/mkan/find-stay.voice.ar.json",
+          "sha256": "16c6bd74abeec9bb9f545487a3c826f121e83c372273af9042c7081040a5409d"
+        },
+        {
+          "path": ".claude/skills/shoot/SKILL.md",
+          "target": "skills/shoot/SKILL.md",
+          "sha256": "6f1b36c6134702ab54facdac01cc06cce0e956a26391b77259d558270bb465f1"
+        }
+      ],
+      "version": "be40ba1a096aaf663bf8d8351991b369feb89348cd17de5515258822611a3ed6"
+    },
+    {
+      "id": "skill:skeleton",
+      "name": "skeleton",
+      "type": "kun:skill",
+      "title": "skeleton",
+      "description": "Skeleton loading states — layout-matching shimmer while data loads",
+      "keywords": [
+        "skeleton"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/skeleton/SKILL.md",
+          "target": "skills/skeleton/SKILL.md",
+          "sha256": "65356c69a0bb285255ab8701d94a2e08a3b0daff0a9e861cfaeed86ddecb77a3"
+        }
+      ],
+      "version": "2c5a1c683bcc38bc6c703727b1d945a1046f01ff56817ddaeca9a5bb674db47d"
+    },
+    {
+      "id": "skill:social",
+      "name": "social",
+      "type": "kun:skill",
+      "title": "social",
+      "description": "One spell — calendar, draft, media, approve, publish, measure for a brand post",
+      "keywords": [
+        "social"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/social/SKILL.md",
+          "target": "skills/social/SKILL.md",
+          "sha256": "0819734fba46b300cfb0b1181894b9e959a90b8a05e807b4a7d7647f14ec7030"
+        }
+      ],
+      "version": "6a99e2ab26abd94aa5f7b2bf181b33024f7e212994f5822ab21ecceb5e313dba"
+    },
+    {
+      "id": "skill:spec",
+      "name": "spec",
+      "type": "kun:skill",
+      "title": "spec",
+      "description": "Technical spec — data model, file plan, refined acceptance criteria",
+      "keywords": [
+        "spec"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/spec/SKILL.md",
+          "target": "skills/spec/SKILL.md",
+          "sha256": "4cc2b8d74763f56621b2a64662ea2210155be235409e9b22fb56a0abf40187b9"
+        }
+      ],
+      "version": "fd8e546cca5371ecda46271c233a2d60cd7054b7df12f24f9ebebbbc564f523e"
+    },
+    {
+      "id": "skill:sync",
+      "name": "sync",
+      "type": "kun:skill",
+      "title": "sync",
+      "description": "Self-update — diff upstream releases and kun's own run evidence against the engine, adopt or propose",
+      "keywords": [
+        "sync"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/sync/SKILL.md",
+          "target": "skills/sync/SKILL.md",
+          "sha256": "20f5488409687d2746f99a73d2db3e0c83be27eb3fdece144304b5c3a1d1656c"
+        }
+      ],
+      "version": "3042bd30866201b549006510bdadaa51664e77e55c455c63e1b50583b13faaf9"
+    },
+    {
+      "id": "skill:tasks",
+      "name": "tasks",
+      "type": "kun:skill",
+      "title": "tasks",
+      "description": "Task breakdown — dependency-ordered work list from an approved plan",
+      "keywords": [
+        "tasks"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/tasks/SKILL.md",
+          "target": "skills/tasks/SKILL.md",
+          "sha256": "dd33e5955638dc38ee57bb704651f95ccd2138e3b4ad5e65f6b15875ba967d67"
+        }
+      ],
+      "version": "bb3e156b5300cd8bd1287d160cdaf8be7c63a2046943eb6a4a8d2f51c2ef7d09"
+    },
+    {
+      "id": "skill:template",
+      "name": "template",
+      "type": "kun:skill",
+      "title": "template",
+      "description": "Create templates - full-page layouts and major UI sections",
+      "keywords": [
+        "template"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/template/SKILL.md",
+          "target": "skills/template/SKILL.md",
+          "sha256": "a5dd1c54e9bddb534b8abc627381f1318899f863e5f099f62777f7c15f93357d"
+        }
+      ],
+      "version": "eb8e70d7385370b741c88db76d434de97f02bf2faa3f6fa2a1808a3603ddc59b"
+    },
+    {
+      "id": "skill:test",
+      "name": "test",
+      "type": "kun:skill",
+      "title": "test",
+      "description": "Generate and run tests - unit, component, or E2E",
+      "keywords": [
+        "test"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/test/SKILL.md",
+          "target": "skills/test/SKILL.md",
+          "sha256": "5593958ee9e07cfa366a612d975e64dc80f7479d10a6577763cec3151e2c4976"
+        }
+      ],
+      "version": "c4b1fa27f53400cdec81a94a9b086a5b18e4d375370c6e46b989408be717b778"
+    },
+    {
+      "id": "skill:textbook",
+      "name": "textbook",
+      "type": "kun:skill",
+      "title": "textbook",
+      "description": "Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark",
+      "keywords": [
+        "textbook"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/textbook/scripts/md-agreement.py",
+          "target": "skills/textbook/scripts/md-agreement.py",
+          "sha256": "5fb947289bd24f9bac23ae35789189d1f6f8bccd806017c84fc3ce58933d9b1e"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/md-structure.py",
+          "target": "skills/textbook/scripts/md-structure.py",
+          "sha256": "f4148ed5f416f95116bf4793d6d55695dda96b1b4f369793b0d778118e6a2549"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/md-table-direction.py",
+          "target": "skills/textbook/scripts/md-table-direction.py",
+          "sha256": "fde7b295873c8aa68d0988f8a23f854b54bdf4cb988afbefd472f2f6b6be60c7"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/presets.json",
+          "target": "skills/textbook/scripts/presets.json",
+          "sha256": "b3ccefd8f2b75289abf54a3b697c4e95c9dbadf627f3d0cf9132212c5e3bf17c"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/textbook-assemble.py",
+          "target": "skills/textbook/scripts/textbook-assemble.py",
+          "sha256": "26266d49f09e875baf975520e3e714f8a56494143c4b3bdd8ac140fd38ab5ff5"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/textbook-bench.py",
+          "target": "skills/textbook/scripts/textbook-bench.py",
+          "sha256": "1b4a98aef6dee056bc81bfd630a27b3827dcbab8440316960a1e44f68edd8e45"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/textbook-contract.py",
+          "target": "skills/textbook/scripts/textbook-contract.py",
+          "sha256": "628585db459f444e26aa05013a0886c718b7b2dc7e9ffed27b1fcf27eb9cf5c9"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/textbook-crop.py",
+          "target": "skills/textbook/scripts/textbook-crop.py",
+          "sha256": "c826040d0dd699eb2b08e5664f6ee2e027112305d72f57af1360dc4f7b56c05c"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/textbook-md.py",
+          "target": "skills/textbook/scripts/textbook-md.py",
+          "sha256": "e0f223e2d444e7bf8b2befae4ec70f4d4bb72f9f8255ffb454187be0a20d31f8"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/textbook-pages.py",
+          "target": "skills/textbook/scripts/textbook-pages.py",
+          "sha256": "53c998174bac415fd34502a79554dac0f7eca19cb10a1a52d60c72a56a04f4cb"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/textbook-preflight.py",
+          "target": "skills/textbook/scripts/textbook-preflight.py",
+          "sha256": "9efa069645935ecb91eaa046e1c949420eb84fb35621f92a024af44d7c68146e"
+        },
+        {
+          "path": ".claude/skills/textbook/scripts/textbook-triage.py",
+          "target": "skills/textbook/scripts/textbook-triage.py",
+          "sha256": "bf21dcd0afb1c7af9c7d518a201067d97168775048a0d97d680378e8372f2745"
+        },
+        {
+          "path": ".claude/skills/textbook/SKILL.md",
+          "target": "skills/textbook/SKILL.md",
+          "sha256": "ab146610b44c4651bf172bfa98bf4fb6cbde2521e9e943cb4e4d5363e6cbf407"
+        }
+      ],
+      "version": "c417f67fce19f0a0664d25e5a78e9ac4d1958298d646863a5490fcede2e9beb0"
+    },
+    {
+      "id": "skill:watch",
+      "name": "watch",
+      "type": "kun:skill",
+      "title": "watch",
+      "description": "Post-deploy verification — visual + console + smoke test",
+      "keywords": [
+        "watch"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/watch/SKILL.md",
+          "target": "skills/watch/SKILL.md",
+          "sha256": "a1542ef4cf064828db89f9d4484f6150ef0bf49c15a2ebd46071f2730e189e5e"
+        }
+      ],
+      "version": "8a7edfdee5a2815c0aa4f358410e804560bbc570a499d94f38b18b976a0f662b"
+    },
+    {
+      "id": "skill:weekly",
+      "name": "weekly",
+      "type": "kun:skill",
+      "title": "weekly",
+      "description": "Run the captain's weekly Sunday-plan / Tuesday-check / Thursday-review cycle",
+      "keywords": [
+        "weekly"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/weekly/SKILL.md",
+          "target": "skills/weekly/SKILL.md",
+          "sha256": "5a4c0890c56957de251113e01923f2fae32dfa7499a734a00d5855e6ec8df27f"
+        }
+      ],
+      "version": "e0b1691c516c2e397282b55b8e7d67beef2018aab7c93be0f57efddb5b52ff86"
+    },
+    {
+      "id": "skill:wire",
+      "name": "wire",
+      "type": "kun:skill",
+      "title": "wire",
+      "description": "UI layer — page (mirror pattern), content, form, table columns, i18n",
+      "keywords": [
+        "wire"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/wire/SKILL.md",
+          "target": "skills/wire/SKILL.md",
+          "sha256": "29d5c29bc54067a475c940058041cf9d9844262da479def1f1c3624b3f16d06b"
+        }
+      ],
+      "version": "3fc55360af10b8301f0b82163e94e8e194ddd49035fffc846bb76c39a2b8c71d"
+    },
+    {
+      "id": "agent:adjudicate",
+      "name": "adjudicate",
+      "type": "kun:agent",
+      "title": "adjudicate",
+      "description": "Textbook page adjudicator — settles disagreements between two transcriptions against the page image; never invents",
+      "keywords": [
+        "adjudicate",
+        "textbook",
+        "textbook loop",
+        "تحويل الكتب"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/adjudicate.md",
+          "target": "agents/adjudicate.md",
+          "sha256": "24e46dfb33dc8103688b4c2f6df1b3a62d56a075eb7978828fcc2882444ab991"
+        }
+      ],
+      "version": "aba62fc284b6c8ca742b2292fe5fc06ee6ee48073aa2a32b34c14bae2cab0526"
+    },
+    {
+      "id": "agent:analyst",
+      "name": "analyst",
+      "type": "kun:agent",
+      "title": "analyst",
+      "description": "Market intelligence per vertical — competitors, usage analytics, churn, pricing research",
+      "keywords": [
+        "reverse"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/analyst.md",
+          "target": "agents/analyst.md",
+          "sha256": "9798200618801ee1629ad16a0f27a552e2ac855525deb9550e80447bf47eb21c"
+        }
+      ],
+      "version": "9d4a0c2939cd24120399e9559e3b194adfac9433a62e340bb2be2dbe47d21e4f"
+    },
+    {
+      "id": "agent:analyze",
+      "name": "analyze",
+      "type": "kun:agent",
+      "title": "analyze",
+      "description": "Repo config generator — derive a repo's CLAUDE.md, agents, rules and skills from its patterns",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/analyze.md",
+          "target": "agents/analyze.md",
+          "sha256": "1cc7561a3c9fa673dc0d5d60c96550e700e46399c41144143f9372d9ce1f6e8e"
+        }
+      ],
+      "version": "202baae263b19e314f558d389aa80c53e8463c9628da17a9e63a847f0906268d"
+    },
+    {
+      "id": "agent:architecture",
+      "name": "architecture",
+      "type": "kun:agent",
+      "title": "architecture",
+      "description": "System architecture — mirror pattern, Prisma, multi-tenant design",
+      "keywords": [
+        "analyze",
+        "checkout",
+        "constitution",
+        "feature",
+        "like hogwarts",
+        "like mkan",
+        "like shifa",
+        "like souq",
+        "machine",
+        "migration",
+        "page",
+        "plan",
+        "prisma",
+        "ready",
+        "review",
+        "rust",
+        "saas",
+        "spec",
+        "tauri"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/architecture.md",
+          "target": "agents/architecture.md",
+          "sha256": "1e334aaf89bbbb01d72ae130469211ea3f40a2e59ac6d27fab191117b87e52cb"
+        }
+      ],
+      "version": "a846d51b8f58909752b7b911191952652e563cbd29a372f2e6137b859ff7c9b2"
+    },
+    {
+      "id": "agent:atom",
+      "name": "atom",
+      "type": "kun:agent",
+      "title": "atom",
+      "description": "Atoms — compose 2+ shadcn/ui primitives into reusable patterns",
+      "keywords": [
+        "atom",
+        "block",
+        "card",
+        "landing",
+        "modal",
+        "shadcn",
+        "template"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/atom.md",
+          "target": "agents/atom.md",
+          "sha256": "1cfd56ab67de8b5f8b682d9fd9b677883a4f64e9df7a3803cdda42796622ca23"
+        }
+      ],
+      "version": "a4a9afa6406b6f3aa9e5ba22b15fe31ebe44aaa648777d5b9693f65881703d0f"
+    },
+    {
+      "id": "agent:authjs",
+      "name": "authjs",
+      "type": "kun:agent",
+      "title": "authjs",
+      "description": "Auth.js v5 — JWT, OAuth, sessions",
+      "keywords": [
+        "auth",
+        "security"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/authjs.md",
+          "target": "agents/authjs.md",
+          "sha256": "e9c49115429551b66fa052db1213699ad1faa9f31b515419b8b39ee1e4cd99a5"
+        }
+      ],
+      "version": "445f73328e96ed31721a5f35b261687288bc464db12a160aa7686c49826e6437"
+    },
+    {
+      "id": "agent:block",
+      "name": "block",
+      "type": "kun:agent",
+      "title": "block",
+      "description": "Blocks — UI components with business logic (data tables, auth, payments, dashboards)",
+      "keywords": [
+        "block",
+        "checkout",
+        "dashboard",
+        "form",
+        "table"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/block.md",
+          "target": "agents/block.md",
+          "sha256": "3a8d6e58fa139f0d58c238561fbc5b0acdd61745a46fbec05ae38ae65019dc55"
+        }
+      ],
+      "version": "dca98cf30e3f8e8becbbd61cbb6c0c56bd770b9e8febbacc6b77b02f6c686976"
+    },
+    {
+      "id": "agent:build",
+      "name": "build",
+      "type": "kun:agent",
+      "title": "build",
+      "description": "Builds — TypeScript validation, Turbopack, build-error prevention",
+      "keywords": [
+        "barrel",
+        "build",
+        "bundle",
+        "check",
+        "deploy",
+        "error",
+        "fix",
+        "lint",
+        "report",
+        "scan"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/build.md",
+          "target": "agents/build.md",
+          "sha256": "d67d9195a365db597fed06893b27777bb9ac296c42cbd860d7dd1cec902be183"
+        }
+      ],
+      "version": "e73ce0fb5b8f877e840692a0a25beb2eef357a65c50e6fba01d0e2732d9b6d6c"
+    },
+    {
+      "id": "agent:captain",
+      "name": "captain",
+      "type": "kun:agent",
+      "title": "captain",
+      "description": "CEO brain — weekly allocation, revenue strategy, coordination across products and the 7-person team",
+      "keywords": [
+        "canon",
+        "captain",
+        "decide",
+        "premortem",
+        "weekly"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/captain.md",
+          "target": "agents/captain.md",
+          "sha256": "272c4db31e1ebfd335ec7b3aa9c3929b9d9c923bb2d26a55436f7547e7a50e36"
+        }
+      ],
+      "version": "b70c3a39d301080237eeb273fd3438f77f0963ff5b0558329081f336a3df1356"
+    },
+    {
+      "id": "agent:clone",
+      "name": "clone",
+      "type": "kun:agent",
+      "title": "clone",
+      "description": "Translate a captured live-URL section (.clone/<slug>) into pixel-exact house-stack JSX (Tailwind v4, shadcn, RTL)",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/clone.md",
+          "target": "agents/clone.md",
+          "sha256": "91dc13578c37d288971cf8730dc927f87b9bef94981c5efe9bed7c30151915d8"
+        }
+      ],
+      "version": "ca03fb7a1ee58f6a5e6c0121a45b3914a676f8b56b185a56b2663edbff492049"
+    },
+    {
+      "id": "agent:cloudflare",
+      "name": "cloudflare",
+      "type": "kun:agent",
+      "title": "cloudflare",
+      "description": "Cloudflare expert — Workers, Containers, zone DNS, crons, the balqalam.com production lane",
+      "keywords": [
+        "cloudflare"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/cloudflare.md",
+          "target": "agents/cloudflare.md",
+          "sha256": "a8b2bc3c68e0ec4125df790cd8a1c013615a90206c90ffffce9c1f7d993e6332"
+        }
+      ],
+      "version": "4684de2fb06b9942ce23c2a3df95b35197232314fd04a2cc041c3b4abb87be07"
+    },
+    {
+      "id": "agent:comment",
+      "name": "comment",
+      "type": "kun:agent",
+      "title": "comment",
+      "description": "Writes short, insightful code comments",
+      "keywords": [
+        "api-docs",
+        "changelog",
+        "docs",
+        "readme",
+        "storybook"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/comment.md",
+          "target": "agents/comment.md",
+          "sha256": "e3cec6ae523442890e9a20f585e640c12d8a710276d115f6460b400584a3cd60"
+        }
+      ],
+      "version": "5f00cd2f3e05ed2584ecea52c1df428e712c7db055db2e26bec50fd12c3e8af1"
+    },
+    {
+      "id": "agent:deploy",
+      "name": "deploy",
+      "type": "kun:agent",
+      "title": "deploy",
+      "description": "Deployments — the Cloudflare Workers/Containers lane plus legacy Vercel previews, monitoring",
+      "keywords": [
+        "deploy",
+        "ship",
+        "vercel",
+        "watch"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/deploy.md",
+          "target": "agents/deploy.md",
+          "sha256": "73e3bea25a5650708c9d99434eb418038d048cf2155e9b15acfe684d63203c6e"
+        }
+      ],
+      "version": "f41f42613225f9105e9cb43c7655672a48f3eab8090d50d08217a3ccca956678"
+    },
+    {
+      "id": "agent:funnel",
+      "name": "funnel",
+      "type": "kun:agent",
+      "title": "funnel",
+      "description": "Conversion — gate state, segments, value ladder, stall clock from first reply to paying customer",
+      "keywords": [
+        "chatbot",
+        "follow up",
+        "funnel",
+        "nurture",
+        "qualify",
+        "segment",
+        "stalled",
+        "تأهيل",
+        "قمع",
+        "متابعة"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/funnel.md",
+          "target": "agents/funnel.md",
+          "sha256": "a9a057ab3fb23887008b660e8c8a502498dae63478b8564f088dd4371d93ceca"
+        }
+      ],
+      "version": "e32d26dffcb6720304c11919b361818733a4b91f04c8cc61cd44bb920bbef82d"
+    },
+    {
+      "id": "agent:git",
+      "name": "git",
+      "type": "kun:agent",
+      "title": "git",
+      "description": "Git — conventional commits and the main-only workflow (no branches, worktrees or PRs)",
+      "keywords": [
+        "push",
+        "quick",
+        "ship",
+        "upstream"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/git.md",
+          "target": "agents/git.md",
+          "sha256": "39d49a1150ee67d4bd44cd7b71f8a7d182d6e3a68a3255221585b9570fe941ca"
+        }
+      ],
+      "version": "35ce69be77efb453aa07b5121c130b336c4d343c45db7db31623d3e97ad1e7b0"
+    },
+    {
+      "id": "agent:github",
+      "name": "github",
+      "type": "kun:agent",
+      "title": "github",
+      "description": "GitHub — issues, Actions, releases, code search (databayt is main-only, no PRs)",
+      "keywords": [
+        "clone",
+        "copy",
+        "extend",
+        "fork",
+        "github",
+        "push",
+        "quick",
+        "upstream"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/github.md",
+          "target": "agents/github.md",
+          "sha256": "21b34e9b37404670dd3ef3c110fc3fabbc34b097998c3d70385c13bbaa532626"
+        }
+      ],
+      "version": "b8cde1dad630edc524de3173c3d255f5dc1cd2cc6c3458682eef40ae066fa675"
+    },
+    {
+      "id": "agent:growth",
+      "name": "growth",
+      "type": "kun:agent",
+      "title": "growth",
+      "description": "Content strategy, SEO, social, developer relations, community",
+      "keywords": [
+        "approve",
+        "calendar",
+        "carousel",
+        "draft",
+        "facebook",
+        "measure",
+        "publish",
+        "social"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/growth.md",
+          "target": "agents/growth.md",
+          "sha256": "c95416d0ad3b2df4a418e8cab5a363869dae2e0c268d257e224d1bfaebbffbc4"
+        }
+      ],
+      "version": "6af32947cf8826e658009170b5c08d1242a801f1cfc8e2bccca6873783ae0714"
+    },
+    {
+      "id": "agent:guardian",
+      "name": "guardian",
+      "type": "kun:agent",
+      "title": "guardian",
+      "description": "Security and quality — OWASP Top 10, performance budgets, dependency health, SSPL compliance",
+      "keywords": [
+        "audit",
+        "security"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/guardian.md",
+          "target": "agents/guardian.md",
+          "sha256": "a253ebfc51499aab74ec9673f36ba1d46b8a7947fc9bf75747d256d33604bbaf"
+        }
+      ],
+      "version": "ad3a44758c6ec0d9fa2518875c3cd5a46fb17ec00092bc9d25b70449842abbd3"
+    },
+    {
+      "id": "agent:hogwarts",
+      "name": "hogwarts",
+      "type": "kun:agent",
+      "title": "hogwarts",
+      "description": "Education SaaS reference — multi-tenant, LMS, SIS, billing patterns",
+      "keywords": [
+        "like hogwarts"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/hogwarts.md",
+          "target": "agents/hogwarts.md",
+          "sha256": "662db96651ed4ea0dc7f3ccd20a3a3f4aec3ed30824943bdc1dd4bf0a6c2a770"
+        }
+      ],
+      "version": "6f1b3b998c1844ad7bbd4044e5b483ce64bce5dea9e30ab98e8b4cdbb719129d"
+    },
+    {
+      "id": "agent:icon",
+      "name": "icon",
+      "type": "kun:agent",
+      "title": "icon",
+      "description": "Icons — SVG, lucide-react, shadcn/ui icon patterns",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/icon.md",
+          "target": "agents/icon.md",
+          "sha256": "40359fae7e3b1334ee38e5560d1f3bdcc5dad954d1194c86c4cc16e46952ae9a"
+        }
+      ],
+      "version": "650af595b3b9f474f8e9a352abbb1248bf9699960d7e71c301178f0d14f0596c"
+    },
+    {
+      "id": "agent:internationalization",
+      "name": "internationalization",
+      "type": "kun:agent",
+      "title": "internationalization",
+      "description": "i18n — Arabic/English, RTL/LTR, dictionaries, locale-aware formatting",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/internationalization.md",
+          "target": "agents/internationalization.md",
+          "sha256": "fd2790b4073d71a1949d637d56aa0790f6bedf89322a22f24658d51e36dd2884"
+        }
+      ],
+      "version": "f83cb3d767134c11a51366cf45770bb485e0a0d0598b65050c10b3be9b16e35c"
+    },
+    {
+      "id": "agent:lead",
+      "name": "lead",
+      "type": "kun:agent",
+      "title": "lead",
+      "description": "Lead acquisition — contact gap, enrichment, tiering, outreach drafts against the Twenty CRM",
+      "keywords": [
+        "contact gap",
+        "enrich",
+        "leads",
+        "outreach",
+        "pipeline health",
+        "prospect",
+        "scrap",
+        "scrap facebook",
+        "scrap facebook for mkan",
+        "scrap for hogwarts",
+        "scrap for mkan",
+        "scrap tiktok",
+        "scrap whatsapp",
+        "scrape",
+        "tiktok homes",
+        "اسحب",
+        "جمع بيانات",
+        "عملاء محتملين"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/lead.md",
+          "target": "agents/lead.md",
+          "sha256": "60a5a6b80c2f157ebe605b1e5492e2973887eb62ef20088e9e274ecabfb53099"
+        }
+      ],
+      "version": "582f18b5f7e342679e2171303f7d60c6e3c999efc6488b0efa332244c5b26558"
+    },
+    {
+      "id": "agent:learn",
+      "name": "learn",
+      "type": "kun:agent",
+      "title": "learn",
+      "description": "Org intelligence — patterns, conventions and team knowledge mined from git history and repos",
+      "keywords": [
+        "conventions",
+        "drift",
+        "learn",
+        "patterns"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/learn.md",
+          "target": "agents/learn.md",
+          "sha256": "0cc84128d09cb55f8b43ed769d59284f10235e3534586dc1659a114abc8164a9"
+        }
+      ],
+      "version": "bebe74b75a5162f6f15ff8e632e22f093c5eaa40fe3a322786e81db8af66489e"
+    },
+    {
+      "id": "agent:media-qa",
+      "name": "media-qa",
+      "type": "kun:agent",
+      "title": "media-qa",
+      "description": "Media QA — checks finished stills, tutorials, support clips and reels against the numbers and by eye (Arabic shaping, RTL, brand, PII, safe areas) before anything is published; never edits pixels",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/media-qa.md",
+          "target": "agents/media-qa.md",
+          "sha256": "cff46f5719ffcf0ae726413935ef26a89de997b8648c88b0151ac224f59ab5e7"
+        }
+      ],
+      "version": "a404ce1a2c1435823fa450575468a6213997da22a3ce096be27f950e19010eb9"
+    },
+    {
+      "id": "agent:middleware",
+      "name": "middleware",
+      "type": "kun:agent",
+      "title": "middleware",
+      "description": "Next.js middleware/proxy — auth, i18n, subdomain routing",
+      "keywords": [
+        "auth",
+        "nextjs"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/middleware.md",
+          "target": "agents/middleware.md",
+          "sha256": "21de9393347d632d334f761ac49d350c8080fd142e484ac5dd0949e3e2232455"
+        }
+      ],
+      "version": "63684de95a0924e4987fda658c613669dfc6a158c370dd15c91495185df00dbb"
+    },
+    {
+      "id": "agent:mkan",
+      "name": "mkan",
+      "type": "kun:agent",
+      "title": "mkan",
+      "description": "Rental marketplace reference — listings, booking, search",
+      "keywords": [
+        "like mkan"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/mkan.md",
+          "target": "agents/mkan.md",
+          "sha256": "2aa746edb5edd5ca517c1d459bef685c09ef385578330bd7fc86759699d3a16b"
+        }
+      ],
+      "version": "0151fdeb49bc09a87e239edd0eb32a0f9dd0d85788de83218f153661dfc394bc"
+    },
+    {
+      "id": "agent:nextjs",
+      "name": "nextjs",
+      "type": "kun:agent",
+      "title": "nextjs",
+      "description": "Next.js 16 — App Router, Server Components, Server Actions",
+      "keywords": [
+        "admin",
+        "api",
+        "auth",
+        "blur",
+        "catalog",
+        "code",
+        "feature",
+        "lazy",
+        "machine",
+        "nextjs",
+        "onboarding",
+        "optimize",
+        "page",
+        "performance",
+        "profile",
+        "react",
+        "saas",
+        "server-component",
+        "settings",
+        "skeleton",
+        "streaming",
+        "suspense",
+        "tauri",
+        "test",
+        "transition",
+        "typescript",
+        "wire"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/nextjs.md",
+          "target": "agents/nextjs.md",
+          "sha256": "7eaa4a852e466c86e1bc8b4b2a898f834971c1152c2766328a03f40ada84d66e"
+        }
+      ],
+      "version": "62ef60a13064c4a197d99587ccc7a37504284032e07e015334f35e08ace9eb0e"
+    },
+    {
+      "id": "agent:ops",
+      "name": "ops",
+      "type": "kun:agent",
+      "title": "ops",
+      "description": "Delivery and costs — CI/CD, spend, monitoring, infrastructure, uptime",
+      "keywords": [
+        "domains",
+        "incident",
+        "monitor"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/ops.md",
+          "target": "agents/ops.md",
+          "sha256": "aa65370eb50674d4a9d04bd6889af8764e84f4a6a1473edf44312c624eeef809"
+        }
+      ],
+      "version": "0827ac5285b41a1841e95a16ec560097e20ce7b7c2b1df87c346ff582b38d5f9"
+    },
+    {
+      "id": "agent:optimize",
+      "name": "optimize",
+      "type": "kun:agent",
+      "title": "optimize",
+      "description": "Automation and integration opportunities that save time",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/optimize.md",
+          "target": "agents/optimize.md",
+          "sha256": "f7d4c2a8758a41db0b6a4e97dcc89c574abc393bfee9db3e305565f226ebab01"
+        }
+      ],
+      "version": "f55afdad5c7ff5d98ca801eb82e00d0b4cf6067840323f55e15afb9fa64ce8cd"
+    },
+    {
+      "id": "agent:orchestration",
+      "name": "orchestration",
+      "type": "kun:agent",
+      "title": "orchestration",
+      "description": "Coordinates multi-agent workflows and delegation",
+      "keywords": [
+        "dispatch",
+        "feature",
+        "saas",
+        "story",
+        "workflow"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/orchestration.md",
+          "target": "agents/orchestration.md",
+          "sha256": "9e36f934c77217bcd8ff8c455b2bab297a9c38bc7c4666753f5506b841d70813"
+        }
+      ],
+      "version": "76a5886e6483a14fb2b0b2cf24b00a046cc0e729d7e26d4d2fc6603a88f4e823"
+    },
+    {
+      "id": "agent:package",
+      "name": "package",
+      "type": "kun:agent",
+      "title": "package",
+      "description": "Cross-repo dependency audits and coordinated upgrades",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/package.md",
+          "target": "agents/package.md",
+          "sha256": "6a078eb4a8ec356d9a4d4e21b3843811017caae316454a63ae5147f59c0ce4b2"
+        }
+      ],
+      "version": "6bd049fc6454006221d3f98f919c4f3079056e8967feec70c8353b0b5f79d6a8"
+    },
+    {
+      "id": "agent:pattern",
+      "name": "pattern",
+      "type": "kun:agent",
+      "title": "pattern",
+      "description": "Code conventions — patterns and anti-patterns",
+      "keywords": [
+        "audit",
+        "constitution",
+        "docs",
+        "review",
+        "security"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/pattern.md",
+          "target": "agents/pattern.md",
+          "sha256": "cf93b49eb4a4800054be0b6e85894a006401d52cf8ae3dc3fae2479adb3c101b"
+        }
+      ],
+      "version": "15755b54d0c7cd8286ae91c4593830231ddb8be8515d2e9b20461e3b621fdf55"
+    },
+    {
+      "id": "agent:performance",
+      "name": "performance",
+      "type": "kun:agent",
+      "title": "performance",
+      "description": "Performance — Core Web Vitals, runtime profiling, infrastructure tuning",
+      "keywords": [
+        "audit",
+        "bundle",
+        "optimize",
+        "parallelize",
+        "performance",
+        "waterfall"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/performance.md",
+          "target": "agents/performance.md",
+          "sha256": "41ba0d2abdcb0d09424497f6f1dc5b9c2536fac4e8f9d3a347cad154671b01bf"
+        }
+      ],
+      "version": "b23959c42d528a83c6a62fd6dda80a8f673f774665a7cce316d9edde21b0f548"
+    },
+    {
+      "id": "agent:prisma",
+      "name": "prisma",
+      "type": "kun:agent",
+      "title": "prisma",
+      "description": "Prisma 6–7 — PostgreSQL ORM, migrations, query optimization",
+      "keywords": [
+        "analyze",
+        "auth",
+        "block",
+        "checkout",
+        "code",
+        "dashboard",
+        "feature",
+        "like hogwarts",
+        "migration",
+        "neon",
+        "performance",
+        "prisma",
+        "saas",
+        "schema",
+        "spec",
+        "table"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/prisma.md",
+          "target": "agents/prisma.md",
+          "sha256": "492395f7484e8e3027ad03d92a7ec9fc11d9acfc45dbd8015fc360a17092b3e8"
+        }
+      ],
+      "version": "cd6d1c18a3d855e257bea28afad04e7497bdec4050bdf43ce0c492420880a49d"
+    },
+    {
+      "id": "agent:product",
+      "name": "product",
+      "type": "kun:agent",
+      "title": "product",
+      "description": "Roadmap across the products — stories, scope, prioritization, release planning",
+      "keywords": [
+        "analyze",
+        "catalog",
+        "ready",
+        "tasks"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/product.md",
+          "target": "agents/product.md",
+          "sha256": "c823646c649461583ff14c5e33d65d4799f86e0d3fde4cff070c3a2969418a05"
+        }
+      ],
+      "version": "9aa0802208a7cfd5668d7539dcbab9362dcc94074c461130c2d271512a85ff4c"
+    },
+    {
+      "id": "agent:pwa",
+      "name": "pwa",
+      "type": "kun:agent",
+      "title": "pwa",
+      "description": "PWA expert — installability, per-tenant manifests, auth-aware service-worker caching, offline outboxes, Web Push",
+      "keywords": [
+        "pwa"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/pwa.md",
+          "target": "agents/pwa.md",
+          "sha256": "23258e5d52397857ffc6b03ad5172cc5ff3101d10fbc38d5da487fa9ed2b32e8"
+        }
+      ],
+      "version": "943c9b17c8538639e11d98aacf27a6aa30f474f47767dcdeaae4adc53d992ae9"
+    },
+    {
+      "id": "agent:quality",
+      "name": "quality",
+      "type": "kun:agent",
+      "title": "quality",
+      "description": "Routes the niche quality keywords to the right MCP or specialist; owns /handover and /release",
+      "keywords": [
+        "architecture",
+        "bench",
+        "debug",
+        "design",
+        "diff",
+        "efficient",
+        "fast",
+        "flow",
+        "guard",
+        "handover",
+        "lang",
+        "mirror",
+        "pattern",
+        "qa",
+        "release",
+        "report",
+        "responsive",
+        "see",
+        "stack",
+        "structure",
+        "trace"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/quality.md",
+          "target": "agents/quality.md",
+          "sha256": "cedd4529a41de49a16b72410f49c6736fd69a533110e15db966be8b15b2dd2fc"
+        }
+      ],
+      "version": "d891633b5d92f299477231b84fe6d5603a6bb38e294728bfdfbe8da97a286e29"
+    },
+    {
+      "id": "agent:react",
+      "name": "react",
+      "type": "kun:agent",
+      "title": "react",
+      "description": "React 19 — hooks, performance, concurrent features",
+      "keywords": [
+        "admin",
+        "animation",
+        "blur",
+        "component",
+        "dashboard",
+        "dedup",
+        "feature",
+        "form",
+        "gesture",
+        "lazy",
+        "memo",
+        "motion",
+        "nextjs",
+        "onboarding",
+        "optimize",
+        "parallelize",
+        "performance",
+        "profile",
+        "react",
+        "review",
+        "saas",
+        "scroll",
+        "server-component",
+        "settings",
+        "skeleton",
+        "streaming",
+        "suspense",
+        "test",
+        "transition",
+        "typescript",
+        "waterfall",
+        "wire"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/react.md",
+          "target": "agents/react.md",
+          "sha256": "f7e9902a15552a3c66273e2c3a878a050cf65513df453e17a82d75be4731d1a1"
+        }
+      ],
+      "version": "2df3cadaaa80a73763abb644fbd7e66f94caf76008ba484a76b2dbcc51967976"
+    },
+    {
+      "id": "agent:record",
+      "name": "record",
+      "type": "kun:agent",
+      "title": "record",
+      "description": "Flow videographer — records demo videos and screenshot sets of real product flows (login walls, OTPs) into the media library",
+      "keywords": [
+        "record"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/record.md",
+          "target": "agents/record.md",
+          "sha256": "cbb92d00b7e5fdf546ab461d4b58044e197014c7a92ce28e96200720029d4794"
+        }
+      ],
+      "version": "60fdbbb8e4afd4aaff0006443f8c7842da272d2ecfc0488a3f5ff7c34b1d30d7"
+    },
+    {
+      "id": "agent:report",
+      "name": "report",
+      "type": "kun:agent",
+      "title": "report",
+      "description": "Fixes the user reports a human accepted — read, verify, fix, build, push, close",
+      "keywords": [
+        "report"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/report.md",
+          "target": "agents/report.md",
+          "sha256": "13d4480d0120859487efb91771cdcb3a2cc04dbc224aeae9c40b9aaeaf7b61b1"
+        }
+      ],
+      "version": "745b049b060652d3ca9a8513703dd42462e58bfc78aea109e477be56cada3036"
+    },
+    {
+      "id": "agent:revenue",
+      "name": "revenue",
+      "type": "kun:agent",
+      "title": "revenue",
+      "description": "Deals — pricing, proposals, contracts, cost analysis, revenue tracking",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/revenue.md",
+          "target": "agents/revenue.md",
+          "sha256": "da4604143cfe490748f6b8bf8a9b72f395085d105aff31aac7e7e8c49c056a7a"
+        }
+      ],
+      "version": "eda23cba3629aaf031137d1d29f832db42b906672712f6d1563bbc220d042b8b"
+    },
+    {
+      "id": "agent:rust",
+      "name": "rust",
+      "type": "kun:agent",
+      "title": "rust",
+      "description": "Rust + Tauri 2 — the machine desktop shell, feature-colocated rust.rs",
+      "keywords": [
+        "catalog",
+        "machine",
+        "rust",
+        "tauri"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/rust.md",
+          "target": "agents/rust.md",
+          "sha256": "6ee4230647fa9fc7bccf43eb975421cf82707bb366ea34dc809b67474420561f"
+        }
+      ],
+      "version": "aa4c4d366c8d506de493b49cfd9411f5be28c09eb62c9a47335bbd4e8992af55"
+    },
+    {
+      "id": "agent:semantic",
+      "name": "semantic",
+      "type": "kun:agent",
+      "title": "semantic",
+      "description": "Semantic HTML and color tokens for accessibility and theming",
+      "keywords": [
+        "accessibility",
+        "tailwind"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/semantic.md",
+          "target": "agents/semantic.md",
+          "sha256": "b516d3c4d3ccf70f974c8af98772d6d8a3374612bca8000953692fd0416531cb"
+        }
+      ],
+      "version": "12671a48259140158a6faa0254ecd093ece3bc22d86171ee4f52c90468fb2605"
+    },
+    {
+      "id": "agent:shadcn",
+      "name": "shadcn",
+      "type": "kun:agent",
+      "title": "shadcn",
+      "description": "shadcn/ui — Radix primitives, registry, MCP",
+      "keywords": [
+        "accessibility",
+        "atom",
+        "clone",
+        "component",
+        "from radix",
+        "from shadcn",
+        "modal",
+        "saas",
+        "shadcn",
+        "tailwind",
+        "wire"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/shadcn.md",
+          "target": "agents/shadcn.md",
+          "sha256": "5d5690df5ce0dde54051bec21b1cf8621c21fca65842aa1910b006b333c84155"
+        }
+      ],
+      "version": "5f349505afcff31450b78caa11bf3ff6f61b800db3b6db03a84bb0fa9979f9e6"
+    },
+    {
+      "id": "agent:shifa",
+      "name": "shifa",
+      "type": "kun:agent",
+      "title": "shifa",
+      "description": "Medical platform reference — appointments, patient records, healthcare workflows",
+      "keywords": [
+        "like shifa"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/shifa.md",
+          "target": "agents/shifa.md",
+          "sha256": "6f80d50edc398ec0b1c248b46e6a094540d43a8f64923e27018f2d41e7bcbdd5"
+        }
+      ],
+      "version": "95440c24b47cbc537f34b895aa46f16b8f6e04fb0a210e71bf073a9984d72c31"
+    },
+    {
+      "id": "agent:souq",
+      "name": "souq",
+      "type": "kun:agent",
+      "title": "souq",
+      "description": "E-commerce reference — multi-vendor marketplace, cart, vendor dashboards",
+      "keywords": [
+        "like souq"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/souq.md",
+          "target": "agents/souq.md",
+          "sha256": "dbdb84f18a5a8211e4c8a437644eac11eca6a2ec4f68dbeb3083e934cfe5ec01"
+        }
+      ],
+      "version": "66674de77cb2f8a6a220428d0657d8d2b1388b9e3bd1340cecd616af314c65d5"
+    },
+    {
+      "id": "agent:sse",
+      "name": "sse",
+      "type": "kun:agent",
+      "title": "sse",
+      "description": "Diagnoses and fixes Next.js server-side exceptions",
+      "keywords": [
+        "error",
+        "report",
+        "scan",
+        "sentry"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/sse.md",
+          "target": "agents/sse.md",
+          "sha256": "ae623cf4d7ff2fba8dfec6499170b3829cc2d9636cbf60f7d7525d8fb06676e3"
+        }
+      ],
+      "version": "edc2fc14c5a9def84786c5343ae8377867ebaa30fc0da6744fe1c94ea6681559"
+    },
+    {
+      "id": "agent:structure",
+      "name": "structure",
+      "type": "kun:agent",
+      "title": "structure",
+      "description": "File organization — naming, directory structure, project layout",
+      "keywords": [
+        "barrel",
+        "page"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/structure.md",
+          "target": "agents/structure.md",
+          "sha256": "319e58ae567a66074ce8c55ffbe95d2e9a4f7b14107bf7e55ecaf0a7f7369dec"
+        }
+      ],
+      "version": "066ac980a74a46338d40c0f2eb7fdc56560ba717aa1c7bfda6b507ebfd8e271e"
+    },
+    {
+      "id": "agent:support",
+      "name": "support",
+      "type": "kun:agent",
+      "title": "support",
+      "description": "Customer success — onboarding, issue triage, knowledge base, SLAs",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/support.md",
+          "target": "agents/support.md",
+          "sha256": "e527a430343c11b17b964b4d3e5d996735fbf18f98e208beb6d2492029a898d3"
+        }
+      ],
+      "version": "b1674e19bcdbd062f812a387f27fa75f0091c52e70d9cc1f54f1d74bffa8ce44"
+    },
+    {
+      "id": "agent:tailwind",
+      "name": "tailwind",
+      "type": "kun:agent",
+      "title": "tailwind",
+      "description": "Tailwind CSS 4 — CSS-first config, OKLCH tokens, responsive, RTL/LTR",
+      "keywords": [
+        "accessibility",
+        "animation",
+        "blur",
+        "landing",
+        "motion",
+        "shadcn",
+        "skeleton",
+        "tailwind",
+        "wire"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/tailwind.md",
+          "target": "agents/tailwind.md",
+          "sha256": "e9e63ac9959614ac7b4874e15b85cfa4eb1cee96a2052dd990aa4cbd9224cad2"
+        }
+      ],
+      "version": "0e5758e99a7ecbc33b61804b3838974d22f55794796daa360bb54ab49c963bb4"
+    },
+    {
+      "id": "agent:tech-lead",
+      "name": "tech-lead",
+      "type": "kun:agent",
+      "title": "tech-lead",
+      "description": "Cross-repo architecture — shared patterns, breaking changes, upgrades, tech-debt priority",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/tech-lead.md",
+          "target": "agents/tech-lead.md",
+          "sha256": "bf22ef8aaa53496c0fea3a29a8c5e620dc16ffe579f8672d47b86017cd4b3a14"
+        }
+      ],
+      "version": "8aa238e67fb6554e013eeaf6329725efedc50ab78e359c399c422a04ff09df86"
+    },
+    {
+      "id": "agent:template",
+      "name": "template",
+      "type": "kun:agent",
+      "title": "template",
+      "description": "Templates — full-page layouts and major sections",
+      "keywords": [
+        "admin",
+        "dashboard",
+        "footer",
+        "header",
+        "hero",
+        "landing",
+        "menu",
+        "navbar",
+        "onboarding",
+        "profile",
+        "settings",
+        "sidebar",
+        "template"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/template.md",
+          "target": "agents/template.md",
+          "sha256": "8fcd4785f29f387dfe3925d745abbe7d37856d8f5f4bca008496c274226d0fc0"
+        }
+      ],
+      "version": "b5d5fa86e059954ce5e744e6872449d1632090fde12076dcb38954b9bb8cf0d1"
+    },
+    {
+      "id": "agent:test",
+      "name": "test",
+      "type": "kun:agent",
+      "title": "test",
+      "description": "Testing — Vitest, Playwright, TDD, coverage",
+      "keywords": [
+        "audit",
+        "coverage",
+        "e2e",
+        "test"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/test.md",
+          "target": "agents/test.md",
+          "sha256": "f255a4b7acf867094b633e22214e4076bc6cec0a944d7c1fdc6142ec62010a9f"
+        }
+      ],
+      "version": "5662b2e0c86ca049e86f69751c47ac82baf5b3907f9ce15dfb03f61e6197e3b6"
+    },
+    {
+      "id": "agent:transcribe",
+      "name": "transcribe",
+      "type": "kun:agent",
+      "title": "transcribe",
+      "description": "Page transcriber — scanned page images to Markdown exactly as printed, never correcting or guessing",
+      "keywords": [
+        "textbook",
+        "textbook bench",
+        "textbook loop",
+        "transcribe",
+        "تحويل الكتب"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/transcribe.md",
+          "target": "agents/transcribe.md",
+          "sha256": "494491a93ad7d2bc7597f81c2d9750999d4a15c31c38f1e0dc54cb1c6df6ba40"
+        }
+      ],
+      "version": "b991af18049073d7648863ff36c95a5e9281fa801b5143f4b72b676224a3cae2"
+    },
+    {
+      "id": "agent:typescript",
+      "name": "typescript",
+      "type": "kun:agent",
+      "title": "typescript",
+      "description": "TypeScript — strict mode, generics, advanced types",
+      "keywords": [
+        "analyze",
+        "api",
+        "api-docs",
+        "build",
+        "check",
+        "code",
+        "error",
+        "fix",
+        "react",
+        "ready",
+        "review",
+        "rust",
+        "scan",
+        "schema",
+        "type-check",
+        "typescript"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/typescript.md",
+          "target": "agents/typescript.md",
+          "sha256": "00c16a9d2dca4d046b0ae746a2f886145e4013226c2e9ab3dc028dac213d4a6f"
+        }
+      ],
+      "version": "d4e9b2119e59e79cc8fd8d4aff2e6bed353882d3a11f689e986d4d75739cc8f9"
+    },
+    {
+      "id": "rule:block-protocol",
+      "name": "block-protocol",
+      "type": "kun:rule",
+      "title": "Block Protocol — per-repo feature blocks",
+      "description": "",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/rules-global/block-protocol.md",
+          "target": "rules/block-protocol.md",
+          "sha256": "9bd5b026c845bf8044f1623fc94ee91bfd346333f9b0ab8a8b3f1481d8875fee"
+        }
+      ],
+      "version": "2cdc92707136677eb5af1b6ce778c3585678724e8330cd2d148f4e124854344b"
+    },
+    {
+      "id": "rule:browser",
+      "name": "browser",
+      "type": "kun:rule",
+      "title": "Browser — one setup, and it is silent",
+      "description": "",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/rules-global/browser.md",
+          "target": "rules/browser.md",
+          "sha256": "9a7a6eeaff2aa97eb36a69ae624694ece739ba56295429e46535d190698774e8"
+        }
+      ],
+      "version": "474e0eb7c2fa6c770ff025d7a917e6b58cca490121b7e737fe015b2a9d36d05d"
+    },
+    {
+      "id": "rule:cowork-bridge",
+      "name": "cowork-bridge",
+      "type": "kun:rule",
+      "title": "Cowork ↔ Claude Code Bridge",
+      "description": "",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/rules-global/cowork-bridge.md",
+          "target": "rules/cowork-bridge.md",
+          "sha256": "def8f57c75100c47c2e3a91c58361317ff0f5ba12fc000c58b09789071bddc46"
+        }
+      ],
+      "version": "876ce8f74b19c8959f3089852d1b6f22028dd1b5f0757c04e89f73925d1ffc3b"
+    },
+    {
+      "id": "rule:delegation",
+      "name": "delegation",
+      "type": "kun:rule",
+      "title": "Delegation — Opus plans, lanes build",
+      "description": "",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/rules-global/delegation.md",
+          "target": "rules/delegation.md",
+          "sha256": "c5c5768b2cb8cddab7a55e4d12eb94fa2d2570ee51e057efebe5667894b817d9"
+        }
+      ],
+      "version": "e5b5bc59894b72b7326bca2b5a1387f684b5d662cd8d1a1c4d02e85b29978515"
+    },
+    {
+      "id": "rule:github-workflow",
+      "name": "github-workflow",
+      "type": "kun:rule",
+      "title": "Workflow — Work Directly on Main",
+      "description": "",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/rules-global/github-workflow.md",
+          "target": "rules/github-workflow.md",
+          "sha256": "4c6ddae854b319f4ed4a6bcf27bac6688e168de2cd1f76ed51c9caac3b3ed1ff"
+        }
+      ],
+      "version": "cda385ae54510c43e205760c0489145c1700c27071d2e0de8a3cf4305fa9931b"
+    },
+    {
+      "id": "rule:patterns",
+      "name": "patterns",
+      "type": "kun:rule",
+      "title": "Pattern Registry Lookup",
+      "description": "",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/rules-global/patterns.md",
+          "target": "rules/patterns.md",
+          "sha256": "8d701610f90ea41afb8b85f764bfa780c32a476d6bb8b0db1ab683b969240ef7"
+        }
+      ],
+      "version": "a21e4a7552805be1a6402141ed1530088d3a8f4b182fe8a220e4fc84dd94436b"
+    },
+    {
+      "id": "rule:session-start",
+      "name": "session-start",
+      "type": "kun:rule",
+      "title": "Session Start — the report queue",
+      "description": "",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/rules-global/session-start.md",
+          "target": "rules/session-start.md",
+          "sha256": "2fe1eafbfe114265a015e6b9a03a78bed49195f92110ff3a6e11d72926307e19"
+        }
+      ],
+      "version": "75aea4931df9cd292e9a1d98e4ade8d7097625e101f4404c6287a44ae2884768"
+    },
+    {
+      "id": "hook:block-context",
+      "name": "block-context",
+      "type": "kun:hook",
+      "title": "block-context",
+      "description": "UserPromptSubmit — kun's router: names in a prompt → repos and blocks.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/block-context.sh",
+          "target": "hooks/block-context.sh",
+          "sha256": "58929122e26ce168a9a81b34dc434f52dbe03d2bf4076c95e56f3e9ef4ec12af"
+        }
+      ],
+      "version": "90b8b514522cd414ad8abd0982b3a5c5d9fe86bc5a84c51a98a038ee964161aa"
+    },
+    {
+      "id": "hook:block-destructive-bash",
+      "name": "block-destructive-bash",
+      "type": "kun:hook",
+      "title": "block-destructive-bash",
+      "description": "block-destructive-bash.sh — PreToolUse(Bash) safety guard for the kun engine.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/block-destructive-bash.sh",
+          "target": "hooks/block-destructive-bash.sh",
+          "sha256": "94c9ebfaf3a7fe60787b29f21a5eb6d4d5eb07c41e4e4005bd476fc41a79f004"
+        }
+      ],
+      "version": "0e6dafd6e7a68e9ed8ff4d222b9b0826e6f2c5e88a7b94642f9bcc7a9ad75b80"
+    },
+    {
+      "id": "hook:block-guard",
+      "name": "block-guard",
+      "type": "kun:hook",
+      "title": "block-guard",
+      "description": "Stop — block protocol guard.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/block-guard.sh",
+          "target": "hooks/block-guard.sh",
+          "sha256": "a72696eae97bb94f7c9e3b74fe21836902850d6760ad6333ac50f082866c7f35"
+        }
+      ],
+      "version": "25f6894ea77df2873770fb60765581ba17714cbd1da30f84620f0c8962f35c0b"
+    },
+    {
+      "id": "hook:block-touch",
+      "name": "block-touch",
+      "type": "kun:hook",
+      "title": "block-touch",
+      "description": "PostToolUse (Write|Edit) — log files touched this session, per session id.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/block-touch.sh",
+          "target": "hooks/block-touch.sh",
+          "sha256": "ffbb073fb0a09f5fbf286dcf584bc563c2b434ec2c186dcc2b0b50f7a403d9eb"
+        }
+      ],
+      "version": "9fd28435e0efa5626b5920bf584ddbdd2e459275e8ed59c5ecc931034ac235a5"
+    },
+    {
+      "id": "hook:delegate-nudge",
+      "name": "delegate-nudge",
+      "type": "kun:hook",
+      "title": "delegate-nudge",
+      "description": "Stop — delegate nudge (\"Opus plans, lanes build\").",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/delegate-nudge.sh",
+          "target": "hooks/delegate-nudge.sh",
+          "sha256": "b0ffa23029eff02eb0809e8c12c9c3eeeece8ac47cc6623b0259cabf4a1ce7aa"
+        }
+      ],
+      "version": "57cb9a214bf88f4593dc3ddb833cdee29466755eb725fdc1a26193ea961959e9"
+    },
+    {
+      "id": "hook:figma-quota",
+      "name": "figma-quota",
+      "type": "kun:hook",
+      "title": "figma-quota",
+      "description": "figma-quota.sh — PostToolUse(mcp__figma__.*): count Figma MCP calls against the free plan's cap.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/figma-quota.sh",
+          "target": "hooks/figma-quota.sh",
+          "sha256": "864be9d9f6c3c6ffc05ff432952c8b3245c8ea1746ea9342a1dc6fa7debef7a4"
+        }
+      ],
+      "version": "bb37db0691762e45745f4fd8e6ffab427f8233937d4a82fed24a233390dc4cbe"
+    },
+    {
+      "id": "hook:format-on-write",
+      "name": "format-on-write",
+      "type": "kun:hook",
+      "title": "format-on-write",
+      "description": "format-on-write.sh — PostToolUse(Write|Edit): run prettier on the file Claude just wrote,",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/format-on-write.sh",
+          "target": "hooks/format-on-write.sh",
+          "sha256": "82deae9ff5fc93952cf7d1953ff13894809a2b484ca9efd5c8597559b884eec8"
+        }
+      ],
+      "version": "04cd028cd4912d1ac5d09db70f91452e78f5b1c0d628797aa1cc9fb7b5a21f59"
+    },
+    {
+      "id": "hook:funnel-guard",
+      "name": "funnel-guard",
+      "type": "kun:hook",
+      "title": "funnel-guard",
+      "description": "funnel-guard.sh — PreToolUse(Bash) guard for the conversion lane's send path.",
+      "keywords": [
+        "follow up"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/funnel-guard.sh",
+          "target": "hooks/funnel-guard.sh",
+          "sha256": "ea3b17d5b253bfdeebea6fd05524abe57606f3a343e5446fafa6f08c03626b32"
+        }
+      ],
+      "version": "cea8926e053f3707974667fb28220b0a4ba254e6f4dba3a7a096734cdb868b4e"
+    },
+    {
+      "id": "hook:funnel-yield",
+      "name": "funnel-yield",
+      "type": "kun:hook",
+      "title": "funnel-yield",
+      "description": "funnel-yield.sh — PostToolUse(Bash) conversion ledger for the funnel lane.",
+      "keywords": [
+        "follow up"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/funnel-yield.sh",
+          "target": "hooks/funnel-yield.sh",
+          "sha256": "9724529b786ffe0bcd78dbf837ab571b404ac80fef3922d74cef556f8ed5ef9a"
+        }
+      ],
+      "version": "3a62bf01f8135705e091dbba96211631b1b862c71525c18893ab5acdc6195066"
+    },
+    {
+      "id": "hook:mandate-guard",
+      "name": "mandate-guard",
+      "type": "kun:hook",
+      "title": "mandate-guard",
+      "description": "mandate-guard.sh — PreToolUse(Bash): what an unattended run may never do.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/mandate-guard.sh",
+          "target": "hooks/mandate-guard.sh",
+          "sha256": "086e400e9583a6c4c9370317c1530cb4e0c08b2dd740beab8fd1ee730c6798eb"
+        }
+      ],
+      "version": "a57d0c2512ab5f900ea97a036ea4cffce49ba40009a1f592d74242a8ecb1ee89"
+    },
+    {
+      "id": "hook:media-guard",
+      "name": "media-guard",
+      "type": "kun:hook",
+      "title": "media-guard",
+      "description": "media-guard.sh — PreToolUse(Bash): keep media binaries out of git, in every repo.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/media-guard.sh",
+          "target": "hooks/media-guard.sh",
+          "sha256": "4bf519870ad92739eb6dd823d4bc6f45e574f9e7ad932670d5af47dcc1a1d135"
+        }
+      ],
+      "version": "41de2ae47c6aa6e741138de26f53b69f39943d014305774c07a7dd888b4e33ee"
+    },
+    {
+      "id": "hook:route-guard",
+      "name": "route-guard",
+      "type": "kun:hook",
+      "title": "route-guard",
+      "description": "PreToolUse (Agent) — route-guard: the last line of lane enforcement for subagents.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/route-guard.sh",
+          "target": "hooks/route-guard.sh",
+          "sha256": "c5cec58c9374a59cef669c340a31be6e5f65494fd133e6a52db2ade060218055"
+        }
+      ],
+      "version": "3724a7f73cad0f0b7b1d5ee3fcd809f6fccf598ad40d701455437b4fee944782"
+    },
+    {
+      "id": "hook:scrape-guard",
+      "name": "scrape-guard",
+      "type": "kun:hook",
+      "title": "scrape-guard",
+      "description": "scrape-guard.sh — PreToolUse(Bash) guard for the lead-acquisition scrape lane.",
+      "keywords": [
+        "scrap",
+        "scrap facebook"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/scrape-guard.sh",
+          "target": "hooks/scrape-guard.sh",
+          "sha256": "e33f9f73b72600cf6a719e2311d0792e45fc2367905d5ba8460bf4bb135051bd"
+        }
+      ],
+      "version": "be12b3b7d0c8eda428a16d2459b86ea6cba5ebd7960243fddd8cd197423f50e1"
+    },
+    {
+      "id": "hook:scrape-yield",
+      "name": "scrape-yield",
+      "type": "kun:hook",
+      "title": "scrape-yield",
+      "description": "scrape-yield.sh — PostToolUse(Bash) yield ledger for the lead-acquisition lane.",
+      "keywords": [
+        "enrich"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/scrape-yield.sh",
+          "target": "hooks/scrape-yield.sh",
+          "sha256": "21e2536f7c2b50241eb20d78ecb13d645a9d2feff6ab62d2bf6fdfe85354eda7"
+        }
+      ],
+      "version": "a9541c15876e37991c1629889cc5cfd3cc9ad009d7086256f402eed549645826"
+    },
+    {
+      "id": "hook:session-aware",
+      "name": "session-aware",
+      "type": "kun:hook",
+      "title": "session-aware",
+      "description": "SessionStart — one awareness brief: only what needs attention, silent when green.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/session-aware.sh",
+          "target": "hooks/session-aware.sh",
+          "sha256": "49150302c44fda6f811065b02d7df2254b93a0c37ed18a750a69d1a0eec189b1"
+        }
+      ],
+      "version": "83900fc5104ed74cfaa3322040dbd6d4b1d008a08952f980bb66641870d4a221"
+    },
+    {
+      "id": "hook:session-engine-context",
+      "name": "session-engine-context",
+      "type": "kun:hook",
+      "title": "session-engine-context",
+      "description": "SessionStart hook (kun repo) — inject engine status as session context.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/session-engine-context.sh",
+          "target": "hooks/session-engine-context.sh",
+          "sha256": "34897fbb606f7917051308e241d32751f09142708f3dcb5ed63ec3d7a4efa858"
+        }
+      ],
+      "version": "8cc65de86228e60390a75a74cf812efa82641c0b283d25f907c99eb1a7bb0f61"
+    },
+    {
+      "id": "hook:session-maintain-status",
+      "name": "session-maintain-status",
+      "type": "kun:hook",
+      "title": "session-maintain-status",
+      "description": "SessionStart hook (user-global) — surface maintain-heartbeat staleness.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/session-maintain-status.sh",
+          "target": "hooks/session-maintain-status.sh",
+          "sha256": "9afc4b27f7cb7e6ed177b688f0ec20f144f2f1433ff89aac68d6035cb3c24ee5"
+        }
+      ],
+      "version": "532338b37eb665580f83d064f0f2090403104ffe4b2388fbcf56df978ddd4dd6"
+    },
+    {
+      "id": "hook:session-media-stale",
+      "name": "session-media-stale",
+      "type": "kun:hook",
+      "title": "session-media-stale",
+      "description": "SessionStart — stale-recording nudge (the iterate half of the /record loop).",
+      "keywords": [
+        "record"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/session-media-stale.sh",
+          "target": "hooks/session-media-stale.sh",
+          "sha256": "fa1bee2af600c032268f80ad1c36ca11162673952ef570397b8e3eaa5eb54562"
+        }
+      ],
+      "version": "a5593b228d3b5648925ce120b4bc76b8688ca933e16e6a892f6582b6765b5dbd"
+    },
+    {
+      "id": "hook:session-start-reports",
+      "name": "session-start-reports",
+      "type": "kun:hook",
+      "title": "session-start-reports",
+      "description": "SessionStart hook — surface the open report-an-issue queue across databayt repos.",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/hooks/session-start-reports.sh",
+          "target": "hooks/session-start-reports.sh",
+          "sha256": "a3d3d834f29abd0b57383ee84e0b66327f5737ba837acf73f3a2f22f19c2f3c1"
+        }
+      ],
+      "version": "38feff422c084b6434895d2418cf4ba81bbe53562de958f6ccad4d9caa50f4ad"
+    },
+    {
+      "id": "pack:media",
+      "name": "media",
+      "type": "kun:pack",
+      "title": "Media",
+      "description": "Shoot, record, edit, generate and publish brand content — with a QA agent before anything goes out.",
+      "title_ar": "الوسائط",
+      "description_ar": "التصوير والتسجيل والمونتاج وتوليد المحتوى ونشره — مع وكيل مراجعة قبل أي نشر.",
+      "keywords": [],
+      "dependencies": [
+        "skill:edit",
+        "skill:shoot",
+        "skill:record",
+        "skill:higgs",
+        "skill:carousel",
+        "skill:draft",
+        "skill:social",
+        "agent:media-qa"
+      ],
+      "files": [
+        {
+          "path": "departments/media/pack.json",
+          "target": "departments/media/pack.json",
+          "sha256": "4b8197afd2916c9ab985060087a3b1a67ae843a81d574a3282f3b09d6ff54f56"
+        },
+        {
+          "path": "departments/media/prompt.md",
+          "target": "departments/media/prompt.md",
+          "sha256": "a6a6091ae7cf97a91082814edbdd2b7e6ad740d1e51b69248ac14eb1a84eaf88"
+        }
+      ],
+      "version": "758d45d358a2856aa02fdfa66eaa6e1437875a4c543099ce550df5e04ef13d32"
+    },
+    {
+      "id": "pack:sales",
+      "name": "sales",
+      "type": "kun:pack",
+      "title": "Sales",
+      "description": "Find leads, convert replies, write proposals and price the product — the cash-flow department.",
+      "title_ar": "المبيعات",
+      "description_ar": "اكتشاف العملاء، تحويل الردود، كتابة العروض وتسعير المنتج — قسم التدفق النقدي.",
+      "keywords": [],
+      "dependencies": [
+        "skill:scrape",
+        "skill:funnel",
+        "skill:proposal",
+        "skill:pricing",
+        "skill:jobs",
+        "agent:lead",
+        "agent:revenue"
+      ],
+      "files": [
+        {
+          "path": "departments/sales/pack.json",
+          "target": "departments/sales/pack.json",
+          "sha256": "3b1688db161a4bc164719e7c5d4957f4675a76f4ea5444f1811a50c8a98b5a2e"
+        },
+        {
+          "path": "departments/sales/prompt.md",
+          "target": "departments/sales/prompt.md",
+          "sha256": "849c8755b9cb8f4a5a4183bfe068beb0db73e5fe3c3c49a70770fdf4e0ebe5a6"
+        }
+      ],
+      "version": "a2473a98f8d7d05ac6af4cc03d33dffd9cba8cdb3481f7423a0b09cb109000c3"
+    }
+  ]
+}

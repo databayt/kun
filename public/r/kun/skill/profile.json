@@ -1,0 +1,19 @@
+{
+  "id": "skill:profile",
+  "name": "profile",
+  "type": "kun:skill",
+  "title": "profile",
+  "description": "Load a selective config profile by role (engineer/business/content/ops)",
+  "keywords": [
+    "profile"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/profile/SKILL.md",
+      "target": "skills/profile/SKILL.md",
+      "sha256": "972d82926950b52654ca6273ab28781ce6e1711800990407a7b39d3bca67bbbb"
+    }
+  ],
+  "version": "4ad1974bb22ab6c75d7e1da3b957fb9f5d3411b5784a5b34a7160fc26f20758a"
+}

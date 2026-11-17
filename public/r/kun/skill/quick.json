@@ -1,0 +1,19 @@
+{
+  "id": "skill:quick",
+  "name": "quick",
+  "type": "kun:skill",
+  "title": "quick",
+  "description": "Fastest commit cycle - lint, fix, commit, push",
+  "keywords": [
+    "quick"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/quick/SKILL.md",
+      "target": "skills/quick/SKILL.md",
+      "sha256": "74092d429c2bc480f67124719403ac22ff851a246da4c2ba09b8477604710c05"
+    }
+  ],
+  "version": "2133ad0f96e90a576a3d7be582a78320c8c4980b7e09607a88b704d479453ba2"
+}

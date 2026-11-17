@@ -1,0 +1,21 @@
+{
+  "id": "agent:ops",
+  "name": "ops",
+  "type": "kun:agent",
+  "title": "ops",
+  "description": "Delivery and costs — CI/CD, spend, monitoring, infrastructure, uptime",
+  "keywords": [
+    "domains",
+    "incident",
+    "monitor"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/ops.md",
+      "target": "agents/ops.md",
+      "sha256": "aa65370eb50674d4a9d04bd6889af8764e84f4a6a1473edf44312c624eeef809"
+    }
+  ],
+  "version": "0827ac5285b41a1841e95a16ec560097e20ce7b7c2b1df87c346ff582b38d5f9"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "agent:transcribe",
+  "name": "transcribe",
+  "type": "kun:agent",
+  "title": "transcribe",
+  "description": "Page transcriber — scanned page images to Markdown exactly as printed, never correcting or guessing",
+  "keywords": [
+    "textbook",
+    "textbook bench",
+    "textbook loop",
+    "transcribe",
+    "تحويل الكتب"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/transcribe.md",
+      "target": "agents/transcribe.md",
+      "sha256": "494491a93ad7d2bc7597f81c2d9750999d4a15c31c38f1e0dc54cb1c6df6ba40"
+    }
+  ],
+  "version": "b991af18049073d7648863ff36c95a5e9281fa801b5143f4b72b676224a3cae2"
+}

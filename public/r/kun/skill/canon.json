@@ -1,0 +1,19 @@
+{
+  "id": "skill:canon",
+  "name": "canon",
+  "type": "kun:skill",
+  "title": "canon",
+  "description": "The right CEO book + operating move for a business or leadership decision; /canon lists all 10",
+  "keywords": [
+    "canon"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/canon/SKILL.md",
+      "target": "skills/canon/SKILL.md",
+      "sha256": "e73767272109c2e40f3fa548e7292a65f450a7c40f645f634457568a68ebc2d8"
+    }
+  ],
+  "version": "e809454a284cf6c53c6bfb16f9127ff4e11c0269b7c6d6d4e25ba12294a9e104"
+}

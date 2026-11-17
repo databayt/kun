@@ -1,0 +1,19 @@
+{
+  "id": "skill:test",
+  "name": "test",
+  "type": "kun:skill",
+  "title": "test",
+  "description": "Generate and run tests - unit, component, or E2E",
+  "keywords": [
+    "test"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/test/SKILL.md",
+      "target": "skills/test/SKILL.md",
+      "sha256": "5593958ee9e07cfa366a612d975e64dc80f7479d10a6577763cec3151e2c4976"
+    }
+  ],
+  "version": "c4b1fa27f53400cdec81a94a9b086a5b18e4d375370c6e46b989408be717b778"
+}

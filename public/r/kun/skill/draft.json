@@ -1,0 +1,29 @@
+{
+  "id": "skill:draft",
+  "name": "draft",
+  "type": "kun:skill",
+  "title": "draft",
+  "description": "Full brand draft — Arabic-first copy, English mirrored, plus media",
+  "keywords": [
+    "draft"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/draft/references/golden-set.md",
+      "target": "skills/draft/references/golden-set.md",
+      "sha256": "5dba17d8922448263c950bdfaadfb8c37277838affd86a3805a33972c4cad7d9"
+    },
+    {
+      "path": ".claude/skills/draft/references/scene-bank.md",
+      "target": "skills/draft/references/scene-bank.md",
+      "sha256": "076e776573c3b7ac4174a5061760ec6a705354bc15af0bfe33f479b424ebaffd"
+    },
+    {
+      "path": ".claude/skills/draft/SKILL.md",
+      "target": "skills/draft/SKILL.md",
+      "sha256": "7d051fa1d2917d729f6f12bc2a49ad5f2fa246e3ab6e321251533f95e507c9f0"
+    }
+  ],
+  "version": "6ff5f6288de3ed85992089239f136d7572c1a45e8a6724fa90048e0cdbe4bff7"
+}

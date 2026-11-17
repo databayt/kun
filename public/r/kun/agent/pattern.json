@@ -1,0 +1,23 @@
+{
+  "id": "agent:pattern",
+  "name": "pattern",
+  "type": "kun:agent",
+  "title": "pattern",
+  "description": "Code conventions — patterns and anti-patterns",
+  "keywords": [
+    "audit",
+    "constitution",
+    "docs",
+    "review",
+    "security"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/pattern.md",
+      "target": "agents/pattern.md",
+      "sha256": "cf93b49eb4a4800054be0b6e85894a006401d52cf8ae3dc3fae2479adb3c101b"
+    }
+  ],
+  "version": "15755b54d0c7cd8286ae91c4593830231ddb8be8515d2e9b20461e3b621fdf55"
+}

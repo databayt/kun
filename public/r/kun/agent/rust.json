@@ -1,0 +1,22 @@
+{
+  "id": "agent:rust",
+  "name": "rust",
+  "type": "kun:agent",
+  "title": "rust",
+  "description": "Rust + Tauri 2 — the machine desktop shell, feature-colocated rust.rs",
+  "keywords": [
+    "catalog",
+    "machine",
+    "rust",
+    "tauri"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/rust.md",
+      "target": "agents/rust.md",
+      "sha256": "6ee4230647fa9fc7bccf43eb975421cf82707bb366ea34dc809b67474420561f"
+    }
+  ],
+  "version": "aa4c4d366c8d506de493b49cfd9411f5be28c09eb62c9a47335bbd4e8992af55"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "skill:release",
+  "name": "release",
+  "type": "kun:skill",
+  "title": "release",
+  "description": "One spell — handover, check, ship, watch, then comment + close the issue",
+  "keywords": [
+    "release"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/release/SKILL.md",
+      "target": "skills/release/SKILL.md",
+      "sha256": "c4d9420c1409a3c732c2ade8f1355b47f34e59b391cdd47604f7e998ae99263d"
+    }
+  ],
+  "version": "2d62590e758e417132006203f0e8c9c68d75218f25bcc3defb476f2a064a0311"
+}

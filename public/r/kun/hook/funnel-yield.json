@@ -1,0 +1,19 @@
+{
+  "id": "hook:funnel-yield",
+  "name": "funnel-yield",
+  "type": "kun:hook",
+  "title": "funnel-yield",
+  "description": "funnel-yield.sh — PostToolUse(Bash) conversion ledger for the funnel lane.",
+  "keywords": [
+    "follow up"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/funnel-yield.sh",
+      "target": "hooks/funnel-yield.sh",
+      "sha256": "9724529b786ffe0bcd78dbf837ab571b404ac80fef3922d74cef556f8ed5ef9a"
+    }
+  ],
+  "version": "3a62bf01f8135705e091dbba96211631b1b862c71525c18893ab5acdc6195066"
+}

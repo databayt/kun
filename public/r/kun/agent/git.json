@@ -1,0 +1,22 @@
+{
+  "id": "agent:git",
+  "name": "git",
+  "type": "kun:agent",
+  "title": "git",
+  "description": "Git — conventional commits and the main-only workflow (no branches, worktrees or PRs)",
+  "keywords": [
+    "push",
+    "quick",
+    "ship",
+    "upstream"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/git.md",
+      "target": "agents/git.md",
+      "sha256": "39d49a1150ee67d4bd44cd7b71f8a7d182d6e3a68a3255221585b9570fe941ca"
+    }
+  ],
+  "version": "35ce69be77efb453aa07b5121c130b336c4d343c45db7db31623d3e97ad1e7b0"
+}

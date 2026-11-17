@@ -1,0 +1,20 @@
+{
+  "id": "agent:semantic",
+  "name": "semantic",
+  "type": "kun:agent",
+  "title": "semantic",
+  "description": "Semantic HTML and color tokens for accessibility and theming",
+  "keywords": [
+    "accessibility",
+    "tailwind"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/semantic.md",
+      "target": "agents/semantic.md",
+      "sha256": "b516d3c4d3ccf70f974c8af98772d6d8a3374612bca8000953692fd0416531cb"
+    }
+  ],
+  "version": "12671a48259140158a6faa0254ecd093ece3bc22d86171ee4f52c90468fb2605"
+}

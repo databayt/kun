@@ -1,0 +1,19 @@
+{
+  "id": "skill:handover",
+  "name": "handover",
+  "type": "kun:skill",
+  "title": "handover",
+  "description": "UI verification — runs niche quality keywords on a URL or block",
+  "keywords": [
+    "handover"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/handover/SKILL.md",
+      "target": "skills/handover/SKILL.md",
+      "sha256": "cd657a762ca97110a3dc6657355433d8ab43c468981059d91ab6e92d6548d9b9"
+    }
+  ],
+  "version": "0012cd67d1572fd2b4ee111b50a56841d5e278c01368f713c65a25511d6ece30"
+}

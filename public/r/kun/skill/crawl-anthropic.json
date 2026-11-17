@@ -1,0 +1,17 @@
+{
+  "id": "skill:crawl-anthropic",
+  "name": "crawl-anthropic",
+  "type": "kun:skill",
+  "title": "crawl-anthropic",
+  "description": "Crawl and snapshot Anthropic docs/assets",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/crawl-anthropic/SKILL.md",
+      "target": "skills/crawl-anthropic/SKILL.md",
+      "sha256": "2b7f6e1259f395694d849d374d79f63a3ccc2fb70d68ef615b7325f6f83a5c73"
+    }
+  ],
+  "version": "1d764f08aaf075fb8537e172f9333f3435d17c3b4f1bd6a1fb8c0694801108a8"
+}

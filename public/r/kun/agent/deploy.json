@@ -1,0 +1,22 @@
+{
+  "id": "agent:deploy",
+  "name": "deploy",
+  "type": "kun:agent",
+  "title": "deploy",
+  "description": "Deployments — the Cloudflare Workers/Containers lane plus legacy Vercel previews, monitoring",
+  "keywords": [
+    "deploy",
+    "ship",
+    "vercel",
+    "watch"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/deploy.md",
+      "target": "agents/deploy.md",
+      "sha256": "73e3bea25a5650708c9d99434eb418038d048cf2155e9b15acfe684d63203c6e"
+    }
+  ],
+  "version": "f41f42613225f9105e9cb43c7655672a48f3eab8090d50d08217a3ccca956678"
+}

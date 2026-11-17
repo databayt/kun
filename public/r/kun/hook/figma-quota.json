@@ -1,0 +1,17 @@
+{
+  "id": "hook:figma-quota",
+  "name": "figma-quota",
+  "type": "kun:hook",
+  "title": "figma-quota",
+  "description": "figma-quota.sh — PostToolUse(mcp__figma__.*): count Figma MCP calls against the free plan's cap.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/figma-quota.sh",
+      "target": "hooks/figma-quota.sh",
+      "sha256": "864be9d9f6c3c6ffc05ff432952c8b3245c8ea1746ea9342a1dc6fa7debef7a4"
+    }
+  ],
+  "version": "bb37db0691762e45745f4fd8e6ffab427f8233937d4a82fed24a233390dc4cbe"
+}

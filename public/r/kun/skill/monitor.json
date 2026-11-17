@@ -1,0 +1,19 @@
+{
+  "id": "skill:monitor",
+  "name": "monitor",
+  "type": "kun:skill",
+  "title": "monitor",
+  "description": "Check all deployments, costs, and uptime across databayt products",
+  "keywords": [
+    "monitor"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/monitor/SKILL.md",
+      "target": "skills/monitor/SKILL.md",
+      "sha256": "c290b8e664a0a410c5fc53a3995dfbec9da3a88a938649a8fcc8792b407ba1df"
+    }
+  ],
+  "version": "77ae28870c56daf4fb56e0622dd89bee2a0735a77e38bdd0cf118e63f11c9a44"
+}

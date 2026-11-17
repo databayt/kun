@@ -1,0 +1,22 @@
+{
+  "id": "skill:mcp-doctor",
+  "name": "mcp-doctor",
+  "type": "kun:skill",
+  "title": "mcp-doctor",
+  "description": "Diagnose and recover the browser/Playwright MCP server",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/mcp-doctor/ERRORS.md",
+      "target": "skills/mcp-doctor/ERRORS.md",
+      "sha256": "aba468d14c4308564a6d015f5b5aad68994718c5afb71dee1cb8fee0634b94e2"
+    },
+    {
+      "path": ".claude/skills/mcp-doctor/SKILL.md",
+      "target": "skills/mcp-doctor/SKILL.md",
+      "sha256": "152ba17b767f797cafa309f452d808308189bce031c774e7fc9e538c3e0aaf09"
+    }
+  ],
+  "version": "2735ef88bf211de554f23d7d6fbe59b6b24a21a846b49f4a12bebfad83670495"
+}

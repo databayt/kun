@@ -1,0 +1,17 @@
+{
+  "id": "rule:github-workflow",
+  "name": "github-workflow",
+  "type": "kun:rule",
+  "title": "Workflow — Work Directly on Main",
+  "description": "",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/rules-global/github-workflow.md",
+      "target": "rules/github-workflow.md",
+      "sha256": "4c6ddae854b319f4ed4a6bcf27bac6688e168de2cd1f76ed51c9caac3b3ed1ff"
+    }
+  ],
+  "version": "cda385ae54510c43e205760c0489145c1700c27071d2e0de8a3cf4305fa9931b"
+}

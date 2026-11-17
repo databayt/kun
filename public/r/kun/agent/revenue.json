@@ -1,0 +1,17 @@
+{
+  "id": "agent:revenue",
+  "name": "revenue",
+  "type": "kun:agent",
+  "title": "revenue",
+  "description": "Deals — pricing, proposals, contracts, cost analysis, revenue tracking",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/revenue.md",
+      "target": "agents/revenue.md",
+      "sha256": "da4604143cfe490748f6b8bf8a9b72f395085d105aff31aac7e7e8c49c056a7a"
+    }
+  ],
+  "version": "eda23cba3629aaf031137d1d29f832db42b906672712f6d1563bbc220d042b8b"
+}

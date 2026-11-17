@@ -1,0 +1,20 @@
+{
+  "id": "agent:middleware",
+  "name": "middleware",
+  "type": "kun:agent",
+  "title": "middleware",
+  "description": "Next.js middleware/proxy — auth, i18n, subdomain routing",
+  "keywords": [
+    "auth",
+    "nextjs"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/middleware.md",
+      "target": "agents/middleware.md",
+      "sha256": "21de9393347d632d334f761ac49d350c8080fd142e484ac5dd0949e3e2232455"
+    }
+  ],
+  "version": "63684de95a0924e4987fda658c613669dfc6a158c370dd15c91495185df00dbb"
+}

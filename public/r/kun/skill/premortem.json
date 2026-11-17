@@ -1,0 +1,19 @@
+{
+  "id": "skill:premortem",
+  "name": "premortem",
+  "type": "kun:skill",
+  "title": "premortem",
+  "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
+  "keywords": [
+    "premortem"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/premortem/SKILL.md",
+      "target": "skills/premortem/SKILL.md",
+      "sha256": "9c9908bba51e90dc4f6192949b7e33177009454f5fc62655c3c2dcf2344e6977"
+    }
+  ],
+  "version": "7483e2f7588dc7a188205917584107623944f143dd80dc74c05e3e87d0a0c1a7"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "skill:atom",
+  "name": "atom",
+  "type": "kun:skill",
+  "title": "atom",
+  "description": "Create atoms - compositions of 2+ shadcn/ui primitives",
+  "keywords": [
+    "atom"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/atom/SKILL.md",
+      "target": "skills/atom/SKILL.md",
+      "sha256": "2f48a2b560d687df6b27483ce8e2629c66ba6934689abae328c59282126ffd9e"
+    }
+  ],
+  "version": "3a7606d91d1879827203561000f007ec3ae8651661f9928ed167094997400146"
+}

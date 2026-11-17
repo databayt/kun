@@ -1,0 +1,19 @@
+{
+  "id": "skill:higgs",
+  "name": "higgs",
+  "type": "kun:skill",
+  "title": "higgs",
+  "description": "Marketing photos and video — Google (Nano Banana, Veo, Omni) direct, or Higgsfield",
+  "keywords": [
+    "higgs"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/higgs/SKILL.md",
+      "target": "skills/higgs/SKILL.md",
+      "sha256": "e60e468281d7fc10f3b92f79d6cd8b7b554ec83072bbcfd7cc2973de0b78fd8a"
+    }
+  ],
+  "version": "ca32424db8c5237593137dbee763e9f96cd4a1c93d6f62d057ea3d336df754e0"
+}

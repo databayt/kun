@@ -1,0 +1,17 @@
+{
+  "id": "agent:clone",
+  "name": "clone",
+  "type": "kun:agent",
+  "title": "clone",
+  "description": "Translate a captured live-URL section (.clone/<slug>) into pixel-exact house-stack JSX (Tailwind v4, shadcn, RTL)",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/clone.md",
+      "target": "agents/clone.md",
+      "sha256": "91dc13578c37d288971cf8730dc927f87b9bef94981c5efe9bed7c30151915d8"
+    }
+  ],
+  "version": "ca03fb7a1ee58f6a5e6c0121a45b3914a676f8b56b185a56b2663edbff492049"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "skill:convert",
+  "name": "convert",
+  "type": "kun:skill",
+  "title": "convert",
+  "description": "Convert a file or URL to Markdown via MarkItDown",
+  "keywords": [
+    "convert"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/convert/SKILL.md",
+      "target": "skills/convert/SKILL.md",
+      "sha256": "631222bbe6d54c9af015087d937d3881af2841c890e51fa893587c3eddbf7f42"
+    }
+  ],
+  "version": "d0695f68a0a1aec0aeec287dbfd97c362eff8cde06d00cd4624fc87ab0fbb94d"
+}

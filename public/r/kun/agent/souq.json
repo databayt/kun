@@ -1,0 +1,19 @@
+{
+  "id": "agent:souq",
+  "name": "souq",
+  "type": "kun:agent",
+  "title": "souq",
+  "description": "E-commerce reference — multi-vendor marketplace, cart, vendor dashboards",
+  "keywords": [
+    "like souq"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/souq.md",
+      "target": "agents/souq.md",
+      "sha256": "dbdb84f18a5a8211e4c8a437644eac11eca6a2ec4f68dbeb3083e934cfe5ec01"
+    }
+  ],
+  "version": "66674de77cb2f8a6a220428d0657d8d2b1388b9e3bd1340cecd616af314c65d5"
+}

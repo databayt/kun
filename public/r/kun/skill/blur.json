@@ -1,0 +1,19 @@
+{
+  "id": "skill:blur",
+  "name": "blur",
+  "type": "kun:skill",
+  "title": "blur",
+  "description": "Blur-up images — photos arrive blurred and sharpen into focus as they load",
+  "keywords": [
+    "blur"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/blur/SKILL.md",
+      "target": "skills/blur/SKILL.md",
+      "sha256": "bc6f07b05dfc25e535f6bb6bf4a1d640e438b532856790ea38bfb9aca2eaed13"
+    }
+  ],
+  "version": "3d0bd6485f1dd6ba82ab5d6e1ab506d4bbfe4203531f0a390ee16b42c57c4352"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "agent:shifa",
+  "name": "shifa",
+  "type": "kun:agent",
+  "title": "shifa",
+  "description": "Medical platform reference — appointments, patient records, healthcare workflows",
+  "keywords": [
+    "like shifa"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/shifa.md",
+      "target": "agents/shifa.md",
+      "sha256": "6f80d50edc398ec0b1c248b46e6a094540d43a8f64923e27018f2d41e7bcbdd5"
+    }
+  ],
+  "version": "95440c24b47cbc537f34b895aa46f16b8f6e04fb0a210e71bf073a9984d72c31"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "skill:calendar",
+  "name": "calendar",
+  "type": "kun:skill",
+  "title": "calendar",
+  "description": "The content calendar — which brand publishes what, on which day",
+  "keywords": [
+    "calendar"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/calendar/SKILL.md",
+      "target": "skills/calendar/SKILL.md",
+      "sha256": "66008e46903107c5e04897ba9d50a685bc37fb4c464812487939533e4367735d"
+    }
+  ],
+  "version": "910d9e56b0dee4fd2b898b672c7adb439fcc199d930c68eb0fd341c4916450ed"
+}

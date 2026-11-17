@@ -1,0 +1,23 @@
+{
+  "id": "agent:block",
+  "name": "block",
+  "type": "kun:agent",
+  "title": "block",
+  "description": "Blocks — UI components with business logic (data tables, auth, payments, dashboards)",
+  "keywords": [
+    "block",
+    "checkout",
+    "dashboard",
+    "form",
+    "table"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/block.md",
+      "target": "agents/block.md",
+      "sha256": "3a8d6e58fa139f0d58c238561fbc5b0acdd61745a46fbec05ae38ae65019dc55"
+    }
+  ],
+  "version": "dca98cf30e3f8e8becbbd61cbb6c0c56bd770b9e8febbacc6b77b02f6c686976"
+}

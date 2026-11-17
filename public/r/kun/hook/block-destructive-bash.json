@@ -1,0 +1,17 @@
+{
+  "id": "hook:block-destructive-bash",
+  "name": "block-destructive-bash",
+  "type": "kun:hook",
+  "title": "block-destructive-bash",
+  "description": "block-destructive-bash.sh — PreToolUse(Bash) safety guard for the kun engine.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/block-destructive-bash.sh",
+      "target": "hooks/block-destructive-bash.sh",
+      "sha256": "94c9ebfaf3a7fe60787b29f21a5eb6d4d5eb07c41e4e4005bd476fc41a79f004"
+    }
+  ],
+  "version": "0e6dafd6e7a68e9ed8ff4d222b9b0826e6f2c5e88a7b94642f9bcc7a9ad75b80"
+}

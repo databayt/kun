@@ -1,0 +1,19 @@
+{
+  "id": "skill:plan",
+  "name": "plan",
+  "type": "kun:skill",
+  "title": "plan",
+  "description": "Architecture plan — tech decisions from an approved spec, before code",
+  "keywords": [
+    "plan"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/plan/SKILL.md",
+      "target": "skills/plan/SKILL.md",
+      "sha256": "2c01248a83be58df6a17ead8c8ae6bb760bfdee1f1e60b7e9a0b4f6e300d15cb"
+    }
+  ],
+  "version": "375b1f2ad22f1328c26ef82eeccbc4cb59b569ba569670b07c0112607c75a7cf"
+}

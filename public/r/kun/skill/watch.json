@@ -1,0 +1,19 @@
+{
+  "id": "skill:watch",
+  "name": "watch",
+  "type": "kun:skill",
+  "title": "watch",
+  "description": "Post-deploy verification — visual + console + smoke test",
+  "keywords": [
+    "watch"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/watch/SKILL.md",
+      "target": "skills/watch/SKILL.md",
+      "sha256": "a1542ef4cf064828db89f9d4484f6150ef0bf49c15a2ebd46071f2730e189e5e"
+    }
+  ],
+  "version": "8a7edfdee5a2815c0aa4f358410e804560bbc570a499d94f38b18b976a0f662b"
+}

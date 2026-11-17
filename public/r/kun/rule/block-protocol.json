@@ -1,0 +1,17 @@
+{
+  "id": "rule:block-protocol",
+  "name": "block-protocol",
+  "type": "kun:rule",
+  "title": "Block Protocol — per-repo feature blocks",
+  "description": "",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/rules-global/block-protocol.md",
+      "target": "rules/block-protocol.md",
+      "sha256": "9bd5b026c845bf8044f1623fc94ee91bfd346333f9b0ab8a8b3f1481d8875fee"
+    }
+  ],
+  "version": "2cdc92707136677eb5af1b6ce778c3585678724e8330cd2d148f4e124854344b"
+}

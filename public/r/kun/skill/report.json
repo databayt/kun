@@ -1,0 +1,19 @@
+{
+  "id": "skill:report",
+  "name": "report",
+  "type": "kun:skill",
+  "title": "report",
+  "description": "Triage and fix the open user reports across databayt repos",
+  "keywords": [
+    "report"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/report/SKILL.md",
+      "target": "skills/report/SKILL.md",
+      "sha256": "7f28953a41cd60f8054964a175f1db5ee166565eb50a6f57b687a8590097ff48"
+    }
+  ],
+  "version": "030b090654fee7bd76bfbfd8bec05846fa50773aa2be70a31ed6eed58b260dce"
+}

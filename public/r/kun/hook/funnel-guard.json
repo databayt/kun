@@ -1,0 +1,19 @@
+{
+  "id": "hook:funnel-guard",
+  "name": "funnel-guard",
+  "type": "kun:hook",
+  "title": "funnel-guard",
+  "description": "funnel-guard.sh — PreToolUse(Bash) guard for the conversion lane's send path.",
+  "keywords": [
+    "follow up"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/funnel-guard.sh",
+      "target": "hooks/funnel-guard.sh",
+      "sha256": "ea3b17d5b253bfdeebea6fd05524abe57606f3a343e5446fafa6f08c03626b32"
+    }
+  ],
+  "version": "cea8926e053f3707974667fb28220b0a4ba254e6f4dba3a7a096734cdb868b4e"
+}

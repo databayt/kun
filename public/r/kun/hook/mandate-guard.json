@@ -1,0 +1,17 @@
+{
+  "id": "hook:mandate-guard",
+  "name": "mandate-guard",
+  "type": "kun:hook",
+  "title": "mandate-guard",
+  "description": "mandate-guard.sh — PreToolUse(Bash): what an unattended run may never do.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/mandate-guard.sh",
+      "target": "hooks/mandate-guard.sh",
+      "sha256": "086e400e9583a6c4c9370317c1530cb4e0c08b2dd740beab8fd1ee730c6798eb"
+    }
+  ],
+  "version": "a57d0c2512ab5f900ea97a036ea4cffce49ba40009a1f592d74242a8ecb1ee89"
+}

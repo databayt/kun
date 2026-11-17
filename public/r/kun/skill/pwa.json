@@ -1,0 +1,24 @@
+{
+  "id": "skill:pwa",
+  "name": "pwa",
+  "type": "kun:skill",
+  "title": "pwa",
+  "description": "Progressive Web App lane — install, offline, Web Push",
+  "keywords": [
+    "pwa"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/pwa/scripts/pwa-audit.mjs",
+      "target": "skills/pwa/scripts/pwa-audit.mjs",
+      "sha256": "d813e1c37e622db4251b59f65404f53a6ac721a7d4dcbf8f545ff8a2c50fabc1"
+    },
+    {
+      "path": ".claude/skills/pwa/SKILL.md",
+      "target": "skills/pwa/SKILL.md",
+      "sha256": "ce947ba18b8a4c78d0abc26ecd07d0e992ff732cf7f03e7c02f565139d89e48d"
+    }
+  ],
+  "version": "29ca89d23ce0e32a5cd1cb8345e5316782f605f93a2df1ca1d246aa1b230d4bb"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "skill:block",
+  "name": "block",
+  "type": "kun:skill",
+  "title": "block",
+  "description": "Create blocks - UI components with integrated business logic",
+  "keywords": [
+    "block"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/block/SKILL.md",
+      "target": "skills/block/SKILL.md",
+      "sha256": "ebb049f7e173f4d794436a7085cf558aba39f4bb970e5153505b4ca6cdfbccb2"
+    }
+  ],
+  "version": "82c8ae78f04306091cf8e6b2c6f02ba7e992de2858f3b2f5951e2e9ceac557b9"
+}

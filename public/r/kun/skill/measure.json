@@ -1,0 +1,19 @@
+{
+  "id": "skill:measure",
+  "name": "measure",
+  "type": "kun:skill",
+  "title": "measure",
+  "description": "Read the numbers back — reach, engagement and UTM attribution per post and brand",
+  "keywords": [
+    "measure"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/measure/SKILL.md",
+      "target": "skills/measure/SKILL.md",
+      "sha256": "5061df371db277f9c9e1316e85f014202fef86b6cba39b244904e89795d31f24"
+    }
+  ],
+  "version": "fef5ef74e6021197df22dd1060f49fbbb9fca8c046afbe5b3fa44100cf78d177"
+}

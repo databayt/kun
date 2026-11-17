@@ -1,0 +1,19 @@
+{
+  "id": "skill:analyze",
+  "name": "analyze",
+  "type": "kun:skill",
+  "title": "analyze",
+  "description": "Analyze a repo's patterns and generate a tailored Claude Code config",
+  "keywords": [
+    "analyze"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/analyze/SKILL.md",
+      "target": "skills/analyze/SKILL.md",
+      "sha256": "e4c63e317e63095d25549f3b2a461dcecf8b74b5cf3747110b09da04ae337b7e"
+    }
+  ],
+  "version": "69640965221aad7cd99ef2f51e4d6832bb5c753e1c8969a7a99e9f81ae5391b8"
+}

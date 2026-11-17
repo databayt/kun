@@ -1,0 +1,35 @@
+{
+  "$comment": "person -> department. Seeded from content/docs/team.mdx (login = <login>@databayt.org). A person may hold more than one department; the first is the default pack the machine suggests.",
+  "departments": ["management", "development", "sales", "media"],
+  "people": [
+    {
+      "login": "abdout",
+      "name": "Abdout",
+      "departments": ["management", "development"]
+    },
+    { "login": "abobaker", "name": "Abobaker", "departments": ["management"] },
+    { "login": "ibrahim", "name": "Ibrahim", "departments": ["development"] },
+    {
+      "login": "moutaz",
+      "name": "Moutaz",
+      "departments": ["development", "sales"]
+    },
+    {
+      "login": "aseel",
+      "name": "Ali Aseel",
+      "departments": ["sales", "development"]
+    },
+    { "login": "moed", "name": "Moed", "departments": ["sales", "media"] },
+    {
+      "login": "samia",
+      "name": "Samia",
+      "departments": ["media", "management"]
+    },
+    {
+      "login": "sedon",
+      "name": "Sedon",
+      "departments": ["development", "management"]
+    },
+    { "login": "huwaida", "name": "هويدا", "departments": ["sales", "media"] }
+  ]
+}

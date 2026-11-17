@@ -1,0 +1,17 @@
+{
+  "id": "skill:costs",
+  "name": "costs",
+  "type": "kun:skill",
+  "title": "costs",
+  "description": "API spend breakdown and cost-optimization analysis",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/costs/SKILL.md",
+      "target": "skills/costs/SKILL.md",
+      "sha256": "0339ad98b87f5952c54641755e38a776c1a52768403fe40b6dd5b35706daf2bb"
+    }
+  ],
+  "version": "cfdfefb63c998619110d58b140d383e0d8b725fb3ca81a6f56b3cba683ec2035"
+}

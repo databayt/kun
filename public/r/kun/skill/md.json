@@ -1,0 +1,19 @@
+{
+  "id": "skill:md",
+  "name": "md",
+  "type": "kun:skill",
+  "title": "md",
+  "description": "House standard for machine-produced Markdown — schema, RTL rules, grading by agreement",
+  "keywords": [
+    "md"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/md/SKILL.md",
+      "target": "skills/md/SKILL.md",
+      "sha256": "55a919bf9ac695e38b6bd368cff83047cf7a7b14a68150c4637caf8e48e3eb69"
+    }
+  ],
+  "version": "7349d51c5d3b82b87be61997f64fd3f12bb3f4e98e9818c3674b52f7f0c90d27"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "agent:authjs",
+  "name": "authjs",
+  "type": "kun:agent",
+  "title": "authjs",
+  "description": "Auth.js v5 — JWT, OAuth, sessions",
+  "keywords": [
+    "auth",
+    "security"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/authjs.md",
+      "target": "agents/authjs.md",
+      "sha256": "e9c49115429551b66fa052db1213699ad1faa9f31b515419b8b39ee1e4cd99a5"
+    }
+  ],
+  "version": "445f73328e96ed31721a5f35b261687288bc464db12a160aa7686c49826e6437"
+}

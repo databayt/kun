@@ -1,0 +1,19 @@
+{
+  "id": "skill:template",
+  "name": "template",
+  "type": "kun:skill",
+  "title": "template",
+  "description": "Create templates - full-page layouts and major UI sections",
+  "keywords": [
+    "template"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/template/SKILL.md",
+      "target": "skills/template/SKILL.md",
+      "sha256": "a5dd1c54e9bddb534b8abc627381f1318899f863e5f099f62777f7c15f93357d"
+    }
+  ],
+  "version": "eb8e70d7385370b741c88db76d434de97f02bf2faa3f6fa2a1808a3603ddc59b"
+}

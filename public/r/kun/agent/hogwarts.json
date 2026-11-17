@@ -1,0 +1,19 @@
+{
+  "id": "agent:hogwarts",
+  "name": "hogwarts",
+  "type": "kun:agent",
+  "title": "hogwarts",
+  "description": "Education SaaS reference — multi-tenant, LMS, SIS, billing patterns",
+  "keywords": [
+    "like hogwarts"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/hogwarts.md",
+      "target": "agents/hogwarts.md",
+      "sha256": "662db96651ed4ea0dc7f3ccd20a3a3f4aec3ed30824943bdc1dd4bf0a6c2a770"
+    }
+  ],
+  "version": "6f1b3b998c1844ad7bbd4044e5b483ce64bce5dea9e30ab98e8b4cdbb719129d"
+}

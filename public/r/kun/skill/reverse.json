@@ -1,0 +1,24 @@
+{
+  "id": "skill:reverse",
+  "name": "reverse",
+  "type": "kun:skill",
+  "title": "reverse",
+  "description": "Competitor feature teardown, with evidence (REA)",
+  "keywords": [
+    "reverse"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/reverse/scripts/rea.sh",
+      "target": "skills/reverse/scripts/rea.sh",
+      "sha256": "86f9405aba4608ad63f6f7a0b52bd8f7f7fcafc3a24427e7f1ad8cd9499a2961"
+    },
+    {
+      "path": ".claude/skills/reverse/SKILL.md",
+      "target": "skills/reverse/SKILL.md",
+      "sha256": "c5d73a04e81eb077a6b4bb3ea15430bf0ab490047c077dbfa857c39870c82602"
+    }
+  ],
+  "version": "164d6cdb625dc02ec53b4e8b417efc8b6afdca77e8a07cacc8cfad1f3be34571"
+}

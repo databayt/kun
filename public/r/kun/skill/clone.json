@@ -1,0 +1,49 @@
+{
+  "id": "skill:clone",
+  "name": "clone",
+  "type": "kun:skill",
+  "title": "clone",
+  "description": "Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact",
+  "keywords": [
+    "clone"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/clone/references/rtl-logical.md",
+      "target": "skills/clone/references/rtl-logical.md",
+      "sha256": "8355904b2d9fd98fba98f90c054173744dad1280ea926af78f1ebb8545316f2f"
+    },
+    {
+      "path": ".claude/skills/clone/references/snapshot-schema.md",
+      "target": "skills/clone/references/snapshot-schema.md",
+      "sha256": "f39e2f585144a9120cd2437b93ae1ff5a65d9b6ff7dc2dcec25c0ef68fd2c596"
+    },
+    {
+      "path": ".claude/skills/clone/references/style-mapping.md",
+      "target": "skills/clone/references/style-mapping.md",
+      "sha256": "65fbbdc5b46cffbedae1719b2d6c1c1b4e7bd30f4325f7516a23972c0208714b"
+    },
+    {
+      "path": ".claude/skills/clone/scripts/clone-capture.mjs",
+      "target": "skills/clone/scripts/clone-capture.mjs",
+      "sha256": "7cb9f4251713e39474ab3e3893b32ae4022c25d06790b0c838833889d88f854d"
+    },
+    {
+      "path": ".claude/skills/clone/scripts/clone.workflow.mjs",
+      "target": "skills/clone/scripts/clone.workflow.mjs",
+      "sha256": "ea7e59f7f05f26fdeeacbbd1a9d7cbda7718d02663c4709135447d07a0c60446"
+    },
+    {
+      "path": ".claude/skills/clone/scripts/package.json",
+      "target": "skills/clone/scripts/package.json",
+      "sha256": "975476c16365e5aef6a326188ae9aa2d109566e58254439a56fbc98dbb2b13ed"
+    },
+    {
+      "path": ".claude/skills/clone/SKILL.md",
+      "target": "skills/clone/SKILL.md",
+      "sha256": "090408a309575baa1743f65351c0104cb8a9421898a75d7350d7f2e5a80655ed"
+    }
+  ],
+  "version": "1555c2a0ea4813f6369d174061b1229108af662539d5ee33db3d62605cd17cd1"
+}

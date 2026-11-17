@@ -1,0 +1,50 @@
+{
+  "id": "agent:react",
+  "name": "react",
+  "type": "kun:agent",
+  "title": "react",
+  "description": "React 19 — hooks, performance, concurrent features",
+  "keywords": [
+    "admin",
+    "animation",
+    "blur",
+    "component",
+    "dashboard",
+    "dedup",
+    "feature",
+    "form",
+    "gesture",
+    "lazy",
+    "memo",
+    "motion",
+    "nextjs",
+    "onboarding",
+    "optimize",
+    "parallelize",
+    "performance",
+    "profile",
+    "react",
+    "review",
+    "saas",
+    "scroll",
+    "server-component",
+    "settings",
+    "skeleton",
+    "streaming",
+    "suspense",
+    "test",
+    "transition",
+    "typescript",
+    "waterfall",
+    "wire"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/react.md",
+      "target": "agents/react.md",
+      "sha256": "f7e9902a15552a3c66273e2c3a878a050cf65513df453e17a82d75be4731d1a1"
+    }
+  ],
+  "version": "2df3cadaaa80a73763abb644fbd7e66f94caf76008ba484a76b2dbcc51967976"
+}

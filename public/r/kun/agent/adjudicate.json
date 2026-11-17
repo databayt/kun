@@ -1,0 +1,22 @@
+{
+  "id": "agent:adjudicate",
+  "name": "adjudicate",
+  "type": "kun:agent",
+  "title": "adjudicate",
+  "description": "Textbook page adjudicator — settles disagreements between two transcriptions against the page image; never invents",
+  "keywords": [
+    "adjudicate",
+    "textbook",
+    "textbook loop",
+    "تحويل الكتب"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/adjudicate.md",
+      "target": "agents/adjudicate.md",
+      "sha256": "24e46dfb33dc8103688b4c2f6df1b3a62d56a075eb7978828fcc2882444ab991"
+    }
+  ],
+  "version": "aba62fc284b6c8ca742b2292fe5fc06ee6ee48073aa2a32b34c14bae2cab0526"
+}

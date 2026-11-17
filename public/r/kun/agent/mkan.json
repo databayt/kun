@@ -1,0 +1,19 @@
+{
+  "id": "agent:mkan",
+  "name": "mkan",
+  "type": "kun:agent",
+  "title": "mkan",
+  "description": "Rental marketplace reference — listings, booking, search",
+  "keywords": [
+    "like mkan"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/mkan.md",
+      "target": "agents/mkan.md",
+      "sha256": "2aa746edb5edd5ca517c1d459bef685c09ef385578330bd7fc86759699d3a16b"
+    }
+  ],
+  "version": "0151fdeb49bc09a87e239edd0eb32a0f9dd0d85788de83218f153661dfc394bc"
+}

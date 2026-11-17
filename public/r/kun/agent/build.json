@@ -1,0 +1,28 @@
+{
+  "id": "agent:build",
+  "name": "build",
+  "type": "kun:agent",
+  "title": "build",
+  "description": "Builds — TypeScript validation, Turbopack, build-error prevention",
+  "keywords": [
+    "barrel",
+    "build",
+    "bundle",
+    "check",
+    "deploy",
+    "error",
+    "fix",
+    "lint",
+    "report",
+    "scan"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/build.md",
+      "target": "agents/build.md",
+      "sha256": "d67d9195a365db597fed06893b27777bb9ac296c42cbd860d7dd1cec902be183"
+    }
+  ],
+  "version": "e73ce0fb5b8f877e840692a0a25beb2eef357a65c50e6fba01d0e2732d9b6d6c"
+}

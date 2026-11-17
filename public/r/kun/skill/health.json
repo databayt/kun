@@ -1,0 +1,19 @@
+{
+  "id": "skill:health",
+  "name": "health",
+  "type": "kun:skill",
+  "title": "health",
+  "description": "Check Claude Code config health across the team + engine drift",
+  "keywords": [
+    "health"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/health/SKILL.md",
+      "target": "skills/health/SKILL.md",
+      "sha256": "60cff657f683ae6e991c4b2a8e6fd723f331d77ce85f58b3cdc933008eb73af7"
+    }
+  ],
+  "version": "9db566a76170b0e2fa0a1673097d5ec7edb0eb991b24885eddb50ec942460885"
+}

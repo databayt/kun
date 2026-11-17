@@ -1,0 +1,22 @@
+{
+  "id": "agent:sse",
+  "name": "sse",
+  "type": "kun:agent",
+  "title": "sse",
+  "description": "Diagnoses and fixes Next.js server-side exceptions",
+  "keywords": [
+    "error",
+    "report",
+    "scan",
+    "sentry"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/sse.md",
+      "target": "agents/sse.md",
+      "sha256": "ae623cf4d7ff2fba8dfec6499170b3829cc2d9636cbf60f7d7525d8fb06676e3"
+    }
+  ],
+  "version": "edc2fc14c5a9def84786c5343ae8377867ebaa30fc0da6744fe1c94ea6681559"
+}

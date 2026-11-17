@@ -1,0 +1,19 @@
+{
+  "id": "skill:record",
+  "name": "record",
+  "type": "kun:skill",
+  "title": "record",
+  "description": "Screen-record demo videos of real product flows, mirrored to Google Drive",
+  "keywords": [
+    "record"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/record/SKILL.md",
+      "target": "skills/record/SKILL.md",
+      "sha256": "57f58b49d973d7bfd514349f14d7a682996f05117e12f2db2272c81c3fb27f52"
+    }
+  ],
+  "version": "2b10265e262d25285aaa3af4c9112a854f255fc497f60b1460de54c7cb2b34ad"
+}

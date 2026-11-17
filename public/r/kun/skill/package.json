@@ -1,0 +1,17 @@
+{
+  "id": "skill:package",
+  "name": "package",
+  "type": "kun:skill",
+  "title": "package",
+  "description": "Cross-repo dependency audit and upgrade coordination",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/package/SKILL.md",
+      "target": "skills/package/SKILL.md",
+      "sha256": "de2623b9cbc695e9e21e47bf7b8244827621d0d6e0250768b33a4b318274cc05"
+    }
+  ],
+  "version": "10af228fdf8b7758e0ae18a1d52fb9a419b8526a4827d47701966a2f95b9601d"
+}

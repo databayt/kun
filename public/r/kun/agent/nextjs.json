@@ -1,0 +1,45 @@
+{
+  "id": "agent:nextjs",
+  "name": "nextjs",
+  "type": "kun:agent",
+  "title": "nextjs",
+  "description": "Next.js 16 — App Router, Server Components, Server Actions",
+  "keywords": [
+    "admin",
+    "api",
+    "auth",
+    "blur",
+    "catalog",
+    "code",
+    "feature",
+    "lazy",
+    "machine",
+    "nextjs",
+    "onboarding",
+    "optimize",
+    "page",
+    "performance",
+    "profile",
+    "react",
+    "saas",
+    "server-component",
+    "settings",
+    "skeleton",
+    "streaming",
+    "suspense",
+    "tauri",
+    "test",
+    "transition",
+    "typescript",
+    "wire"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/nextjs.md",
+      "target": "agents/nextjs.md",
+      "sha256": "7eaa4a852e466c86e1bc8b4b2a898f834971c1152c2766328a03f40ada84d66e"
+    }
+  ],
+  "version": "62ef60a13064c4a197d99587ccc7a37504284032e07e015334f35e08ace9eb0e"
+}

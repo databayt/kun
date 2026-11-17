@@ -1,0 +1,17 @@
+{
+  "id": "hook:session-engine-context",
+  "name": "session-engine-context",
+  "type": "kun:hook",
+  "title": "session-engine-context",
+  "description": "SessionStart hook (kun repo) — inject engine status as session context.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/session-engine-context.sh",
+      "target": "hooks/session-engine-context.sh",
+      "sha256": "34897fbb606f7917051308e241d32751f09142708f3dcb5ed63ec3d7a4efa858"
+    }
+  ],
+  "version": "8cc65de86228e60390a75a74cf812efa82641c0b283d25f907c99eb1a7bb0f61"
+}

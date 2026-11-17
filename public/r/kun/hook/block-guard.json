@@ -1,0 +1,17 @@
+{
+  "id": "hook:block-guard",
+  "name": "block-guard",
+  "type": "kun:hook",
+  "title": "block-guard",
+  "description": "Stop — block protocol guard.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/block-guard.sh",
+      "target": "hooks/block-guard.sh",
+      "sha256": "a72696eae97bb94f7c9e3b74fe21836902850d6760ad6333ac50f082866c7f35"
+    }
+  ],
+  "version": "25f6894ea77df2873770fb60765581ba17714cbd1da30f84620f0c8962f35c0b"
+}

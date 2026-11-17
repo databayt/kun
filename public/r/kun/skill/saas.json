@@ -1,0 +1,19 @@
+{
+  "id": "skill:saas",
+  "name": "saas",
+  "type": "kun:skill",
+  "title": "saas",
+  "description": "Generate complete SaaS feature with all layers",
+  "keywords": [
+    "saas"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/saas/SKILL.md",
+      "target": "skills/saas/SKILL.md",
+      "sha256": "63a1479d3ac4a68eaed0ec81971e93b148c656c17eb4b52f66c888592d0db81b"
+    }
+  ],
+  "version": "ba557b597c2915285a8d708def2ce0e934acf5a424c34db468af971cbb2188a6"
+}

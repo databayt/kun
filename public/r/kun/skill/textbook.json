@@ -1,0 +1,79 @@
+{
+  "id": "skill:textbook",
+  "name": "textbook",
+  "type": "kun:skill",
+  "title": "textbook",
+  "description": "Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark",
+  "keywords": [
+    "textbook"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/textbook/scripts/md-agreement.py",
+      "target": "skills/textbook/scripts/md-agreement.py",
+      "sha256": "5fb947289bd24f9bac23ae35789189d1f6f8bccd806017c84fc3ce58933d9b1e"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/md-structure.py",
+      "target": "skills/textbook/scripts/md-structure.py",
+      "sha256": "f4148ed5f416f95116bf4793d6d55695dda96b1b4f369793b0d778118e6a2549"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/md-table-direction.py",
+      "target": "skills/textbook/scripts/md-table-direction.py",
+      "sha256": "fde7b295873c8aa68d0988f8a23f854b54bdf4cb988afbefd472f2f6b6be60c7"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/presets.json",
+      "target": "skills/textbook/scripts/presets.json",
+      "sha256": "b3ccefd8f2b75289abf54a3b697c4e95c9dbadf627f3d0cf9132212c5e3bf17c"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/textbook-assemble.py",
+      "target": "skills/textbook/scripts/textbook-assemble.py",
+      "sha256": "26266d49f09e875baf975520e3e714f8a56494143c4b3bdd8ac140fd38ab5ff5"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/textbook-bench.py",
+      "target": "skills/textbook/scripts/textbook-bench.py",
+      "sha256": "1b4a98aef6dee056bc81bfd630a27b3827dcbab8440316960a1e44f68edd8e45"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/textbook-contract.py",
+      "target": "skills/textbook/scripts/textbook-contract.py",
+      "sha256": "628585db459f444e26aa05013a0886c718b7b2dc7e9ffed27b1fcf27eb9cf5c9"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/textbook-crop.py",
+      "target": "skills/textbook/scripts/textbook-crop.py",
+      "sha256": "c826040d0dd699eb2b08e5664f6ee2e027112305d72f57af1360dc4f7b56c05c"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/textbook-md.py",
+      "target": "skills/textbook/scripts/textbook-md.py",
+      "sha256": "e0f223e2d444e7bf8b2befae4ec70f4d4bb72f9f8255ffb454187be0a20d31f8"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/textbook-pages.py",
+      "target": "skills/textbook/scripts/textbook-pages.py",
+      "sha256": "53c998174bac415fd34502a79554dac0f7eca19cb10a1a52d60c72a56a04f4cb"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/textbook-preflight.py",
+      "target": "skills/textbook/scripts/textbook-preflight.py",
+      "sha256": "9efa069645935ecb91eaa046e1c949420eb84fb35621f92a024af44d7c68146e"
+    },
+    {
+      "path": ".claude/skills/textbook/scripts/textbook-triage.py",
+      "target": "skills/textbook/scripts/textbook-triage.py",
+      "sha256": "bf21dcd0afb1c7af9c7d518a201067d97168775048a0d97d680378e8372f2745"
+    },
+    {
+      "path": ".claude/skills/textbook/SKILL.md",
+      "target": "skills/textbook/SKILL.md",
+      "sha256": "ab146610b44c4651bf172bfa98bf4fb6cbde2521e9e943cb4e4d5363e6cbf407"
+    }
+  ],
+  "version": "c417f67fce19f0a0664d25e5a78e9ac4d1958298d646863a5490fcede2e9beb0"
+}

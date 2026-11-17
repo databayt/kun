@@ -1,0 +1,17 @@
+{
+  "id": "hook:session-aware",
+  "name": "session-aware",
+  "type": "kun:hook",
+  "title": "session-aware",
+  "description": "SessionStart — one awareness brief: only what needs attention, silent when green.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/session-aware.sh",
+      "target": "hooks/session-aware.sh",
+      "sha256": "49150302c44fda6f811065b02d7df2254b93a0c37ed18a750a69d1a0eec189b1"
+    }
+  ],
+  "version": "83900fc5104ed74cfaa3322040dbd6d4b1d008a08952f980bb66641870d4a221"
+}

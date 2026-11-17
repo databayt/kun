@@ -1,0 +1,19 @@
+{
+  "id": "skill:dev",
+  "name": "dev",
+  "type": "kun:skill",
+  "title": "dev",
+  "description": "Start dev server on port 3000",
+  "keywords": [
+    "dev"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/dev/SKILL.md",
+      "target": "skills/dev/SKILL.md",
+      "sha256": "4e2a72f5f88a125c53f0f5f2fda41936929c9a3ab3c46eb149ce2318b3c3625d"
+    }
+  ],
+  "version": "87dc93417bd103c0af328082f7a7bcf1303da2ecc08cb9c90862b9ef19a19d9a"
+}

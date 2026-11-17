@@ -1,0 +1,24 @@
+{
+  "id": "agent:performance",
+  "name": "performance",
+  "type": "kun:agent",
+  "title": "performance",
+  "description": "Performance — Core Web Vitals, runtime profiling, infrastructure tuning",
+  "keywords": [
+    "audit",
+    "bundle",
+    "optimize",
+    "parallelize",
+    "performance",
+    "waterfall"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/performance.md",
+      "target": "agents/performance.md",
+      "sha256": "41ba0d2abdcb0d09424497f6f1dc5b9c2536fac4e8f9d3a347cad154671b01bf"
+    }
+  ],
+  "version": "b23959c42d528a83c6a62fd6dda80a8f673f774665a7cce316d9edde21b0f548"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "skill:learn",
+  "name": "learn",
+  "type": "kun:skill",
+  "title": "learn",
+  "description": "Extract organizational patterns and conventions from repos + history",
+  "keywords": [
+    "learn"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/learn/SKILL.md",
+      "target": "skills/learn/SKILL.md",
+      "sha256": "0db49051678813bf2ae0086a9e6b9bcc38e6aae91992fab5d302bd910a07a243"
+    }
+  ],
+  "version": "829eb2034f685bca56c86864fcc56f11ca51c1e2285225392758337952d9f66f"
+}

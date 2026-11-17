@@ -1,0 +1,24 @@
+{
+  "id": "skill:scrape",
+  "name": "scrape",
+  "type": "kun:skill",
+  "title": "scrape",
+  "description": "Lead acquisition — contact gap first, discovery last",
+  "keywords": [
+    "scrape"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/scrape/references/backends.md",
+      "target": "skills/scrape/references/backends.md",
+      "sha256": "dd2b0569642146b28d8bfb7da285ad92e55b43b7d12d7adb09e3dea491b0e619"
+    },
+    {
+      "path": ".claude/skills/scrape/SKILL.md",
+      "target": "skills/scrape/SKILL.md",
+      "sha256": "65ee9839e5f65ad70d01a24ec68f920e14d49ddc2ca4c6ccbb543f33c6c76527"
+    }
+  ],
+  "version": "964d03bf55c236317b6ee3fb18c9799e1d87b24126cfb02a831964d7b86df107"
+}

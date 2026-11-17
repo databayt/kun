@@ -1,0 +1,32 @@
+{
+  "id": "pack:sales",
+  "name": "sales",
+  "type": "kun:pack",
+  "title": "Sales",
+  "description": "Find leads, convert replies, write proposals and price the product — the cash-flow department.",
+  "title_ar": "المبيعات",
+  "description_ar": "اكتشاف العملاء، تحويل الردود، كتابة العروض وتسعير المنتج — قسم التدفق النقدي.",
+  "keywords": [],
+  "dependencies": [
+    "skill:scrape",
+    "skill:funnel",
+    "skill:proposal",
+    "skill:pricing",
+    "skill:jobs",
+    "agent:lead",
+    "agent:revenue"
+  ],
+  "files": [
+    {
+      "path": "departments/sales/pack.json",
+      "target": "departments/sales/pack.json",
+      "sha256": "3b1688db161a4bc164719e7c5d4957f4675a76f4ea5444f1811a50c8a98b5a2e"
+    },
+    {
+      "path": "departments/sales/prompt.md",
+      "target": "departments/sales/prompt.md",
+      "sha256": "849c8755b9cb8f4a5a4183bfe068beb0db73e5fe3c3c49a70770fdf4e0ebe5a6"
+    }
+  ],
+  "version": "a2473a98f8d7d05ac6af4cc03d33dffd9cba8cdb3481f7423a0b09cb109000c3"
+}

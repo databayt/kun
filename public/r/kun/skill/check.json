@@ -1,0 +1,19 @@
+{
+  "id": "skill:check",
+  "name": "check",
+  "type": "kun:skill",
+  "title": "check",
+  "description": "Quality gate — typecheck + build + visual verify before shipping",
+  "keywords": [
+    "check"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/check/SKILL.md",
+      "target": "skills/check/SKILL.md",
+      "sha256": "3920b7cc3e17b57829efde8c41a841b872cd714075cab1c1947a6568883d6003"
+    }
+  ],
+  "version": "270ad55f04f00fd104eed44d96df52ea259122d3f4c61556204870e7131fea96"
+}

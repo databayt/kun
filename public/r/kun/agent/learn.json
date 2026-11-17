@@ -1,0 +1,22 @@
+{
+  "id": "agent:learn",
+  "name": "learn",
+  "type": "kun:agent",
+  "title": "learn",
+  "description": "Org intelligence — patterns, conventions and team knowledge mined from git history and repos",
+  "keywords": [
+    "conventions",
+    "drift",
+    "learn",
+    "patterns"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/learn.md",
+      "target": "agents/learn.md",
+      "sha256": "0cc84128d09cb55f8b43ed769d59284f10235e3534586dc1659a114abc8164a9"
+    }
+  ],
+  "version": "bebe74b75a5162f6f15ff8e632e22f093c5eaa40fe3a322786e81db8af66489e"
+}

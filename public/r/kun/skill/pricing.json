@@ -1,0 +1,17 @@
+{
+  "id": "skill:pricing",
+  "name": "pricing",
+  "type": "kun:skill",
+  "title": "pricing",
+  "description": "Calculate and compare pricing tiers for a databayt product",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/pricing/SKILL.md",
+      "target": "skills/pricing/SKILL.md",
+      "sha256": "8416ff1ab4d73b438d0d86e7e3d3a9522e7953099cf6ee7dfad25676be2c5f7e"
+    }
+  ],
+  "version": "deae47e5418e2ba2aaff6c5eb84f8d936c0f820e43886d8d4dbc4135d7e2ab36"
+}

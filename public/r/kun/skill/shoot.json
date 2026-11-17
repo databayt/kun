@@ -1,0 +1,564 @@
+{
+  "id": "skill:shoot",
+  "name": "shoot",
+  "type": "kun:skill",
+  "title": "shoot",
+  "description": "Stills of real product pages and flows, framed like Abdout's MacBook",
+  "keywords": [
+    "shoot"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/clean-bg.py",
+      "target": "skills/shoot/assets/hogwarts/clean-bg.py",
+      "sha256": "ec186093865fbd1203a5d578aee655de847d65810500e814d4388e941d2aef37"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/degree.jpg",
+      "target": "skills/shoot/assets/hogwarts/degree.jpg",
+      "sha256": "67f89af2901a431c2963da9687481db74c53c128310ee78dd61c7119f8d9fb26"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/id.jpg",
+      "target": "skills/shoot/assets/hogwarts/id.jpg",
+      "sha256": "ffe1d6d800df6f6c3c72fac1dc495a3b5a92e6c7dcab8d417f144d7cf2c8786a"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/make-docs.mjs",
+      "target": "skills/shoot/assets/hogwarts/make-docs.mjs",
+      "sha256": "6164fb6afdd4764b78ef4f132542348256b86cc53a14b5922ba593ff2d4438ab"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/make-sheets.mjs",
+      "target": "skills/shoot/assets/hogwarts/make-sheets.mjs",
+      "sha256": "a551fd2bc4e3429beae278d6b4acf29384e9c9b889c616755af38efa9e3be840"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/other.jpg",
+      "target": "skills/shoot/assets/hogwarts/other.jpg",
+      "sha256": "38fc29dab5fefe92f7db3eb613264d851e363bfd1e766e30aa7f46f8194749ec"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/photo.jpg",
+      "target": "skills/shoot/assets/hogwarts/photo.jpg",
+      "sha256": "1e6e83f08f5a0b96c7f889d5443871650432713eff56fbb5515dd239dec82da5"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/resume.jpg",
+      "target": "skills/shoot/assets/hogwarts/resume.jpg",
+      "sha256": "eadaacfe4ea46e23136bf7a229adaaf0d4ad783dff9e024b58d432054b0b2a5e"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/transcript.jpg",
+      "target": "skills/shoot/assets/hogwarts/transcript.jpg",
+      "sha256": "dd27782929205971b5b07db34e492cbb75a4ea8db888f21b58a0df64129445a3"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/طلاب-الصف-الأول.csv",
+      "target": "skills/shoot/assets/hogwarts/طلاب-الصف-الأول.csv",
+      "sha256": "21f098bf75cc1597da84b046cf07a2fac9ab88c5777aa97c029365afbe2b6bfa"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/طلاب-الصف-الأول.thumb.jpg",
+      "target": "skills/shoot/assets/hogwarts/طلاب-الصف-الأول.thumb.jpg",
+      "sha256": "1a447e67e9dd1e665f9a184629ee48bd6ff8f395df2aa36e8808fb5dd520ca68"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/معلمون-جدد.csv",
+      "target": "skills/shoot/assets/hogwarts/معلمون-جدد.csv",
+      "sha256": "428e06e0b9b0929c1b9337a4cdc5ac029112364a7bd94b12ae2a5a0fe9d9851b"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/hogwarts/معلمون-جدد.thumb.jpg",
+      "target": "skills/shoot/assets/hogwarts/معلمون-جدد.thumb.jpg",
+      "sha256": "a784539d9b4128c73fe454a7655856f5f657bc8d9243c0684005a0afcd6b3cdd"
+    },
+    {
+      "path": ".claude/skills/shoot/assets/student-avatar.png",
+      "target": "skills/shoot/assets/student-avatar.png",
+      "sha256": "f26211c1289c63d836a2d8e8d1924ef4dfb95bd9f18de7668f913f8dee49fa2a"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/_bulk.mjs",
+      "target": "skills/shoot/flows/hogwarts/_bulk.mjs",
+      "sha256": "c4192fa00e5a056ac104308787691a1f0db6f80244a5345eebf3a52a93cb8956"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/_feature.mjs",
+      "target": "skills/shoot/flows/hogwarts/_feature.mjs",
+      "sha256": "d219cb473eda26f440f2081049226d5611a5666fb2374a87ddb6b27f3cf4d5d1"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/_live-join.mjs",
+      "target": "skills/shoot/flows/hogwarts/_live-join.mjs",
+      "sha256": "9c52fbd9fc3d88b91e55d4f80eb02446252f2a1796007f1620a8bfc8bcb6ad69"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/_tour.mjs",
+      "target": "skills/shoot/flows/hogwarts/_tour.mjs",
+      "sha256": "05fa783b6f0cb277b64c833a5b63e2644976a4d55221a3e23bade946fda522a5"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/add-student.mjs",
+      "target": "skills/shoot/flows/hogwarts/add-student.mjs",
+      "sha256": "ca8b908aeafb3c58319947bba6aece55390bce29af90ab4b93dc8c629875e7fe"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/add-teacher.mjs",
+      "target": "skills/shoot/flows/hogwarts/add-teacher.mjs",
+      "sha256": "eabd4dc1ab8f4a3ccd906c7f249b79ebccb11f09172577305f3bfdaa6fb8152f"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/admin-login.mjs",
+      "target": "skills/shoot/flows/hogwarts/admin-login.mjs",
+      "sha256": "1401a9548a8f3d7fb53a0bf7a4a97a3fb45bc38e6cd817ded28ea3a440fe67b3"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/bulk-student.mjs",
+      "target": "skills/shoot/flows/hogwarts/bulk-student.mjs",
+      "sha256": "3afdc4bbb4f742e92d72d876f89b7e1baf6fa95aacd5e03c61e11fbde25644bc"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/bulk-teacher.mjs",
+      "target": "skills/shoot/flows/hogwarts/bulk-teacher.mjs",
+      "sha256": "cb58c620a40020d5758ee5617490f8d05dda6925a675077a279f5207d4999229"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/create-exam.mjs",
+      "target": "skills/shoot/flows/hogwarts/create-exam.mjs",
+      "sha256": "7d2375a83e4516c9b69f03b53e7ee0806f2a2de3632fb47c92a5e04143aa37a9"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/enter-grades.mjs",
+      "target": "skills/shoot/flows/hogwarts/enter-grades.mjs",
+      "sha256": "41b33bcff71de46c78bfda77c59d24f165a8ee407041e7afb72be06fa6de8d9c"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-admission.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-admission.mjs",
+      "sha256": "7254b79d360ce98e9233b99b534ddc9b38d4c61628d85bfec14e378bcbba5197"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-announcement.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-announcement.mjs",
+      "sha256": "ccb74e790f18c7bd3a75f69a6411191f8192687d7310c05653c1cf43fc0f7675"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-attendance.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-attendance.mjs",
+      "sha256": "7368d6a3c2df6f58617767d5056ee996f2f4d1ebefd2bdcc35b01235558f67ec"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-dashboard.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-dashboard.mjs",
+      "sha256": "702142a8bf4992b2c51cde7ceab57d4682cccb2c905984c67388a320c0ccffa4"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-exam.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-exam.mjs",
+      "sha256": "6d72431892d9c634961c92a46445fb887ee57f1a0d8d567fb32d1939d3e3139e"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-gradebook.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-gradebook.mjs",
+      "sha256": "f409c9baa71b99bae4eabf5e9193c4af962ef037a9bceafb272a535c47240f35"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-parent-login.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-parent-login.mjs",
+      "sha256": "5251f16db94347d1ca469e1d34e3b7dd325921d72ca6fe31a92fb13aac496347"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-payment.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-payment.mjs",
+      "sha256": "11cf0d9e7fa4a91caae63ad47f0cadfbf3f3cd74253fe0af4f0ffaa091f9c455"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-student.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-student.mjs",
+      "sha256": "a33f3f648f0fc28f86fd950053e2f645277f04829895c50643e5d37d24430c16"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/feature-timetable.mjs",
+      "target": "skills/shoot/flows/hogwarts/feature-timetable.mjs",
+      "sha256": "2aa10f735cbf3fabd3d4babac3db25ef42678b679faf2f3e0d4fdd0616a9e2f8"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/install-app.mjs",
+      "target": "skills/shoot/flows/hogwarts/install-app.mjs",
+      "sha256": "6c01aa61568d825d4dbb0741062bda2c2231a63c4b46e7a0e6f2517a05b00c1e"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/live-attendance.mjs",
+      "target": "skills/shoot/flows/hogwarts/live-attendance.mjs",
+      "sha256": "7bc94abd20a6bbf5bd5a7c1bfeac114cad19627d0e207adfe35d515b17dc7e56"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/live-join-banner.mjs",
+      "target": "skills/shoot/flows/hogwarts/live-join-banner.mjs",
+      "sha256": "fb242de78be355cd8723348d0b58a6730142b713dbb80580ef6185f406a02c28"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/live-join-notice.mjs",
+      "target": "skills/shoot/flows/hogwarts/live-join-notice.mjs",
+      "sha256": "75f34a3469638b3756b84d79706096f76ce532bfdf600bd72e8d4f930e0b9259"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/live-join-timetable.mjs",
+      "target": "skills/shoot/flows/hogwarts/live-join-timetable.mjs",
+      "sha256": "b1dc3c23072c5049834db3eb68da3d0500db86673d27ca5c27488d26a6d934b8"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/live-settings.mjs",
+      "target": "skills/shoot/flows/hogwarts/live-settings.mjs",
+      "sha256": "26c8239235fd9a00ec2847a6a275cb4b120c1c30d44c31fb4760cdb45eeb81fb"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/live-setup.mjs",
+      "target": "skills/shoot/flows/hogwarts/live-setup.mjs",
+      "sha256": "b87d189f40966299f4a190f429a3b5d609f802248f12a166b9f1e10289388bde"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/live-student.mjs",
+      "target": "skills/shoot/flows/hogwarts/live-student.mjs",
+      "sha256": "a36f7fd0ac20b3295c84855b4727637e7206fd76feab195655a3d1cdc54643ea"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/live-teacher.mjs",
+      "target": "skills/shoot/flows/hogwarts/live-teacher.mjs",
+      "sha256": "e74c0d801ff68766a403526e75b7a4417a46c5bae1233f35af2a289476423f55"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/login.mjs",
+      "target": "skills/shoot/flows/hogwarts/login.mjs",
+      "sha256": "e4b57d1b3103327434fcddb586abf9954d7258673034745ab883912fbc25d05f"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/manage-admission.mjs",
+      "target": "skills/shoot/flows/hogwarts/manage-admission.mjs",
+      "sha256": "59fad2d8e2b77007fe658d3a10b67b28a2c91984eafa09bb335695ffb6eca77a"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/manage-roles.mjs",
+      "target": "skills/shoot/flows/hogwarts/manage-roles.mjs",
+      "sha256": "cc6adc9824e8afe1d90d7a7e52fc1ace6ca22d50198c484c479456b8b124c983"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/mark-attendance.mjs",
+      "target": "skills/shoot/flows/hogwarts/mark-attendance.mjs",
+      "sha256": "3bbaaddf957dd9715d62ed238c5a2bbe53f029b4b3996e957881b21e8e26e9df"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/parent-portal.mjs",
+      "target": "skills/shoot/flows/hogwarts/parent-portal.mjs",
+      "sha256": "cb106648aa9d71b52ecbedb41758a47586686845a2079b662c1afc7edf4a997b"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/review-security.mjs",
+      "target": "skills/shoot/flows/hogwarts/review-security.mjs",
+      "sha256": "c3fa0bfe03e059a9c96b196160c5ff2e6cfd7007c601a2361498a274eb7b9fc2"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/send-message.mjs",
+      "target": "skills/shoot/flows/hogwarts/send-message.mjs",
+      "sha256": "9afaceac97f32497788d2bd42c3a9f11ce24542122aa5a77f9ecdefec2344b16"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/set-fees.mjs",
+      "target": "skills/shoot/flows/hogwarts/set-fees.mjs",
+      "sha256": "6ec23a39f7ac2c3f77ce350a020616a2421607284c19797a668e45a8c899514c"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/setup-academics.mjs",
+      "target": "skills/shoot/flows/hogwarts/setup-academics.mjs",
+      "sha256": "20f08690fad17e0cf4d385af7ea35acd7f8f2771330c090960f09cacadae1f43"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/student-credentials.mjs",
+      "target": "skills/shoot/flows/hogwarts/student-credentials.mjs",
+      "sha256": "7f7af7a81c6a2346b82d4bbccc1f6e8baf642815af2cb311637422c7e14f8c41"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/switch-language.mjs",
+      "target": "skills/shoot/flows/hogwarts/switch-language.mjs",
+      "sha256": "f76409462ed26f187ca45edd3aff1d5258a2738f99f157b5959b82f4c9521755"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/teacher-credentials.mjs",
+      "target": "skills/shoot/flows/hogwarts/teacher-credentials.mjs",
+      "sha256": "a840260dd1de7277e06c70e5ea33d863b8bdfe133e4f596106a5df8ce2a4f54a"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/teacher-profile.mjs",
+      "target": "skills/shoot/flows/hogwarts/teacher-profile.mjs",
+      "sha256": "f9752245a38c0f0e6da94ec362c397437de1ed771930d15e64eba65f81c25394"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/teacher-start.mjs",
+      "target": "skills/shoot/flows/hogwarts/teacher-start.mjs",
+      "sha256": "a5060d71316ea507a273b884a99ef593c3c8997e97be6f97bd5f716f0f55ef9c"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/teacher-timetables.mjs",
+      "target": "skills/shoot/flows/hogwarts/teacher-timetables.mjs",
+      "sha256": "f765bbd31b29979741b9e903f5fd92ce89fbe7737d9819983c5cda2cfa552f5d"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/timetable-edit.mjs",
+      "target": "skills/shoot/flows/hogwarts/timetable-edit.mjs",
+      "sha256": "2ee3fc2e1f478a4c8af1ad37a1eebc75b771f6d4ed1e3c972909d3d6202817c4"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/track-transport.mjs",
+      "target": "skills/shoot/flows/hogwarts/track-transport.mjs",
+      "sha256": "7d0f362cec9a32c384510cdc8c0c36cfa6a86d365f62198db0170ae2799a0e4a"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/view-documents.mjs",
+      "target": "skills/shoot/flows/hogwarts/view-documents.mjs",
+      "sha256": "666d57ce963e299abb05f07bf31d8054e5bf924aec50970f3d2ed4db58824f4c"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/view-reports.mjs",
+      "target": "skills/shoot/flows/hogwarts/view-reports.mjs",
+      "sha256": "ebdf7f90c2efecb9f84e3173cab3e448ca81bed74d312a280db07dc0c2c2a4a5"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/hogwarts/view-timetable.mjs",
+      "target": "skills/shoot/flows/hogwarts/view-timetable.mjs",
+      "sha256": "9878a2e7f4e476b81d4ad9cfb470287b7ab159c9fc6a02749fa9be4582fd1621"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/mkan/ask-agent.mjs",
+      "target": "skills/shoot/flows/mkan/ask-agent.mjs",
+      "sha256": "6cd441a01b7e300142634cf022a10ea6e2411eadd9a85f10262251605907bffe"
+    },
+    {
+      "path": ".claude/skills/shoot/flows/mkan/find-stay.mjs",
+      "target": "skills/shoot/flows/mkan/find-stay.mjs",
+      "sha256": "938b2522ea89090e42eb78ad64a449f69bf772192642256db76ecc76ede54779"
+    },
+    {
+      "path": ".claude/skills/shoot/motion/hogwarts/add-student.html",
+      "target": "skills/shoot/motion/hogwarts/add-student.html",
+      "sha256": "e9e9e28097afd173ff61b4f10450796899ae1b05898e11b1b93c8b496aa8d1b9"
+    },
+    {
+      "path": ".claude/skills/shoot/motion/hogwarts/feature-admission.html",
+      "target": "skills/shoot/motion/hogwarts/feature-admission.html",
+      "sha256": "4770e0ec005a5853dd56429ada7126f2a226650ed714f345572b4e1e5e89d42b"
+    },
+    {
+      "path": ".claude/skills/shoot/motion/hogwarts/feature-hero.html",
+      "target": "skills/shoot/motion/hogwarts/feature-hero.html",
+      "sha256": "126d3c037f194a6df1326e98a105f8785ac8b8b76133788ee79f011e2ee92769"
+    },
+    {
+      "path": ".claude/skills/shoot/scripts/finder.mjs",
+      "target": "skills/shoot/scripts/finder.mjs",
+      "sha256": "65d04b7408d09b23f0a30a75027e42bee1391c928add1622ba07462983d612e5"
+    },
+    {
+      "path": ".claude/skills/shoot/scripts/hero.mjs",
+      "target": "skills/shoot/scripts/hero.mjs",
+      "sha256": "6029b33ea51dfa596ea0193c23360d7d70cc1f823599c7f5f3098c07da4ed5dd"
+    },
+    {
+      "path": ".claude/skills/shoot/scripts/motion.mjs",
+      "target": "skills/shoot/scripts/motion.mjs",
+      "sha256": "4b2f0e3135612b1a7c4e1ac9cb5b6bd08fc38b9a3b13bf7247b0a241120caf33"
+    },
+    {
+      "path": ".claude/skills/shoot/scripts/publish.mjs",
+      "target": "skills/shoot/scripts/publish.mjs",
+      "sha256": "56157f3b2fa7f4dd5a9622bd511fb7ceed50993f80d905488647b4e072477747"
+    },
+    {
+      "path": ".claude/skills/shoot/scripts/shoot.mjs",
+      "target": "skills/shoot/scripts/shoot.mjs",
+      "sha256": "360c96d85f7a52bb49d65fb28d2b01948bdce8fc327232de6d5d3defbb139daf"
+    },
+    {
+      "path": ".claude/skills/shoot/scripts/sim.mjs",
+      "target": "skills/shoot/scripts/sim.mjs",
+      "sha256": "ef67d9dbb6d4a346d5ac597034fea68be15e00cf34c73a9413b09a36443f1625"
+    },
+    {
+      "path": ".claude/skills/shoot/scripts/story.mjs",
+      "target": "skills/shoot/scripts/story.mjs",
+      "sha256": "25423735c36ea719b73648039008080cccebbe9f98cc305b3ae6724d5bd0ac36"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/_bulk.mjs",
+      "target": "skills/shoot/sims/hogwarts/_bulk.mjs",
+      "sha256": "3f431610d7aaa7d64ba49c93590dd70067c86d9766b2eb09ca09a783e948c554"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/_live-room.mjs",
+      "target": "skills/shoot/sims/hogwarts/_live-room.mjs",
+      "sha256": "1cf144fa78f978a4fe5a5c791e88a8e8feca9ec32ed7af7bcd2be50524fc9bdf"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/add-student.mjs",
+      "target": "skills/shoot/sims/hogwarts/add-student.mjs",
+      "sha256": "f57684f0aeced6214bfa2c145ea1c932caa78066eb2af605f86b49f6efdbc48d"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/add-student.story.json",
+      "target": "skills/shoot/sims/hogwarts/add-student.story.json",
+      "sha256": "b2b8a2dbed7ba42ba058a1a08c9337c9911c17c69b4d51ab33080d3140537ca2"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/add-student.voice.ar.json",
+      "target": "skills/shoot/sims/hogwarts/add-student.voice.ar.json",
+      "sha256": "2b86564a89f374a9e7ec5506af8b7209b015ce555fd376a4fd289f30d6d106a5"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/add-teacher.mjs",
+      "target": "skills/shoot/sims/hogwarts/add-teacher.mjs",
+      "sha256": "fe7ed500147693600be775805736c1b62a948e7207cf2b8aa4461cf3071b7ee6"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/admin-login.mjs",
+      "target": "skills/shoot/sims/hogwarts/admin-login.mjs",
+      "sha256": "0921742868fc9a54382821d6aaaf04968dddd56c8adaff24f54f9e2d20d0f7b6"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/bulk-student.mjs",
+      "target": "skills/shoot/sims/hogwarts/bulk-student.mjs",
+      "sha256": "612dd02d12ae0953d53cc6414378d4a412072de2f22889459ac214ab08125796"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/bulk-teacher.mjs",
+      "target": "skills/shoot/sims/hogwarts/bulk-teacher.mjs",
+      "sha256": "248dc9971bd8e39004d1f3d65597f5d00c4f6ee7d5ad03a1e7d69696db236009"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-attendance.mjs",
+      "target": "skills/shoot/sims/hogwarts/live-attendance.mjs",
+      "sha256": "8a49346587b408a5449be200b17abb8b106f22e507da5311431a52c44300b3f2"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-join-banner.mjs",
+      "target": "skills/shoot/sims/hogwarts/live-join-banner.mjs",
+      "sha256": "cb0182dc60811fe099309dc96501f0743d9caaabb850b6f6b9a2ec6d82fbecaf"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-join-banner.voice.ar.json",
+      "target": "skills/shoot/sims/hogwarts/live-join-banner.voice.ar.json",
+      "sha256": "f6b953bf0718cbec5f6a3caaf6947e3063e8915e729783ca593ea1a32139e27a"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-join-notice.mjs",
+      "target": "skills/shoot/sims/hogwarts/live-join-notice.mjs",
+      "sha256": "357d0b723328abcd779094406a5cdb951ac174733a798b53f3e645ae048e3189"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-join-notice.voice.ar.json",
+      "target": "skills/shoot/sims/hogwarts/live-join-notice.voice.ar.json",
+      "sha256": "d0f24b6a5fd5c9c9c952017f9d88a6ba877e6c5aba83e83ef4e6367aa7a2f27d"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-join-timetable.mjs",
+      "target": "skills/shoot/sims/hogwarts/live-join-timetable.mjs",
+      "sha256": "ffb07d34b5164ab153990d232dcf2c2b1c3851638e51df4026d09fb73c9fb77a"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-join-timetable.voice.ar.json",
+      "target": "skills/shoot/sims/hogwarts/live-join-timetable.voice.ar.json",
+      "sha256": "71c52c04153dcdf448dc5638040449e7c95c942fa3dd9e8cbfedd1e9b6de25b9"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-settings.mjs",
+      "target": "skills/shoot/sims/hogwarts/live-settings.mjs",
+      "sha256": "d71624091aa3552df0b24959e0ff7e092230f85673ade5b90b4c46a0eecc9da1"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-setup.mjs",
+      "target": "skills/shoot/sims/hogwarts/live-setup.mjs",
+      "sha256": "0b6267f307a086547e6dfa50af274f19a1122675b77632883617ae8d01de0557"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-student.mjs",
+      "target": "skills/shoot/sims/hogwarts/live-student.mjs",
+      "sha256": "17ec1daf4b25966c092a24c6ab44a31928d8ee7d7adfe87cfb6088b52264dac6"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-teacher.mjs",
+      "target": "skills/shoot/sims/hogwarts/live-teacher.mjs",
+      "sha256": "17d7f85f10fcbdd162756cc050a802030cba2248afb08f62e43552744e264891"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/live-teacher.voice.ar.json",
+      "target": "skills/shoot/sims/hogwarts/live-teacher.voice.ar.json",
+      "sha256": "148fa93c8ca07142936fcb5209d5a0b38949360a64caedd9183dd67ccd80aa32"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/prepare-lesson.mjs",
+      "target": "skills/shoot/sims/hogwarts/prepare-lesson.mjs",
+      "sha256": "3269c299592b99c09e6fc59af9ff90e27d255bf7bc2400f997d676fbb0291b95"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/student-credentials.mjs",
+      "target": "skills/shoot/sims/hogwarts/student-credentials.mjs",
+      "sha256": "667e03bfd6638a9d87f4923f65a45ee301cef9b476d726e6ed2e5b60fe19a385"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/teacher-credentials.mjs",
+      "target": "skills/shoot/sims/hogwarts/teacher-credentials.mjs",
+      "sha256": "b27ce5b810269456b7247f1c10fd64cf922f42c48808ed660407992211ca23c5"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/teacher-profile.mjs",
+      "target": "skills/shoot/sims/hogwarts/teacher-profile.mjs",
+      "sha256": "6952e38cb3fc205e592ae1d9086f9f6b73be2120dab35657517c02dcd8a98921"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/teacher-start.mjs",
+      "target": "skills/shoot/sims/hogwarts/teacher-start.mjs",
+      "sha256": "e13a229d490bf292fb0250739c9268648b318a930042b2bbb308ab3437b578a2"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/teacher-timetables.mjs",
+      "target": "skills/shoot/sims/hogwarts/teacher-timetables.mjs",
+      "sha256": "5187d2ca8ba1ac3bcdca54985b48c2ac97c66c09003e1700ffece7d1a08a0b1c"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/hogwarts/timetable-edit.mjs",
+      "target": "skills/shoot/sims/hogwarts/timetable-edit.mjs",
+      "sha256": "ddef12fa3c598b8a7416c54127bf5105abd59b00c688936315a8cddab871f45f"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/mkan/ask-agent-wa.voice.ar.json",
+      "target": "skills/shoot/sims/mkan/ask-agent-wa.voice.ar.json",
+      "sha256": "b18bd15a05391da75577c1aae7398b3be28fb61fc299ed07791b679af5d9685d"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/mkan/ask-agent.mjs",
+      "target": "skills/shoot/sims/mkan/ask-agent.mjs",
+      "sha256": "a737cf89053eaa18420b41e4c528962175f7226ac4ee8c61f869ada726ec1d28"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/mkan/ask-agent.voice.ar.json",
+      "target": "skills/shoot/sims/mkan/ask-agent.voice.ar.json",
+      "sha256": "22f682ef885a7f9393540792ee0e50e3fb7dd210a84143555c1e1b07bfaed231"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/mkan/find-stay.mjs",
+      "target": "skills/shoot/sims/mkan/find-stay.mjs",
+      "sha256": "05306fcd4b886de7e3a0498eb829dfc3150fd95b8489fff8b55729951c05d175"
+    },
+    {
+      "path": ".claude/skills/shoot/sims/mkan/find-stay.voice.ar.json",
+      "target": "skills/shoot/sims/mkan/find-stay.voice.ar.json",
+      "sha256": "16c6bd74abeec9bb9f545487a3c826f121e83c372273af9042c7081040a5409d"
+    },
+    {
+      "path": ".claude/skills/shoot/SKILL.md",
+      "target": "skills/shoot/SKILL.md",
+      "sha256": "6f1b36c6134702ab54facdac01cc06cce0e956a26391b77259d558270bb465f1"
+    }
+  ],
+  "version": "be40ba1a096aaf663bf8d8351991b369feb89348cd17de5515258822611a3ed6"
+}

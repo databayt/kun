@@ -1,0 +1,17 @@
+{
+  "id": "hook:format-on-write",
+  "name": "format-on-write",
+  "type": "kun:hook",
+  "title": "format-on-write",
+  "description": "format-on-write.sh — PostToolUse(Write|Edit): run prettier on the file Claude just wrote,",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/format-on-write.sh",
+      "target": "hooks/format-on-write.sh",
+      "sha256": "82deae9ff5fc93952cf7d1953ff13894809a2b484ca9efd5c8597559b884eec8"
+    }
+  ],
+  "version": "04cd028cd4912d1ac5d09db70f91452e78f5b1c0d628797aa1cc9fb7b5a21f59"
+}

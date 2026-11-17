@@ -1,0 +1,19 @@
+{
+  "id": "skill:code",
+  "name": "code",
+  "type": "kun:skill",
+  "title": "code",
+  "description": "Logic layer — server actions with auth, validation, tenant isolation",
+  "keywords": [
+    "code"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/code/SKILL.md",
+      "target": "skills/code/SKILL.md",
+      "sha256": "072c6309f4575eacdd66bc817b034de875fbb43d2551924acc682e238961daeb"
+    }
+  ],
+  "version": "675aa2f717b050e65ba004f99e89574a8ffca741783ec801d511e07c0c525438"
+}

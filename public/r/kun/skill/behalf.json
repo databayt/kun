@@ -1,0 +1,19 @@
+{
+  "id": "skill:behalf",
+  "name": "behalf",
+  "type": "kun:skill",
+  "title": "behalf",
+  "description": "Web errands as Abdout — sign up, confirm, get keys",
+  "keywords": [
+    "behalf"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/behalf/SKILL.md",
+      "target": "skills/behalf/SKILL.md",
+      "sha256": "4c5682f6f3e7ffd6f5d757bae358088f4dfcce1ec43db3b4876a78baa8ff24b5"
+    }
+  ],
+  "version": "761426520497efdf13886e77403f54b74404f5ce05101b658026199d95bccd10"
+}

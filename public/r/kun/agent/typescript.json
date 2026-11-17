@@ -1,0 +1,34 @@
+{
+  "id": "agent:typescript",
+  "name": "typescript",
+  "type": "kun:agent",
+  "title": "typescript",
+  "description": "TypeScript — strict mode, generics, advanced types",
+  "keywords": [
+    "analyze",
+    "api",
+    "api-docs",
+    "build",
+    "check",
+    "code",
+    "error",
+    "fix",
+    "react",
+    "ready",
+    "review",
+    "rust",
+    "scan",
+    "schema",
+    "type-check",
+    "typescript"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/typescript.md",
+      "target": "agents/typescript.md",
+      "sha256": "00c16a9d2dca4d046b0ae746a2f886145e4013226c2e9ab3dc028dac213d4a6f"
+    }
+  ],
+  "version": "d4e9b2119e59e79cc8fd8d4aff2e6bed353882d3a11f689e986d4d75739cc8f9"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "agent:shadcn",
+  "name": "shadcn",
+  "type": "kun:agent",
+  "title": "shadcn",
+  "description": "shadcn/ui — Radix primitives, registry, MCP",
+  "keywords": [
+    "accessibility",
+    "atom",
+    "clone",
+    "component",
+    "from radix",
+    "from shadcn",
+    "modal",
+    "saas",
+    "shadcn",
+    "tailwind",
+    "wire"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/shadcn.md",
+      "target": "agents/shadcn.md",
+      "sha256": "5d5690df5ce0dde54051bec21b1cf8621c21fca65842aa1910b006b333c84155"
+    }
+  ],
+  "version": "5f349505afcff31450b78caa11bf3ff6f61b800db3b6db03a84bb0fa9979f9e6"
+}

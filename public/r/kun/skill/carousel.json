@@ -1,0 +1,19 @@
+{
+  "id": "skill:carousel",
+  "name": "carousel",
+  "type": "kun:skill",
+  "title": "carousel",
+  "description": "Multi-slide bilingual brand carousels — deck written, slides rendered at exact platform sizes, human-approved",
+  "keywords": [
+    "carousel"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/carousel/SKILL.md",
+      "target": "skills/carousel/SKILL.md",
+      "sha256": "7ab721415bf12543b0ed66b5aa76bfce01eabee6790ac30749b1cdf0d1f37044"
+    }
+  ],
+  "version": "42057c9980a0a233f295abe377b1b6be41ca35777f0e0caf99462d8d8013ed46"
+}

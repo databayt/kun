@@ -1,0 +1,17 @@
+{
+  "id": "skill:repos",
+  "name": "repos",
+  "type": "kun:skill",
+  "title": "repos",
+  "description": "Explore databayt organization repositories",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/repos/SKILL.md",
+      "target": "skills/repos/SKILL.md",
+      "sha256": "204632fe3e52a164ec8491b245965d1c793a89743acb23b4e01072730e044d07"
+    }
+  ],
+  "version": "4f10824a6aa834859be391ad2107cf0dac38ffa68f3e97e0a6d7ae52454894a0"
+}

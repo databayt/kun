@@ -1,0 +1,19 @@
+{
+  "id": "skill:approve",
+  "name": "approve",
+  "type": "kun:skill",
+  "title": "approve",
+  "description": "The human gate — the /social/publish review queue, or a signed link for a remote approver",
+  "keywords": [
+    "approve"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/approve/SKILL.md",
+      "target": "skills/approve/SKILL.md",
+      "sha256": "b4df0e562bf7d89e2da2bea9085e99beeec3785fbece753a815216301d5e2e53"
+    }
+  ],
+  "version": "647c6f582e9d5375ffe8f41acfa2a7637bc3a1b588ca2c34832bb95f64b8e7ee"
+}

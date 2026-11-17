@@ -1,0 +1,19 @@
+{
+  "id": "skill:economy",
+  "name": "economy",
+  "type": "kun:skill",
+  "title": "economy",
+  "description": "Token economy — audit consumption and delegate across model × effort × product lane",
+  "keywords": [
+    "economy"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/economy/SKILL.md",
+      "target": "skills/economy/SKILL.md",
+      "sha256": "85d937a43663bf1f3a09c62f9254ba1b6f8669fd551db8f2e1d5268419037952"
+    }
+  ],
+  "version": "11f2d1cc640e643c15a9812ce8683ea3c6e47c54be05ed0db5f30130ccd16926"
+}

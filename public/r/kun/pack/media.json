@@ -1,0 +1,33 @@
+{
+  "id": "pack:media",
+  "name": "media",
+  "type": "kun:pack",
+  "title": "Media",
+  "description": "Shoot, record, edit, generate and publish brand content — with a QA agent before anything goes out.",
+  "title_ar": "الوسائط",
+  "description_ar": "التصوير والتسجيل والمونتاج وتوليد المحتوى ونشره — مع وكيل مراجعة قبل أي نشر.",
+  "keywords": [],
+  "dependencies": [
+    "skill:edit",
+    "skill:shoot",
+    "skill:record",
+    "skill:higgs",
+    "skill:carousel",
+    "skill:draft",
+    "skill:social",
+    "agent:media-qa"
+  ],
+  "files": [
+    {
+      "path": "departments/media/pack.json",
+      "target": "departments/media/pack.json",
+      "sha256": "4b8197afd2916c9ab985060087a3b1a67ae843a81d574a3282f3b09d6ff54f56"
+    },
+    {
+      "path": "departments/media/prompt.md",
+      "target": "departments/media/prompt.md",
+      "sha256": "a6a6091ae7cf97a91082814edbdd2b7e6ad740d1e51b69248ac14eb1a84eaf88"
+    }
+  ],
+  "version": "758d45d358a2856aa02fdfa66eaa6e1437875a4c543099ce550df5e04ef13d32"
+}

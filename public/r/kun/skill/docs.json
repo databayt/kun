@@ -1,0 +1,19 @@
+{
+  "id": "skill:docs",
+  "name": "docs",
+  "type": "kun:skill",
+  "title": "docs",
+  "description": "Generate documentation - component MDX, API docs, Storybook stories",
+  "keywords": [
+    "docs"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/docs/SKILL.md",
+      "target": "skills/docs/SKILL.md",
+      "sha256": "3bf61f09648044c13372f1b340d5c8e3bf04cd11840b7eec2201edc6024d984e"
+    }
+  ],
+  "version": "62763f120a238d927d2852dd9d5dc06e8f989d94c9b7616df8f28036174bdb91"
+}

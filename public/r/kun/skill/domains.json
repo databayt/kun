@@ -1,0 +1,19 @@
+{
+  "id": "skill:domains",
+  "name": "domains",
+  "type": "kun:skill",
+  "title": "domains",
+  "description": "Domain + mail health — expiry, renewal, DNS, inboxes",
+  "keywords": [
+    "domains"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/domains/SKILL.md",
+      "target": "skills/domains/SKILL.md",
+      "sha256": "4483f9399a6bbb050fde10effe32d495a082ce56d5956e0aca339fe57d7d97b5"
+    }
+  ],
+  "version": "55b23d3c1580cd919f7ef63da0069545dd58b761e3f8f87a0a308ecd0c9602ae"
+}

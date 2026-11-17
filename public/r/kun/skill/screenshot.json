@@ -1,0 +1,17 @@
+{
+  "id": "skill:screenshot",
+  "name": "screenshot",
+  "type": "kun:skill",
+  "title": "screenshot",
+  "description": "View most recent screenshot from Desktop or Downloads",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/screenshot/SKILL.md",
+      "target": "skills/screenshot/SKILL.md",
+      "sha256": "d59e0c82379d5bc0667dbbca2fc3866b859944dc3f12859c2541cfed403f6a1d"
+    }
+  ],
+  "version": "81b596190e61aea8e78f71ea39fb18100f6a9867eba429ce8283e63857a072e7"
+}

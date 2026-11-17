@@ -1,0 +1,19 @@
+{
+  "id": "skill:schema",
+  "name": "schema",
+  "type": "kun:skill",
+  "title": "schema",
+  "description": "Data layer — Prisma model, migration, and Zod validation",
+  "keywords": [
+    "schema"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/schema/SKILL.md",
+      "target": "skills/schema/SKILL.md",
+      "sha256": "317bae180cb01fa5e375343f198483e65929340e019e96a5de99c6bce3f23db9"
+    }
+  ],
+  "version": "7119080049b429392fd651ebc9bcf90194c0dd04c7d1375055a62e2bd30e6a85"
+}

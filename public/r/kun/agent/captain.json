@@ -1,0 +1,23 @@
+{
+  "id": "agent:captain",
+  "name": "captain",
+  "type": "kun:agent",
+  "title": "captain",
+  "description": "CEO brain — weekly allocation, revenue strategy, coordination across products and the 7-person team",
+  "keywords": [
+    "canon",
+    "captain",
+    "decide",
+    "premortem",
+    "weekly"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/captain.md",
+      "target": "agents/captain.md",
+      "sha256": "272c4db31e1ebfd335ec7b3aa9c3929b9d9c923bb2d26a55436f7547e7a50e36"
+    }
+  ],
+  "version": "b70c3a39d301080237eeb273fd3438f77f0963ff5b0558329081f336a3df1356"
+}

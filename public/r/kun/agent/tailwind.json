@@ -1,0 +1,27 @@
+{
+  "id": "agent:tailwind",
+  "name": "tailwind",
+  "type": "kun:agent",
+  "title": "tailwind",
+  "description": "Tailwind CSS 4 — CSS-first config, OKLCH tokens, responsive, RTL/LTR",
+  "keywords": [
+    "accessibility",
+    "animation",
+    "blur",
+    "landing",
+    "motion",
+    "shadcn",
+    "skeleton",
+    "tailwind",
+    "wire"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/tailwind.md",
+      "target": "agents/tailwind.md",
+      "sha256": "e9e63ac9959614ac7b4874e15b85cfa4eb1cee96a2052dd990aa4cbd9224cad2"
+    }
+  ],
+  "version": "0e5758e99a7ecbc33b61804b3838974d22f55794796daa360bb54ab49c963bb4"
+}

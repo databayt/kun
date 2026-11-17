@@ -1,0 +1,19 @@
+{
+  "id": "agent:report",
+  "name": "report",
+  "type": "kun:agent",
+  "title": "report",
+  "description": "Fixes the user reports a human accepted — read, verify, fix, build, push, close",
+  "keywords": [
+    "report"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/report.md",
+      "target": "agents/report.md",
+      "sha256": "13d4480d0120859487efb91771cdcb3a2cc04dbc224aeae9c40b9aaeaf7b61b1"
+    }
+  ],
+  "version": "745b049b060652d3ca9a8513703dd42462e58bfc78aea109e477be56cada3036"
+}

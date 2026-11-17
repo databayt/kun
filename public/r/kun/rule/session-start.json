@@ -1,0 +1,17 @@
+{
+  "id": "rule:session-start",
+  "name": "session-start",
+  "type": "kun:rule",
+  "title": "Session Start — the report queue",
+  "description": "",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/rules-global/session-start.md",
+      "target": "rules/session-start.md",
+      "sha256": "2fe1eafbfe114265a015e6b9a03a78bed49195f92110ff3a6e11d72926307e19"
+    }
+  ],
+  "version": "75aea4931df9cd292e9a1d98e4ade8d7097625e101f4404c6287a44ae2884768"
+}

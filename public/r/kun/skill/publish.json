@@ -1,0 +1,19 @@
+{
+  "id": "skill:publish",
+  "name": "publish",
+  "type": "kun:skill",
+  "title": "publish",
+  "description": "Deliver approved full drafts to the brand channels",
+  "keywords": [
+    "publish"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/publish/SKILL.md",
+      "target": "skills/publish/SKILL.md",
+      "sha256": "089786675c61d87eb2e82b8618048c81cc48744e849e10da14b28b992dcd736f"
+    }
+  ],
+  "version": "e196d884b61d2ad64168000c7b7859441a204936708d9af2b26e697ab300ff7c"
+}

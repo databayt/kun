@@ -1,0 +1,17 @@
+{
+  "id": "agent:analyze",
+  "name": "analyze",
+  "type": "kun:agent",
+  "title": "analyze",
+  "description": "Repo config generator — derive a repo's CLAUDE.md, agents, rules and skills from its patterns",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/analyze.md",
+      "target": "agents/analyze.md",
+      "sha256": "1cc7561a3c9fa673dc0d5d60c96550e700e46399c41144143f9372d9ce1f6e8e"
+    }
+  ],
+  "version": "202baae263b19e314f558d389aa80c53e8463c9628da17a9e63a847f0906268d"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "skill:fix",
+  "name": "fix",
+  "type": "kun:skill",
+  "title": "fix",
+  "description": "Auto-fix all detected issues - TypeScript, lint, build errors",
+  "keywords": [
+    "fix"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/fix/SKILL.md",
+      "target": "skills/fix/SKILL.md",
+      "sha256": "01689b4ac0265ac5dfb6aec9fd83cb9bfc43775219fbfd43724e44edbe2af22c"
+    }
+  ],
+  "version": "636a7ff015944dc21c9bc0aabc665cbeed307016f13984b6ec4aa9d0b381ce8b"
+}

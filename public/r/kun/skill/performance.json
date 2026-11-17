@@ -1,0 +1,19 @@
+{
+  "id": "skill:performance",
+  "name": "performance",
+  "type": "kun:skill",
+  "title": "performance",
+  "description": "Performance audit - Core Web Vitals, bundle, database queries",
+  "keywords": [
+    "performance"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/performance/SKILL.md",
+      "target": "skills/performance/SKILL.md",
+      "sha256": "e40be075f789c8679230695765fa713ee5cf8a1dd0adb79d3eddd08ace5271ba"
+    }
+  ],
+  "version": "8692ae89591d9b1b68c0b72d0b677ee5c3c4345828a0d6978cbf5b95deac45b4"
+}

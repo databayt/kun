@@ -1,0 +1,31 @@
+{
+  "id": "agent:template",
+  "name": "template",
+  "type": "kun:agent",
+  "title": "template",
+  "description": "Templates — full-page layouts and major sections",
+  "keywords": [
+    "admin",
+    "dashboard",
+    "footer",
+    "header",
+    "hero",
+    "landing",
+    "menu",
+    "navbar",
+    "onboarding",
+    "profile",
+    "settings",
+    "sidebar",
+    "template"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/template.md",
+      "target": "agents/template.md",
+      "sha256": "8fcd4785f29f387dfe3925d745abbe7d37856d8f5f4bca008496c274226d0fc0"
+    }
+  ],
+  "version": "b5d5fa86e059954ce5e744e6872449d1632090fde12076dcb38954b9bb8cf0d1"
+}

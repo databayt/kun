@@ -1,0 +1,19 @@
+{
+  "id": "skill:spec",
+  "name": "spec",
+  "type": "kun:skill",
+  "title": "spec",
+  "description": "Technical spec — data model, file plan, refined acceptance criteria",
+  "keywords": [
+    "spec"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/spec/SKILL.md",
+      "target": "skills/spec/SKILL.md",
+      "sha256": "4cc2b8d74763f56621b2a64662ea2210155be235409e9b22fb56a0abf40187b9"
+    }
+  ],
+  "version": "fd8e546cca5371ecda46271c233a2d60cd7054b7df12f24f9ebebbbc564f523e"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "skill:bench",
+  "name": "bench",
+  "type": "kun:skill",
+  "title": "bench",
+  "description": "Score the engine's own config on its labeled cases, and propose holdout-gated fixes",
+  "keywords": [
+    "bench"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/bench/SKILL.md",
+      "target": "skills/bench/SKILL.md",
+      "sha256": "cabe0e21f2b82a2e24293888cc0f918b24af1a2dd2a29bbdccda86f73605b625"
+    }
+  ],
+  "version": "ed0ef1402a085212faae919bf26d003b4553c5e83870e406ba79c9fea78dfe9b"
+}

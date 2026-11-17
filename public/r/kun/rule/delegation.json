@@ -1,0 +1,17 @@
+{
+  "id": "rule:delegation",
+  "name": "delegation",
+  "type": "kun:rule",
+  "title": "Delegation — Opus plans, lanes build",
+  "description": "",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/rules-global/delegation.md",
+      "target": "rules/delegation.md",
+      "sha256": "c5c5768b2cb8cddab7a55e4d12eb94fa2d2570ee51e057efebe5667894b817d9"
+    }
+  ],
+  "version": "e5b5bc59894b72b7326bca2b5a1387f684b5d662cd8d1a1c4d02e85b29978515"
+}

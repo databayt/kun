@@ -1,0 +1,29 @@
+{
+  "id": "skill:shadcn",
+  "name": "shadcn",
+  "type": "kun:skill",
+  "title": "shadcn",
+  "description": "shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say \"shadcn\" to load it; \"shadcn docs\" = the docs-block style.",
+  "keywords": [
+    "shadcn"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/shadcn/references/docs-block.md",
+      "target": "skills/shadcn/references/docs-block.md",
+      "sha256": "b8147e2c22547d5fc194259ad7fd507d1d0bc5448831455361f1388229675686"
+    },
+    {
+      "path": ".claude/skills/shadcn/references/registry-and-cli.md",
+      "target": "skills/shadcn/references/registry-and-cli.md",
+      "sha256": "9f6205eaab9381ecb1be765445706017a16db87135c8f3cf81652b560a1668f4"
+    },
+    {
+      "path": ".claude/skills/shadcn/SKILL.md",
+      "target": "skills/shadcn/SKILL.md",
+      "sha256": "2e3977db236fcce961b2d9cbca090892ed37fa7b462a8b6a83c9645c08720bb1"
+    }
+  ],
+  "version": "f2509e3a7154cf5aa10186ee8111740ad215c70bcdbaa690625fdfc299c5abfd"
+}

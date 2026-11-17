@@ -1,0 +1,34 @@
+{
+  "id": "agent:prisma",
+  "name": "prisma",
+  "type": "kun:agent",
+  "title": "prisma",
+  "description": "Prisma 6–7 — PostgreSQL ORM, migrations, query optimization",
+  "keywords": [
+    "analyze",
+    "auth",
+    "block",
+    "checkout",
+    "code",
+    "dashboard",
+    "feature",
+    "like hogwarts",
+    "migration",
+    "neon",
+    "performance",
+    "prisma",
+    "saas",
+    "schema",
+    "spec",
+    "table"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/prisma.md",
+      "target": "agents/prisma.md",
+      "sha256": "492395f7484e8e3027ad03d92a7ec9fc11d9acfc45dbd8015fc360a17092b3e8"
+    }
+  ],
+  "version": "cd6d1c18a3d855e257bea28afad04e7497bdec4050bdf43ce0c492420880a49d"
+}

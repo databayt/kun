@@ -1,0 +1,35 @@
+{
+  "name": "sales",
+  "title": "Sales",
+  "title_ar": "المبيعات",
+  "description": "Find leads, convert replies, write proposals and price the product — the cash-flow department.",
+  "description_ar": "اكتشاف العملاء، تحويل الردود، كتابة العروض وتسعير المنتج — قسم التدفق النقدي.",
+  "items": [
+    "skill:scrape",
+    "skill:funnel",
+    "skill:proposal",
+    "skill:pricing",
+    "skill:jobs",
+    "agent:lead",
+    "agent:revenue"
+  ],
+  "prompt": "prompt.md",
+  "defaultDriver": "claude",
+  "quickActions": [
+    {
+      "label_ar": "عرض سعر لمدرسة",
+      "label_en": "Quote a school",
+      "prompt": "جهّز عرض سعر لمدرسة: اسأل عن عدد الطلاب ثم استخدم التسعير المعتمد."
+    },
+    {
+      "label_ar": "من أتابع اليوم؟",
+      "label_en": "Who to follow up",
+      "prompt": "من العملاء الذين يجب أن أتابعهم اليوم؟ رتّبهم حسب الأولوية."
+    },
+    {
+      "label_ar": "عملاء جدد",
+      "label_en": "Find leads",
+      "prompt": "اقترح ١٠ مدارس جديدة نتواصل معها هذا الأسبوع."
+    }
+  ]
+}

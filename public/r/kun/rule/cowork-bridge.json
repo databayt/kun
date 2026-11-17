@@ -1,0 +1,17 @@
+{
+  "id": "rule:cowork-bridge",
+  "name": "cowork-bridge",
+  "type": "kun:rule",
+  "title": "Cowork ↔ Claude Code Bridge",
+  "description": "",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/rules-global/cowork-bridge.md",
+      "target": "rules/cowork-bridge.md",
+      "sha256": "def8f57c75100c47c2e3a91c58361317ff0f5ba12fc000c58b09789071bddc46"
+    }
+  ],
+  "version": "876ce8f74b19c8959f3089852d1b6f22028dd1b5f0757c04e89f73925d1ffc3b"
+}

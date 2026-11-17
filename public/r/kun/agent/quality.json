@@ -1,0 +1,39 @@
+{
+  "id": "agent:quality",
+  "name": "quality",
+  "type": "kun:agent",
+  "title": "quality",
+  "description": "Routes the niche quality keywords to the right MCP or specialist; owns /handover and /release",
+  "keywords": [
+    "architecture",
+    "bench",
+    "debug",
+    "design",
+    "diff",
+    "efficient",
+    "fast",
+    "flow",
+    "guard",
+    "handover",
+    "lang",
+    "mirror",
+    "pattern",
+    "qa",
+    "release",
+    "report",
+    "responsive",
+    "see",
+    "stack",
+    "structure",
+    "trace"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/quality.md",
+      "target": "agents/quality.md",
+      "sha256": "cedd4529a41de49a16b72410f49c6736fd69a533110e15db966be8b15b2dd2fc"
+    }
+  ],
+  "version": "d891633b5d92f299477231b84fe6d5603a6bb38e294728bfdfbe8da97a286e29"
+}

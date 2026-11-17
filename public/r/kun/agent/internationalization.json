@@ -1,0 +1,17 @@
+{
+  "id": "agent:internationalization",
+  "name": "internationalization",
+  "type": "kun:agent",
+  "title": "internationalization",
+  "description": "i18n — Arabic/English, RTL/LTR, dictionaries, locale-aware formatting",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/internationalization.md",
+      "target": "agents/internationalization.md",
+      "sha256": "fd2790b4073d71a1949d637d56aa0790f6bedf89322a22f24658d51e36dd2884"
+    }
+  ],
+  "version": "f83cb3d767134c11a51366cf45770bb485e0a0d0598b65050c10b3be9b16e35c"
+}

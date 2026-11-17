@@ -1,0 +1,20 @@
+{
+  "id": "hook:scrape-guard",
+  "name": "scrape-guard",
+  "type": "kun:hook",
+  "title": "scrape-guard",
+  "description": "scrape-guard.sh — PreToolUse(Bash) guard for the lead-acquisition scrape lane.",
+  "keywords": [
+    "scrap",
+    "scrap facebook"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/scrape-guard.sh",
+      "target": "hooks/scrape-guard.sh",
+      "sha256": "e33f9f73b72600cf6a719e2311d0792e45fc2367905d5ba8460bf4bb135051bd"
+    }
+  ],
+  "version": "be12b3b7d0c8eda428a16d2459b86ea6cba5ebd7960243fddd8cd197423f50e1"
+}

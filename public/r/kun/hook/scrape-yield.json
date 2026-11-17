@@ -1,0 +1,19 @@
+{
+  "id": "hook:scrape-yield",
+  "name": "scrape-yield",
+  "type": "kun:hook",
+  "title": "scrape-yield",
+  "description": "scrape-yield.sh — PostToolUse(Bash) yield ledger for the lead-acquisition lane.",
+  "keywords": [
+    "enrich"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/scrape-yield.sh",
+      "target": "hooks/scrape-yield.sh",
+      "sha256": "21e2536f7c2b50241eb20d78ecb13d645a9d2feff6ab62d2bf6fdfe85354eda7"
+    }
+  ],
+  "version": "a9541c15876e37991c1629889cc5cfd3cc9ad009d7086256f402eed549645826"
+}

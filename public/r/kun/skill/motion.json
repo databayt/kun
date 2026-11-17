@@ -1,0 +1,19 @@
+{
+  "id": "skill:motion",
+  "name": "motion",
+  "type": "kun:skill",
+  "title": "motion",
+  "description": "Add Framer Motion animations to components",
+  "keywords": [
+    "motion"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/motion/SKILL.md",
+      "target": "skills/motion/SKILL.md",
+      "sha256": "1d54fee86afafd96e6012db891c43f7fe56504766f75914318b9d06698424074"
+    }
+  ],
+  "version": "bd3bfb6beb6c66cb402316afde8cfd10c8b775956e819a2a782f380b1d4f8183"
+}

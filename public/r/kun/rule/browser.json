@@ -1,0 +1,17 @@
+{
+  "id": "rule:browser",
+  "name": "browser",
+  "type": "kun:rule",
+  "title": "Browser — one setup, and it is silent",
+  "description": "",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/rules-global/browser.md",
+      "target": "rules/browser.md",
+      "sha256": "9a7a6eeaff2aa97eb36a69ae624694ece739ba56295429e46535d190698774e8"
+    }
+  ],
+  "version": "474e0eb7c2fa6c770ff025d7a917e6b58cca490121b7e737fe015b2a9d36d05d"
+}

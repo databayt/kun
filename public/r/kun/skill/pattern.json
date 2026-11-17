@@ -1,0 +1,19 @@
+{
+  "id": "skill:pattern",
+  "name": "pattern",
+  "type": "kun:skill",
+  "title": "pattern",
+  "description": "Look up a canonical cross-repo pattern (form, table, auth, ...)",
+  "keywords": [
+    "pattern"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/pattern/SKILL.md",
+      "target": "skills/pattern/SKILL.md",
+      "sha256": "4f7467df8dc637aabda6bb7fa0659d2a4a21a10f7ab839851c29ae9c7ecaf0a8"
+    }
+  ],
+  "version": "ccc5397901e7598773998096e9db0c1a8676e7db86db19b4acedb0b6f6dd3d5c"
+}

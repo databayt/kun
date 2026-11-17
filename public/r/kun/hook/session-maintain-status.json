@@ -1,0 +1,17 @@
+{
+  "id": "hook:session-maintain-status",
+  "name": "session-maintain-status",
+  "type": "kun:hook",
+  "title": "session-maintain-status",
+  "description": "SessionStart hook (user-global) — surface maintain-heartbeat staleness.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/session-maintain-status.sh",
+      "target": "hooks/session-maintain-status.sh",
+      "sha256": "9afc4b27f7cb7e6ed177b688f0ec20f144f2f1433ff89aac68d6035cb3c24ee5"
+    }
+  ],
+  "version": "532338b37eb665580f83d064f0f2090403104ffe4b2388fbcf56df978ddd4dd6"
+}

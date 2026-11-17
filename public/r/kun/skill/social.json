@@ -1,0 +1,19 @@
+{
+  "id": "skill:social",
+  "name": "social",
+  "type": "kun:skill",
+  "title": "social",
+  "description": "One spell — calendar, draft, media, approve, publish, measure for a brand post",
+  "keywords": [
+    "social"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/social/SKILL.md",
+      "target": "skills/social/SKILL.md",
+      "sha256": "0819734fba46b300cfb0b1181894b9e959a90b8a05e807b4a7d7647f14ec7030"
+    }
+  ],
+  "version": "6a99e2ab26abd94aa5f7b2bf181b33024f7e212994f5822ab21ecceb5e313dba"
+}

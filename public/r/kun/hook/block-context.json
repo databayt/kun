@@ -1,0 +1,17 @@
+{
+  "id": "hook:block-context",
+  "name": "block-context",
+  "type": "kun:hook",
+  "title": "block-context",
+  "description": "UserPromptSubmit — kun's router: names in a prompt → repos and blocks.",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/hooks/block-context.sh",
+      "target": "hooks/block-context.sh",
+      "sha256": "58929122e26ce168a9a81b34dc434f52dbe03d2bf4076c95e56f3e9ef4ec12af"
+    }
+  ],
+  "version": "90b8b514522cd414ad8abd0982b3a5c5d9fe86bc5a84c51a98a038ee964161aa"
+}

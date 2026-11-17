@@ -1,0 +1,19 @@
+{
+  "id": "skill:seek",
+  "name": "seek",
+  "type": "kun:skill",
+  "title": "seek",
+  "description": "The open opportunity loop anyone runs from their own profile — find, tailor, apply, follow up",
+  "keywords": [
+    "seek"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/seek/SKILL.md",
+      "target": "skills/seek/SKILL.md",
+      "sha256": "f12b63c435430bfdf9773386fa6963b92104727f8299b5d98dd971b840bb650e"
+    }
+  ],
+  "version": "31914b7fc8c75827cea0f4dc32eaf66fa06602dfe9c662a6175df92715dc3f61"
+}

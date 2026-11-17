@@ -1,0 +1,17 @@
+{
+  "id": "agent:optimize",
+  "name": "optimize",
+  "type": "kun:agent",
+  "title": "optimize",
+  "description": "Automation and integration opportunities that save time",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/optimize.md",
+      "target": "agents/optimize.md",
+      "sha256": "f7d4c2a8758a41db0b6a4e97dcc89c574abc393bfee9db3e305565f226ebab01"
+    }
+  ],
+  "version": "f55afdad5c7ff5d98ca801eb82e00d0b4cf6067840323f55e15afb9fa64ce8cd"
+}

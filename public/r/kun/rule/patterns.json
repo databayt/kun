@@ -1,0 +1,17 @@
+{
+  "id": "rule:patterns",
+  "name": "patterns",
+  "type": "kun:rule",
+  "title": "Pattern Registry Lookup",
+  "description": "",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/rules-global/patterns.md",
+      "target": "rules/patterns.md",
+      "sha256": "8d701610f90ea41afb8b85f764bfa780c32a476d6bb8b0db1ab683b969240ef7"
+    }
+  ],
+  "version": "a21e4a7552805be1a6402141ed1530088d3a8f4b182fe8a220e4fc84dd94436b"
+}

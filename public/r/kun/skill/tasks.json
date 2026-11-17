@@ -1,0 +1,19 @@
+{
+  "id": "skill:tasks",
+  "name": "tasks",
+  "type": "kun:skill",
+  "title": "tasks",
+  "description": "Task breakdown — dependency-ordered work list from an approved plan",
+  "keywords": [
+    "tasks"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/tasks/SKILL.md",
+      "target": "skills/tasks/SKILL.md",
+      "sha256": "dd33e5955638dc38ee57bb704651f95ccd2138e3b4ad5e65f6b15875ba967d67"
+    }
+  ],
+  "version": "bb3e156b5300cd8bd1287d160cdaf8be7c63a2046943eb6a4a8d2f51c2ef7d09"
+}

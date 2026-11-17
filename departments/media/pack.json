@@ -1,0 +1,36 @@
+{
+  "name": "media",
+  "title": "Media",
+  "title_ar": "الوسائط",
+  "description": "Shoot, record, edit, generate and publish brand content — with a QA agent before anything goes out.",
+  "description_ar": "التصوير والتسجيل والمونتاج وتوليد المحتوى ونشره — مع وكيل مراجعة قبل أي نشر.",
+  "items": [
+    "skill:edit",
+    "skill:shoot",
+    "skill:record",
+    "skill:higgs",
+    "skill:carousel",
+    "skill:draft",
+    "skill:social",
+    "agent:media-qa"
+  ],
+  "prompt": "prompt.md",
+  "defaultDriver": "claude",
+  "quickActions": [
+    {
+      "label_ar": "ريلز من فيديو",
+      "label_en": "Reel from a video",
+      "prompt": "اصنع ريلز قصيرة من آخر فيديو في مجلد الوسائط مع ترجمة عربية."
+    },
+    {
+      "label_ar": "منشور جديد",
+      "label_en": "Draft a post",
+      "prompt": "اكتب مسودة منشور عن ميزة جديدة في هوغورتس، عربي أولاً."
+    },
+    {
+      "label_ar": "لقطات شاشة",
+      "label_en": "Screenshots",
+      "prompt": "خذ لقطات شاشة لصفحة الحضور في هوغورتس."
+    }
+  ]
+}

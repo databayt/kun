@@ -1,0 +1,19 @@
+{
+  "id": "agent:cloudflare",
+  "name": "cloudflare",
+  "type": "kun:agent",
+  "title": "cloudflare",
+  "description": "Cloudflare expert — Workers, Containers, zone DNS, crons, the balqalam.com production lane",
+  "keywords": [
+    "cloudflare"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/cloudflare.md",
+      "target": "agents/cloudflare.md",
+      "sha256": "a8b2bc3c68e0ec4125df790cd8a1c013615a90206c90ffffce9c1f7d993e6332"
+    }
+  ],
+  "version": "4684de2fb06b9942ce23c2a3df95b35197232314fd04a2cc041c3b4abb87be07"
+}

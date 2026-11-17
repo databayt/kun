@@ -1,0 +1,19 @@
+{
+  "id": "skill:deploy",
+  "name": "deploy",
+  "type": "kun:skill",
+  "title": "deploy",
+  "description": "Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane",
+  "keywords": [
+    "deploy"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/deploy/SKILL.md",
+      "target": "skills/deploy/SKILL.md",
+      "sha256": "9ff930a1e7c2f6532e3718437d7f4a3e830144531a6d00d0618fb904f0094e18"
+    }
+  ],
+  "version": "a999204c9532b437ffa5e437e916533b087ff9a4593885734215d47385b15179"
+}

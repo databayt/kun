@@ -1,0 +1,19 @@
+{
+  "id": "skill:incident",
+  "name": "incident",
+  "type": "kun:skill",
+  "title": "incident",
+  "description": "Incident response workflow for production issues",
+  "keywords": [
+    "incident"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/incident/SKILL.md",
+      "target": "skills/incident/SKILL.md",
+      "sha256": "9f3b7cbfb774f2cf56f2240ab5e6749b2cc999b029bd1789ff8f4076247968f8"
+    }
+  ],
+  "version": "5cd12aeac157d9290e0c2ef06245bcb95c251b08212de3b02150bc8e52e61ec2"
+}

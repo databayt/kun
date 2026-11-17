@@ -1,0 +1,19 @@
+{
+  "id": "skill:weekly",
+  "name": "weekly",
+  "type": "kun:skill",
+  "title": "weekly",
+  "description": "Run the captain's weekly Sunday-plan / Tuesday-check / Thursday-review cycle",
+  "keywords": [
+    "weekly"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/weekly/SKILL.md",
+      "target": "skills/weekly/SKILL.md",
+      "sha256": "5a4c0890c56957de251113e01923f2fae32dfa7499a734a00d5855e6ec8df27f"
+    }
+  ],
+  "version": "e0b1691c516c2e397282b55b8e7d67beef2018aab7c93be0f57efddb5b52ff86"
+}
