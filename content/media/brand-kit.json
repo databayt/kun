@@ -994,7 +994,38 @@
       },
       "voice": "house-ar",
       "cdn": "hogwarts",
-      "manifest": "src/components/docs/media-manifest.json"
+      "manifest": "src/components/docs/media-manifest.json",
+      "produce": {
+        "code": "HOG",
+        "direction": "trustworthy, modern, educational, product-focused (blueprint §12 proposal, pending team approval)",
+        "voiceNote": "house-ar stock voice; calm teacher-to-principal register. TODO: confirm tone with the team",
+        "lowerThird": {
+          "status": "TODO",
+          "note": "TODO: design not yet approved"
+        },
+        "intro": {
+          "status": "TODO",
+          "note": "TODO: logo sting, not yet approved"
+        },
+        "outro": {
+          "status": "TODO",
+          "note": "TODO: CTA end card, not yet approved"
+        },
+        "approvedExamples": [
+          "TODO"
+        ],
+        "subtitle": {
+          "font": "Thmanyah Sans 500 (bold, 17pt libass)",
+          "background": "#141413",
+          "ink": "#faf9f5",
+          "box": "opaque rounded box, no outline, bottom-centre, MarginV 60",
+          "source": "brand.mjs --ass"
+        },
+        "logos": [
+          "public/brands/hogwarts.png"
+        ],
+        "$note": "read by .claude/skills/produce/scripts/produce.mjs; TODO entries are never guessed"
+      }
     },
     "balqalam": {
       "status": "ready",
@@ -1063,7 +1094,38 @@
         "prompt": "warm modern Afro-house, marimba and kalimba melody, Rhodes chords, light shaker, gentle kick, uplifting calm real-estate showcase"
       },
       "cdn": "mkan",
-      "manifest": "src/components/help/media-manifest.json"
+      "manifest": "src/components/help/media-manifest.json",
+      "produce": {
+        "code": "MKN",
+        "direction": "accessible, practical, welcoming, property discovery (blueprint §12 proposal, pending team approval)",
+        "voiceNote": "house-ar stock voice; warm host register. TODO: confirm tone with the team",
+        "lowerThird": {
+          "status": "TODO",
+          "note": "TODO: design not yet approved"
+        },
+        "intro": {
+          "status": "TODO",
+          "note": "TODO: logo sting; sound bed public/brands/mkan-bed.m4a exists"
+        },
+        "outro": {
+          "status": "TODO",
+          "note": "TODO: CTA end card, not yet approved"
+        },
+        "approvedExamples": [
+          "TODO"
+        ],
+        "subtitle": {
+          "font": "Thmanyah Sans 500 (bold, 17pt libass)",
+          "background": "#1a2530",
+          "ink": "#faf8f5",
+          "box": "opaque rounded box, no outline, bottom-centre, MarginV 60",
+          "source": "brand.mjs --ass"
+        },
+        "logos": [
+          "public/brands/mkan.png"
+        ],
+        "$note": "read by .claude/skills/produce/scripts/produce.mjs; TODO entries are never guessed"
+      }
     },
     "databayt": {
       "status": "ready",
@@ -1093,7 +1155,38 @@
       },
       "voice": "house-ar",
       "cdn": "databayt",
-      "manifest": "TODO"
+      "manifest": "TODO",
+      "produce": {
+        "code": "DBY",
+        "direction": "technically capable, confident, modern, tied to real engineering work (blueprint §12 proposal, pending team approval)",
+        "voiceNote": "house-ar stock voice; founder-credible, plain. TODO: confirm tone with the team",
+        "lowerThird": {
+          "status": "TODO",
+          "note": "TODO: design not yet approved"
+        },
+        "intro": {
+          "status": "TODO",
+          "note": "TODO: logo sting, not yet approved"
+        },
+        "outro": {
+          "status": "TODO",
+          "note": "TODO: CTA end card, not yet approved"
+        },
+        "approvedExamples": [
+          "TODO"
+        ],
+        "subtitle": {
+          "font": "Thmanyah Sans 500 (bold, 17pt libass)",
+          "background": "#141413",
+          "ink": "#faf9f5",
+          "box": "opaque rounded box, no outline, bottom-centre, MarginV 60",
+          "source": "brand.mjs --ass"
+        },
+        "logos": [
+          "public/brands/databayt.png"
+        ],
+        "$note": "read by .claude/skills/produce/scripts/produce.mjs; TODO entries are never guessed"
+      }
     },
     "kun": {
       "status": "draft",

@@ -3091,6 +3091,35 @@ export const schools: School[] = [
         depends: [],
       },
       {
+        name: "produce",
+        effect:
+          "The video factory — one engine, three lines (hogwarts, mkan, databayt); a request becomes a project, 14 stages chained over the existing skills, three human gates, an approved master on the CDN video tier",
+        order: [f("growth"), s("/produce"), s("/edit")],
+        steps: [
+          "produce init — brand, category, subject → ID like HOG-INTRO-20261120-V001 and ~/media/_projects/<ID>/",
+          "Research, brief, script (/draft) — script sign-off before any heavy stage",
+          "Storyboard shot-list.json validated; real UI only for product claims, generated scenes marked illustrative",
+          "Assets and visuals via /shoot /record /higgs /blender /carousel; audio and edit via /edit",
+          "Render, then media-qa; QA must pass before approval",
+          "Approve the exact version, then produce ship (CDN video/<brand>/<ID>/) — dry-run first",
+          "Separate publish approval, then /publish and /facebook; one dept:video issue tracks it",
+        ],
+        connects: [
+          "draft",
+          "record",
+          "shoot",
+          "higgs",
+          "blender",
+          "carousel",
+          "edit",
+          "approve",
+          "publish",
+          "facebook",
+          "social",
+        ],
+        depends: [],
+      },
+      {
         name: "shoot",
         effect:
           "Take still screenshots of real product pages and scripted end-to-end flows exactly as Abdout's 14in MacBook shows them at Chrome 125% — headless, auto demo login, filed in ~/media/<repo>/<flow|page>/ and published to cdn.databayt.org/<repo>/<route>/ (the CDN mirrors the app's routes)",
