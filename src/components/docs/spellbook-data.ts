@@ -2675,6 +2675,21 @@ export const schools: School[] = [
         connects: ["dispatch", "health", "monitor"],
         depends: [],
       },
+      {
+        name: "provision",
+        effect:
+          "Take a computer to 100% readiness and keep it there — check, auto-fix, update, hand human steps to a person",
+        order: [f("ops"), s("/provision")],
+        steps: [
+          "provision.mjs --check — every applicable readiness step, concurrency 4",
+          "--complete — onboarding delta, auto fixes, re-check up to 3 passes",
+          "--maintain — due updates; non-auto ones reported as update-available",
+          "Agent heals what remains within the guardrails, stops on human steps",
+          "One receipt: fixed, remains, who must act",
+        ],
+        connects: ["health", "aware"],
+        depends: [],
+      },
     ],
   },
   {
