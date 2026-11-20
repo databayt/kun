@@ -9,9 +9,11 @@
  *
  * A task is a GitHub issue in a databayt repo with a `dept:<department>` label, the sprint as its
  * milestone, a `P0`–`P3` priority label, and an optional kun block in its body:
- *   <!-- kun: repos=hogwarts,kun; items=skill:proposal,skill:pricing; after=hogwarts#40,#41 -->
+ *   <!-- kun: repos=hogwarts,kun; items=skill:proposal,skill:pricing; after=hogwarts#40,#41; driver=claude -->
  * Who holds a task is the `holder:<login>` label (works for people with no GitHub account); its state
- * is `status:in-progress` / `status:review`, and closed = done (only the CEO closes).
+ * is `status:in-progress` / `status:review`, and closed = done (only the CEO closes). There are no
+ * pull requests: review = `status:review` plus a run-receipt comment (`<!-- kun:receipt -->`).
+ * A `run:auto` label opts a task into automatic pickup on a machine that enabled `autoRun`.
  */
 import { z } from "zod";
 
@@ -33,11 +35,17 @@ export const API_BASE_DEFAULT = "https://kun.databayt.org";
 
 export type TaskStatus = "todo" | "in-progress" | "review" | "done";
 
+/** The agent CLIs a task may name with `driver=`. */
+export const DRIVERS = ["claude", "codex", "opencode", "agy", "hermes"] as const;
+export type Driver = (typeof DRIVERS)[number];
+
 /** The parsed kun block. Ids are `databayt/<repo>#<n>`; a bare `#41` means the task's own repo. */
 export interface KunBlock {
   repos: string[];
   items: string[];
   after: string[];
+  /** `driver=` — null when absent or unknown (the machine profile default applies). */
+  driver: Driver | null;
 }
 
 export interface Task {
@@ -54,8 +62,10 @@ export interface Task {
   priority: 0 | 1 | 2 | 3 | null;
   /** Milestone title, or null when the task is not in a sprint. */
   sprint: string | null;
-  /** 0-based position in the queue: sprint → priority → `after` → age. */
+  /** 0-based position in the queue: priority (P0 first) → sprint (current first) → age (oldest first). */
   order: number;
+  /** The `run:auto` label: eligible for opt-in automatic pickup. */
+  auto: boolean;
   kun: KunBlock;
   /** The `after` ids that are still open (computed by the server). Non-empty = blocked. */
   afterOpen: string[];
@@ -91,6 +101,36 @@ export const doneSchema = z.object({
   id: taskIdSchema,
   summary: z.string().trim().min(1).max(4000),
 });
+
+/** The marker every run-receipt comment starts with. */
+export const RECEIPT_MARKER = "<!-- kun:receipt -->";
+
+/** POST /api/machine/receipt — only the holder may post it; it also sets `status:review`. */
+export const receiptSchema = z.object({
+  id: taskIdSchema,
+  driver: z.enum(DRIVERS),
+  model: z.string().trim().min(1).max(100),
+  durationMs: z.number().int().min(0).max(7 * 24 * 3600 * 1000),
+  commits: z.array(z.string().trim().min(1).max(200)).max(100),
+  artifacts: z.array(z.string().trim().min(1).max(500)).max(100),
+  summary: z.string().trim().min(1).max(4000),
+  next: z.string().trim().min(1).max(1000).optional(),
+});
+export type Receipt = z.infer<typeof receiptSchema>;
+
+export interface TaskComment {
+  author: string;
+  body: string;
+  createdAt: string;
+  /** True when the body starts with {@link RECEIPT_MARKER}. */
+  receipt: boolean;
+}
+
+/** GET /api/machine/task?id=<id> — the context pack: body plus the last 5 comments (receipts marked). */
+export interface TaskDetailResponse {
+  task: Task;
+  comments: TaskComment[];
+}
 
 /** Claim refusals (HTTP 409 `{ error }`). */
 export type ClaimError =

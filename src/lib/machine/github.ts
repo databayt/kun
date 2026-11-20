@@ -1,6 +1,7 @@
 // GitHub REST for the machine API, through the server's GITHUB_PERSONAL_ACCESS_TOKEN.
 // A task is an issue; this file maps issues to Tasks and performs the label/comment writes.
-import type { Sprint, Task } from "./contract";
+import type { Sprint, Task, TaskComment } from "./contract";
+import { RECEIPT_MARKER } from "./contract";
 import { ORG, orderTasks, parseKunBlock, parseLabels, splitId, wipLimitFor } from "./tasks";
 import type { RawTask } from "./tasks";
 
@@ -87,6 +88,7 @@ async function toRawTasks(issues: Issue[], fallbackRepo?: string): Promise<RawTa
     department: labels.department!,
     status: i.state === "closed" ? "done" : labels.status,
     holder: labels.holder,
+    auto: labels.auto,
     priority: labels.priority,
     sprint: i.milestone?.title ?? null,
     kun,
@@ -146,6 +148,27 @@ export async function readTask(id: string): Promise<{ task: Task; labels: string
   if (!raw) return null; // not a task (no dept label) or a pull request
   const { createdAt: _c, sprintDue: _d, ...rest } = raw;
   return { task: { ...rest, order: 0 }, labels: labelNames(issue) };
+}
+
+/** The last `n` comments of an issue (oldest of those first), bodies capped, receipts marked. */
+export async function lastComments(repo: string, number: number, n = 5): Promise<TaskComment[]> {
+  const all: { user: { login: string } | null; body: string | null; created_at: string }[] = [];
+  for (let page = 1; page <= 5; page++) {
+    const res = await gh(`/repos/${ORG}/${repo}/issues/${number}/comments?per_page=100&page=${page}`);
+    if (!res.ok) throw new Error(`comments ${res.status}`);
+    const rows = (await res.json()) as typeof all;
+    all.push(...rows);
+    if (rows.length < 100) break;
+  }
+  return all.slice(-n).map((c) => {
+    const body = c.body ?? "";
+    return {
+      author: c.user?.login ?? "unknown",
+      body: body.slice(0, 2000),
+      createdAt: c.created_at,
+      receipt: body.trimStart().startsWith(RECEIPT_MARKER),
+    };
+  });
 }
 
 // ---- writes --------------------------------------------------------------------------------------

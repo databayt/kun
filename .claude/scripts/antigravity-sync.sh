@@ -103,3 +103,11 @@ if [ -n "$GEMINI_TEMPLATE" ]; then
 else
     info "GEMINI.md template not found — doctrine skipped"
 fi
+
+# ── 5. Workspace skills mirror ────────────────────────────────────
+# .agents/skills is the workspace copy of .claude/skills (Antigravity/Codex). Nothing generated
+# it before mirror-agents.mjs; it copies what differs and never deletes.
+if command -v node >/dev/null 2>&1 && [ -f "$KUN_DIR/.claude/scripts/mirror-agents.mjs" ]; then
+    node "$KUN_DIR/.claude/scripts/mirror-agents.mjs" | tail -1 | sed 's/^/  · /'
+    pass "workspace skills (.agents/skills ← .claude/skills)"
+fi
