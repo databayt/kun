@@ -1,0 +1,1970 @@
+{
+  "version": 1,
+  "note": "Readiness catalog. Probes: .claude/scripts/kun-ready <probe>. Shared by onboarding-mac.sh --doctor and the Machine app.",
+  "stages": [
+    "identity",
+    "accounts",
+    "foundation",
+    "repos",
+    "agents",
+    "engine",
+    "tools"
+  ],
+  "steps": [
+    {
+      "id": "gh.installed",
+      "stage": "identity",
+      "title": {
+        "ar": "أداة GitHub مثبتة",
+        "en": "GitHub CLI installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "gh.installed",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install gh"
+      },
+      "update": {
+        "cmd": "brew upgrade gh",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "gh.auth",
+      "stage": "identity",
+      "title": {
+        "ar": "تسجيل الدخول إلى GitHub",
+        "en": "GitHub signed in"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "gh.installed"
+      ],
+      "human": true,
+      "check": {
+        "probe": "gh.auth",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "gh auth login -w",
+        "message": "Sign in to GitHub in the browser"
+      }
+    },
+    {
+      "id": "github.org",
+      "stage": "identity",
+      "title": {
+        "ar": "عضوية منظمة databayt",
+        "en": "databayt org membership active"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "gh.auth"
+      ],
+      "human": true,
+      "check": {
+        "probe": "github.org",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "link",
+        "url": "https://github.com/orgs/databayt/invitation",
+        "message": "Accept the databayt org invitation, or ask Abdout to send one"
+      }
+    },
+    {
+      "id": "github.ssh",
+      "stage": "identity",
+      "title": {
+        "ar": "مفتاح SSH على GitHub",
+        "en": "SSH key on GitHub"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "gh.auth"
+      ],
+      "human": false,
+      "check": {
+        "probe": "github.ssh",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "gh auth refresh -h github.com -s admin:public_key && ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519 && gh ssh-key add ~/.ssh/id_ed25519.pub"
+      }
+    },
+    {
+      "id": "git.identity",
+      "stage": "identity",
+      "title": {
+        "ar": "هوية git (الاسم والبريد)",
+        "en": "git name and email set"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "git.identity",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "git config --global user.name \"Your Name\" && git config --global user.email you@databayt.org",
+        "message": "Set your git name and email"
+      }
+    },
+    {
+      "id": "anthropic.login",
+      "stage": "accounts",
+      "title": {
+        "ar": "تسجيل الدخول إلى Anthropic",
+        "en": "Anthropic account signed in"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "anthropic.login",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "claude auth login",
+        "message": "Run claude and sign in"
+      }
+    },
+    {
+      "id": "mobile.app",
+      "stage": "accounts",
+      "title": {
+        "ar": "تطبيق Claude على الهاتف",
+        "en": "Claude mobile app installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "mobile.app",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "link",
+        "url": "https://claude.ai/download",
+        "message": "Install the Claude app on your phone and sign in"
+      }
+    },
+    {
+      "id": "slack.joined",
+      "stage": "accounts",
+      "title": {
+        "ar": "الانضمام إلى Slack",
+        "en": "Joined the databayt Slack"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "slack.joined",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Please send me the Slack invite"
+      }
+    },
+    {
+      "id": "secrets.gist",
+      "stage": "accounts",
+      "title": {
+        "ar": "أسرار الفريق (Gist)",
+        "en": "Team secrets present (~/.claude/.env)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "gh.auth"
+      ],
+      "human": false,
+      "check": {
+        "probe": "secrets.gist",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "bash .claude/scripts/secrets.sh <GIST_ID>",
+        "message": "Ask Abdout for the secrets gist id"
+      }
+    },
+    {
+      "id": "crm.mkan",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب CRM — mkan",
+        "en": "Twenty CRM key — mkan"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "crm.mkan",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Please create my CRM login for the mkan workspace"
+      }
+    },
+    {
+      "id": "crm.hogwarts",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب CRM — hogwarts",
+        "en": "Twenty CRM key — hogwarts"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "crm.hogwarts",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Please create my CRM login for the hogwarts workspace"
+      }
+    },
+    {
+      "id": "crm.sijillee",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب CRM — sijillee",
+        "en": "Twenty CRM key — sijillee"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "crm.sijillee",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Please create my CRM login for the sijillee workspace"
+      }
+    },
+    {
+      "id": "crm.moallimee",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب CRM — moallimee",
+        "en": "Twenty CRM key — moallimee"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "crm.moallimee",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Please create my CRM login for the moallimee workspace"
+      }
+    },
+    {
+      "id": "crm.databayt",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب CRM — databayt",
+        "en": "Twenty CRM key — databayt"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "crm.databayt",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Please create my CRM login for the databayt workspace"
+      }
+    },
+    {
+      "id": "crm.api",
+      "stage": "accounts",
+      "title": {
+        "ar": "اتصال CRM",
+        "en": "Twenty CRM API answers 200"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "crm.api",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Please create my CRM login"
+      }
+    },
+    {
+      "id": "cloudflare.login",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب Cloudflare",
+        "en": "Cloudflare signed in (wrangler)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "engineer"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "cloudflare.login",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "wrangler login"
+      }
+    },
+    {
+      "id": "vercel.login",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب Vercel",
+        "en": "Vercel signed in"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "engineer"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "vercel.login",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "vercel login"
+      }
+    },
+    {
+      "id": "aws.login",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب AWS",
+        "en": "AWS credentials valid"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "engineer"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "aws.login",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "aws configure"
+      }
+    },
+    {
+      "id": "neon.login",
+      "stage": "accounts",
+      "title": {
+        "ar": "حساب Neon",
+        "en": "Neon access"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "engineer"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "neon.login",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Please add me to the Neon org"
+      }
+    },
+    {
+      "id": "brew",
+      "stage": "foundation",
+      "title": {
+        "ar": "Homebrew",
+        "en": "Homebrew installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "brew",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"",
+        "message": "Homebrew needs sudo"
+      },
+      "update": {
+        "cmd": "brew update",
+        "cadence": "daily",
+        "auto": true
+      }
+    },
+    {
+      "id": "git",
+      "stage": "foundation",
+      "title": {
+        "ar": "git مثبت",
+        "en": "git installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "git",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install git"
+      },
+      "update": {
+        "cmd": "brew upgrade git",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "jq",
+      "stage": "foundation",
+      "title": {
+        "ar": "jq مثبت",
+        "en": "jq installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "jq",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install jq"
+      },
+      "update": {
+        "cmd": "brew upgrade jq",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "uv",
+      "stage": "foundation",
+      "title": {
+        "ar": "uv مثبت",
+        "en": "uv installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "uv",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install uv"
+      },
+      "update": {
+        "cmd": "brew upgrade uv",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "ffmpeg",
+      "stage": "foundation",
+      "title": {
+        "ar": "ffmpeg مثبت",
+        "en": "ffmpeg installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "ffmpeg",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install ffmpeg"
+      },
+      "update": {
+        "cmd": "brew upgrade ffmpeg",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "tesseract",
+      "stage": "foundation",
+      "title": {
+        "ar": "tesseract مثبت",
+        "en": "tesseract installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "tesseract",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install tesseract"
+      },
+      "update": {
+        "cmd": "brew upgrade tesseract",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "tmux",
+      "stage": "foundation",
+      "title": {
+        "ar": "tmux مثبت",
+        "en": "tmux installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "tmux",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install tmux"
+      },
+      "update": {
+        "cmd": "brew upgrade tmux",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "node",
+      "stage": "foundation",
+      "title": {
+        "ar": "Node 24",
+        "en": "Node 24"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "node",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install node@24"
+      },
+      "update": {
+        "cmd": "brew upgrade node@24",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "pnpm",
+      "stage": "foundation",
+      "title": {
+        "ar": "pnpm",
+        "en": "pnpm installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "node"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pnpm",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "corepack enable && corepack prepare pnpm@latest --activate"
+      },
+      "update": {
+        "cmd": "corepack prepare pnpm@latest --activate",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "chrome",
+      "stage": "foundation",
+      "title": {
+        "ar": "متصفح Chrome",
+        "en": "Google Chrome installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "chrome",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install --cask google-chrome"
+      },
+      "update": {
+        "cmd": "brew upgrade --cask google-chrome",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "colima",
+      "stage": "foundation",
+      "title": {
+        "ar": "Colima (Docker)",
+        "en": "Colima installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "engineer"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "colima",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install colima docker"
+      },
+      "update": {
+        "cmd": "brew upgrade colima",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "repos.dir",
+      "stage": "repos",
+      "title": {
+        "ar": "مجلد المستودعات",
+        "en": "Repos directory exists"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "repos.dir",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "mkdir -p \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      }
+    },
+    {
+      "id": "repo.kun",
+      "stage": "repos",
+      "title": {
+        "ar": "مستودع kun",
+        "en": "kun repo cloned"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "github.org",
+        "github.ssh",
+        "repos.dir"
+      ],
+      "human": false,
+      "check": {
+        "probe": "repo.kun",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "gh repo clone databayt/kun \"$(bash .claude/scripts/kun-ready --repo-path kun)\""
+      },
+      "update": {
+        "cmd": "git -C \"$(bash .claude/scripts/kun-ready --repo-path kun)\" pull --ff-only",
+        "cadence": "daily",
+        "auto": true
+      }
+    },
+    {
+      "id": "repo.hogwarts",
+      "stage": "repos",
+      "title": {
+        "ar": "مستودع hogwarts",
+        "en": "hogwarts repo cloned"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "github.org",
+        "github.ssh",
+        "repos.dir"
+      ],
+      "human": false,
+      "check": {
+        "probe": "repo.hogwarts",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "gh repo clone databayt/hogwarts \"$(bash .claude/scripts/kun-ready --repo-path hogwarts)\""
+      },
+      "update": {
+        "cmd": "git -C \"$(bash .claude/scripts/kun-ready --repo-path hogwarts)\" pull --ff-only",
+        "cadence": "daily",
+        "auto": true
+      }
+    },
+    {
+      "id": "repo.codebase",
+      "stage": "repos",
+      "title": {
+        "ar": "مستودع codebase",
+        "en": "codebase repo cloned"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "github.org",
+        "github.ssh",
+        "repos.dir"
+      ],
+      "human": false,
+      "check": {
+        "probe": "repo.codebase",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "gh repo clone databayt/codebase \"$(bash .claude/scripts/kun-ready --repo-path codebase)\""
+      },
+      "update": {
+        "cmd": "git -C \"$(bash .claude/scripts/kun-ready --repo-path codebase)\" pull --ff-only",
+        "cadence": "daily",
+        "auto": true
+      }
+    },
+    {
+      "id": "env.hogwarts",
+      "stage": "repos",
+      "title": {
+        "ar": "ملف .env — hogwarts",
+        "en": ".env present in hogwarts"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "repo.hogwarts"
+      ],
+      "human": false,
+      "check": {
+        "probe": "env.hogwarts",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/vercel-pull.sh \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      }
+    },
+    {
+      "id": "env.mkan",
+      "stage": "repos",
+      "title": {
+        "ar": "ملف .env — mkan",
+        "en": ".env present in mkan"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "repos.dir"
+      ],
+      "human": false,
+      "check": {
+        "probe": "env.mkan",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/vercel-pull.sh \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      }
+    },
+    {
+      "id": "env.souq",
+      "stage": "repos",
+      "title": {
+        "ar": "ملف .env — souq",
+        "en": ".env present in souq"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "repos.dir"
+      ],
+      "human": false,
+      "check": {
+        "probe": "env.souq",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/vercel-pull.sh \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      }
+    },
+    {
+      "id": "env.shifa",
+      "stage": "repos",
+      "title": {
+        "ar": "ملف .env — shifa",
+        "en": ".env present in shifa"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "repos.dir"
+      ],
+      "human": false,
+      "check": {
+        "probe": "env.shifa",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/vercel-pull.sh \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      }
+    },
+    {
+      "id": "claude.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "Claude Code",
+        "en": "Claude Code installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "claude.cli",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=code"
+      },
+      "update": {
+        "cmd": "claude update",
+        "cadence": "daily",
+        "auto": true
+      }
+    },
+    {
+      "id": "claude.launcher",
+      "stage": "agents",
+      "title": {
+        "ar": "اختصار c",
+        "en": "`c` launcher alias"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "claude.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "claude.launcher",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=code"
+      }
+    },
+    {
+      "id": "claude.desktop",
+      "stage": "agents",
+      "title": {
+        "ar": "Claude Desktop",
+        "en": "Claude Desktop installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "claude.desktop",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=desktop"
+      },
+      "update": {
+        "cmd": "brew upgrade --cask claude",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "claude.desktop-mcp",
+      "stage": "agents",
+      "title": {
+        "ar": "ربط MCP بسطح المكتب",
+        "en": "Claude Desktop MCP config linked"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "claude.desktop"
+      ],
+      "human": false,
+      "check": {
+        "probe": "claude.desktop-mcp",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=desktop"
+      }
+    },
+    {
+      "id": "agy.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "Antigravity (agy)",
+        "en": "Antigravity installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "agy.cli",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=agy"
+      }
+    },
+    {
+      "id": "agy.eligible",
+      "stage": "agents",
+      "title": {
+        "ar": "أهلية Antigravity",
+        "en": "Antigravity account eligible"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "agy.cli"
+      ],
+      "human": true,
+      "check": {
+        "probe": "agy.eligible",
+        "timeoutS": 45
+      },
+      "fix": {
+        "kind": "request",
+        "message": "agy reports my account is not eligible; please advise"
+      }
+    },
+    {
+      "id": "opencode.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "opencode",
+        "en": "opencode installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "opencode.cli",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=opencode"
+      },
+      "update": {
+        "cmd": "brew upgrade opencode",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "opencode.allow",
+      "stage": "agents",
+      "title": {
+        "ar": "إعداد opencode",
+        "en": "opencode permission allow config"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "opencode.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "opencode.allow",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=opencode"
+      }
+    },
+    {
+      "id": "codex.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "Codex",
+        "en": "Codex CLI installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "codex.cli",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "npm i -g @openai/codex"
+      },
+      "update": {
+        "cmd": "npm i -g @openai/codex@latest",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "hermes.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "Hermes",
+        "en": "Hermes CLI installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "hermes.cli",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=hermes"
+      }
+    },
+    {
+      "id": "hermes.gateway",
+      "stage": "agents",
+      "title": {
+        "ar": "بوابة Hermes",
+        "en": "Hermes gateway running"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "hermes.cli"
+      ],
+      "human": true,
+      "check": {
+        "probe": "hermes.gateway",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "hermes gateway setup"
+      }
+    },
+    {
+      "id": "engine.manifest",
+      "stage": "engine",
+      "title": {
+        "ar": "بيان المحرك",
+        "en": "Engine manifest (~/.claude/.kun-manifest.json)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "repo.kun"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.manifest",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "engine.health",
+      "stage": "engine",
+      "title": {
+        "ar": "صحة المحرك",
+        "en": "health.sh green"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.health",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "engine.mcp",
+      "stage": "engine",
+      "title": {
+        "ar": "خوادم MCP",
+        "en": "Catalog MCP servers registered"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "claude.cli",
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.mcp",
+        "timeoutS": 40
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "engine.browser-mcp",
+      "stage": "engine",
+      "title": {
+        "ar": "MCP المتصفح",
+        "en": "browser MCP registered"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "claude.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.browser-mcp",
+        "timeoutS": 40
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "engine.mirror",
+      "stage": "engine",
+      "title": {
+        "ar": "مرآة الوكلاء",
+        "en": "Agent mirrors in sync"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "repo.kun"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.mirror",
+        "timeoutS": 40
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/mirror-agents.mjs"
+      }
+    },
+    {
+      "id": "engine.maintain",
+      "stage": "engine",
+      "title": {
+        "ar": "النبض اليومي",
+        "en": "Maintain heartbeat armed and fresh (<48h)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.maintain",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/maintain.sh --install"
+      }
+    },
+    {
+      "id": "engine.devices",
+      "stage": "engine",
+      "title": {
+        "ar": "مسار الأجهزة",
+        "en": "Devices lane armed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.devices",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/devices.sh --install"
+      }
+    },
+    {
+      "id": "tool.blender",
+      "stage": "tools",
+      "title": {
+        "ar": "Blender",
+        "en": "Blender installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "video"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "tool.blender",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/blender.sh install"
+      }
+    },
+    {
+      "id": "tool.filmcraft",
+      "stage": "tools",
+      "title": {
+        "ar": "FilmCraft",
+        "en": "FilmCraft installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "video"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "tool.filmcraft",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/filmcraft.sh install"
+      },
+      "update": {
+        "cmd": "bash .claude/scripts/filmcraft.sh update",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "tool.whisper-cli",
+      "stage": "tools",
+      "title": {
+        "ar": "whisper-cli",
+        "en": "whisper-cli installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "video"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "tool.whisper-cli",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install whisper-cpp"
+      },
+      "update": {
+        "cmd": "brew upgrade whisper-cpp",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "tool.whisper-model",
+      "stage": "tools",
+      "title": {
+        "ar": "نموذج whisper",
+        "en": "A real ggml model (not a test stub)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "video"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "tool.whisper-cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "tool.whisper-model",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "mkdir -p ~/.cache/whisper && curl -L -o ~/.cache/whisper/ggml-small.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
+      }
+    },
+    {
+      "id": "tool.obs",
+      "stage": "tools",
+      "title": {
+        "ar": "OBS",
+        "en": "OBS installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "video"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "tool.obs",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install --cask obs"
+      },
+      "update": {
+        "cmd": "brew upgrade --cask obs",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "tool.comfyui",
+      "stage": "tools",
+      "title": {
+        "ar": "ComfyUI",
+        "en": "ComfyUI installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "video"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "tool.comfyui",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install --cask comfyui"
+      }
+    },
+    {
+      "id": "tool.artcraft",
+      "stage": "tools",
+      "title": {
+        "ar": "ArtCraft",
+        "en": "ArtCraft installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "video"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "tool.artcraft",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "link",
+        "url": "https://github.com/storytold/artcraft/releases"
+      }
+    },
+    {
+      "id": "tool.webstorm",
+      "stage": "tools",
+      "title": {
+        "ar": "WebStorm",
+        "en": "WebStorm installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "tech"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "tool.webstorm",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install --cask webstorm"
+      }
+    },
+    {
+      "id": "tool.vscode",
+      "stage": "tools",
+      "title": {
+        "ar": "VS Code",
+        "en": "VS Code installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "tech"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "brew"
+      ],
+      "human": false,
+      "check": {
+        "probe": "tool.vscode",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "brew install --cask visual-studio-code"
+      }
+    }
+  ]
+}

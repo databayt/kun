@@ -442,6 +442,19 @@ To reset and start fresh: delete the state file, then re-run the bootstrap.
 
 ---
 
+## Control room
+
+The one-liner is unchanged: you still paste it, answer the few dialogs, and get a working computer. What changed is that "working" now has a definition you can read.
+
+`.claude/machine/readiness.json` is the catalog of every step from org join to fully configured, grouped in seven stages: identity, accounts, foundation, repos, agents, engine, tools. Each step names its probe, who it applies to (OS, department, role), what it waits on, whether it needs a person, how to fix it and how to keep it updated. `.claude/scripts/kun-ready` runs the probes: `kun-ready <probe>` for one, `kun-ready --all --json` for the whole list, exit 0 pass, 1 fail, 2 not applicable. It never prints a secret value.
+
+Two things read the same catalog:
+
+- `onboarding-mac.sh --doctor` prints it after the engine health audit, so the terminal and the app never disagree.
+- The Machine app shows your readiness, completes a partial setup, heals what is failing (automatic fixes run by themselves; anything needing sudo or a sign-in is handed to you as a terminal command or a link) and applies due updates.
+
+Each heartbeat carries the summary (percent, failing step ids, catalog version). Abdout sees the whole team on the admin page `/machines`: one row per computer, red when it has not reported for 48 hours or any step is failing, plus the requests a machine sent him (for example "create my CRM login").
+
 ## Troubleshooting
 
 | Symptom | Fix |

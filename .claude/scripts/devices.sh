@@ -59,7 +59,7 @@ main() {
     WARN_SWAP_PCT="$(policy warn.swap_used_pct 80)"
 
     case "$mode" in
-        --status)     do_status ;;
+        --status)     if [ "${2:-}" = "--json" ]; then status_json; else do_status; fi ;;
         --brief)      do_brief ;;
         --install)    do_install ;;
         --uninstall)  do_uninstall ;;
@@ -447,6 +447,23 @@ do_status() {
     echo "    Desktop: Settings → Claude Code → Enable remote control by default"
     echo "    Desktop: Settings → General → Computer use (plus Accessibility + Screen Recording) for Dispatch/GUI work"
     return 0
+}
+
+# --status --json: the same checks as do_status, as {verdict, errors, warnings, checks:[{status,name,detail}]}
+# (name = the section heading; ✓ → pass, ✗ → fail; "Only you can flip" notes are not checks).
+status_json() {
+    do_status 2>/dev/null | python3 -c '
+import sys, json
+section, checks = "", []
+for line in sys.stdin.read().split("\n"):
+    if line.startswith("── "):
+        section = line[3:].strip(); continue
+    t = line.strip()
+    if t.startswith("✓ "): checks.append({"status": "pass", "name": section, "detail": t[2:]})
+    elif t.startswith("✗ "): checks.append({"status": "fail", "name": section, "detail": t[2:]})
+errors = sum(c["status"] == "fail" for c in checks)
+print(json.dumps({"verdict": "red" if errors else "green", "errors": errors, "warnings": 0, "checks": checks}, ensure_ascii=False))
+'
 }
 
 main "$@"; exit $?

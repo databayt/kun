@@ -9,6 +9,9 @@ set -e
 
 CLAUDE_DIR="$HOME/.claude"
 REPORT="${1:-}"
+JSON_OUT=0
+[ "$REPORT" = "--json" ] && { JSON_OUT=1; REPORT=""; }
+JSON_ROWS=""
 TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
 HOSTNAME=$(hostname -s 2>/dev/null || echo "unknown")
 OS=$(uname -s)
@@ -18,6 +21,7 @@ CHECKS=""
 
 check() {
     local status="$1" name="$2" detail="$3"
+    JSON_ROWS="${JSON_ROWS}${status}"$'\x1f'"${name}"$'\x1f'"${detail}"$'\n'
     if [[ "$status" == "pass" ]]; then
         CHECKS="${CHECKS}| ✅ | ${name} | ${detail} |\n"
     elif [[ "$status" == "warn" ]]; then
@@ -286,6 +290,18 @@ elif [ $WARNINGS -gt 0 ]; then
     STATUS="⚠️ $WARNINGS warnings"
 else
     STATUS="✅ healthy"
+fi
+
+# ── JSON output (--json): same checks, machine-readable ──────────
+if [ "$JSON_OUT" = 1 ]; then
+    VERDICT="green"; [ $WARNINGS -gt 0 ] && VERDICT="warn"; [ $ERRORS -gt 0 ] && VERDICT="red"
+    printf '%s' "$JSON_ROWS" | python3 -c '
+import sys, json
+rows = [l.split("\x1f") for l in sys.stdin.read().split("\n") if l]
+checks = [{"status": r[0], "name": r[1], "detail": r[2] if len(r) > 2 else ""} for r in rows]
+print(json.dumps({"verdict": sys.argv[1], "errors": int(sys.argv[2]), "warnings": int(sys.argv[3]), "checks": checks}, ensure_ascii=False))
+' "$VERDICT" "$ERRORS" "$WARNINGS"
+    exit 0
 fi
 
 # ── Output ───────────────────────────────────────────────────────

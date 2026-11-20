@@ -3,6 +3,7 @@
   "title": "Databayt Quiet Wizard — Step Catalog",
   "description": "Documentation-style catalog of every step the wrappers run. Wrappers currently hardcode these; future versions may read from this file. Source of truth for what each platform installer does.",
   "version": 1,
+  "readiness": "Per-computer readiness (what is installed, signed in, configured) lives in .claude/machine/readiness.json, probed by .claude/scripts/kun-ready. onboarding-mac.sh --doctor and the Machine app both read it; this file only documents the installer acts.",
   "acts": {
     "act1_preflight": {
       "description": "Scan first (lib/agents.sh), then dialog ONLY what detection can't answer — usually 1-2 dialogs on a machine with any history, 5 on a bare one",

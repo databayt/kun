@@ -14,6 +14,11 @@
  * is `status:in-progress` / `status:review`, and closed = done (only the CEO closes). There are no
  * pull requests: review = `status:review` plus a run-receipt comment (`<!-- kun:receipt -->`).
  * A `run:auto` label opts a task into automatic pickup on a machine that enabled `autoRun`.
+ *
+ * Readiness: `.claude/machine/readiness.json` is the catalog of steps that take a computer from org
+ * join to fully configured; `.claude/scripts/kun-ready` probes it. The heartbeat carries the summary
+ * (`readiness`) so the /machines fleet page can show who is where. The machine repo's
+ * src/lib/contract.ts mirrors this file, including `readiness`.
  */
 import { z } from "zod";
 
@@ -164,6 +169,17 @@ export interface LocalRepo {
   dirty: boolean;
 }
 
+/** The readiness summary a machine computes from the catalog (`kun-ready --all`). */
+export const readinessSchema = z.object({
+  /** 0–100: passing steps over applicable steps. */
+  percent: z.number().min(0).max(100),
+  /** Ids of the catalog steps that currently fail (skips are not failures). */
+  failing: z.array(z.string().max(80)).max(200),
+  /** `version` of the readiness.json the machine evaluated. */
+  catalogVersion: z.number().int().min(0),
+});
+export type Readiness = z.infer<typeof readinessSchema>;
+
 /** POST /api/machine/heartbeat */
 export const heartbeatSchema = z.object({
   appVersion: z.string().max(40),
@@ -194,6 +210,7 @@ export const heartbeatSchema = z.object({
     )
     .max(200),
   currentTask: taskIdSchema.nullable(),
+  readiness: readinessSchema.optional(),
 });
 export type Heartbeat = z.infer<typeof heartbeatSchema>;
 
@@ -223,7 +240,7 @@ export interface ReposResponse {
 
 // ---- messages ------------------------------------------------------------------------------------
 
-export type MessageKind = "note" | "job" | "nudge";
+export type MessageKind = "note" | "job" | "nudge" | "request";
 
 export interface MachineMessage {
   id: string;
@@ -238,7 +255,7 @@ export interface MachineMessage {
 /** POST /api/machine/messages */
 export const sendMessageSchema = z.object({
   to: z.string().regex(/^[a-z0-9-]{1,32}$/),
-  kind: z.enum(["note", "job", "nudge"]),
+  kind: z.enum(["note", "job", "nudge", "request"]),
   body: z.object({
     text: z.string().trim().min(1).max(4000),
     taskId: taskIdSchema.optional(),

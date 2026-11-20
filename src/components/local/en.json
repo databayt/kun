@@ -82,5 +82,29 @@
       "secrets": "Secrets",
       "projects": "Projects"
     }
+  },
+  "machines": {
+    "title": "Machines",
+    "subtitle": "Every computer on the team: who is set up, what is failing, when it last reported.",
+    "empty": "No machine has reported yet.",
+    "login": "Person",
+    "os": "OS",
+    "version": "App",
+    "lastSeen": "Last seen",
+    "readiness": "Ready",
+    "failing": "Failing steps",
+    "health": "Health",
+    "never": "never",
+    "justNow": "just now",
+    "minAgo": "{n}m ago",
+    "hourAgo": "{n}h ago",
+    "dayAgo": "{n}d ago",
+    "ok": "OK",
+    "attention": "Needs attention",
+    "stale": "Not seen for 48h",
+    "none": "None",
+    "requests": "Requests to Abdout",
+    "noRequests": "No open requests.",
+    "unknown": "Not reported"
   }
 }

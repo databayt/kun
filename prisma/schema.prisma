@@ -567,6 +567,8 @@ model Machine {
   health      Json?
   repos       Json?
   currentTask String?
+  /// { percent, failing[], catalogVersion } from the machine's readiness probes
+  readiness   Json?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }

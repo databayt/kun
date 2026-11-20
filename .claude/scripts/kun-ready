@@ -1,0 +1,294 @@
+#!/bin/bash
+# =============================================================================
+# kun-ready — readiness probes for one computer, driven by .claude/machine/readiness.json
+# =============================================================================
+# Shared by `onboarding-mac.sh --doctor` and the Machine desktop app.
+#
+#   kun-ready <probe>              run one probe        exit 0 pass · 1 fail · 2 not applicable
+#                                  stdout = ONE line of detail (never a secret value)
+#   kun-ready --list               probe ids (catalog order)
+#   kun-ready --all [--json]       every catalog step for this OS (and role, when known):
+#                                  text table, or [{id, exit, detail}]
+#   kun-ready --repos-dir          the repos directory (installer state, else $HOME)
+#   kun-ready --repo-path <repo>   where <repo> lives (or should be cloned)
+#
+# Env: KUN_ROLE=engineer|business|content|ops overrides role detection.
+# Each probe runs under its own timeout (catalog check.timeoutS) and, for --all, in parallel.
+#
+# Other platforms: add .claude/scripts/lib/ready-<linux|windows>.sh defining p_<id> functions;
+# it is sourced after the macOS set and overrides it. A probe with no function for the OS
+# returns 2 (not applicable).
+# =============================================================================
+
+SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SELF")"
+KUN_ROOT="${KUN_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+CATALOG="$KUN_ROOT/.claude/machine/readiness.json"
+CLAUDE_DIR="$HOME/.claude"
+case "$(uname -s)" in Darwin) OS_KEY=mac ;; Linux) OS_KEY=linux ;; *) OS_KEY=windows ;; esac
+
+# shellcheck disable=SC1091
+[ -f "$SCRIPT_DIR/lib/agents.sh" ] && . "$SCRIPT_DIR/lib/agents.sh"
+
+has() { command -v "$1" >/dev/null 2>&1; }
+ok()   { echo "$*"; return 0; }
+bad()  { echo "$*"; return 1; }
+skip() { echo "${*:-not applicable}"; return 2; }
+app()  { [ -d "/Applications/$1" ] || [ -d "$HOME/Applications/$1" ]; }
+
+detect_role() {
+    [ -n "${KUN_ROLE:-}" ] && { echo "$KUN_ROLE"; return; }
+    local m="$CLAUDE_DIR/mcp.json"
+    [ -f "$m" ] || { echo unknown; return; }
+    if grep -q '"shadcn"' "$m"; then echo engineer
+    elif grep -q '"linear"' "$m"; then echo business
+    elif grep -q '"figma"' "$m"; then echo content
+    elif grep -q '"posthog"' "$m"; then echo ops
+    else echo unknown; fi
+}
+
+repos_dir() {
+    local f d=""
+    if [ "$OS_KEY" = mac ]; then f="$HOME/Library/Application Support/Databayt/installer-state.json"
+    else f="${XDG_CONFIG_HOME:-$HOME/.config}/databayt/installer-state.json"; fi
+    if [ -f "$f" ] && has jq; then d="$(jq -r '.reposDir // empty' "$f" 2>/dev/null)"; fi
+    d="${d/#\~/$HOME}"
+    echo "${d:-$HOME}"
+}
+repo_path() { echo "$(repos_dir)/$1"; }
+repo_found() {
+    local r="$1" p
+    for p in "$(repo_path "$r")" "$HOME/$r"; do [ -d "$p/.git" ] && { echo "$p"; return 0; }; done
+    return 1
+}
+
+# ── Probes (macOS) ──────────────────────────────────────────────────────────
+# identity
+p_gh_installed() { has gh && ok "$(gh --version | head -1)" || bad "gh not installed"; }
+p_gh_auth() { has gh || return 2; gh auth status >/dev/null 2>&1 && ok "signed in" || bad "not signed in"; }
+p_github_org() {
+    has gh || return 2
+    local s; s="$(gh api user/memberships/orgs/databayt --jq .state 2>/dev/null)"
+    [ "$s" = active ] && ok "active member" || bad "membership: ${s:-none}"
+}
+p_github_ssh() {
+    local out; out="$(ssh -o BatchMode=yes -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1)"
+    echo "$out" | grep -qi "successfully authenticated" && ok "ssh key accepted" || bad "no accepted ssh key"
+}
+p_git_identity() {
+    local n e; n="$(git config --global user.name)"; e="$(git config --global user.email)"
+    [ -n "$n" ] && [ -n "$e" ] && ok "name and email set" || bad "git user.name/user.email missing"
+}
+# accounts
+p_anthropic_login() {
+    has jq && [ -f "$HOME/.claude.json" ] && jq -e '.oauthAccount' "$HOME/.claude.json" >/dev/null 2>&1 \
+        && ok "signed in" || bad "no Anthropic sign-in in ~/.claude.json"
+}
+p_mobile_app() { skip "human step — confirm on the phone"; }
+p_slack_joined() { skip "human step — confirm in Slack"; }
+p_secrets_gist() {
+    local f="$CLAUDE_DIR/.env" n
+    [ -f "$f" ] || { bad "~/.claude/.env missing"; return; }
+    n="$(grep -cE '^[A-Za-z_][A-Za-z0-9_]*=' "$f")"
+    [ "${n:-0}" -ge 5 ] && ok "$n keys present" || bad "only ${n:-0} keys (need 5+)"
+}
+crm_probe() {
+    has security || return 2
+    security find-generic-password -s databayt-twenty -a "$1" >/dev/null 2>&1 \
+        && ok "keychain key present" || bad "no keychain key for $1"
+}
+p_crm_mkan() { crm_probe mkan; }
+p_crm_hogwarts() { crm_probe hogwarts; }
+p_crm_sijillee() { crm_probe sijillee; }
+p_crm_moallimee() { crm_probe moallimee; }
+p_crm_databayt() { crm_probe databayt; }
+p_crm_api() {
+    has security && has curl && has jq || return 2
+    local ws key code
+    for ws in $(jq -r '.workspaces[].product' "$KUN_ROOT/.claude/memory/crm.json" 2>/dev/null); do
+        key="$(security find-generic-password -s databayt-twenty -a "$ws" -w 2>/dev/null)"
+        [ -n "$key" ] || continue
+        code="$(curl -s -o /dev/null -m 12 -w '%{http_code}' -H "Authorization: Bearer $key" \
+            "https://crm-api.databayt.org/rest/people?limit=1")"
+        [ "$code" = 200 ] && ok "REST 200 ($ws)" || bad "REST $code ($ws)"
+        return
+    done
+    bad "no workspace key to test with"
+}
+p_cloudflare_login() { has wrangler || { bad "wrangler not installed"; return; }
+    wrangler whoami 2>&1 | grep -qi "logged in" && ok "signed in" || bad "wrangler not signed in"; }
+p_vercel_login() { has vercel || { bad "vercel CLI not installed"; return; }
+    vercel whoami >/dev/null 2>&1 && ok "signed in" || bad "vercel not signed in"; }
+p_aws_login() { has aws || { bad "aws CLI not installed"; return; }
+    aws sts get-caller-identity >/dev/null 2>&1 && ok "credentials valid" || bad "no valid AWS credentials"; }
+p_neon_login() {
+    if has neonctl && neonctl me >/dev/null 2>&1; then ok "signed in"; return 0; fi
+    grep -qE '^NEON_API_KEY=.+' "$CLAUDE_DIR/.env" 2>/dev/null && { ok "API key present"; return 0; }
+    bad "no Neon access"
+}
+# foundation
+p_brew() { has brew && ok "$(brew --version | head -1)" || bad "Homebrew not installed"; }
+p_git() { has git && ok "$(git --version)" || bad "git not installed"; }
+p_jq() { has jq && ok "$(jq --version)" || bad "jq not installed"; }
+p_uv() { has uv && ok "$(uv --version)" || bad "uv not installed"; }
+p_ffmpeg() { has ffmpeg && ok "$(ffmpeg -version 2>/dev/null | head -1 | cut -c1-40)" || bad "ffmpeg not installed"; }
+p_tesseract() { has tesseract && ok "$(tesseract --version 2>&1 | head -1)" || bad "tesseract not installed"; }
+p_tmux() { has tmux && ok "$(tmux -V)" || bad "tmux not installed"; }
+p_node() {
+    has node || { bad "node not installed"; return; }
+    local v; v="$(node -v)"
+    [ "$(echo "${v#v}" | cut -d. -f1)" -ge 24 ] && ok "$v" || bad "$v (need 24+)"
+}
+p_pnpm() { has pnpm && ok "$(pnpm --version 2>/dev/null | head -1)" || bad "pnpm not installed"; }
+p_chrome() { app "Google Chrome.app" && ok "installed" || bad "Chrome not installed"; }
+p_colima() { has colima && ok "$(colima version 2>/dev/null | head -1)" || bad "colima not installed"; }
+# repos
+p_repos_dir() { local d; d="$(repos_dir)"; [ -d "$d" ] && ok "$d" || bad "$d missing"; }
+repo_probe() { local p; p="$(repo_found "$1")" && ok "$p" || bad "$1 not cloned in $(repos_dir)"; }
+p_repo_kun() { repo_probe kun; }
+p_repo_hogwarts() { repo_probe hogwarts; }
+p_repo_codebase() { repo_probe codebase; }
+env_probe() {
+    local p; p="$(repo_found "$1")" || { skip "$1 repo absent"; return; }
+    [ -f "$p/.env" ] && ok ".env present" || bad "$1/.env missing"
+}
+p_env_hogwarts() { env_probe hogwarts; }
+p_env_mkan() { env_probe mkan; }
+p_env_souq() { env_probe souq; }
+p_env_shifa() { env_probe shifa; }
+# agents
+p_claude_cli() { has claude && ok "$(claude --version 2>/dev/null | head -1)" || bad "claude not installed"; }
+p_claude_launcher() { _ag_alias_present c claude && ok "alias c" || bad "no c launcher in ~/.zshrc"; }
+p_claude_desktop() { app "Claude.app" && ok "installed" || bad "Claude Desktop not installed"; }
+p_claude_desktop_mcp() {
+    local f="$HOME/Library/Application Support/Claude/claude_desktop_config.json" n
+    has jq && [ -f "$f" ] && n="$(jq '.mcpServers // {} | length' "$f" 2>/dev/null)" && [ "${n:-0}" -ge 1 ] \
+        && ok "$n MCP servers linked" || bad "Desktop MCP config missing or empty"
+}
+p_agy_cli() { has agy && ok "$(agy --version 2>/dev/null | head -1)" || bad "agy not installed"; }
+p_agy_eligible() {
+    has agy || return 2
+    local out; out="$(agy -p hi --output-format json 2>&1 </dev/null | head -c 2000)"
+    echo "$out" | grep -qi "not eligible" && bad "agy: account not eligible" || ok "agy answers"
+}
+p_opencode_cli() { has opencode && ok "$(opencode --version 2>/dev/null | head -1)" || bad "opencode not installed"; }
+p_opencode_allow() { _ag_opencode_bypass && ok "permission allow" || bad "opencode.json lacks permission: allow"; }
+p_codex_cli() { has codex && ok "$(codex --version 2>/dev/null | head -1)" || bad "codex not installed"; }
+p_hermes_cli() { has hermes && ok "$(hermes --version 2>/dev/null | head -1)" || bad "hermes not installed"; }
+p_hermes_gateway() {
+    has hermes || return 2
+    hermes gateway status 2>&1 | grep -qiE "running|active|loaded" && ok "gateway running" || bad "gateway not running"
+}
+# engine
+p_engine_manifest() { [ -f "$CLAUDE_DIR/.kun-manifest.json" ] && ok "manifest present" || bad "no ~/.claude/.kun-manifest.json"; }
+p_engine_health() {
+    local out e w
+    out="$(bash "$SCRIPT_DIR/health.sh" --json 2>/dev/null)" || true
+    e="$(echo "$out" | jq -r '.errors' 2>/dev/null)"
+    [ -n "$e" ] && [ "$e" != null ] || { bad "health.sh gave no verdict"; return; }
+    w="$(echo "$out" | jq -r '.warnings')"
+    [ "$e" -eq 0 ] && ok "green ($w warnings)" || bad "$e errors, $w warnings"
+}
+p_engine_mcp() {
+    has claude || return 2
+    local n want
+    n="$(claude mcp list 2>/dev/null | grep -cE ' - (✔|✓|✗|!|⚠)')"
+    want="$(jq -r '.counts.project_mcp // 10' "$KUN_ROOT/.claude/engine.json" 2>/dev/null)"
+    [ "$n" -ge "$want" ] && ok "$n registered (expected $want+)" || bad "$n registered (expected $want+)"
+}
+p_engine_browser_mcp() {
+    has claude || return 2
+    claude mcp list 2>/dev/null | grep -qE '^browser:' && ok "browser MCP registered" || bad "no browser MCP (run /mcp-doctor)"
+}
+p_engine_mirror() {
+    has node || return 2
+    node "$SCRIPT_DIR/mirror-agents.mjs" --check >/dev/null 2>&1 && ok "mirrors in sync" || bad "agent mirrors drifted"
+}
+p_engine_maintain() {
+    launchctl list 2>/dev/null | grep -q "com.databayt.kun-maintain" || { bad "heartbeat not armed"; return; }
+    local fresh; fresh="$(find "$CLAUDE_DIR/logs" -name 'maintain-*.log' -mmin -2880 2>/dev/null | head -1)"
+    [ -n "$fresh" ] && ok "armed, ran in the last 48h" || bad "armed but no run in 48h"
+}
+p_engine_devices() {
+    launchctl list 2>/dev/null | grep -q "com.databayt.claude-rc" && ok "Remote Control armed" || bad "devices lane not armed"
+}
+# tools
+p_tool_blender() { app "Blender.app" && ok "installed" || bad "Blender not installed"; }
+p_tool_filmcraft() { app "FilmCraft.app" && ok "installed" || bad "FilmCraft not installed"; }
+p_tool_whisper_cli() { { has whisper-cli || has whisper-cpp; } && ok "installed" || bad "whisper-cli not installed"; }
+p_tool_whisper_model() {
+    local m
+    m="$(find "$HOME/.cache/whisper" "$HOME/models" "$HOME/.local/share/whisper" /opt/homebrew/share/whisper-cpp \
+        -maxdepth 3 -name 'ggml-*.bin' -size +10M 2>/dev/null | grep -vi test | head -1)"
+    [ -n "$m" ] && ok "$(basename "$m")" || bad "no real ggml model (test stubs do not count)"
+}
+p_tool_obs() { app "OBS.app" && ok "installed" || bad "OBS not installed"; }
+p_tool_comfyui() { { app "ComfyUI.app" || [ -d "$HOME/ComfyUI" ]; } && ok "installed" || bad "ComfyUI not installed"; }
+p_tool_artcraft() { { app "ArtCraft.app" || app "Artcraft.app"; } && ok "installed" || bad "ArtCraft not installed"; }
+p_tool_webstorm() { app "WebStorm.app" && ok "installed" || bad "WebStorm not installed"; }
+p_tool_vscode() { app "Visual Studio Code.app" && ok "installed" || bad "VS Code not installed"; }
+
+# Per-OS overrides: linux/windows probes are added here without touching the macOS set.
+# shellcheck disable=SC1090
+[ -f "$SCRIPT_DIR/lib/ready-$OS_KEY.sh" ] && . "$SCRIPT_DIR/lib/ready-$OS_KEY.sh"
+
+fn_for() { echo "p_$(echo "$1" | sed 's/[^A-Za-z0-9]/_/g')"; }
+
+run_raw() {
+    local fn out rc; fn="$(fn_for "$1")"
+    if declare -F "$fn" >/dev/null; then
+        out="$("$fn" 2>/dev/null)"; rc=$?
+        echo "$out" | head -1 | tr -d '\r'; return $rc
+    fi
+    echo "no probe for $1 on $OS_KEY"; return 2
+}
+
+timeout_for() { jq -r --arg p "$1" '[.steps[]|select(.check.probe==$p)|.check.timeoutS][0] // 15' "$CATALOG" 2>/dev/null; }
+
+run_probe() {
+    local t out rc; t="$(timeout_for "$1")"
+    out="$(perl -e 'alarm shift; exec @ARGV' "${t:-15}" bash "$SELF" --raw "$1" 2>/dev/null </dev/null)"; rc=$?
+    if [ "$rc" -eq 142 ] || [ "$rc" -eq 14 ]; then echo "timeout after ${t}s"; return 1; fi
+    [ "$rc" -gt 2 ] && rc=1
+    echo "$out" | head -1; return "$rc"
+}
+
+catalog_probes() {
+    local role; role="$(detect_role)"
+    jq -r --arg os "$OS_KEY" --arg role "$role" '.steps[]
+        | select((.os|index($os)) != null)
+        | select($role=="unknown" or (.roles|index("*")) != null or (.roles|index($role)) != null)
+        | .check.probe' "$CATALOG"
+}
+
+all_run() {
+    local tmp id i=0 j=0 arr="[]"; tmp="$(mktemp -d)"
+    for id in $(catalog_probes); do
+        ( out="$(run_probe "$id")"; rc=$?; printf '%s' "$out" > "$tmp/$i.d"; echo "$rc" > "$tmp/$i.r"; echo "$id" > "$tmp/$i.i" ) &
+        i=$((i+1))
+    done
+    wait
+    while [ "$j" -lt "$i" ]; do
+        arr="$(jq -c --arg id "$(cat "$tmp/$j.i")" --argjson ex "$(cat "$tmp/$j.r")" --rawfile d "$tmp/$j.d" \
+            '. + [{id:$id, exit:$ex, detail:$d}]' <<<"$arr")"
+        j=$((j+1))
+    done
+    rm -rf "$tmp"
+    echo "$arr"
+}
+
+case "${1:-}" in
+    --raw) run_raw "$2"; exit $? ;;
+    --list) jq -r '.steps[].check.probe' "$CATALOG"; exit 0 ;;
+    --repos-dir) repos_dir; exit 0 ;;
+    --repo-path) repo_path "$2"; exit 0 ;;
+    --all)
+        has jq || { echo "kun-ready: jq required" >&2; exit 1; }
+        res="$(all_run)"
+        if [ "${2:-}" = "--json" ]; then echo "$res"; exit 0; fi
+        echo "$res" | jq -r '.[] | (if .exit==0 then "  ✓ " elif .exit==2 then "  - " else "  ✗ " end) + .id + "  " + .detail'
+        echo "$res" | jq -r '"  pass \([.[]|select(.exit==0)]|length) · fail \([.[]|select(.exit==1)]|length) · skip \([.[]|select(.exit==2)]|length)"'
+        exit 0 ;;
+    ""|-h|--help) sed -n 2,19p "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) run_probe "$1"; exit $? ;;
+esac

@@ -178,6 +178,16 @@ if [[ "$DOCTOR" == "1" ]]; then
     else
         info "~/.claude not provisioned yet — run this script without --doctor to install"
     fi
+    # Readiness catalog (.claude/machine/readiness.json) — the same steps the Machine app tracks
+    KUN_READY=""
+    for d in "$HOME/kun" "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." 2>/dev/null && pwd)"; do
+        [[ -x "$d/.claude/scripts/kun-ready" ]] && { KUN_READY="$d/.claude/scripts/kun-ready"; break; }
+    done
+    if [[ -n "$KUN_READY" ]] && command -v jq >/dev/null 2>&1; then
+        echo ""
+        echo -e "${BD}Doctor — readiness catalog${NC}"
+        bash "$KUN_READY" --all || true
+    fi
     # Awareness + self-improvement (2026-11-01): what is happening on this machine, and what
     # kun would improve — both zero tokens.
     if command -v node >/dev/null 2>&1 && [[ -f "$HOME/kun/.claude/scripts/aware.mjs" ]]; then
