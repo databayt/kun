@@ -961,7 +961,6 @@
       ],
       "after": [
         "github.org",
-        "github.ssh",
         "repos.dir"
       ],
       "human": false,
@@ -997,7 +996,6 @@
       ],
       "after": [
         "github.org",
-        "github.ssh",
         "repos.dir"
       ],
       "human": false,
@@ -1033,7 +1031,6 @@
       ],
       "after": [
         "github.org",
-        "github.ssh",
         "repos.dir"
       ],
       "human": false,
