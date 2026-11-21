@@ -5,7 +5,7 @@
   "type": "object",
   "required": ["id", "brand", "category", "subject", "title", "langs", "version", "status", "owner", "reviewer", "stages", "assets", "cost", "approvals", "cdn"],
   "properties": {
-    "id": { "type": "string", "pattern": "^(HOG|MKN|DBY)-[A-Z0-9]+(-[A-Z0-9]+)*-\\d{8}-V\\d{3}$" },
+    "id": { "type": "string", "pattern": "^(hogwarts|mkan|databayt)-[a-z0-9]+(-[a-z0-9]+)*-v\\d{3}$" },
     "brand": { "type": "string", "enum": ["hogwarts", "mkan", "databayt"] },
     "identity": { "type": "string", "$comment": "optional brand-kit key shown on film; defaults to brand" },
     "category": { "type": "string" },

@@ -45,8 +45,8 @@ const SCHEMA = join(HERE, "..", "schema")
 const PUBLISH = join(HERE, "..", "..", "edit", "scripts", "media", "publish.mjs")
 const HOME = process.env.PRODUCE_HOME || join(homedir(), "media", "_projects")
 
-const BRANDS = { hogwarts: "HOG", mkan: "MKN", databayt: "DBY" }
-const CODE_TO_BRAND = Object.fromEntries(Object.entries(BRANDS).map(([b, c]) => [c, b]))
+// Production lines, by their full names — never an abbreviation (Abdout 2026-11-21).
+const BRANDS = new Set(["hogwarts", "mkan", "databayt"])
 
 // The 14 stages (blueprint §6): key, deliverable (relative to the project dir), the human gate if any.
 export const STAGES = [
@@ -225,21 +225,20 @@ const gh = (args) => {
 // ---- init ------------------------------------------------------------------------------------
 function init() {
   const b = opt("brand"), category = opt("category"), subject = opt("subject")
-  if (!BRANDS[b] || !category || !subject) die("usage: init --brand hogwarts|mkan|databayt --category <cat> --subject <slug> [--lang ar,en] [--title …] [--markets sa,ae,eg,sd] [--slug <slug>]", 2)
+  if (!BRANDS.has(b) || !category || !subject) die("usage: init --brand hogwarts|mkan|databayt --category <cat> --subject <slug> [--lang ar,en] [--title …] [--markets sa,ae,eg,sd] [--slug <slug>]", 2)
   const langs = (opt("lang", "ar,en")).split(",").map((s) => s.trim()).filter(Boolean)
   const identity = opt("identity") ? checkIdentity(opt("identity")) : b
   const markets = opt("markets") ? parseMarkets(opt("markets")) : null
   const pslug = checkSlug(opt("slug") ?? slug(category).toLowerCase())
   const variants = deriveVariants(markets, langs)
   const kit = loadBrand(b) // throws on a draft / unknown brand: renderers never guess
-  const base = `${BRANDS[b]}-${slug(category)}-${slug(subject)}`
+  // ID = full names, lowercase, no date: hogwarts-intro-owners-v001
+  const base = `${b}-${slug(category)}-${slug(subject)}`.toLowerCase()
   mkdirSync(HOME, { recursive: true })
   // next free Vnnn for this brand+category+subject, across dates
-  const used = readdirSync(HOME).filter((d) => d.startsWith(base + "-")).map((d) => Number(/-V(\d{3})$/.exec(d)?.[1] || 0))
+  const used = readdirSync(HOME).filter((d) => d.toLowerCase().startsWith(base + "-")).map((d) => Number(/-v(\d{3})$/i.exec(d)?.[1] || 0))
   const v = `V${String(Math.max(0, ...used) + 1).padStart(3, "0")}`
-  const d = new Date()
-  const date = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`
-  const id = `${base}-${date}-${v}`
+  const id = `${base}-${v.toLowerCase()}`
   const dir = dirOf(id)
   if (existsSync(dir)) die(`${id} already exists`)
   for (const f of FOLDERS) mkdirSync(join(dir, f), { recursive: true })
@@ -888,6 +887,26 @@ function readiness() {
   process.exit(okAll ? 0 : 1)
 }
 
+// `list [--json] [--repo <brand>]` — every project, newest first, with its next stage: what Machine's
+// "Continue" branch lists. A project folder without a readable project.json is skipped.
+function listCmd() {
+  const repo = opt("repo")
+  const out = []
+  for (const d of existsSync(HOME) ? readdirSync(HOME) : []) {
+    if (d.startsWith("_")) continue
+    let p
+    try { p = readJson(join(HOME, d, "project.json")) } catch { continue }
+    if (repo && p.brand !== repo) continue
+    const vm = !!p.markets?.length
+    const next = (vm ? STAGES.filter((x) => !PER_VARIANT.includes(x.key)) : STAGES).find((s) => !p.stages?.[s.key])
+    out.push({ id: p.id, title: p.title, brand: p.brand, category: p.category, subject: p.subject, version: p.version, status: p.status,
+      createdAt: p.createdAt, next: next ? next.key : vm ? "build" : "done", focus: p.focus ?? [], variants: vm ? variantsOf(p).map((v) => v.id) : p.langs ?? [] })
+  }
+  out.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+  if (has("json")) console.log(JSON.stringify(out, null, 2))
+  else for (const x of out) console.log(`${x.id}  [${x.status}]  next: ${x.next}${x.focus.length ? `  focus ${x.focus.join(",")}` : ""}`)
+}
+
 // ---- dispatch --------------------------------------------------------------------------------
 const [cmd, ...rest] = pos()
 const run = {
@@ -904,7 +923,8 @@ const run = {
   index,
   validate: () => validateFile(rest[0]),
   readiness,
+  list: listCmd,
   "from-reference": () => fromReferenceSeed(rest[0], rest[1]),
 }[cmd]
-if (!run) die("usage: produce <init|set|status|advance|approve|cost|issue|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
+if (!run) die("usage: produce <init|list|set|status|advance|approve|cost|issue|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
 run()

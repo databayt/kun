@@ -996,7 +996,6 @@
       "cdn": "hogwarts",
       "manifest": "src/components/docs/media-manifest.json",
       "produce": {
-        "code": "HOG",
         "direction": "trustworthy, modern, educational, product-focused (blueprint §12 proposal, pending team approval)",
         "voiceNote": "house-ar stock voice; calm teacher-to-principal register. TODO: confirm tone with the team",
         "lowerThird": {
@@ -1096,7 +1095,6 @@
       "cdn": "mkan",
       "manifest": "src/components/help/media-manifest.json",
       "produce": {
-        "code": "MKN",
         "direction": "accessible, practical, welcoming, property discovery (blueprint §12 proposal, pending team approval)",
         "voiceNote": "house-ar stock voice; warm host register. TODO: confirm tone with the team",
         "lowerThird": {
@@ -1157,7 +1155,6 @@
       "cdn": "databayt",
       "manifest": "TODO",
       "produce": {
-        "code": "DBY",
         "direction": "technically capable, confident, modern, tied to real engineering work (blueprint §12 proposal, pending team approval)",
         "voiceNote": "house-ar stock voice; founder-credible, plain. TODO: confirm tone with the team",
         "lowerThird": {

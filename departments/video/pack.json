@@ -40,36 +40,6 @@
       "prompt": "اكتب سكربت فيديو ٦٠ ثانية لميزة من هوغورتس: الفكرة، اللقطات، والتعليق الصوتي.",
       "description_en": "A 60-second script for a Hogwarts feature: the idea, the shots and the voiceover.",
       "description_ar": "سكربت ٦٠ ثانية لميزة في هوغورتس: الفكرة واللقطات والتعليق الصوتي."
-    },
-    {
-      "repos": [
-        "hogwarts"
-      ],
-      "label_ar": "استيراد سكربت مرجعي",
-      "label_en": "Import a reference script",
-      "prompt": "produce: استورد السكربت المرجعي لفيديو بالقلم التعريفي. اسحب آخر فيديو من مجموعة واتساب «المدرسة 2.0» (balqalam-promo-v2.mp4، أُرسل 2026-11-18 واعتمد الفريق أسلوب كتابته) عبر wa-pull.py إلى ~/media/_projects/_inbox/، ثم أنشئ مشروع الإصدار الجديد بـ produce init --brand hogwarts --category intro --subject introduction --identity balqalam --markets sa,ae,eg,sd,rw --slug intro --from-reference <الفيديو>، واضبط focus على sd-ar. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس، وسجّل ما تعطّل في 09-quality/friction.md.",
-      "description_en": "Pull the team-approved promo from «المدرسة 2.0», transcribe it, and open the new intro project from its script.",
-      "description_ar": "اسحب الفيديو المعتمد من «المدرسة 2.0»، فرّغ نصه، وافتح مشروع الفيلم التعريفي الجديد من سكربته."
-    },
-    {
-      "repos": [
-        "hogwarts"
-      ],
-      "label_ar": "فحص الأدوات",
-      "label_en": "Tools check",
-      "prompt": "produce: فحص الأدوات لخط الفيديو. شغّل produce readiness (وأصلح بـ --fix ما يُصلح آلياً)، ثم شغّل كل أداة فعلياً واترك دليلاً في ~/media/_projects/_checks/<اليوم>/: (١) Blender: صورة ثابتة headless عبر blender.sh مع نص «بالقلم»، و get_scene_info عبر MCP إن كان Blender مفتوحاً؛ (٢) FilmCraft: command_list عبر MCP ثم render_frame لبطاقة عنوان ثانيتين؛ (٣) Claude: اكتب report.md بجدول ✓/✗ لكل أداة مع مسار الدليل والزمن. لا تُنتج الفيديو، افحص فقط.",
-      "description_en": "Run every tool for real — Blender, FilmCraft, Claude — and leave proof files and a ✓/✗ report.",
-      "description_ar": "شغّل كل أداة فعلياً — Blender و FilmCraft و Claude — واترك ملفات دليل وتقرير ✓/✗."
-    },
-    {
-      "repos": [
-        "hogwarts"
-      ],
-      "label_ar": "مكتب الإنتاج",
-      "label_en": "Production desk",
-      "prompt": "produce: مكتب الإنتاج — produce readiness ثم produce status لكل مشاريع فيديو هوغورتس (شبكة النسخ × المراحل، البوابة المنتظرة، الروابط المتوقعة على CDN)، ثم سمِّ الخطوة التالية للنسخة في focus ونفّذها حتى البوابة البشرية القادمة.",
-      "description_en": "Readiness, then every Hogwarts video's version × stage grid, the waiting gate, and the next step for the focus version.",
-      "description_ar": "الجاهزية، ثم شبكة النسخ × المراحل لكل فيديو، والبوابة المنتظرة، والخطوة التالية لنسخة التركيز."
     }
   ],
   "cards": [
@@ -94,5 +64,794 @@
       "--fix",
       "--json"
     ]
-  }
+  },
+  "starters": [
+    {
+      "id": "new",
+      "label_ar": "فيديو جديد",
+      "label_en": "New video",
+      "icon": "Clapperboard",
+      "description_ar": "النوع ← الجمهور ← السوق واللغة",
+      "description_en": "Type → audience → market & language",
+      "children": [
+        {
+          "id": "intro",
+          "label_ar": "فيديو تعريفي",
+          "label_en": "Intro film",
+          "icon": "Clapperboard",
+          "description_ar": "يعرّف بالمنتج كله في قصة واحدة",
+          "description_en": "The whole product in one story",
+          "set": {
+            "type": "intro"
+          },
+          "children": [
+            {
+              "id": "owners",
+              "label_ar": "ملاك المدارس ومديروها",
+              "label_en": "School owners & principals",
+              "description_ar": "يقرّرون ويدفعون",
+              "description_en": "They decide and pay",
+              "icon": "Users",
+              "set": {
+                "audience": "owners"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "parents",
+              "label_ar": "أولياء الأمور",
+              "label_en": "Parents",
+              "description_ar": "يتابعون أبناءهم",
+              "description_en": "They follow their children",
+              "icon": "Users",
+              "set": {
+                "audience": "parents"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "teachers",
+              "label_ar": "المعلمون",
+              "label_en": "Teachers",
+              "description_ar": "يستخدمونه كل يوم",
+              "description_en": "They use it every day",
+              "icon": "Users",
+              "set": {
+                "audience": "teachers"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "students",
+              "label_ar": "الطلاب",
+              "label_en": "Students",
+              "description_ar": "يتعلمون عليه",
+              "description_en": "They learn on it",
+              "icon": "Users",
+              "set": {
+                "audience": "students"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "feature",
+          "label_ar": "شرح ميزة",
+          "label_en": "Feature explainer",
+          "icon": "Film",
+          "description_ar": "ميزة واحدة من الواجهة الحقيقية",
+          "description_en": "One feature, from the real app",
+          "set": {
+            "type": "feature"
+          },
+          "children": [
+            {
+              "id": "owners",
+              "label_ar": "ملاك المدارس ومديروها",
+              "label_en": "School owners & principals",
+              "description_ar": "يقرّرون ويدفعون",
+              "description_en": "They decide and pay",
+              "icon": "Users",
+              "set": {
+                "audience": "owners"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "parents",
+              "label_ar": "أولياء الأمور",
+              "label_en": "Parents",
+              "description_ar": "يتابعون أبناءهم",
+              "description_en": "They follow their children",
+              "icon": "Users",
+              "set": {
+                "audience": "parents"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "teachers",
+              "label_ar": "المعلمون",
+              "label_en": "Teachers",
+              "description_ar": "يستخدمونه كل يوم",
+              "description_en": "They use it every day",
+              "icon": "Users",
+              "set": {
+                "audience": "teachers"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "students",
+              "label_ar": "الطلاب",
+              "label_en": "Students",
+              "description_ar": "يتعلمون عليه",
+              "description_en": "They learn on it",
+              "icon": "Users",
+              "set": {
+                "audience": "students"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tutorial",
+          "label_ar": "فيديو تعليمي",
+          "label_en": "Tutorial",
+          "icon": "FileText",
+          "description_ar": "خطوة بخطوة لمستخدم",
+          "description_en": "Step by step, for a user",
+          "set": {
+            "type": "tutorial"
+          },
+          "children": [
+            {
+              "id": "owners",
+              "label_ar": "ملاك المدارس ومديروها",
+              "label_en": "School owners & principals",
+              "description_ar": "يقرّرون ويدفعون",
+              "description_en": "They decide and pay",
+              "icon": "Users",
+              "set": {
+                "audience": "owners"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "parents",
+              "label_ar": "أولياء الأمور",
+              "label_en": "Parents",
+              "description_ar": "يتابعون أبناءهم",
+              "description_en": "They follow their children",
+              "icon": "Users",
+              "set": {
+                "audience": "parents"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "teachers",
+              "label_ar": "المعلمون",
+              "label_en": "Teachers",
+              "description_ar": "يستخدمونه كل يوم",
+              "description_en": "They use it every day",
+              "icon": "Users",
+              "set": {
+                "audience": "teachers"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "students",
+              "label_ar": "الطلاب",
+              "label_en": "Students",
+              "description_ar": "يتعلمون عليه",
+              "description_en": "They learn on it",
+              "icon": "Users",
+              "set": {
+                "audience": "students"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ad",
+          "label_ar": "إعلان قصير",
+          "label_en": "Short ad",
+          "icon": "Play",
+          "description_ar": "١٥–٣٠ ثانية للإعلانات المموّلة",
+          "description_en": "15–30 s for paid reach",
+          "set": {
+            "type": "ad"
+          },
+          "children": [
+            {
+              "id": "owners",
+              "label_ar": "ملاك المدارس ومديروها",
+              "label_en": "School owners & principals",
+              "description_ar": "يقرّرون ويدفعون",
+              "description_en": "They decide and pay",
+              "icon": "Users",
+              "set": {
+                "audience": "owners"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "parents",
+              "label_ar": "أولياء الأمور",
+              "label_en": "Parents",
+              "description_ar": "يتابعون أبناءهم",
+              "description_en": "They follow their children",
+              "icon": "Users",
+              "set": {
+                "audience": "parents"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "teachers",
+              "label_ar": "المعلمون",
+              "label_en": "Teachers",
+              "description_ar": "يستخدمونه كل يوم",
+              "description_en": "They use it every day",
+              "icon": "Users",
+              "set": {
+                "audience": "teachers"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "students",
+              "label_ar": "الطلاب",
+              "label_en": "Students",
+              "description_ar": "يتعلمون عليه",
+              "description_en": "They learn on it",
+              "icon": "Users",
+              "set": {
+                "audience": "students"
+              },
+              "children": [
+                {
+                  "id": "market",
+                  "label_ar": "السوق واللغة",
+                  "label_en": "Market & language",
+                  "source": "markets",
+                  "then": [
+                    {
+                      "id": "start",
+                      "label_ar": "ابدأ الإنتاج",
+                      "label_en": "Start production",
+                      "icon": "Play",
+                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
+                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
+                      "prompt": "produce: أنشئ مشروع فيديو جديد لـ {{repo}}: النوع {{type_label}} ({{type}})، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). استخدم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} واضبط focus على {{variant}}، ثم أنجز البحث والموجز والسكربت (العربية أولاً) وتوقّف عند بوابة اعتماد السكربت. سجّل ما أبطأك في 09-quality/friction.md."
+                    },
+                    {
+                      "id": "reference",
+                      "label_ar": "من فيديو مرجعي",
+                      "label_en": "From a reference video",
+                      "icon": "FolderOpen",
+                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
+                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
+                      "prompt": "produce: فيديو جديد لـ {{repo}} من مرجع: النوع {{type_label}}، الجمهور {{audience_label}}، النسخة {{variant_label}} ({{variant}}). خذ الفيديو المرفق في الرسالة، وإن لم يوجد فآخر فيديو في مجموعة واتساب «المدرسة 2.0» (wa-pull.py إلى ~/media/_projects/_inbox/)، ثم node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{repo}} --category {{type}} --subject {{audience}} --markets {{market}} --from-reference <الفيديو>، واضبط focus على {{variant}}. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس وتوقّف لاعتمادي."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "continue",
+      "label_ar": "متابعة إنتاج",
+      "label_en": "Continue a production",
+      "icon": "Activity",
+      "description_ar": "مشروع ← نسخة ← الخطوة التالية",
+      "description_en": "Project → version → next step",
+      "source": "projects",
+      "then": [
+        {
+          "id": "variant",
+          "label_ar": "النسخة",
+          "label_en": "Version",
+          "source": "variants",
+          "then": [
+            {
+              "id": "next",
+              "label_ar": "الخطوة التالية",
+              "label_en": "Next step",
+              "icon": "Play",
+              "description_ar": "أنجز المرحلة التالية وتوقّف عند البوابة البشرية",
+              "description_en": "Do the next stage, stop at the human gate",
+              "prompt": "produce: تابع المشروع {{project}} للنسخة {{variant}}: شغّل node ~/.claude/skills/produce/scripts/produce.mjs status {{project}}، ثم أنجز المرحلة التالية لهذه النسخة بأدواتنا (Blender، FilmCraft، HyperFrames، shoot، voice.mjs) وتوقّف عند البوابة البشرية القادمة. سجّل ما أبطأك في 09-quality/friction.md."
+            },
+            {
+              "id": "status",
+              "label_ar": "الحالة والروابط",
+              "label_en": "Status & links",
+              "icon": "Activity",
+              "description_ar": "المراحل والبوابات والرابط المتوقع على CDN",
+              "description_en": "Stages, gates and the predicted CDN link",
+              "prompt": "produce: اعرض حالة {{project}} للنسخة {{variant}}: node ~/.claude/skills/produce/scripts/produce.mjs status {{project}} و url {{project}} --variant {{variant}}، بجدول قصير: ما أُنجز، ما ينتظر اعتمادي، والخطوة التالية."
+            },
+            {
+              "id": "review",
+              "label_ar": "راجع آخر مخرَج",
+              "label_en": "Review the latest output",
+              "icon": "Film",
+              "description_ar": "اعرض آخر ما أُنتج لهذه النسخة مع ملاحظات المراجعة",
+              "description_en": "Show the latest deliverable for this version, with review notes",
+              "prompt": "produce: اعرض آخر مخرَج للمشروع {{project}} نسخة {{variant}} (السكربت، اللقطات المفتاحية، أو المعاينة) بمساراته المطلقة، ثم راجعه بعين media-qa واقترح التعديلات. لا تعتمد شيئاً بنفسك."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "studio",
+      "label_ar": "الاستوديو",
+      "label_en": "Studio",
+      "icon": "Wrench",
+      "description_ar": "تحدّث مع الأدوات مباشرة",
+      "description_en": "Talk to the tools directly",
+      "children": [
+        {
+          "id": "blender",
+          "label_ar": "Blender",
+          "label_en": "Blender",
+          "icon": "Box",
+          "description_ar": "المشهد المفتوح، أو صورة ثابتة تجريبية",
+          "description_en": "The open scene, or a test still",
+          "prompt": "استخدم Blender: إن كان مفتوحاً فاقرأ المشهد عبر MCP (get_scene_info) وصِفه؛ وإلا فاصنع صورة ثابتة تجريبية 1080×1920 headless عبر ~/.claude/scripts/blender.sh في ~/media/_projects/_checks/<اليوم>/ واعرض مسارها."
+        },
+        {
+          "id": "filmcraft",
+          "label_ar": "FilmCraft",
+          "label_en": "FilmCraft",
+          "icon": "Scissors",
+          "description_ar": "افحص المحرّك وأخرج إطاراً تجريبياً",
+          "description_en": "Check the engine and render a test frame",
+          "prompt": "استخدم FilmCraft عبر MCP: command_list (العدد فقط)، ثم أنشئ بطاقة عنوان «بالقلم» ثانيتين وأخرج إطاراً واحداً (render_frame) إلى ~/media/_projects/_checks/<اليوم>/ واعرض مساره."
+        },
+        {
+          "id": "voice",
+          "label_ar": "عيّنة صوت",
+          "label_en": "Voice sample",
+          "icon": "Mic",
+          "description_ar": "جملة واحدة بلهجة السوق المختار",
+          "description_en": "One line in a market's dialect",
+          "source": "markets",
+          "then": [
+            {
+              "id": "say",
+              "label_ar": "اسمع العيّنة",
+              "label_en": "Hear the sample",
+              "icon": "Mic",
+              "prompt": "اصنع عيّنة صوت واحدة بـ voice.mjs للنسخة {{variant}} (لهجة السوق من markets.json): «بالقلم، مدرستك كلها في مكان واحد.» بالعربية أو «Balqalam — your whole school in one place.» بالإنجليزية حسب اللغة، إلى ~/media/_projects/_checks/<اليوم>/voice-{{variant}}.wav واعرض مسارها."
+            }
+          ]
+        },
+        {
+          "id": "capture",
+          "label_ar": "لقطات الجوال",
+          "label_en": "Phone captures",
+          "icon": "Camera",
+          "description_ar": "صوّر الواجهة الحقيقية بمقاس الجوال",
+          "description_en": "Shoot the real app at phone size",
+          "prompt": "صوّر واجهة {{repo}} الحقيقية بمقاس الجوال: اقترح أهم ٥ مسارات للفيديو الحالي، وبعد موافقتي شغّل shoot.mjs --device iphone-16 --lang ar,en عليها واعرض لقطة تلامس."
+        }
+      ]
+    }
+  ]
 }
