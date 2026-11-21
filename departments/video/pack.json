@@ -46,9 +46,9 @@
       ],
       "label_ar": "فيديو تعريفي لبالقلم",
       "label_en": "Balqalam intro film",
-      "prompt": "produce: تابع الفيديو التعريفي لبالقلم (المشروع HOG-INTRO-INTRODUCTION-20261120-V001) — لفيسبوك فقط، عمودي للجوال، نسختان عربية وإنجليزية، موجّه لملاك المدارس ومديريها. شغّل /produce status ثم أنجز المرحلة التالية وتوقّف عند البوابة البشرية القادمة.",
-      "description_en": "Move the Balqalam intro film to its next gate — a vertical Facebook film for phones, in Arabic and English.",
-      "description_ar": "انقل الفيديو التعريفي لبالقلم إلى بوابته التالية — فيلم عمودي لفيسبوك على الجوال، بالعربية والإنجليزية."
+      "prompt": "produce: تابع الفيديو التعريفي لبالقلم (HOG-INTRO-INTRODUCTION-20261120-V001) — لفيسبوك، عمودي للجوال، بكل نسخه: السعودية والإمارات ومصر والسودان، عربي وإنجليزي، بلهجة وعملة كل سوق. شغّل /produce status، ثم أنجز الخطوة التالية (أو produce build --all بعد اعتماد السكربت) وتوقّف عند البوابة البشرية القادمة.",
+      "description_en": "Move the Balqalam intro film forward — every market version (SA, UAE, EG, SD × ar/en) with its own voice and price.",
+      "description_ar": "انقل الفيديو التعريفي لبالقلم للأمام — كل نسخ الأسواق (السعودية، الإمارات، مصر، السودان × عربي/إنجليزي) بصوتها وسعرها."
     },
     {
       "repos": [
@@ -66,9 +66,9 @@
       ],
       "label_ar": "مكتب الإنتاج",
       "label_en": "Production desk",
-      "prompt": "produce: مكتب الإنتاج — افحص جاهزية خط الفيديو (ffmpeg، Blender، FilmCraft، HyperFrames، خوادم MCP، المساحة، الكهرباء، هوية العلامة)، ثم اعرض كل مشاريع فيديو هوغورتس بمرحلتها والبوابة المنتظرة، وسمِّ الخطوة التالية.",
-      "description_en": "Check the video line's readiness and show every Hogwarts video project with its stage, its waiting gate and the next step.",
-      "description_ar": "افحص جاهزية خط الفيديو واعرض كل مشاريع هوغورتس بمرحلتها والبوابة المنتظرة والخطوة التالية."
+      "prompt": "produce: مكتب الإنتاج — افحص جاهزية خط الفيديو (ffmpeg، Blender، FilmCraft، خوادم MCP، المساحة، الكهرباء)، ثم اعرض لكل مشروع فيديو لهوغورتس شبكة النسخ × المراحل، والبوابة المنتظرة، والروابط المتوقعة على CDN (produce url)، وسمِّ الخطوة التالية.",
+      "description_en": "Readiness check, then every Hogwarts video's version × stage grid, waiting gates and predicted CDN links.",
+      "description_ar": "فحص الجاهزية، ثم شبكة النسخ × المراحل لكل فيديو، والبوابات المنتظرة، والروابط المتوقعة على CDN."
     }
   ],
   "cards": [

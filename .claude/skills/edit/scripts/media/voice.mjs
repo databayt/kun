@@ -10,6 +10,13 @@
 //                                                       (script.voice e.g. "Charon", script.style) —
 //                                                       no clone, so no consent; GEMINI_API_KEY from kun/.env;
 //                                                       --model picks the TTS model (default gemini-3.8-flash-tts)
+//                                                       --dialect <saudi|egyptian|msa|neutral> and --style "<free text>" (or the script's
+//                                                       `dialect`/`style` fields) steer a Gemini delivery: the dialect directive is prepended
+//                                                       to the speech_metadata style (never the spoken text). Arabic lines only. Chatterbox
+//                                                       cannot do dialect: gen warns once and records dialectApplied:false in voice.json;
+//                                                       a dialect other than msa/neutral auto-selects Gemini unless --engine chatterbox
+//                                                       is forced (--engine gemini|chatterbox, else script.engine). Stock voices only —
+//                                                       the consent gate is untouched.
 //   voice mix <voice.json> --cues <cues.json> --duration S --out <file.wav> [--lufs -16] [--lead 0.25]
 //   voice revoke <id>                                   withdraw consent + list published assets using it
 //
@@ -227,13 +234,21 @@ if (sub === "gen") {
   const out = arg("out")
   if (!scriptFile || !out) throw new Error("usage: voice gen <script.json> --out <dir> [--retries 3]")
   const script = JSON.parse(readFileSync(scriptFile, "utf8"))
-  const id = arg("voice", script.voice || "house-ar")
+  const id = arg("voice", script.voice || (arg("engine") === "gemini" || script.engine === "gemini" || (script.dialect && !["msa", "neutral"].includes(script.dialect) && arg("engine") !== "chatterbox") ? "Charon" : "house-ar"))
   const lang = script.lang || "ar"
   const lines = script.lines.map((l) => (typeof l === "string" ? l : l.text))
   mkdirSync(out, { recursive: true })
-  const gemini = script.engine === "gemini"
+  const dialect = arg("dialect", script.dialect)
+  const styleText = arg("style", script.style)
+  const wantsDialect = lang === "ar" && !!dialect && !["msa", "neutral"].includes(dialect)
+  const forced = arg("engine")
+  const engine = forced || (wantsDialect && script.engine !== "gemini" ? "gemini" : script.engine)
+  const gemini = engine === "gemini"
+  if (wantsDialect && !gemini) console.error(`voice: dialect "${dialect}" cannot be applied on Chatterbox (engine forced) — the line is read in the reference voice's own accent`)
+  const DIALECTS = { saudi: "Speak in a calm Saudi Arabic dialect (Gulf/Najdi accent), not Modern Standard Arabic.", egyptian: "Speak in a calm Egyptian Arabic dialect (Cairene accent), not Modern Standard Arabic.", msa: "Speak in clear Modern Standard Arabic (fusha).", neutral: "" }
+  const styleFull = gemini ? [lang === "ar" && dialect ? DIALECTS[dialect] ?? `Speak in ${dialect} Arabic.` : "", styleText].filter(Boolean).join(" ") || undefined : styleText
   const GEMINI_MODEL = arg("model", script.model || process.env.MEDIA_GEMINI_TTS || "gemini-3.8-flash-tts")
-  const result = { voice: id, engine: gemini ? "gemini" : "chatterbox", model: gemini ? GEMINI_MODEL : MODEL, lang, generated: new Date().toISOString(), lines: lines.map((text, i) => ({ i, text, file: null, ok: false, tries: 0 })) }
+  const result = { voice: id, engine: gemini ? "gemini" : "chatterbox", model: gemini ? GEMINI_MODEL : MODEL, lang, dialect: dialect || null, style: styleFull || null, dialectApplied: !wantsDialect ? null : gemini, generated: new Date().toISOString(), lines: lines.map((text, i) => ({ i, text, file: null, ok: false, tries: 0 })) }
   const c = gemini ? { ok: true, speaker: `Google stock voice ${id} (AI)` } : consent(id)
   if (!c.ok) {
     Object.assign(result, { captionsOnly: true, reason: `voice ${id}: ${c.reason}`, okRatio: 0 })
@@ -253,7 +268,7 @@ if (sub === "gen") {
     let gen
     if (gemini) {
       try {
-        const files = await geminiLines(items.map((it) => it.text), { model: GEMINI_MODEL, voice: id, style: script.style, attempt: t, take: t === 1 ? arg("take") : undefined })
+        const files = await geminiLines(items.map((it) => it.text), { model: GEMINI_MODEL, voice: id, style: styleFull, attempt: t, take: t === 1 ? arg("take") : undefined })
         gen = items.map((it, k) => ({ id: it.id, ok: true, file: files[k] }))
       } catch (e) {
         // the daily quota and an unsplittable take are not per-line failures — another round would just

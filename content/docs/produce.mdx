@@ -26,7 +26,7 @@ P="node ~/.claude/skills/produce/scripts/produce.mjs"
 $P init --brand hogwarts --identity balqalam --category intro --subject introduction --lang ar,en \
   --audience "School owners and principals" --objective "Book a 1-month free trial"
 $P status <ID>
-$P advance <ID> <stage> --file <deliverable>
+$P advance <ID> <stage> --file <deliverable> [--variant sa-ar]
 $P approve <ID> --version V001 --by <login> [--gate script|version|publish]
 $P ship <ID> --dry-run
 ```
@@ -74,7 +74,59 @@ HOG-INTRO-INTRODUCTION-20261120-V001/
 The ID is `<CODE>-<CATEGORY>-<SUBJECT>-<YYYYMMDD>-V<nnn>`. `produce validate <file>` checks a
 `project.json` or a `shot-list.json` against the schemas.
 
-## CDN keys
+## Markets & versions
+
+One film ships as many **versions**: a market (`sa`, `ae`, `eg`, `sd`) times a language (`ar`, `en`). Markets live in one
+file, `content/media/markets.json` — currency, on-screen price, a currency symbol (an SVG for the riyal and the dirham, in
+`content/media/currency/`), numerals, languages and the Arabic voice dialect. A version is `<market>-<lang>`: `sa-ar`, `eg-en`.
+
+```bash
+$P init --brand hogwarts --identity balqalam --category intro --subject introduction \
+  --markets sa,ae,eg,sd --slug intro
+$P set <ID> markets sa,ae,eg,sd      # or add them to an existing project
+$P set <ID> slug intro
+```
+
+The film prices are 25 SAR, 25 AED and 7 USD (Egypt, Sudan), per Abdout on 2026-11-21. The pricing decision
+D-20261117 says 24 SAR per student; the film's 25 is his call for video, and pricing code is untouched.
+
+## Shared vs per-version stages
+
+Stages 01–07 (request, research, brief, script, storyboard, assets, visual) are **shared**: done once, whatever the version
+count. Stages audio, edit, render, qa, approval, cdn and publish are **per version**, recorded in
+`project.json → variantStages[<variant>][<stage>]`. `status` prints the shared table, then a version × stage grid
+(✓ done, · todo, ✗ failed) and each version's predicted URL.
+
+`advance <ID> <stage> --variant <v>` records a per-version stage; on a multi-version project it errors with the list when
+`--variant` is missing. `approve --version V001 --variant <v>|--all` pins each version's master sha and refuses any version
+whose QA has not passed. A project created without `--markets` keeps the single-line flow, one version per language.
+
+## build and url
+
+```bash
+$P build <ID> --variant sa-ar|--all [--dry-run]   # piece.mjs → assemble.mjs, per version
+$P url <ID> [--variant sa-ar]                     # predicted URLs, known before the render
+```
+
+`build` runs `piece.mjs`, which writes the resolved script `03-script/variants/<v>.json` and the FilmCraft piece
+`06-production/editing/<v>.video.json`, then `assemble.mjs --aspect 9:16 --deliver`, and records audio, edit and render for
+that version into `08-render/<v>/fb-9x16.mp4`. A version whose inputs hash (resolved script + piece + its market entry) is
+unchanged since its last render is skipped, so a price change rebuilds only the affected versions. `--dry-run` writes the
+script and piece and stops; a real build needs the script sign-off.
+
+## CDN keys and the URL grammar
+
+```text
+https://cdn.databayt.org/video/<brand-cdn>/<slug>/<variant>/fb-9x16.mp4     stable: always the approved latest
+                                                  /<variant>/poster.webp, <lang>.vtt
+https://cdn.databayt.org/video/<brand-cdn>/<slug>/manifest.json            every shipped version, sha, approvedAt
+https://cdn.databayt.org/video/<brand-cdn>/<slug>/_v/V001/<variant>/…      immutable archive per version
+```
+
+Example: `https://cdn.databayt.org/video/hogwarts/intro/sa-ar/fb-9x16.mp4`. The slug is set at `init --slug` (default: the
+category), so the URL is known before anything renders. `ship <ID> --variant <v>|--all` uploads the `_v/` archive first,
+then the stable keys, then the merged manifest, and refuses if another film already owns the brand and slug. `--dry-run`
+prints the key list only. Projects without markets keep the legacy keys:
 
 ```text
 video/<brand>/<ID>/{master.mp4, fb-16x9.mp4, fb-9x16.mp4, fb-1x1.mp4, <lang>.vtt, poster.webp, manifest.json}
@@ -82,7 +134,7 @@ video/index.json        approved videos only
 ```
 
 `<ns>/<lang>/<flow>/video.mp4` tutorial keys are a different tier. Run `ship --dry-run` first.
-See [media](/docs/media).
+See [media](/docs/media) and [cdn](/docs/cdn).
 
 ## Identity
 

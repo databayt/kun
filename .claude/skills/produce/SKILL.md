@@ -19,11 +19,15 @@ stage belongs to an existing skill (table below). Blueprint: `~/.claude/playwrig
 P="node ~/.claude/skills/produce/scripts/produce.mjs"
 $P init --brand hogwarts --category intro --subject introduction --lang ar,en   # → HOG-INTRO-INTRODUCTION-20261120-V001
 $P issue <ID> --create          # one GitHub issue, label dept:video, kun block items=skill:produce
+$P init … --markets sa,ae,eg,sd --slug intro   # market x language versions (content/media/markets.json)
 $P set <ID> identity balqalam   # change the on-film identity of an existing project
-$P status <ID>                  # stage table, gates, cost, next stage
-$P advance <ID> <stage> --file <deliverable> [--verdict pass|fail]
-$P approve <ID> --version V001 --by <login> [--gate script|version|publish] [--destination facebook] [--issue databayt/x#n]
-$P ship <ID> --dry-run          # CDN keys + plan; real run only after the version approval
+$P set <ID> slug intro          # | set <ID> markets sa,ae,eg,sd
+$P status <ID>                  # shared stages, then a variant x per-variant-stage grid + predicted URLs
+$P advance <ID> <stage> --file <deliverable> [--verdict pass|fail] [--variant sa-ar]
+$P approve <ID> --version V001 --by <login> [--gate script|version|publish] [--variant sa-ar|--all] [--destination facebook] [--issue databayt/x#n]
+$P url <ID> [--variant sa-ar]   # predicted CDN URLs, before anything renders
+$P build <ID> --variant sa-ar|--all [--dry-run]   # piece.mjs -> assemble.mjs per variant; unchanged inputs are skipped
+$P ship <ID> [--variant v|--all] --dry-run        # CDN keys + plan; real run only after the version approval
 $P index                        # rebuild the local video index
 ```
 
@@ -47,6 +51,17 @@ Deliverables live in `~/media/_projects/<ID>/` (never inside a repo). Run `advan
 | 12  | approval   | approval record in `project.json`                                                                     | human: `approve --version Vnnn --by <login>` (per exact version, master sha pinned); `/approve` for the review queue                               | **exact-version approval**                                                     |
 | 13  | cdn        | `10-publishing/manifest.json`, CDN keys                                                               | `produce ship` → `edit/scripts/media/publish.mjs` (mp4) + wrapper (vtt/webp/json)                                                                  | refuses without approval                                                       |
 | 14  | publish    | `10-publishing/{caption.md,publishing-record.md}`                                                     | `/publish` + `/facebook` + `/social`                                                                                                               | **separate publish approval**: `approve --gate publish --destination facebook` |
+
+## Markets and versions
+
+`--markets sa,ae,eg,sd` (ids from `content/media/markets.json`: currency, on-screen price, symbol, voice dialect) turns a
+project into **variants** `<market>-<lang>` (`sa-ar`, `eg-en`). Stages 01–07 (request … visual) are **shared**, done once.
+Stages audio, edit, render, qa, approval, cdn, publish are **per variant**, stored in `project.json → variantStages[<variant>]`;
+`advance` takes `--variant` for them and errors with the list on a multi-variant project without it. `build` runs
+`piece.mjs` (writes `03-script/variants/<v>.json` + `06-production/editing/<v>.video.json`) then `assemble.mjs --deliver`
+into `08-render/<v>/fb-9x16.mp4`, skipping a variant whose input hash is unchanged. `approve --variant|--all` pins each
+variant's master sha; `ship` uploads the `_v/<Vnnn>/` archive, then the stable keys, then a merged `manifest.json`.
+Projects without markets keep the old single-line flow.
 
 ## Human gates (three, never merged)
 
@@ -84,6 +99,16 @@ colors, `produce.{code,direction,voiceNote,subtitle,lowerThird,intro,outro}`. Co
 (lower-third, intro, outro, approved examples) — fill them with the team, do not invent.
 
 ## CDN (`content/docs/cdn.mdx`, `media.mdx`)
+
+Variant projects (stable slug, URL known before the render, e.g. `https://cdn.databayt.org/video/hogwarts/intro/sa-ar/fb-9x16.mp4`):
+
+```
+video/<cdn>/<slug>/<variant>/{fb-9x16.mp4, poster.webp, <lang>.vtt}   stable — overwritten on re-approval, invalidated
+video/<cdn>/<slug>/manifest.json                                       every shipped variant (max-age 60)
+video/<cdn>/<slug>/_v/<Vnnn>/<variant>/…                               immutable archive per version
+```
+
+`ship` refuses when another film (different category/subject) already owns the brand+slug. Legacy projects:
 
 ```
 video/<brand>/<ID>/{master.mp4, fb-16x9.mp4, fb-9x16.mp4, fb-1x1.mp4, <lang>.vtt, poster.webp, manifest.json}

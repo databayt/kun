@@ -1,0 +1,51 @@
+{
+  "readme": "Markets for the video line (/produce). Film prices per Abdout 2026-11-21; pricing decision D-20261117 says 24 SAR per student — the film's 25 is his call for video only, pricing code untouched. A variant is <market>-<lang> (sa-ar, eg-en). voice.<lang> feeds voice.mjs --dialect/--style. Symbol svg paths are repo-relative.",
+  "sa": {
+    "name": { "ar": "السعودية", "en": "Saudi Arabia" },
+    "currency": "SAR",
+    "price": 25,
+    "symbol": { "svg": "content/media/currency/sar.svg", "text": "ر.س" },
+    "numerals": "arab",
+    "langs": ["ar", "en"],
+    "voice": {
+      "ar": { "dialect": "saudi", "style": "calm Najdi Saudi Arabic" },
+      "en": { "dialect": "neutral", "style": "calm, clear international English" }
+    }
+  },
+  "ae": {
+    "name": { "ar": "الإمارات", "en": "United Arab Emirates" },
+    "currency": "AED",
+    "price": 25,
+    "symbol": { "svg": "content/media/currency/aed.svg", "text": "د.إ" },
+    "numerals": "arab",
+    "langs": ["ar", "en"],
+    "voice": {
+      "ar": { "dialect": "saudi", "style": "calm Gulf/Saudi Arabic" },
+      "en": { "dialect": "neutral", "style": "calm, clear international English" }
+    }
+  },
+  "eg": {
+    "name": { "ar": "مصر", "en": "Egypt" },
+    "currency": "USD",
+    "price": 7,
+    "symbol": { "text": "$" },
+    "numerals": "arab",
+    "langs": ["ar", "en"],
+    "voice": {
+      "ar": { "dialect": "egyptian", "style": "calm Egyptian Arabic" },
+      "en": { "dialect": "neutral", "style": "calm, clear international English" }
+    }
+  },
+  "sd": {
+    "name": { "ar": "السودان", "en": "Sudan" },
+    "currency": "USD",
+    "price": 7,
+    "symbol": { "text": "$" },
+    "numerals": "arab",
+    "langs": ["ar", "en"],
+    "voice": {
+      "ar": { "dialect": "msa", "style": "calm Modern Standard Arabic" },
+      "en": { "dialect": "neutral", "style": "calm, clear international English" }
+    }
+  }
+}

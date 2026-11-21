@@ -18,6 +18,9 @@
 //   "end": 6                                              // trim the whole piece to 6 s (optional)
 // }
 // Item extras:
+//   card.image   absolute path to an svg/png (e.g. a currency mark) placed beside the card title (RTL: left),
+//                at ~14% of the short side. SVG is rasterised (sips, else ffmpeg) with currentColor → brand ink,
+//                into a cache dir (<spec>/.cache/img). Put it after the figure in reading order: below the title.
 //   still.move   { "from": [cx, cy, zoom], "to": [cx, cy, zoom], "ease": "inOutSine|linear|outCubic|inCubic" }
 //                Ken Burns by Motion keyframes: (cx, cy) = the picture point (0..1) held at the frame
 //                centre, zoom = x the size the frame mode gave it (1 = as placed). No Blender needed.
@@ -42,7 +45,7 @@
 // aspect for review. Encode/QA/publish stay with media.sh — this only edits.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, resolve, join } from 'node:path';
+import { dirname, resolve, join, basename } from 'node:path';
 import { homedir } from 'node:os';
 
 const CLI = process.env.FILMCRAFT_CLI || join(homedir(), '.local/bin/filmcraft-cli');
@@ -207,7 +210,23 @@ function fit(clip, seconds) {
 }
 
 
-function card(t, seconds, title, subtitle, tall) {
+// An svg is rasterised once (currentColor → brand ink) into <spec>/.cache/img; a png/jpg is used as is.
+function rasterise(file) {
+  if (!existsSync(file)) throw new Error(`missing card image: ${file}`);
+  if (!/\.svg$/i.test(file)) return file;
+  const cdir = join(dir, '.cache/img');
+  mkdirSync(cdir, { recursive: true });
+  const out = join(cdir, `${basename(file, '.svg')}-${String(v.ink).replace('#', '')}.png`);
+  if (existsSync(out)) return out;
+  const svg = join(cdir, `${basename(file, '.svg')}-${String(v.ink).replace('#', '')}.svg`);
+  writeFileSync(svg, readFileSync(file, 'utf8').replace(/currentColor/g, v.ink));
+  let r = spawnSync('sips', ['-s', 'format', 'png', '-Z', '512', svg, '--out', out], { encoding: 'utf8' });
+  if (r.status !== 0 || !existsSync(out)) r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', svg, '-vf', 'scale=-1:512', out], { encoding: 'utf8' });
+  if (!existsSync(out)) throw new Error(`could not rasterise ${file}: ${(r.stderr || '').slice(-200)}`);
+  return out;
+}
+
+function card(t, seconds, title, subtitle, tall, image) {
   const m = fc('file.newColorMatte', { color: v.canvas, seconds });
   fc('timeline.place', { item: m.item, track: 'V1', seconds: t, duration: { seconds } });
   const g = fc('graphics.template.apply', {
@@ -229,6 +248,24 @@ function card(t, seconds, title, subtitle, tall) {
     if (span > max) fc('graphics.set', { clip: g.clip, layer: name, props: { size: Math.floor(((name === 'Title' ? (tall ? 170 : 140) : tall ? 64 : 54) * max) / span) } });
   }
   fit(g.clip, seconds);
+  if (image) {
+    // The mark follows the figure in reading order, on the title's line: to its left in Arabic
+    // (RTL, «٢٥ ⃁»), to its right in Latin («25 ⃁»). Sized to the figure's cap height.
+    const png = rasterise(image);
+    const frameW = tall ? 1080 : 1920, frameH = tall ? 1920 : 1080;
+    const tl = fc('graphics.list', { clip: g.clip }, { save: false }).layers.find((x) => x.name === 'Title');
+    const xs = tl?.quad.map((q) => q[0]) ?? [frameW / 2, frameW / 2];
+    const ys = tl?.quad.map((q) => q[1]) ?? [frameH / 2, frameH / 2];
+    const capH = Math.max(Math.max(...ys) - Math.min(...ys), Math.min(frameW, frameH) * 0.1);
+    const size = capH * 0.8;
+    const rtl = /[؀-ۿ]/.test(title || '');
+    const gap = size * 0.25;
+    const x = rtl ? Math.min(...xs) - gap - size / 2 : Math.max(...xs) + gap + size / 2;
+    const y = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const l = fc('timeline.place', { item: importItem(png), track: 'new', seconds: t, duration: { seconds } });
+    fc('effects.setParam', { clip: l.clips[0], effect: 'motion', param: 'scale', value: (size / 512) * 100 });
+    fc('effects.setParam', { clip: l.clips[0], effect: 'motion', param: 'position', value: [x, y] });
+  }
   return g.clip;
 }
 
@@ -292,7 +329,7 @@ for (const aspect of aspects) {
     const secs = it.seconds ?? it.voiceSeconds;
     if (it.type === 'card') {
       const cs = snap(Math.min(secs ?? 3, END - t));
-      card(t, cs, it.title, it.subtitle, h > w);
+      card(t, cs, it.title, it.subtitle, h > w, it.image ? at(it.image) : null);
       t += cs;
       continue;
     }

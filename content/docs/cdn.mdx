@@ -119,6 +119,24 @@ never hard-code these URLs — they read them from the product's
 `media-manifest.json` by id (`add-student/created-ar`). The local side lives in
 `~/media/<repo>/<flow>/`; see the `shoot` docs for the full grammar.
 
+## Video tier (`video/`)
+
+Finished films from `/produce` live under `video/`, keyed by a stable **slug** (set at `produce init --slug`) and a
+**variant** `<market>-<lang>`, never by the dated project ID, so the URL is known before the render:
+
+```
+cdn.databayt.org/video/<brand-cdn>/<slug>/<variant>/fb-9x16.mp4        stable, the approved latest
+cdn.databayt.org/video/<brand-cdn>/<slug>/<variant>/poster.webp
+cdn.databayt.org/video/<brand-cdn>/<slug>/<variant>/<lang>.vtt
+cdn.databayt.org/video/<brand-cdn>/<slug>/manifest.json                every shipped variant (max-age 60)
+cdn.databayt.org/video/<brand-cdn>/<slug>/_v/<Vnnn>/<variant>/…        immutable archive per version
+cdn.databayt.org/video/index.json                                      approved videos
+```
+
+Example: `https://cdn.databayt.org/video/hogwarts/intro/sa-ar/fb-9x16.mp4`. The stable keys are overwritten when a new version is
+approved and are invalidated; the `_v/` archive keys are written once and never overwritten. Projects created without
+markets keep `video/<brand>/<ID>/…`. See [produce](/docs/produce).
+
 ## Catalog key scheme
 
 Catalog is the one tier whose keys are **persisted in the database** (the
@@ -192,12 +210,13 @@ copies every object (and flattens `anthropic/`), making the bucket move free.
 ### Immutability & versioning
 
 Every object is immutable and served with a one-year `immutable` cache header —
-except product media from `/shoot` and `/record` (above), whose stable keys are
-overwritten in place and invalidated by the publisher.
-**Never overwrite an existing key.** When an asset's content changes, write a new
-key with a `-vN` suffix and point references at it. Because keys are never
-overwritten, CloudFront never serves stale content and **no invalidation is ever
-needed**.
+except two tiers with **stable keys**: product media from `/shoot` and `/record` (above) and
+the stable video keys (`video/<brand-cdn>/<slug>/<variant>/…`, above). Those are overwritten in
+place on re-approval and invalidated by the publisher; the video `_v/<Vnnn>/` archive keys stay
+immutable.
+Everywhere else, **never overwrite an existing key.** When an asset's content changes, write a new
+key with a `-vN` suffix and point references at it. Because those keys are never
+overwritten, CloudFront never serves stale content and **no invalidation is needed**.
 
 ## The helper (proposed)
 
