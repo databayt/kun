@@ -22,13 +22,14 @@
  */
 import { z } from "zod";
 
-/** The seven departments, in menu order. */
+/** The eight departments, in menu order. */
 export const DEPARTMENTS = [
   "tech",
   "business",
   "sales",
   "marketing",
   "video",
+  "image",
   "support",
   "rnd",
 ] as const;

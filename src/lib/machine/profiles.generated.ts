@@ -11,6 +11,7 @@ export const MACHINE_PROFILES = [
       "sales",
       "marketing",
       "video",
+      "image",
       "support",
       "rnd"
     ],
@@ -31,7 +32,8 @@ export const MACHINE_PROFILES = [
     "departments": [
       "sales",
       "marketing",
-      "video"
+      "video",
+      "image"
     ],
     "repos": [
       "kun",
@@ -46,6 +48,13 @@ export const DEPARTMENT_PACKS = [
     "name": "business",
     "repos": [
       "kun"
+    ]
+  },
+  {
+    "name": "image",
+    "repos": [
+      "kun",
+      "hogwarts"
     ]
   },
   {

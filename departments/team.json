@@ -6,6 +6,7 @@
     "sales",
     "marketing",
     "video",
+    "image",
     "support",
     "rnd"
   ],
@@ -54,7 +55,8 @@
       "departments": [
         "sales",
         "marketing",
-        "video"
+        "video",
+        "image"
       ]
     },
     {
@@ -62,7 +64,8 @@
       "name": "Samia",
       "departments": [
         "rnd",
-        "video"
+        "video",
+        "image"
       ]
     },
     {
@@ -79,7 +82,8 @@
       "departments": [
         "sales",
         "marketing",
-        "video"
+        "video",
+        "image"
       ]
     }
   ]
