@@ -105,5 +105,26 @@
         "style": "calm, clear international English"
       }
     }
+  },
+  "rw": {
+    "name": {
+      "ar": "رواندا",
+      "en": "Rwanda"
+    },
+    "currency": "USD",
+    "price": 6.4,
+    "symbol": {
+      "text": "$"
+    },
+    "numerals": "latin",
+    "langs": [
+      "en"
+    ],
+    "voice": {
+      "en": {
+        "dialect": "neutral",
+        "style": "calm, clear international English"
+      }
+    }
   }
 }
