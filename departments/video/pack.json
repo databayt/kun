@@ -41,6 +41,36 @@
       "prompt": "اكتب سكربت فيديو ٦٠ ثانية لميزة من هوغورتس: الفكرة، اللقطات، والتعليق الصوتي.",
       "description_en": "A 60-second script for a Hogwarts feature: the idea, the shots and the voiceover.",
       "description_ar": "سكربت ٦٠ ثانية لميزة في هوغورتس: الفكرة واللقطات والتعليق الصوتي."
+    },
+    {
+      "repos": [
+        "hogwarts"
+      ],
+      "label_ar": "فيلم تعريفي",
+      "label_en": "Intro film",
+      "prompt": "خطّط فيلماً تعريفياً لهوغورتس (بالقلم).\nالجمهور: ملّاك المدارس ومديروها · النسخة: السودان · عربي · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال، نحو دقيقتين.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: آخر فيديو اعتمده الفريق في «المدرسة 2.0»، بمستوى سينمائي وشخصيات ثلاثية الأبعاد.\nاجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
+      "description_ar": "موجز احترافي جاهز للتعديل: الجمهور، النسخة، المرجع، ثم خطة",
+      "description_en": "A professional brief to edit: audience, version, reference, then a plan"
+    },
+    {
+      "repos": [
+        "hogwarts"
+      ],
+      "label_ar": "متابعة الإنتاج",
+      "label_en": "Continue production",
+      "prompt": "تابع إنتاج فيديو هوغورتس المفتوح.\nاقرأ produce list و produce status لنسخة التركيز: المراحل المنجزة، البوابة المنتظرة، والروابط المتوقعة على CDN.\nثم أعطني: أين نحن في سطر · ما يحتاج قراري · الخطوة التالية بأداتها وما تنتجه.",
+      "description_ar": "أين وصل الإنتاج، وما البوابة المنتظرة، وما الخطوة التالية",
+      "description_en": "Where the production stands, the waiting gate, the next step"
+    },
+    {
+      "repos": [
+        "hogwarts"
+      ],
+      "label_ar": "فحص الأدوات",
+      "label_en": "Tools check",
+      "prompt": "افحص جاهزية خط الفيديو.\nشغّل produce readiness، ثم تأكد أن Blender و FilmCraft و Claude تستجيب فعلاً، واترك دليلاً في ~/media/_projects/_checks/<اليوم>/.\nثم أعطني: جدول ✓/✗ لكل أداة · ما يحتاج إصلاحاً وأمره. لا تُنتج الفيديو.",
+      "description_ar": "Blender و FilmCraft و Claude: هل تعمل؟ جدول ✓/✗ مع الدليل",
+      "description_en": "Blender, FilmCraft, Claude: do they work? A ✓/✗ table with proof"
     }
   ],
   "cards": [
