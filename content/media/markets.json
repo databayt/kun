@@ -1,51 +1,109 @@
 {
-  "readme": "Markets for the video line (/produce). Film prices per Abdout 2026-11-21; pricing decision D-20261117 says 24 SAR per student — the film's 25 is his call for video only, pricing code untouched. A variant is <market>-<lang> (sa-ar, eg-en). voice.<lang> feeds voice.mjs --dialect/--style. Symbol svg paths are repo-relative.",
+  "readme": "Film prices follow the pricing docs (D-20261117-pricing-proportional-sar, hogwarts pricing/rates.ts): 24 SAR per student a year = $6.40. UAE shows 24 AED (Abdout, 2026-11-21). Change a price here and only that market's versions rebuild.",
   "sa": {
-    "name": { "ar": "السعودية", "en": "Saudi Arabia" },
+    "name": {
+      "ar": "السعودية",
+      "en": "Saudi Arabia"
+    },
     "currency": "SAR",
-    "price": 25,
-    "symbol": { "svg": "content/media/currency/sar.svg", "text": "ر.س" },
+    "price": 24,
+    "symbol": {
+      "svg": "content/media/currency/sar.svg",
+      "text": "ر.س"
+    },
     "numerals": "arab",
-    "langs": ["ar", "en"],
+    "langs": [
+      "ar",
+      "en"
+    ],
     "voice": {
-      "ar": { "dialect": "saudi", "style": "calm Najdi Saudi Arabic" },
-      "en": { "dialect": "neutral", "style": "calm, clear international English" }
+      "ar": {
+        "dialect": "saudi",
+        "style": "calm Najdi Saudi Arabic"
+      },
+      "en": {
+        "dialect": "neutral",
+        "style": "calm, clear international English"
+      }
     }
   },
   "ae": {
-    "name": { "ar": "الإمارات", "en": "United Arab Emirates" },
+    "name": {
+      "ar": "الإمارات",
+      "en": "United Arab Emirates"
+    },
     "currency": "AED",
-    "price": 25,
-    "symbol": { "svg": "content/media/currency/aed.svg", "text": "د.إ" },
+    "price": 24,
+    "symbol": {
+      "svg": "content/media/currency/aed.svg",
+      "text": "د.إ"
+    },
     "numerals": "arab",
-    "langs": ["ar", "en"],
+    "langs": [
+      "ar",
+      "en"
+    ],
     "voice": {
-      "ar": { "dialect": "saudi", "style": "calm Gulf/Saudi Arabic" },
-      "en": { "dialect": "neutral", "style": "calm, clear international English" }
+      "ar": {
+        "dialect": "saudi",
+        "style": "calm Gulf/Saudi Arabic"
+      },
+      "en": {
+        "dialect": "neutral",
+        "style": "calm, clear international English"
+      }
     }
   },
   "eg": {
-    "name": { "ar": "مصر", "en": "Egypt" },
+    "name": {
+      "ar": "مصر",
+      "en": "Egypt"
+    },
     "currency": "USD",
-    "price": 7,
-    "symbol": { "text": "$" },
+    "price": 6.4,
+    "symbol": {
+      "text": "$"
+    },
     "numerals": "arab",
-    "langs": ["ar", "en"],
+    "langs": [
+      "ar",
+      "en"
+    ],
     "voice": {
-      "ar": { "dialect": "egyptian", "style": "calm Egyptian Arabic" },
-      "en": { "dialect": "neutral", "style": "calm, clear international English" }
+      "ar": {
+        "dialect": "egyptian",
+        "style": "calm Egyptian Arabic"
+      },
+      "en": {
+        "dialect": "neutral",
+        "style": "calm, clear international English"
+      }
     }
   },
   "sd": {
-    "name": { "ar": "السودان", "en": "Sudan" },
+    "name": {
+      "ar": "السودان",
+      "en": "Sudan"
+    },
     "currency": "USD",
-    "price": 7,
-    "symbol": { "text": "$" },
+    "price": 6.4,
+    "symbol": {
+      "text": "$"
+    },
     "numerals": "arab",
-    "langs": ["ar", "en"],
+    "langs": [
+      "ar",
+      "en"
+    ],
     "voice": {
-      "ar": { "dialect": "msa", "style": "calm Modern Standard Arabic" },
-      "en": { "dialect": "neutral", "style": "calm, clear international English" }
+      "ar": {
+        "dialect": "msa",
+        "style": "calm Modern Standard Arabic"
+      },
+      "en": {
+        "dialect": "neutral",
+        "style": "calm, clear international English"
+      }
     }
   }
 }

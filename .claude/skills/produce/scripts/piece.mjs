@@ -40,17 +40,26 @@ const dialect = vo.dialect || "neutral"
 const style = vo.style || ""
 
 const CURRENCY = { SAR: { ar: "ريالاً", en: "riyals" }, AED: { ar: "درهماً", en: "dirhams" }, USD: { ar: "دولارات", en: "dollars" } }
+const CURRENCY_ONE = { SAR: "ريال", AED: "درهم", USD: "دولار" }
 const arab = (n) => String(n).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d])
-const price = market.numerals === "arab" && lang === "ar" ? arab(market.price) : String(market.price)
+// A fractional price shows with two decimals ($6.40; Arabic ٦٫٤٠ with the Arabic decimal mark)
+const shown = Number.isInteger(market.price) ? String(market.price) : market.price.toFixed(2)
+const price = market.numerals === "arab" && lang === "ar" ? arab(shown).replace(".", "٫") : shown
+// Spoken, a fraction reads as units + cents ("6 dollars 40 cents" / "٦ دولارات و٤٠ سنتاً"), never "six point four"
+const whole = Math.trunc(market.price), cents = Math.round((market.price - whole) * 100)
+const num = (n) => (market.numerals === "arab" && lang === "ar" ? arab(n) : String(n))
 // en: "$" goes before the figure; any other currency reads as its code after it
 const symbolEn = market.currency === "USD" ? "$" : market.currency
 // Arabic with a bare "$" reads badly ("٧ $"): use the currency word (دولارات) instead
 const symbol = lang === "ar" ? (market.symbol?.svg || market.symbol?.text !== "$" ? market.symbol?.text || market.currency : CURRENCY[market.currency]?.ar || market.currency) : symbolEn
 const tokens = { price, currency: CURRENCY[market.currency]?.[lang] || market.currency, currencySymbol: symbol, market: market.name?.[lang] || marketId }
-const fill = (s, { dropSymbol = false } = {}) => {
+const fill = (s, { dropSymbol = false, spoken = false } = {}) => {
   let t = s
+  if (spoken && cents) t = t.replace("{{price}} {{currency}}", lang === "ar" ? `${num(whole)} ${tokens.currency} و${num(cents)} سنتاً` : `${whole} ${tokens.currency} ${cents} cents`)
   if (lang === "en" && symbolEn !== "$") t = t.replace("{{currencySymbol}}{{price}}", "{{price}} {{currencySymbol}}")
   if (dropSymbol) t = t.replace(/\s*\{\{currencySymbol\}\}/, "")
+  // Arabic after a decimal figure takes the singular: «٦٫٤٠ دولار», not «دولارات»
+  if (!spoken && cents && lang === "ar") t = t.replace(/\{\{price\}\}(\s*)\{\{(currency|currencySymbol)\}\}/, `{{price}}$1${CURRENCY_ONE[market.currency] || "{{$2}}"}`)
   return t.replace(/\{\{(\w+)\}\}/g, (m, k) => (k in tokens ? tokens[k] : m)).replace(/ {2,}/g, " ").trim()
 }
 const pick = (o) => o[`${lang}@${dialect}`] ?? o[lang] ?? ""
@@ -59,7 +68,7 @@ const pick = (o) => o[`${lang}@${dialect}`] ?? o[lang] ?? ""
 const scenes = shots.map((sh) => {
   const sc = script.scenes.find((x) => x.id === sh.id)
   if (!sc) throw new Error(`scene ${sh.id} is in shot-list.json but not in script.json`)
-  return { id: sh.id, durationS: sh.durationS, onScreen: fill(pick(sc.onScreen)), voice: fill(pick(sc.voice)), overridden: !!sc.voice[`${lang}@${dialect}`] }
+  return { id: sh.id, durationS: sh.durationS, onScreen: fill(pick(sc.onScreen)), voice: fill(pick(sc.voice), { spoken: true }), overridden: !!sc.voice[`${lang}@${dialect}`] }
 })
 const scriptOut = join(P, "03-script/variants", `${variant}.json`)
 writeJson(scriptOut, { variant, market: marketId, lang, dialect, style, scenes: scenes.map(({ overridden, ...s }) => s) })
