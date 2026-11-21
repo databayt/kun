@@ -452,6 +452,7 @@ Two things read the same catalog:
 
 - `onboarding-mac.sh --doctor` prints it after the engine health audit, so the terminal and the app never disagree.
 - The Machine app shows your readiness, completes a partial setup, heals what is failing (automatic fixes run by themselves; anything needing sudo or a sign-in is handed to you as a terminal command or a link) and applies due updates.
+- The same catalog says how each step is removed. `provision.mjs --uninstall --only <id>` (the Machine app's **Uninstall**) removes a step, refuses one that something installed still needs, and never removes a keystone (Homebrew, Node, the kun repo, Claude Code) by itself. What a person removed is kept in `~/.claude/state/readiness-optout.json`: it shows as "removed by you", leaves the percentage alone and is not reinstalled by the heartbeat. See [Machine → Install and uninstall](/docs/machine#install-and-uninstall).
 
 Each heartbeat carries the summary (percent, failing step ids, catalog version). Abdout sees the whole team on the admin page `/machines`: one row per computer, red when it has not reported for 48 hours or any step is failing, plus the requests a machine sent him (for example "create my CRM login").
 

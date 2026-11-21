@@ -43,8 +43,88 @@ With no `-MsiPath` or `-MsiUrl`, the script downloads the `.msi` of the [latest 
 
 1. In PowerShell run `claude` once and sign in with **your own** Claude account. Nobody signs in for you.
 2. Open **Kun** from the Start menu. The app picks up your name, department and agent from `settings.json`.
-3. Open the catalog and install your department's pack, then ask in Arabic or English.
+3. The app opens on **Install** until the computer is ready. Press **Install everything**, sign in where it asks, then open **.claude → departments** and install your department's pack. After that, ask in Arabic or English.
 4. Voice (optional): press the microphone, and the app downloads a small speech model once (about 142 MB). It runs on the CPU and nothing leaves the computer. A larger, slower, more accurate model (`small`, about 465 MB) can be chosen instead. Spoken replies use the Windows voices.
+
+## The sidebar
+
+The sidebar is the whole navigation. There is no title, toolbar or tab row in the work area: a screen shows content only. Click a link and its sub-links open under it; click one of those and the screen swaps to it. The lines under the open link are your path, so the sidebar is also the way back: click any line above to go up a level. On a narrow window the same four links are in the menu.
+
+| Link | Open it when | What is under it |
+| --- | --- | --- |
+| **Sessions** | You want a chat you had before | Every past chat on this computer: reopen, rename, delete |
+| **Install** | The computer is new, something stopped working, or you want something removed | The seven stages of a ready computer, each with its count (`9/11`), then each stage's steps |
+| **.claude** | You want to see, add, remove or switch off what the agent can do | The folders of `~/.claude`: `skills`, `agents`, `rules`, `hooks`, `departments`, `mcp` |
+| **Settings** | You are changing how the app or the engine behaves | General, Config, Health, Engine |
+| Docs | You want to read how something works | Opens these pages in the browser |
+| Mathematics | You want the curriculum walk-through | Starts a chat about it |
+
+The number beside **Install** (`· 82%`) is how ready the computer is; it disappears at 100%.
+
+**Settings, link by link**
+
+- **General**: language, who you are and your department. (The default agent is under **Install → Agents → Default agent**; every repo is under **Install → Repos → All repositories**.)
+- **Config**: the notifications line, your personal `settings.json` keys and the team secrets file. Every change is backed up first, and a failed health check puts the old content back.
+- **Health**: the engine's health check and app updates.
+- **Engine**: the engine's version and its own update. Hidden on machines whose profile does not manage the engine.
+
+## Install and uninstall
+
+Install is the wizard. It follows the same catalog the one-liner uses (`.claude/machine/readiness.json`), so the app and the terminal never disagree about what "ready" means.
+
+| Stage | What it covers |
+| --- | --- |
+| Identity | GitHub CLI, GitHub sign-in, membership of the databayt organization, SSH key, git name and email |
+| Accounts | Claude sign-in, Slack, team secrets, CRM keys, and for engineers Cloudflare, Vercel, AWS and Neon |
+| Foundation | Homebrew, git, Node 24, pnpm, jq, uv, ffmpeg, tesseract, tmux, Chrome, Colima |
+| Repos | The repos folder, the kun, hogwarts and codebase clones, each product's `.env` |
+| Agents | Claude Code and Desktop, Antigravity, opencode, Codex, Hermes |
+| Engine | The engine's config in `~/.claude`, its MCP servers, the daily heartbeat, the devices lane |
+| Tools | Your department's apps: WebStorm and VS Code for tech; Blender, FilmCraft, OBS and ComfyUI for video |
+
+How to use it:
+
+1. Open **Install**. The first screen shows how ready the computer is and one button, **Install everything**. It runs every step that needs no person.
+2. Steps that need you are marked. Each has one button that takes you to the right place: **Sign in** opens Terminal with the command, **Open** opens the page (for example the organization invite), **Ask Abdout** sends him the request.
+3. Open a stage to see its steps, or one step to see the exact command it runs and what it waits for.
+4. **Heal with agent** hands whatever is still failing to Claude, in the kun folder, with the `provision` skill.
+
+**Uninstall** is on every step the wizard installed. Before it removes anything the app shows what still depends on the step, and it refuses while something installed needs it.
+
+- Apps and command-line tools are removed with the same tool that installed them.
+- Repos and `.env` files go to the **Trash**, not deleted. A repo with uncommitted, stashed or unpushed work is refused.
+- Sign-ins are signed out in Terminal.
+- **Homebrew, Node, the kun repo and Claude Code are keystones**: the app itself stands on them. The app never removes them by itself. It opens Terminal with the command and tells you that Machine cannot install anything afterwards; the [one-liner](/docs/onboarding#the-one-liner) brings it all back.
+- Steps with nothing on the computer to remove (organization membership, Slack, CRM keys) have no Uninstall.
+
+What you remove stays removed. The step shows as **removed by you**, it no longer counts against the percentage, and the daily heartbeat does not put it back. Press **Install** on it to bring it back.
+
+## The `.claude` control room
+
+**.claude** shows the agent's config folder the way Finder shows a folder: folders and files, nothing else.
+
+| Folder | What is in it | What you can do |
+| --- | --- | --- |
+| `skills` | What the agent knows how to do (`draft`, `deploy`, `funnel`, …) | Install, uninstall, switch on or off |
+| `agents` | The specialists it can hand work to | Install, uninstall, switch on or off |
+| `rules` | Standing instructions it always follows | Install, uninstall, switch on or off |
+| `hooks` | Scripts that run on events | Install, uninstall |
+| `departments` | A department's pack: its skills and agents in one item | Install the pack, or open it and pick items |
+| `mcp` | The outside services the agent can reach | Switch a server on or off |
+
+The first screen also shows three files, `CLAUDE.md`, `settings.json` and `.env`; opening one takes you to **Settings → Config**, where they are edited. Each folder ends with one line, for example `86 items · 61 on`.
+
+How to read a folder:
+
+- A normal icon is **installed** and on.
+- A dimmed icon with a download mark is **available** from kun but not on this computer. Open it and press **Install**.
+- A greyed icon is **switched off**: the file is kept aside, and the agent no longer sees it. The switch under the icon brings it back exactly as it was.
+- A blue dot means kun has a newer version: open it and press **Update**.
+- An icon with a person mark is **yours**: something you made. The app can switch it off, and it never deletes it.
+
+The difference between the two verbs: **switch off** keeps your copy and is undone with one click; **uninstall** removes kun's files. Both survive the daily engine refresh, which otherwise copies every engine item back.
+
+Hooks have no switch on purpose. A hook is wired from `settings.json`, and a missing file would raise an error on every event; install or uninstall it instead.
 
 ## What Moed's machine can and cannot do
 
