@@ -23,6 +23,16 @@ Flags: `--only id1,id2` (plus their `after` deps), `--departments a,b`, `--role 
 
 It emits NDJSON events (`start`, `progress`, `step`, `pass`, `done`), writes `~/.claude/state/readiness.json`, and appends a `provision` line to the runs ledger. Guardrails are in code: no sudo, no root-level rm, no force-push, no database reset or drop; `terminal`/`link`/`request` fixes are reported, never run; env values are never echoed; one lock, one run at a time.
 
+### Uninstall mode and the opt-out
+
+```
+node .claude/skills/provision/scripts/provision.mjs --uninstall --only tool.vscode,tool.obs --json [--dry-run]
+```
+
+`--only` is required (exit 2 without it). Each target's catalog `uninstall` (`{kind: auto|terminal, cmd, keystone?}`, catalog v2) runs dependents first. Events: `removing` then `removed`; `fail` (`no uninstaller`, or `refused: uninstall matches guardrail`); `blocked` (`needed by: a, b` — another installed step lists it in `after`); `human` (a `terminal` or keystone uninstall: the command is the detail, handed to a person, never run here). Keystones are `brew`, `node`, `repo.kun`, `claude.cli`. Repo and env removals go through `kun-trash` (to the Trash, refuses unsaved work).
+
+A removed or handed-off step is recorded in `~/.claude/state/readiness-optout.json` (`{"removed": {id: ISO time}}`). From then on `--check` reports it `skip` ("removed by you", out of the percent), `--complete`/`--maintain` do not reinstall it, and the onboarding delta is skipped while any opt-out exists. If the thing is found installed again after 30 minutes the opt-out is dropped; `--complete --only <id>` is an explicit reinstall and clears it. The state file lists current opt-outs under `removed`.
+
 ## 2. The agent's job after the script
 
 For each step still failing after `--complete` (and not `human`):

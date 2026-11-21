@@ -217,6 +217,17 @@ if [ -f "$ENGINE_JSON" ] && command -v jq &> /dev/null; then
     EC_USKILLS=$(jq -r '.counts.user_skills' "$ENGINE_JSON")
     ER_UAGENTS=$(find "$HOME/.claude/agents" -maxdepth 1 -name '*.md' ! -name '_index*' 2>/dev/null | wc -l | tr -d ' ')
     ER_USKILLS=$(find "$HOME/.claude/skills" -mindepth 2 -maxdepth 2 -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
+    # Items a person disabled or removed in the Machine control room (~/.kun/machine/disabled.json)
+    # are expected-absent: setup.sh keeps them out, so count them as present for the comparison.
+    DISABLED_JSON="${KUN_HOME:-$HOME/.kun}/machine/disabled.json"
+    if [ -f "$DISABLED_JSON" ]; then
+        for dis_id in $(jq -r '((.disabled // {}) | keys[]), (.removed // [])[]' "$DISABLED_JSON" 2>/dev/null | grep -E '^(agent|skill):[a-z0-9-]+$'); do
+            case "$dis_id" in
+                agent:*) [ -f "$HOME/.claude/agents/${dis_id#agent:}.md" ] || ER_UAGENTS=$((ER_UAGENTS + 1)) ;;
+                skill:*) [ -f "$HOME/.claude/skills/${dis_id#skill:}/SKILL.md" ] || ER_USKILLS=$((ER_USKILLS + 1)) ;;
+            esac
+        done
+    fi
     [ "$EC_UAGENTS" = "$ER_UAGENTS" ] && check pass "engine user-agents" "$ER_UAGENTS" || check warn "engine user-agents" "engine.json=$EC_UAGENTS actual=$ER_UAGENTS"
     [ "$EC_USKILLS" = "$ER_USKILLS" ] && check pass "engine user-skills" "$ER_USKILLS" || check warn "engine user-skills" "engine.json=$EC_USKILLS actual=$ER_USKILLS"
     # CONFIG-BENCHMARK.md is excluded on purpose: it is a historical ledger of

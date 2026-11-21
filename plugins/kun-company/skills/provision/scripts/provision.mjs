@@ -3,6 +3,13 @@
 //
 //   node provision.mjs --check | --complete | --maintain  [--only a,b] [--departments x,y]
 //        [--role engineer|member] [--json] [--dry-run] [--catalog <path>]
+//   node provision.mjs --uninstall --only a,b  [--json] [--dry-run] [--catalog <path>]
+//
+// --uninstall removes the named steps (requires --only; exits 2 without it) using each step's
+// catalog `uninstall` command: dependents first; a step another installed step needs is `blocked`;
+// terminal + keystone uninstalls are handed off as `human`, never run here. A removed or handed-off
+// step is recorded in <STATE_DIR>/readiness-optout.json so --check shows it `skip` ("removed by
+// you") and --complete does not reinstall it; `--complete --only <id>` clears the opt-out.
 //
 // Catalog: .claude/machine/readiness.json. Probe runner: `bash .claude/scripts/kun-ready <probe>`
 // (exit 0 pass / 1 fail / 2 skip, one detail line). Test hooks: PROVISION_PROBE_CMD,
@@ -20,6 +27,7 @@ const STATE_DIR = process.env.PROVISION_STATE_DIR || join(HOME, ".claude/state")
 const LEDGER = process.env.RUNS_LEDGER || join(HOME, ".claude/logs/runs.jsonl");
 const FIX_TIMEOUT_MS = Number(process.env.PROVISION_FIX_TIMEOUT_MS) || 15 * 60 * 1000;
 const CONCURRENCY = 4;
+const OPTOUT_GRACE_MS = 30 * 60 * 1000; // a handed-off removal may still be in progress
 const AGENT_LANES = ["code", "desktop", "agy", "opencode", "hermes"];
 
 // ── args ───────────────────────────────────────────────────────
@@ -28,7 +36,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const t = argv[i];
     const val = () => (t.includes("=") ? t.slice(t.indexOf("=") + 1) : argv[++i]);
-    if (t === "--check" || t === "--complete" || t === "--maintain") a.mode = t.slice(2);
+    if (t === "--check" || t === "--complete" || t === "--maintain" || t === "--uninstall") a.mode = t.slice(2);
     else if (t === "--json") a.json = true;
     else if (t === "--dry-run") a.dry = true;
     else if (t.startsWith("--only")) a.only = val().split(",").filter(Boolean);
@@ -150,7 +158,11 @@ function lock() {
 export async function main(argv, out = (s) => process.stdout.write(s)) {
   const args = parseArgs(argv);
   if (!args.mode) {
-    out("usage: provision.mjs --check|--complete|--maintain [--only ids] [--departments a,b] [--role engineer|member] [--json] [--dry-run] [--catalog path]\n");
+    out("usage: provision.mjs --check|--complete|--maintain [--only ids] [--departments a,b] [--role engineer|member] [--json] [--dry-run] [--catalog path]\n       provision.mjs --uninstall --only ids [--json] [--dry-run] [--catalog path]\n");
+    return 2;
+  }
+  if (args.mode === "uninstall" && !args.only?.length) {
+    out("usage: provision.mjs --uninstall --only <id,id> [--json] [--dry-run]  (--only is required: nothing is removed by default)\n");
     return 2;
   }
   let catalog;
@@ -177,6 +189,31 @@ async function execute(args, catalog, out) {
   const events = [];
   const prevState = (() => { try { return JSON.parse(readFileSync(join(STATE_DIR, "readiness.json"), "utf8")); } catch { return {}; } })();
   const lastUpdate = { ...(prevState.lastUpdate || {}) };
+
+  // opt-out: steps a person removed on purpose — never reinstalled behind their back
+  const optoutFile = join(STATE_DIR, "readiness-optout.json");
+  const optout = (() => { try { return { ...(JSON.parse(readFileSync(optoutFile, "utf8")).removed || {}) }; } catch { return {}; } })();
+  let optoutDirty = false;
+  const saveOptout = () => {
+    if (args.dry || !optoutDirty) return;
+    try {
+      mkdirSync(STATE_DIR, { recursive: true });
+      writeFileSync(optoutFile, JSON.stringify({ removed: optout }, null, 2));
+      optoutDirty = false;
+    } catch {}
+  };
+  // `--complete --only <id>` on an opted-out id is an explicit reinstall
+  if ((args.mode === "complete" || args.mode === "maintain") && args.only?.length) {
+    for (const id of args.only) if (id in optout) { delete optout[id]; optoutDirty = true; }
+    saveOptout();
+  }
+  const applyOptout = (s, r) => {
+    const at = optout[s.id];
+    if (!at) return r;
+    if (r.status !== "pass") return { status: "skip", detail: "removed by you" };
+    if (Date.now() - Date.parse(at) > OPTOUT_GRACE_MS) { delete optout[s.id]; optoutDirty = true; return r; }
+    return { status: "skip", detail: "removal in progress" };
+  };
 
   const emit = (ev) => {
     events.push(ev);
@@ -220,7 +257,7 @@ async function execute(args, catalog, out) {
           if (bad) { settle(s, { status: "blocked", detail: `after ${bad}` }); continue; }
           if (running.size >= CONCURRENCY) { pending.add(s.id); break; }
           running.add(s.id);
-          probe(s).then((r) => { running.delete(s.id); settle(s, r); tick(); });
+          probe(s).then((r) => { running.delete(s.id); settle(s, applyOptout(s, r)); tick(); });
         }
         if (!pending.size && !running.size) done();
       };
@@ -249,6 +286,7 @@ async function execute(args, catalog, out) {
   }
 
   async function onboardingDelta(res) {
+    if (Object.keys(optout).length) return; // the onboarding script would reinstall what was removed
     const failing = steps.filter((s) => ["foundation", "agents", "repos"].includes(s.stage) && res.get(s.id)?.status === "fail" && s.fix?.kind === "auto");
     if (!failing.length) return;
     const missing = AGENT_LANES.filter((l) => failing.some((s) => s.stage === "agents" && (s.id.includes(l) || s.check?.probe?.includes(l))));
@@ -262,6 +300,55 @@ async function execute(args, catalog, out) {
       },
     });
   }
+
+  async function uninstallAll() {
+    const byId = new Map(catalog.steps.map((s) => [s.id, s]));
+    const targets = [];
+    for (const id of args.only) {
+      const s = steps.find((x) => x.id === id);
+      if (s) targets.push(s);
+      else emit({ type: "step", id, stage: byId.get(id)?.stage ?? null, status: "fail", detail: byId.has(id) ? "not applicable on this machine" : "no such step" });
+    }
+    // transitive `after`: a step goes before everything it depends on
+    const needs = (s, seen = new Set()) => {
+      for (const d of byId.get(s.id)?.after || []) if (!seen.has(d)) { seen.add(d); needs({ id: d }, seen); }
+      return seen;
+    };
+    const dep = new Map(targets.map((s) => [s.id, needs(s)]));
+    const order = [];
+    const left = [...targets];
+    while (left.length) {
+      const i = left.findIndex((s) => !left.some((t) => t !== s && dep.get(t.id).has(s.id)));
+      order.push(...left.splice(i < 0 ? 0 : i, 1));
+    }
+    const targetIds = new Set(targets.map((s) => s.id));
+    const universe = select(catalog, { os });
+    const record = (s) => { optout[s.id] = now(); optoutDirty = true; saveOptout(); };
+    for (const s of order) {
+      const u = s.uninstall;
+      if (!u || !u.cmd) { emitStep(s, "fail", "no uninstaller"); continue; }
+      if (u.kind === "terminal" || u.keystone) {
+        emitStep(s, "human", u.cmd);
+        if (!args.dry) record(s);
+        continue;
+      }
+      const needers = [];
+      for (const o of universe) {
+        if (targetIds.has(o.id) || !(o.after || []).includes(s.id)) continue;
+        if ((await probe(o)).status === "pass") needers.push(o.id);
+      }
+      if (needers.length) { emitStep(s, "blocked", `needed by: ${needers.join(", ")}`); continue; }
+      const bad = forbidden(u.cmd);
+      if (bad) { emitStep(s, "fail", `refused: uninstall matches guardrail /${bad}/`); continue; }
+      if (args.dry) { emitStep(s, "removing", `dry-run: ${u.cmd}`); continue; }
+      emitStep(s, "removing", u.cmd);
+      const r = await run("bash", ["-lc", u.cmd], { timeoutMs: FIX_TIMEOUT_MS });
+      if (r.code === 0) { record(s); emitStep(s, "removed", ""); }
+      else emitStep(s, "fail", r.timedOut ? "uninstall timed out" : `uninstall exited ${r.code}: ${r.err.trim().split("\n").pop() || ""}`);
+    }
+  }
+
+  if (args.mode === "uninstall") await uninstallAll();
 
   let res;
   let n = 0;
@@ -305,9 +392,20 @@ async function execute(args, catalog, out) {
     }
   }
 
-  const { passed, applicable } = count(res);
-  const failing = steps.filter((s) => ["fail", "blocked", "human"].includes(res.get(s.id)?.status)).map((s) => s.id);
-  const human = steps.filter((s) => res.get(s.id)?.status === "human").map((s) => s.id);
+  saveOptout();
+  // An --only run looked at part of the catalog: fold it into the last full picture, so the
+  // percent and the state file keep describing the whole computer, not the few steps just run.
+  const stamp = now();
+  const order = new Map(catalog.steps.map((s, i) => [s.id, i]));
+  const kept = args.only?.length && Array.isArray(prevState.steps) ? prevState.steps.filter((p) => p && order.has(p.id) && !ids.has(p.id)) : [];
+  const picture = [
+    ...kept.map((p) => ({ id: p.id, status: p.status, detail: p.detail, at: p.at })),
+    ...steps.map((s) => ({ id: s.id, status: res.get(s.id)?.status, detail: redact(res.get(s.id)?.detail), at: stamp })),
+  ].sort((a, b) => order.get(a.id) - order.get(b.id));
+  const applicable = picture.filter((p) => p.status !== "skip").length;
+  const passed = picture.filter((p) => p.status === "pass").length;
+  const failing = picture.filter((p) => ["fail", "blocked", "human"].includes(p.status)).map((p) => p.id);
+  const human = picture.filter((p) => p.status === "human").map((p) => p.id);
   const percent = applicable ? Math.round((passed / applicable) * 1000) / 10 : 100;
   emit({ type: "done", percent, passed, applicable, failing, human });
   if (!args.json) out(`\n${percent}% ready (${passed}/${applicable})${failing.length ? " · failing: " + failing.join(", ") : ""}${human.length ? " · needs a person: " + human.join(", ") : ""}\n`);
@@ -315,10 +413,10 @@ async function execute(args, catalog, out) {
   if (!args.dry) {
     try {
       mkdirSync(STATE_DIR, { recursive: true });
-      const at = now();
+      const at = stamp;
       writeFileSync(join(STATE_DIR, "readiness.json"), JSON.stringify({
-        catalogVersion: catalog.version, at, percent, failing, human,
-        steps: steps.map((s) => ({ id: s.id, status: res.get(s.id)?.status, detail: redact(res.get(s.id)?.detail), at })),
+        catalogVersion: catalog.version, at, percent, failing, human, removed: Object.keys(optout),
+        steps: picture,
         lastUpdate,
       }, null, 2));
       mkdirSync(dirname(LEDGER), { recursive: true });

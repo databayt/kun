@@ -1,0 +1,82 @@
+#!/bin/bash
+# =============================================================================
+# kun-trash — move a repo checkout or its .env to the Trash. Never deletes.
+# =============================================================================
+#   kun-trash repo <name>   refuse unless the checkout is a clean git repo with nothing
+#                           stashed and no commit that exists on no remote; then Trash it
+#   kun-trash env <name>    Trash <repo>/.env (exit 0 with a note when absent)
+#
+# <name> is a plain repo name ([a-z0-9-]+); the directory is found the way kun-ready finds it
+# (the installer's repos dir, else $HOME). Exit 0 done · 1 refused (one line on stderr) · 2 usage.
+# Trash location: /usr/bin/trash (macOS 15+) · else ~/.Trash/<name>-<UTC time> · Linux: gio trash,
+# else ~/.local/share/Trash/files. KUN_TRASH_DIR overrides the location (tests).
+# =============================================================================
+set -u
+
+die() { echo "kun-trash: $*" >&2; exit 1; }
+usage() { echo "usage: kun-trash repo|env <name>" >&2; exit 2; }
+
+[ $# -eq 2 ] || usage
+KIND="$1"; NAME="$2"
+case "$KIND" in repo|env) ;; *) usage ;; esac
+[[ "$NAME" =~ ^[a-z0-9-]+$ ]] || die "'$NAME' is not a plain repo name ([a-z0-9-]+)"
+
+# ── Locate the repo (same rule as kun-ready: installer state, else $HOME) ──
+repos_dir() {
+    local f d=""
+    if [ "$(uname -s)" = Darwin ]; then f="$HOME/Library/Application Support/Databayt/installer-state.json"
+    else f="${XDG_CONFIG_HOME:-$HOME/.config}/databayt/installer-state.json"; fi
+    if [ -f "$f" ] && command -v jq >/dev/null 2>&1; then d="$(jq -r '.reposDir // empty' "$f" 2>/dev/null)"; fi
+    d="${d/#\~/$HOME}"
+    echo "${d:-$HOME}"
+}
+find_repo() {
+    local p
+    for p in "$(repos_dir)/$1" "$HOME/$1"; do
+        [ -d "$p/.git" ] && { echo "$p"; return 0; }
+    done
+    return 1
+}
+
+# ── Move to the Trash (mv or trash(1), never rm) ──
+to_trash() {
+    local src="$1" base stamp dest
+    base="$(basename "$src")"; stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+    if [ -n "${KUN_TRASH_DIR:-}" ]; then
+        mkdir -p "$KUN_TRASH_DIR" || die "cannot create $KUN_TRASH_DIR"
+        dest="$KUN_TRASH_DIR/$base-$stamp"
+        mv "$src" "$dest" || die "could not move $src to the Trash"
+    elif [ "$(uname -s)" = Darwin ]; then
+        if [ -x /usr/bin/trash ]; then
+            /usr/bin/trash "$src" || die "trash failed for $src"
+        else
+            mkdir -p "$HOME/.Trash" || die "cannot create ~/.Trash"
+            dest="$HOME/.Trash/$base-$stamp"
+            mv "$src" "$dest" || die "could not move $src to the Trash"
+        fi
+    elif command -v gio >/dev/null 2>&1 && gio trash "$src" 2>/dev/null; then
+        :
+    else
+        dest="${XDG_DATA_HOME:-$HOME/.local/share}/Trash/files"
+        mkdir -p "$dest" || die "cannot create $dest"
+        mv "$src" "$dest/$base-$stamp" || die "could not move $src to the Trash"
+    fi
+    echo "kun-trash: moved $src to the Trash"
+}
+
+DIR="$(find_repo "$NAME")" || {
+    if [ "$KIND" = env ]; then echo "kun-trash: $NAME is not cloned — no .env to move"; exit 0; fi
+    die "$NAME is not a git checkout in $(repos_dir)"
+}
+
+if [ "$KIND" = env ]; then
+    [ -f "$DIR/.env" ] || { echo "kun-trash: $NAME/.env is already absent"; exit 0; }
+    to_trash "$DIR/.env"
+    exit 0
+fi
+
+# repo: refuse anything that holds work not safe elsewhere
+[ -n "$(git -C "$DIR" status --porcelain 2>/dev/null)" ] && die "$NAME has uncommitted changes"
+[ -n "$(git -C "$DIR" stash list 2>/dev/null)" ] && die "$NAME has stashed changes"
+[ -n "$(git -C "$DIR" log --branches --not --remotes --oneline 2>/dev/null)" ] && die "$NAME has commits that are on no remote"
+to_trash "$DIR"

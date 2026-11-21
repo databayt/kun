@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "note": "Readiness catalog. Probes: .claude/scripts/kun-ready <probe>. Shared by onboarding-mac.sh --doctor and the Machine app.",
   "stages": [
     "identity",
@@ -37,6 +37,10 @@
         "kind": "auto",
         "cmd": "brew install gh"
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall gh"
+      },
       "update": {
         "cmd": "brew upgrade gh",
         "cadence": "weekly",
@@ -71,6 +75,10 @@
         "kind": "terminal",
         "cmd": "gh auth login -w",
         "message": "Sign in to GitHub in the browser"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "gh auth logout"
       }
     },
     {
@@ -186,6 +194,10 @@
         "kind": "terminal",
         "cmd": "claude auth login",
         "message": "Run claude and sign in"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "claude auth logout"
       }
     },
     {
@@ -460,6 +472,10 @@
       "fix": {
         "kind": "terminal",
         "cmd": "wrangler login"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "wrangler logout"
       }
     },
     {
@@ -487,6 +503,10 @@
       "fix": {
         "kind": "terminal",
         "cmd": "vercel login"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "vercel logout"
       }
     },
     {
@@ -570,6 +590,11 @@
         "cmd": "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"",
         "message": "Homebrew needs sudo"
       },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\"",
+        "keystone": true
+      },
       "update": {
         "cmd": "brew update",
         "cadence": "daily",
@@ -603,6 +628,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install git"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall git"
       },
       "update": {
         "cmd": "brew upgrade git",
@@ -638,6 +667,10 @@
         "kind": "auto",
         "cmd": "brew install jq"
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall jq"
+      },
       "update": {
         "cmd": "brew upgrade jq",
         "cadence": "weekly",
@@ -671,6 +704,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install uv"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall uv"
       },
       "update": {
         "cmd": "brew upgrade uv",
@@ -706,6 +743,10 @@
         "kind": "auto",
         "cmd": "brew install ffmpeg"
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall ffmpeg"
+      },
       "update": {
         "cmd": "brew upgrade ffmpeg",
         "cadence": "weekly",
@@ -739,6 +780,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install tesseract"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall tesseract"
       },
       "update": {
         "cmd": "brew upgrade tesseract",
@@ -774,6 +819,10 @@
         "kind": "auto",
         "cmd": "brew install tmux"
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall tmux"
+      },
       "update": {
         "cmd": "brew upgrade tmux",
         "cadence": "weekly",
@@ -807,6 +856,11 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install node@24"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "brew uninstall node@24",
+        "keystone": true
       },
       "update": {
         "cmd": "brew upgrade node@24",
@@ -842,6 +896,10 @@
         "kind": "auto",
         "cmd": "corepack enable && corepack prepare pnpm@latest --activate"
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "corepack disable pnpm"
+      },
       "update": {
         "cmd": "corepack prepare pnpm@latest --activate",
         "cadence": "weekly",
@@ -876,6 +934,10 @@
         "kind": "auto",
         "cmd": "brew install --cask google-chrome"
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall --cask google-chrome"
+      },
       "update": {
         "cmd": "brew upgrade --cask google-chrome",
         "cadence": "weekly",
@@ -909,6 +971,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install colima docker"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall colima docker"
       },
       "update": {
         "cmd": "brew upgrade colima",
@@ -972,6 +1038,11 @@
         "kind": "auto",
         "cmd": "gh repo clone databayt/kun \"$(bash .claude/scripts/kun-ready --repo-path kun)\""
       },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "bash .claude/scripts/kun-trash repo kun",
+        "keystone": true
+      },
       "update": {
         "cmd": "git -C \"$(bash .claude/scripts/kun-ready --repo-path kun)\" pull --ff-only",
         "cadence": "daily",
@@ -1006,6 +1077,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "gh repo clone databayt/hogwarts \"$(bash .claude/scripts/kun-ready --repo-path hogwarts)\""
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-trash repo hogwarts"
       },
       "update": {
         "cmd": "git -C \"$(bash .claude/scripts/kun-ready --repo-path hogwarts)\" pull --ff-only",
@@ -1042,6 +1117,10 @@
         "kind": "auto",
         "cmd": "gh repo clone databayt/codebase \"$(bash .claude/scripts/kun-ready --repo-path codebase)\""
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-trash repo codebase"
+      },
       "update": {
         "cmd": "git -C \"$(bash .claude/scripts/kun-ready --repo-path codebase)\" pull --ff-only",
         "cadence": "daily",
@@ -1075,6 +1154,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/vercel-pull.sh \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-trash env hogwarts"
       }
     },
     {
@@ -1104,6 +1187,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/vercel-pull.sh \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-trash env mkan"
       }
     },
     {
@@ -1133,6 +1220,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/vercel-pull.sh \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-trash env souq"
       }
     },
     {
@@ -1162,6 +1253,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/vercel-pull.sh \"$(bash .claude/scripts/kun-ready --repos-dir)\""
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-trash env shifa"
       }
     },
     {
@@ -1189,6 +1284,11 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=code"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "rm -f \"$HOME/.local/bin/claude\" && rm -r \"$HOME/.local/share/claude\"",
+        "keystone": true
       },
       "update": {
         "cmd": "claude update",
@@ -1251,6 +1351,10 @@
         "kind": "auto",
         "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=desktop"
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall --cask claude"
+      },
       "update": {
         "cmd": "brew upgrade --cask claude",
         "cadence": "weekly",
@@ -1284,6 +1388,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=desktop"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "f=\"$HOME/Library/Application Support/Claude/claude_desktop_config.json\"; if [ -L \"$f\" ] && [ \"$(readlink \"$f\")\" = \"$HOME/.claude/mcp.json\" ]; then rm -f \"$f\"; fi"
       }
     },
     {
@@ -1311,6 +1419,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=agy"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "rm -f \"$(command -v agy)\""
       }
     },
     {
@@ -1368,6 +1480,10 @@
         "kind": "auto",
         "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=opencode"
       },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "opencode uninstall"
+      },
       "update": {
         "cmd": "brew upgrade opencode",
         "cadence": "weekly",
@@ -1401,6 +1517,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=opencode"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "f=\"$HOME/.config/opencode/opencode.json\"; if [ -f \"$f\" ] && [ \"$(jq -r .permission \"$f\")\" = \"allow\" ]; then jq 'del(.permission)' \"$f\" > \"$f.tmp\" && mv \"$f.tmp\" \"$f\"; fi"
       }
     },
     {
@@ -1428,6 +1548,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "npm i -g @openai/codex"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "npm uninstall -g @openai/codex"
       },
       "update": {
         "cmd": "npm i -g @openai/codex@latest",
@@ -1460,6 +1584,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=hermes"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "hermes uninstall"
       }
     },
     {
@@ -1518,6 +1646,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/setup.sh --quiet"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --uninstall"
       }
     },
     {
@@ -1577,6 +1709,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/setup.sh --quiet"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "for n in $(jq -r '.mcpServers | to_entries[] | select(.value[\"$skipRegistration\"] != true) | .key' .claude/mcp.json); do claude mcp remove -s user \"$n\" >/dev/null 2>&1 || true; done"
       }
     },
     {
@@ -1664,6 +1800,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/maintain.sh --install"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/maintain.sh --uninstall"
       }
     },
     {
@@ -1693,6 +1833,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/devices.sh --install"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/devices.sh --uninstall"
       }
     },
     {
@@ -1720,6 +1864,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/blender.sh install"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall --cask blender"
       }
     },
     {
@@ -1747,6 +1895,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "bash .claude/scripts/filmcraft.sh install"
+      },
+      "uninstall": {
+        "kind": "terminal",
+        "cmd": "rm -r /Applications/FilmCraft.app \"$HOME/.local/share/filmcraft-cli\" && rm -f \"$HOME/.local/bin/filmcraft-cli\""
       },
       "update": {
         "cmd": "bash .claude/scripts/filmcraft.sh update",
@@ -1782,6 +1934,10 @@
         "kind": "auto",
         "cmd": "brew install whisper-cpp"
       },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall whisper-cpp"
+      },
       "update": {
         "cmd": "brew upgrade whisper-cpp",
         "cadence": "weekly",
@@ -1815,6 +1971,10 @@
       "fix": {
         "kind": "terminal",
         "cmd": "mkdir -p ~/.cache/whisper && curl -L -o ~/.cache/whisper/ggml-small.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "rm -f \"$HOME/.cache/whisper/ggml-small.bin\""
       }
     },
     {
@@ -1844,6 +2004,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install --cask obs"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall --cask obs"
       },
       "update": {
         "cmd": "brew upgrade --cask obs",
@@ -1876,6 +2040,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install --cask comfyui"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall --cask comfyui"
       }
     },
     {
@@ -1932,6 +2100,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install --cask webstorm"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall --cask webstorm"
       }
     },
     {
@@ -1961,6 +2133,10 @@
       "fix": {
         "kind": "auto",
         "cmd": "brew install --cask visual-studio-code"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "brew uninstall --cask visual-studio-code"
       }
     }
   ]

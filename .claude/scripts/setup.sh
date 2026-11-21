@@ -9,9 +9,11 @@ set -e
 
 QUIET=0
 ROLE=""
+UNINSTALL=0
 for arg in "$@"; do
     case "$arg" in
         --quiet) QUIET=1 ;;
+        --uninstall) UNINSTALL=1 ;;
         --*) echo "Unknown flag: $arg" >&2; exit 1 ;;
         *) [ -z "$ROLE" ] && ROLE="$arg" ;;
     esac
@@ -27,6 +29,57 @@ pass() { [ "$QUIET" = 1 ] || echo -e "  ${G}✓${NC} $1"; }
 fail() { echo -e "  ${R}✗${NC} $1"; ERRORS=$((ERRORS + 1)); }
 info() { [ "$QUIET" = 1 ] || echo -e "  ${D}·${NC} $1"; }
 say()  { [ "$QUIET" = 1 ] || echo -e "$1"; }
+
+# ── Uninstall — remove exactly what the manifest lists, nothing else ──
+# Runs before any install work. Skills, agents, workflows and rules the engine shipped are
+# removed from ~/.claude, then the manifest. Personal items, settings.json, hooks, scripts,
+# bin, memory and .env are deliberately left.
+if [ "$UNINSTALL" = 1 ]; then
+    MANIFEST="$CLAUDE_DIR/.kun-manifest.json"
+    if [ ! -f "$MANIFEST" ]; then
+        echo "Nothing to uninstall — no $MANIFEST (the engine was not installed by setup.sh here)."
+        exit 0
+    fi
+    UN_OUT=$(python3 - "$CLAUDE_DIR" "$MANIFEST" <<'PYEOF'
+import json, os, re, shutil, sys
+
+claude, manifest_path = sys.argv[1], sys.argv[2]
+try:
+    with open(manifest_path) as f:
+        m = json.load(f)
+except Exception:
+    print("ERR unreadable manifest")
+    sys.exit(0)
+
+targets = {"skills": True, "agents": False, "workflows": False, "rules": False}
+safe = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]*$")
+removed = []
+for key, is_dir in targets.items():
+    for name in m.get(key, []) or []:
+        if not isinstance(name, str) or not safe.match(name):
+            continue
+        target = os.path.join(claude, key, name)
+        if is_dir and os.path.isdir(target) and not os.path.islink(target):
+            shutil.rmtree(target)
+            removed.append(f"{key}/{name}")
+        elif not is_dir and os.path.isfile(target):
+            os.remove(target)
+            removed.append(f"{key}/{name}")
+os.remove(manifest_path)
+print(len(removed))
+for r in removed:
+    print(r)
+PYEOF
+    ) || UN_OUT="ERR python failed"
+    case "$UN_OUT" in
+        ERR*) echo -e "${R}Uninstall stopped:${NC} ${UN_OUT#ERR }" >&2; exit 1 ;;
+    esac
+    UN_COUNT=$(echo "$UN_OUT" | head -1)
+    echo -e "${B}Kun Engine uninstall${NC} — removed ${UN_COUNT:-0} engine item(s) from $CLAUDE_DIR and the manifest"
+    echo "$UN_OUT" | tail -n +2 | while read -r item; do if [ -n "$item" ]; then echo "  - $item"; fi; done
+    echo "Left in place: personal skills/agents/rules, settings.json, hooks, scripts, bin, memory, CLAUDE.md, .env, MCP registrations."
+    exit 0
+fi
 
 # ── Role validation ──────────────────────────────────────────────
 # Fall back to the persisted role so unattended refreshes need no args.
@@ -176,6 +229,48 @@ if [ -d "$KUN_DIR/.claude/skills" ]; then
     cp -r "$KUN_DIR/.claude/skills/"* "$CLAUDE_DIR/skills/" 2>/dev/null || true
     SKILL_COUNT=$(ls -d "$CLAUDE_DIR/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
     info "skills ($SKILL_COUNT)"
+fi
+
+# ── The control room's choices ───────────────────────────────────
+# Machine writes ~/.kun/machine/disabled.json: items a person turned off (`disabled`) or removed
+# (`removed`). The copy steps above put every engine item back, so take those out again before
+# the manifest is written. Only skill/agent/rule ids with a plain name are honoured; a missing or
+# unreadable file does nothing.
+KUN_HOME="${KUN_HOME:-$HOME/.kun}"
+DISABLED_FILE="$KUN_HOME/machine/disabled.json"
+if [ -f "$DISABLED_FILE" ]; then
+    SKIP_COUNT=$(python3 - "$DISABLED_FILE" "$CLAUDE_DIR" <<'PYEOF' 2>/dev/null || echo 0
+import json, os, re, shutil, sys
+
+path, claude = sys.argv[1], sys.argv[2]
+try:
+    with open(path) as f:
+        data = json.load(f)
+    ids = list((data.get("disabled") or {}).keys()) + list(data.get("removed") or [])
+except Exception:
+    print(0)
+    sys.exit(0)
+
+dirs = {"skill": ("skills", "{}", True), "agent": ("agents", "{}.md", False), "rule": ("rules", "{}.md", False)}
+count = 0
+for ident in ids:
+    if not isinstance(ident, str) or ":" not in ident:
+        continue
+    kind, name = ident.split(":", 1)
+    if kind not in dirs or not re.fullmatch(r"[a-z0-9-]+", name):
+        continue
+    sub, pattern, is_dir = dirs[kind]
+    target = os.path.join(claude, sub, pattern.format(name))
+    if is_dir and os.path.isdir(target) and not os.path.islink(target):
+        shutil.rmtree(target)
+        count += 1
+    elif not is_dir and os.path.isfile(target):
+        os.remove(target)
+        count += 1
+print(count)
+PYEOF
+    )
+    [ "${SKIP_COUNT:-0}" -gt 0 ] 2>/dev/null && info "control room: kept $SKIP_COUNT disabled/removed item(s) out of ~/.claude"
 fi
 
 # ── Manifest prune ───────────────────────────────────────────────
