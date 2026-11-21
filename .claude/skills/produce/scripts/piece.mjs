@@ -80,6 +80,8 @@ writeJson(voiceScript, { engine: "gemini", voice: "Charon", lang, dialect, style
 
 // ---- 3. piece spec for assemble.mjs
 const missing = []
+const assetFile = join(P, "05-assets/asset-manifest.json")
+const assetMap = existsSync(assetFile) ? JSON.parse(readFileSync(assetFile, "utf8")) : {}
 const need = (f) => { if (!existsSync(f)) missing.push(f); return f }
 const items = []
 let endCard
@@ -87,7 +89,15 @@ shots.forEach((sh, i) => {
   const s = scenes[i]
   const last = i === shots.length - 1
   if (sh.source?.type === "capture") {
-    items.push({ type: "clip", id: sh.id, src: need(join(P, "05-assets/screen-recordings", lang, `${sh.id}.mp4`)), in: 0, out: sh.durationS, label: s.onScreen })
+    // A recorded take wins; else the scene's real phone stills from 05-assets/asset-manifest.json
+    // (scenes.<id>.<lang> = [png…]) share the scene's time, each with a slow push-in.
+    const take = join(P, "05-assets/screen-recordings", lang, `${sh.id}.mp4`)
+    const stills = assetMap.scenes?.[sh.id]?.[lang] || []
+    if (!existsSync(take) && stills.length) {
+      const each = +(sh.durationS / stills.length).toFixed(2)
+      stills.forEach((f, i) => items.push({ type: "still", id: `${sh.id}-${i + 1}`, src: need(f), seconds: each, ...(i === 0 ? { label: s.onScreen } : {}),
+        move: { from: [0.5, 0.35, 1], to: [0.5, 0.4, 1.06], ease: "inOutSine" } }))
+    } else items.push({ type: "clip", id: sh.id, src: need(take), in: 0, out: sh.durationS, label: s.onScreen })
   } else if (last) {
     const [title, ...rest] = s.onScreen.split(" · ")
     endCard = { title, subtitle: rest.join(" · "), seconds: sh.durationS }

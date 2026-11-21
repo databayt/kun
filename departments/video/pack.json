@@ -46,9 +46,9 @@
       ],
       "label_ar": "فيديو تعريفي لبالقلم",
       "label_en": "Balqalam intro film",
-      "prompt": "produce: تابع الفيديو التعريفي لبالقلم (HOG-INTRO-INTRODUCTION-20261120-V001) — لفيسبوك، عمودي للجوال، بكل نسخه: السعودية والإمارات ومصر والسودان، عربي وإنجليزي، بلهجة وعملة كل سوق. شغّل /produce status، ثم أنجز الخطوة التالية (أو produce build --all بعد اعتماد السكربت) وتوقّف عند البوابة البشرية القادمة.",
-      "description_en": "Move the Balqalam intro film forward — every market version (SA, UAE, EG, SD × ar/en) with its own voice and price.",
-      "description_ar": "انقل الفيديو التعريفي لبالقلم للأمام — كل نسخ الأسواق (السعودية، الإمارات، مصر، السودان × عربي/إنجليزي) بصوتها وسعرها."
+      "prompt": "produce: تابع الفيديو التعريفي لبالقلم (HOG-INTRO-INTRODUCTION-20261120-V001). اقرأ /produce status وحقل focus في project.json وابدأ بالنسخة المحددة فيه (الآن sd-ar: السودان، عربي، جوال). نفّذ المراحل المتبقية بأدواتنا: لقطة Blender للريشة بلا نص (مشتركة)، ثم produce build --variant <focus> عبر FilmCraft، ثم QA، وتوقّف عند اعتماد النسخة. سجّل في النهاية ما تعطّل أو أبطأك.",
+      "description_en": "Move the Balqalam intro film forward — the focus version first (now Sudan · Arabic · mobile), Blender + FilmCraft, stop at approval.",
+      "description_ar": "انقل الفيديو التعريفي لبالقلم للأمام — نسخة التركيز أولاً (الآن السودان · عربي · جوال)، Blender ثم FilmCraft، وتوقّف عند الاعتماد."
     },
     {
       "repos": [

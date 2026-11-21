@@ -31,6 +31,8 @@ $P ship <ID> [--variant v|--all] --dry-run        # CDN keys + plan; real run on
 $P index                        # rebuild the local video index
 ```
 
+**Focus** — `project.json → focus` (e.g. `["sd-ar"]`) is the build order: Machine's starter and `build` work those versions first.
+
 ## The 14 stages
 
 Deliverables live in `~/media/_projects/<ID>/` (never inside a repo). Run `advance` after each stage.
