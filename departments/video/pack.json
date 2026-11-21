@@ -5,8 +5,10 @@
   "description": "Record, edit and generate video — reels, demos and explainers — with a QA agent before anything goes out.",
   "description_ar": "التسجيل والمونتاج وتوليد الفيديو — ريلز وعروض وشروحات — مع وكيل مراجعة قبل أي نشر.",
   "items": [
+    "skill:produce",
     "skill:edit",
     "skill:record",
+    "skill:blender",
     "skill:higgs",
     "agent:media-qa"
   ],
@@ -15,6 +17,7 @@
     "hogwarts"
   ],
   "docs": [
+    "produce",
     "edit",
     "record",
     "media",
@@ -36,6 +39,36 @@
       "prompt": "اكتب سكربت فيديو ٦٠ ثانية لميزة من هوغورتس: الفكرة، اللقطات، والتعليق الصوتي.",
       "description_en": "A 60-second script for a Hogwarts feature: the idea, the shots and the voiceover.",
       "description_ar": "سكربت ٦٠ ثانية لميزة في هوغورتس: الفكرة واللقطات والتعليق الصوتي."
+    },
+    {
+      "repos": [
+        "hogwarts"
+      ],
+      "label_ar": "فيديو تعريفي لبالقلم",
+      "label_en": "Balqalam intro film",
+      "prompt": "produce: تابع الفيديو التعريفي لبالقلم (المشروع HOG-INTRO-INTRODUCTION-20261120-V001) — لفيسبوك فقط، عمودي للجوال، نسختان عربية وإنجليزية، موجّه لملاك المدارس ومديريها. شغّل /produce status ثم أنجز المرحلة التالية وتوقّف عند البوابة البشرية القادمة.",
+      "description_en": "Move the Balqalam intro film to its next gate — a vertical Facebook film for phones, in Arabic and English.",
+      "description_ar": "انقل الفيديو التعريفي لبالقلم إلى بوابته التالية — فيلم عمودي لفيسبوك على الجوال، بالعربية والإنجليزية."
+    },
+    {
+      "repos": [
+        "hogwarts"
+      ],
+      "label_ar": "فيديو ميزة من الواجهة الحقيقية",
+      "label_en": "Feature video from the real app",
+      "prompt": "produce: فيديو ميزة من هوغورتس لفيسبوك — اقترح أقوى ٣ ميزات لملاك المدارس، وبعد اختياري سجّل الواجهة الحقيقية بمقاس الجوال (/record) واصنع شرحًا عموديًا ٣٠–٦٠ ثانية بنسختين عربية وإنجليزية، عبر سجل /produce.",
+      "description_en": "Record a real feature at phone size and cut a 30–60 s vertical Facebook explainer, in Arabic and English.",
+      "description_ar": "سجّل ميزة حقيقية بمقاس الجوال واصنع شرحًا عموديًا ٣٠–٦٠ ثانية لفيسبوك، بالعربية والإنجليزية."
+    },
+    {
+      "repos": [
+        "hogwarts"
+      ],
+      "label_ar": "مكتب الإنتاج",
+      "label_en": "Production desk",
+      "prompt": "produce: مكتب الإنتاج — افحص جاهزية خط الفيديو (ffmpeg، Blender، FilmCraft، HyperFrames، خوادم MCP، المساحة، الكهرباء، هوية العلامة)، ثم اعرض كل مشاريع فيديو هوغورتس بمرحلتها والبوابة المنتظرة، وسمِّ الخطوة التالية.",
+      "description_en": "Check the video line's readiness and show every Hogwarts video project with its stage, its waiting gate and the next step.",
+      "description_ar": "افحص جاهزية خط الفيديو واعرض كل مشاريع هوغورتس بمرحلتها والبوابة المنتظرة والخطوة التالية."
     }
   ],
   "cards": [

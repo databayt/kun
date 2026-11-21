@@ -19,6 +19,7 @@ stage belongs to an existing skill (table below). Blueprint: `~/.claude/playwrig
 P="node ~/.claude/skills/produce/scripts/produce.mjs"
 $P init --brand hogwarts --category intro --subject introduction --lang ar,en   # → HOG-INTRO-INTRODUCTION-20261120-V001
 $P issue <ID> --create          # one GitHub issue, label dept:video, kun block items=skill:produce
+$P set <ID> identity balqalam   # change the on-film identity of an existing project
 $P status <ID>                  # stage table, gates, cost, next stage
 $P advance <ID> <stage> --file <deliverable> [--verdict pass|fail]
 $P approve <ID> --version V001 --by <login> [--gate script|version|publish] [--destination facebook] [--issue databayt/x#n]
@@ -67,6 +68,14 @@ Deliverables live in `~/media/_projects/<ID>/` (never inside a repo). Run `advan
 `produce issue <ID> --create` opens a GitHub issue labelled `dept:video` + `P2` whose last line is the kun block
 `<!-- kun: repos=kun; items=skill:produce; project=<ID> -->`, with the 14-stage checklist and the three gates in the
 body. Tick the boxes as stages land (`produce status`), pass `--issue repo#n` to `approve`, close it on publish.
+
+## Identity
+
+**brand** = the production line and ledger code (HOG/MKN/DBY, CDN `video/<brand>/`). **identity** = the brand-kit
+face that appears on film — name, wordmark, colors. It defaults to the brand; set `init --identity balqalam` (or
+`set <ID> identity balqalam`) to make a hogwarts-line production under Balqalam, e.g. the intro film for school
+owners. `brand.mjs`, captions and the end card read `brand-kit[identity]`; a `balqalam` piece never carries the
+Hogwarts wordmark, a `hogwarts` piece never says بالقلم. `init` also takes `--audience` and `--objective`.
 
 ## Brands
 

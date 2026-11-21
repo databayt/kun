@@ -1,0 +1,105 @@
+---
+title: Produce
+description: The video factory — one engine, three production lines, 14 stages from a request to Facebook, with three human gates and a CDN tier. Arabic-first, local, free by default
+---
+
+# Produce
+
+`produce` turns a request into a finished, approved video. It is a **ledger**, not a renderer: it
+creates the project folder, records each of the 14 stages, holds the human gates and ships the
+approved master to the CDN. The work of each stage belongs to a skill that already exists
+([draft](/docs/social), [record](/docs/record), [higgs](/docs/higgs), [edit](/docs/edit) and the
+rest) — `produce` chains them and re-implements none.
+
+## The three lines
+
+| Line | Code | Makes |
+| --- | --- | --- |
+| `hogwarts` | HOG | Product explainers and tutorials, real UI |
+| `mkan` | MKN | Marketplace intro, property storytelling |
+| `databayt` | DBY | Company, people, engineering |
+
+## Quick start
+
+```bash
+P="node ~/.claude/skills/produce/scripts/produce.mjs"
+$P init --brand hogwarts --identity balqalam --category intro --subject introduction --lang ar,en \
+  --audience "School owners and principals" --objective "Book a 1-month free trial"
+$P status <ID>
+$P advance <ID> <stage> --file <deliverable>
+$P approve <ID> --version V001 --by <login> [--gate script|version|publish]
+$P ship <ID> --dry-run
+```
+
+## The 14 stages
+
+| # | Stage | Deliverable | Done by |
+| --- | --- | --- | --- |
+| 01 | request | `01-brief/request.json` | `produce init` |
+| 02 | research | `02-research/product-research.md` | product docs, verified vs assumed |
+| 03 | brief | `01-brief/creative-brief.md` | draft voice doctrine |
+| 04 | script | `03-script/script.md` | draft, Arabic first — **gate 1** |
+| 05 | storyboard | `04-storyboard/shot-list.json` | schema-validated |
+| 06 | assets | `05-assets/asset-manifest.json` | reuse first, then shoot / record / generate |
+| 07 | visual | `06-production/visual-manifest.json` | record, blender, higgs, HyperFrames |
+| 08 | audio | `07-audio/audio-package.json` | voice, music bed, loudness |
+| 09 | edit | `06-production/editing/edit-project.json` | edit, FilmCraft, captions |
+| 10 | render | `08-render/masters/master.mp4` + delivery cuts | encode, poster, VTT |
+| 11 | qa | `09-quality/qa-report.md` | media-qa agent — must pass |
+| 12 | approval | approval record | human — **gate 2** |
+| 13 | cdn | `10-publishing/manifest.json` | `produce ship` |
+| 14 | publish | `10-publishing/publishing-record.md` | publish + facebook — **gate 3** |
+
+## The three human gates
+
+1. **Script sign-off** — light, before the expensive stages (visual, audio, edit, render refuse without it).
+2. **Exact-version approval** — tied to one `Vnnn` and the sha of its master. A re-render voids it.
+3. **Publish approval** — a separate yes that names the destination. Approving a version is not approving a post.
+
+Hard rules: real product UI only for product claims; generated scenes are illustrative; no publish without approve.
+
+## Project folder
+
+Projects live outside every repo, in `~/media/_projects/<ID>/` (override with `PRODUCE_HOME`):
+
+```text
+HOG-INTRO-INTRODUCTION-20261120-V001/
+  project.json            the ledger
+  01-brief/ 02-research/ 03-script/ 04-storyboard/
+  05-assets/ 06-production/ 07-audio/
+  08-render/ (previews, masters, delivery)
+  09-quality/ 10-publishing/
+```
+
+The ID is `<CODE>-<CATEGORY>-<SUBJECT>-<YYYYMMDD>-V<nnn>`. `produce validate <file>` checks a
+`project.json` or a `shot-list.json` against the schemas.
+
+## CDN keys
+
+```text
+video/<brand>/<ID>/{master.mp4, fb-16x9.mp4, fb-9x16.mp4, fb-1x1.mp4, <lang>.vtt, poster.webp, manifest.json}
+video/index.json        approved videos only
+```
+
+`<ns>/<lang>/<flow>/video.mp4` tutorial keys are a different tier. Run `ship --dry-run` first.
+See [media](/docs/media).
+
+## Identity
+
+**brand** is the production line and the ledger code. **identity** is the brand-kit face that
+appears on film: name, wordmark, colors. It defaults to the brand. Set it at creation with
+`--identity balqalam`, or change an existing project with `produce set <ID> identity balqalam`.
+Brand tooling, captions and the end card read `brand-kit[identity]`, so a Balqalam piece never
+carries the Hogwarts wordmark, and a Hogwarts piece never says بالقلم. The Hogwarts intro film
+is made for school owners under the Balqalam identity.
+
+## From Machine
+
+In the Machine app, the **Video** department with the **hogwarts** repo shows three starters,
+defined in `departments/video/pack.json` with `repos: ["hogwarts"]`:
+
+| Starter | What it does |
+| --- | --- |
+| Balqalam intro film | Moves the intro project to its next gate |
+| Feature video from the real app | Records a real feature at phone size and cuts a vertical Facebook explainer, Arabic and English |
+| Production desk | Checks the line's readiness and lists every project with its stage and waiting gate |

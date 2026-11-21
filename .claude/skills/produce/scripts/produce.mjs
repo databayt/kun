@@ -4,6 +4,8 @@
 // make video: every stage's work is done by the existing skill named in SKILL.md.
 //
 //   produce init --brand hogwarts|mkan|databayt --category <intro|promo|explainer|tutorial|…> --subject <slug> [--lang ar,en] [--title "…"]
+//        [--identity <brand-kit key, default = the brand>] [--audience "…"] [--objective "…"]
+//   produce set <ID> identity <brand-kit key>      (change which brand-kit face appears on film)
 //   produce status <ID>
 //   produce advance <ID> <stage> --file <deliverable> [--verdict pass|fail]
 //   produce approve <ID> --version Vnnn --by <login> [--gate script|version|publish] [--destination facebook] [--issue databayt/x#n]
@@ -71,7 +73,7 @@ const opt = (name, def) => {
   return i >= 0 && i + 1 < argv.length ? argv[i + 1] : def
 }
 const has = (name) => argv.includes(`--${name}`)
-const VALUE_FLAGS = new Set(["brand", "category", "subject", "lang", "title", "version", "by", "gate", "destination", "issue", "file", "verdict", "item", "usd", "note", "repo", "out"])
+const VALUE_FLAGS = new Set(["brand", "category", "subject", "lang", "title", "version", "by", "gate", "destination", "issue", "file", "verdict", "item", "usd", "note", "repo", "out", "identity", "audience", "objective"])
 const pos = () => {
   const out = []
   for (let i = 0; i < argv.length; i++) {
@@ -123,6 +125,14 @@ function shotListRules(sl) {
   return errs
 }
 
+// identity = which brand-kit face appears on film; must be a key of brand-kit.json brands or production.
+function checkIdentity(id) {
+  const kit = readJson(join(HERE, "..", "..", "..", "..", "content", "media", "brand-kit.json"))
+  const keys = new Set([...Object.keys(kit.brands ?? {}), ...Object.keys(kit.production ?? {})].filter((k) => !k.startsWith("$")))
+  if (!keys.has(id)) die(`unknown identity "${id}" — not a key in brand-kit.json (${[...keys].join(", ")})`, 2)
+  return id
+}
+
 const dirOf = (id) => join(HOME, id)
 function load(id) {
   if (!id) die("missing <ID>", 2)
@@ -154,6 +164,7 @@ function init() {
   const b = opt("brand"), category = opt("category"), subject = opt("subject")
   if (!BRANDS[b] || !category || !subject) die("usage: init --brand hogwarts|mkan|databayt --category <cat> --subject <slug> [--lang ar,en] [--title …]", 2)
   const langs = (opt("lang", "ar,en")).split(",").map((s) => s.trim()).filter(Boolean)
+  const identity = opt("identity") ? checkIdentity(opt("identity")) : b
   const kit = loadBrand(b) // throws on a draft / unknown brand: renderers never guess
   const base = `${BRANDS[b]}-${slug(category)}-${slug(subject)}`
   mkdirSync(HOME, { recursive: true })
@@ -168,23 +179,23 @@ function init() {
   for (const f of FOLDERS) mkdirSync(join(dir, f), { recursive: true })
   const owner = spawnSync("git", ["config", "user.name"], { encoding: "utf8" }).stdout.trim() || process.env.USER || "unknown"
   const p = {
-    id, brand: b, category: category.toLowerCase(), subject: subject.toLowerCase(), title: opt("title", `${b} ${category} — ${subject}`),
+    id, brand: b, identity, category: category.toLowerCase(), subject: subject.toLowerCase(), title: opt("title", `${b} ${category} — ${subject}`),
     langs, version: v, status: "draft", createdAt: now(), issue: null, owner, reviewer: null,
     stages: {}, assets: [], cost: [], approvals: [], cdn: {},
   }
-  writeFileSync(join(dir, "01-brief/request.json"), JSON.stringify({ id, brand: b, category, subject, langs, audience: "TODO", objective: "TODO", references: [], requestedAt: now() }, null, 2) + "\n")
+  writeFileSync(join(dir, "01-brief/request.json"), JSON.stringify({ id, brand: b, identity, category, subject, langs, audience: opt("audience", "TODO"), objective: opt("objective", "TODO"), references: [], requestedAt: now() }, null, 2) + "\n")
   writeJson(join(dir, "04-storyboard/shot-list.json"), { id, scenes: [] })
   writeFileSync(join(dir, "10-publishing/metadata.json"), JSON.stringify({ id, brand: b, cdn: kit.cdn, destination: "facebook", caption: "TODO", hashtags: [] }, null, 2) + "\n")
   p.stages.request = { status: "done", file: "01-brief/request.json", at: now() }
   p.status = "in-production"
   save(p)
-  console.log(JSON.stringify({ id, dir, brand: b, cdn: kit.cdn, version: v, langs, next: "research (02-research/product-research.md) — then `produce issue " + id + " --create`" }, null, 2))
+  console.log(JSON.stringify({ id, dir, brand: b, identity, cdn: kit.cdn, version: v, langs, next: "research (02-research/product-research.md) — then `produce issue " + id + " --create`" }, null, 2))
 }
 
 // ---- status ----------------------------------------------------------------------------------
 function status(id) {
   const p = load(id)
-  console.log(`${p.id}  [${p.status}]  ${p.title}\n  brand ${p.brand}  version ${p.version}  langs ${p.langs.join(",")}  owner ${p.owner}  issue ${p.issue ?? "—"}`)
+  console.log(`${p.id}  [${p.status}]  ${p.title}\n  brand ${p.brand}  identity ${p.identity ?? p.brand}  version ${p.version}  langs ${p.langs.join(",")}  owner ${p.owner}  issue ${p.issue ?? "—"}`)
   let next = null
   for (const s of STAGES) {
     const st = p.stages[s.key]
@@ -196,6 +207,17 @@ function status(id) {
   console.log(`  gates: script ${g("script") ? `signed by ${g("script").by}` : "NOT signed"} · version ${p.version} ${g("version") ? `approved by ${g("version").by}` : "NOT approved"} · publish ${g("publish") ? `approved by ${g("publish").by} (${g("publish").destination})` : "NOT approved"}`)
   console.log(`  cost: $${p.cost.reduce((a, c) => a + c.usd, 0).toFixed(2)} over ${p.cost.length} item(s)`)
   console.log(next ? `  next: ${next.n} ${next.key}` : "  next: done")
+}
+
+// ---- set (identity only) -----------------------------------------------------------------------
+function setField(id, field, value) {
+  if (field !== "identity" || !value) die("usage: set <ID> identity <brand-kit key>", 2)
+  const p = load(id)
+  p.identity = checkIdentity(value)
+  save(p)
+  const rf = join(dirOf(id), "01-brief/request.json")
+  if (existsSync(rf)) writeJson(rf, { ...readJson(rf), identity: p.identity })
+  console.log(`${id}: identity ${p.identity}`)
 }
 
 // ---- advance ---------------------------------------------------------------------------------
@@ -441,6 +463,7 @@ const [cmd, ...rest] = pos()
 const run = {
   init,
   status: () => status(rest[0]),
+  set: () => setField(rest[0], rest[1], rest[2]),
   advance: () => advance(rest[0], rest[1]),
   approve: () => approve(rest[0]),
   cost: () => cost(rest[0]),
@@ -449,5 +472,5 @@ const run = {
   index,
   validate: () => validateFile(rest[0]),
 }[cmd]
-if (!run) die("usage: produce <init|status|advance|approve|cost|issue|ship|index|validate> …  (see the header of this file)", 2)
+if (!run) die("usage: produce <init|set|status|advance|approve|cost|issue|ship|index|validate> …  (see the header of this file)", 2)
 run()
