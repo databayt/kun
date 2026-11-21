@@ -23,9 +23,10 @@ to cheaper lanes with a written brief. The ledger is `produce.mjs`
    `kun/content/media/brand-kit.json` (the identity), `kun/content/media/markets.json` (price, currency,
    dialect), existing captures in `~/media/<repo>/`, any reference transcript in `02-research/reference/`,
    and the product docs for claims. Say what you read in one line.
-2. **Actions you need first**: anything that writes (pull a WhatsApp reference, transcribe, create the
+2. **References**: a WhatsApp video is pulled with `uv run --with cryptography python ~/.claude/skills/edit/scripts/media/wa-pull.py --chat "<group>" --since <YYYY-MM-DD> --out ~/media/_projects/_inbox/` (decrypts from the desktop DB; works for media never downloaded), then `produce from-reference <ID> <video>`; a file attached in the message (+ → Attach) arrives as a path or CDN URL under "References".
+3. **Actions you need first**: anything that writes (pull a WhatsApp reference, transcribe, create the
    project) is listed as "actions I need your OK for", with the exact command. Never do them in plan mode.
-3. **The plan**, short, in the person's language:
+4. **The plan**, short, in the person's language:
    - the brief in one line (what · for whom · version · goal · destination)
    - 2–3 questions that change the film, each with a recommended answer
    - the journey: stage → tool → lane → gate → what is reused
