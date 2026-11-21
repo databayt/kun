@@ -800,6 +800,9 @@ function fromReferenceSeed(id, video, fresh = false) {
 
 // ---- readiness ---------------------------------------------------------------------------------
 function readiness() {
+  // A GUI app (Kun) starts us with a bare PATH: look where the tools actually live first.
+  const HOMEDIR = process.env.HOME || ""
+  process.env.PATH = [`${HOMEDIR}/.local/bin`, "/opt/homebrew/bin", "/opt/homebrew/sbin", "/usr/local/bin", `${HOMEDIR}/.cargo/bin`, process.env.PATH || "/usr/bin:/bin"].join(":")
   const fix = has("fix"), asJson = has("json")
   const rows = [] // {name, level: ok|warn|fail, critical, detail}
   const add = (name, level, detail, critical = true) => rows.push({ name, level, critical, detail })
@@ -849,7 +852,8 @@ function readiness() {
   // disk
   const df = run1("df", ["-k", "/"]).stdout.trim().split("\n").pop().split(/\s+/)
   const freeGb = Number(df[3]) / 1048576
-  add("disk free on /", freeGb >= 15 ? "ok" : "fail", `${freeGb.toFixed(1)} GB (need 15)`)
+  // ≥ 15 GB is comfortable for renders; 8–15 still works (orange); under 8 a render can fail mid-way (red)
+  add("disk free on /", freeGb >= 15 ? "ok" : freeGb >= 8 ? "warn" : "fail", `${freeGb.toFixed(1)} GB (comfortable ≥ 15, minimum 8)`)
   // power
   const pm = run1("pmset", ["-g", "batt"]).stdout
   const pct = Number(/(\d+)%/.exec(pm)?.[1])
