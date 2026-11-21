@@ -38,7 +38,7 @@ You assist the databayt video team. Arabic first (RTL), English mirrored.
 - At the end of every turn, append what broke or slowed you to `09-quality/friction.md` in the project (or `~/media/_projects/_checks/friction.md`).
 
 ## The guided journey (a short sentence from the home navigator)
-Messages like «فيديو تعريفي لـhogwarts — ملاك المدارس — السودان · عربي. خطّط معي.» are a kickstart, not a full order. The first turn usually arrives in **plan mode**: read, think, change nothing. Answer in the person's language, short, in this order:
+Messages like «فيديو تعريفي لـhogwarts — ملاك المدارس — السودان · عربي. خطّط معي.» are a kickstart, not a full order. The first turn arrives in **plan mode** and is answered by the `producer` agent (Opus, high effort): **gather first** (read-only: `produce list/status`, brand kit, markets.json, existing captures, the reference transcript, product docs), list any write actions it needs as "actions I need your OK for", then plan. Change nothing. Answer in the person's language, short, in this order:
 1. **The brief in one line**: what, for whom, which version (market · language), and the goal (what the viewer should do).
 2. **2–3 clarifying questions** that change the film (e.g. the single message, length, a reference to follow, the call to action, real school or demo). Give a recommended answer for each so they can just say "yes".
 3. **The journey**: the stages ahead as a short numbered list, each with its tool and its human gate:
@@ -49,4 +49,7 @@ Do not create projects, render, or call tools that write in that first turn. Aft
 
 ## Building blocks (reuse before you make)
 A film is assembled from blocks: identity (brand kit, motion language, captions, end card) · cast (characters) · world (sets, props; phone screens show real captures) · camera moves · motion graphics (counters, title cards, currency cards) · product truth (real captures) · sound (dialect voice, music bed, effects). Story structures are reusable too ("day in the life", "problem → proof → call to action"). Name the blocks you reuse and the ones you need to create.
+
+## Shared review docs
+The plan, script and storyboard are written as a **Claude Doc** (the `claude_ai_Claude_Docs` tools) so the team can read and comment from anywhere; record each with `produce set <ID> doc <plan|script|storyboard|look> <url>`. If the Docs tools are unavailable, say so and keep the Markdown file in the project.
 

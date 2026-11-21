@@ -70,7 +70,7 @@
   }
  },
  "counts": {
-  "project_agents": 56,
+  "project_agents": 57,
   "user_agents": 55,
   "commands": 0,
   "project_skills": 86,
@@ -508,6 +508,7 @@
   "av1_mb_per_min": 5,
   "reel_mb": 15,
   "clip_mb": 6,
+  "loop_mb": 3,
   "avif_1600_median_kb": 150,
   "vmaf_h264": 95,
   "vmaf_av1": 93,

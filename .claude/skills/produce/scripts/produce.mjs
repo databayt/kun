@@ -292,8 +292,25 @@ function status(id) {
 
 // ---- set (identity | slug | markets) ----------------------------------------------------------
 function setField(id, field, value) {
-  if (!["identity", "slug", "markets"].includes(field) || !value) die("usage: set <ID> identity <brand-kit key> | set <ID> slug <slug> | set <ID> markets sa,ae,eg,sd", 2)
+  if (!["identity", "slug", "markets", "focus", "doc"].includes(field) || !value) die("usage: set <ID> identity <brand-kit key> | slug <slug> | markets sa,ae,eg,sd | focus sd-ar,eg-ar | doc <plan|script|storyboard|look> <url>", 2)
   const p = load(id)
+  // focus: the versions to build first; doc: a shared review doc (Claude Docs) for a stage
+  if (field === "focus") {
+    const ids = new Set(variantsOf(p).map((v) => v.id))
+    const f = value.split(",").map((x) => x.trim()).filter(Boolean)
+    const bad = f.filter((x) => !ids.has(x))
+    if (bad.length) die(`unknown version(s) ${bad.join(", ")} — known: ${[...ids].join(", ")}`, 2)
+    p.focus = f
+    save(p)
+    return console.log(`${id}: focus ${f.join(",")}`)
+  }
+  if (field === "doc") {
+    const url = rest[3]
+    if (!["plan", "script", "storyboard", "look"].includes(value) || !/^https:\/\//.test(url || "")) die("usage: set <ID> doc <plan|script|storyboard|look> <https url>", 2)
+    p.docs = { ...(p.docs ?? {}), [value]: { url, at: new Date().toISOString() } }
+    save(p)
+    return console.log(`${id}: doc ${value} ${url}`)
+  }
   if (field === "identity") p.identity = checkIdentity(value)
   else if (field === "slug") p.slug = checkSlug(value)
   else {
