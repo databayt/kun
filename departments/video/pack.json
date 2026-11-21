@@ -50,7 +50,8 @@
       "label_en": "Intro film",
       "prompt": "خطّط فيلماً تعريفياً لهوغورتس (بالقلم).\nالجمهور: ملّاك المدارس ومديروها · النسخة: السودان · عربي · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال، نحو دقيقتين.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: آخر فيديو اعتمده الفريق في «المدرسة 2.0»، بمستوى سينمائي وشخصيات ثلاثية الأبعاد.\nاجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
       "description_ar": "موجز احترافي جاهز للتعديل: الجمهور، النسخة، المرجع، ثم خطة",
-      "description_en": "A professional brief to edit: audience, version, reference, then a plan"
+      "description_en": "A professional brief to edit: audience, version, reference, then a plan",
+      "route": "plan"
     },
     {
       "repos": [
@@ -60,7 +61,8 @@
       "label_en": "Continue production",
       "prompt": "تابع إنتاج فيديو هوغورتس المفتوح.\nاقرأ produce list و produce status لنسخة التركيز: المراحل المنجزة، البوابة المنتظرة، والروابط المتوقعة على CDN.\nثم أعطني: أين نحن في سطر · ما يحتاج قراري · الخطوة التالية بأداتها وما تنتجه.",
       "description_ar": "أين وصل الإنتاج، وما البوابة المنتظرة، وما الخطوة التالية",
-      "description_en": "Where the production stands, the waiting gate, the next step"
+      "description_en": "Where the production stands, the waiting gate, the next step",
+      "route": "do"
     },
     {
       "repos": [
@@ -70,7 +72,8 @@
       "label_en": "Tools check",
       "prompt": "افحص جاهزية خط الفيديو.\nشغّل produce readiness، ثم تأكد أن Blender و FilmCraft و Claude تستجيب فعلاً، واترك دليلاً في ~/media/_projects/_checks/<اليوم>/.\nثم أعطني: جدول ✓/✗ لكل أداة · ما يحتاج إصلاحاً وأمره. لا تُنتج الفيديو.",
       "description_ar": "Blender و FilmCraft و Claude: هل تعمل؟ جدول ✓/✗ مع الدليل",
-      "description_en": "Blender, FilmCraft, Claude: do they work? A ✓/✗ table with proof"
+      "description_en": "Blender, FilmCraft, Claude: do they work? A ✓/✗ table with proof",
+      "route": "quick"
     }
   ],
   "cards": [
@@ -939,5 +942,56 @@
       "effort": "medium",
       "agent": "producer"
     }
-  }
+  },
+  "routes": [
+    {
+      "id": "plan",
+      "label_ar": "خطة أولاً",
+      "label_en": "Plan first",
+      "icon": "ListChecks",
+      "description_ar": "المنتج يجمع ويسأل ويقترح الرحلة، دون أي تعديل",
+      "description_en": "The producer gathers, asks and proposes the journey; changes nothing",
+      "mode": "plan",
+      "model": "opus",
+      "effort": "high",
+      "agent": "producer"
+    },
+    {
+      "id": "do",
+      "label_ar": "نفّذ الآن",
+      "label_en": "Do it now",
+      "icon": "Play",
+      "description_ar": "المنتج ينفّذ مرحلة واحدة ويتوقف عند البوابة",
+      "description_en": "The producer works one stage and stops at the gate",
+      "mode": "auto",
+      "model": "opus",
+      "effort": "medium",
+      "agent": "producer"
+    },
+    {
+      "id": "workflow",
+      "label_ar": "سير عمل",
+      "label_en": "Workflow",
+      "icon": "Workflow",
+      "description_ar": "عدة وكلاء بالتوازي: نسخة لكل وكيل، ثم تحقّق",
+      "description_en": "Agents in parallel: one per version, each verified",
+      "mode": "auto",
+      "model": "opus",
+      "effort": "high",
+      "agent": "producer",
+      "suffix": "Run this as a workflow: use a workflow to fan out one Sonnet agent per version (or per independent piece), verify each result, and stop at the human gates. Never Fable."
+    },
+    {
+      "id": "quick",
+      "label_ar": "مسار سريع",
+      "label_en": "Quick lane",
+      "icon": "Zap",
+      "description_ar": "مهام صغيرة: حالة، فحص، بحث",
+      "description_en": "Small jobs: status, checks, lookups",
+      "mode": "auto",
+      "model": "sonnet",
+      "effort": "low"
+    }
+  ],
+  "defaultRoute": "plan"
 }
