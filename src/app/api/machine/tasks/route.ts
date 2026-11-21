@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request): Promise<Response> {
   const auth = await authenticate(request);
   if (isResponse(auth)) return auth;
-  const asked = new URL(request.url).searchParams.get("department") ?? auth.profile.departments[0];
+  const asked = new URL(request.url).searchParams.get("department") ?? auth.profile.department ?? auth.profile.departments[0];
   if (!asked || !(DEPARTMENTS as readonly string[]).includes(asked))
     return json({ error: "bad_department" }, 400);
   const department = asked as Department;

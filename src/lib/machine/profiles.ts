@@ -8,6 +8,8 @@ export interface Profile {
   login: string;
   name: string;
   os: string;
+  /** The default department, set by the registry; one of `departments`. */
+  department: Department | null;
   departments: Department[];
   repos: string[];
   catalog: string;
@@ -15,11 +17,17 @@ export interface Profile {
 
 const isDept = (d: string): d is Department => (DEPARTMENTS as readonly string[]).includes(d);
 
+/** The registry's `department` when it is one of the authorized list, else the first of them. */
+function defaultDepartment(d: string | null, list: Department[]): Department | null {
+  return d && isDept(d) && list.includes(d) ? d : (list[0] ?? null);
+}
+
 export function allProfiles(): Profile[] {
   return MACHINE_PROFILES.map((p) => ({
     login: p.login,
     name: p.name,
     os: p.os,
+    department: defaultDepartment(p.department, [...p.departments].filter(isDept)),
     departments: [...p.departments].filter(isDept),
     repos: [...p.repos],
     catalog: p.catalog,

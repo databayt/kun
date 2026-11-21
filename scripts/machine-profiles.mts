@@ -12,6 +12,7 @@ const machines = readdirSync(join(root, "machines"))
     login: m.login,
     name: m.name,
     os: m.os ?? "",
+    department: m.department ?? m.departments?.[0] ?? null,
     departments: m.departments ?? [],
     repos: m.repos ?? [],
     catalog: m.access?.catalog ?? "profile",

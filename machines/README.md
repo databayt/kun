@@ -11,7 +11,8 @@ which is how the founder's own Mac behaves.
 | `name` | Display name (Arabic first). |
 | `os` | `windows`, `macos` or `linux`. Informational. |
 | `driver` | Agent CLI the machine locks to (`claude`, `codex`, `opencode`). Omit to let the person pick. |
-| `departments` | Packs from `departments/<name>/`. Only their skills and agents are installed and linked. |
+| `department` | The default department, set by the machine ID: Machine opens in it and the task board starts there. Must be one of `departments`; omitted means the first. |
+| `departments` | The departments this machine is authorized for (switchable in Machine → Settings → General). Packs from `departments/<name>/`. Only their skills and agents are installed and linked. |
 | `repos` | Public databayt repos cloned read-only into `~/Kun/repos/<name>` and added to every run. |
 | `access.code` | `read`: the generated `--settings` denies Edit/Write under `repos/**`, `git push`, `git commit`, `rm`. `write`: no such denies. |
 | `access.workspace` | `write`: runs may write in `~/Kun/<login>/work/`. `none`: nowhere. |

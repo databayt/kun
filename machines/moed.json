@@ -3,6 +3,7 @@
   "name": "معد",
   "os": "windows",
   "driver": "claude",
+  "department": "sales",
   "departments": [
     "sales",
     "marketing",

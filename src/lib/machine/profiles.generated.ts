@@ -4,6 +4,7 @@ export const MACHINE_PROFILES = [
     "login": "abdout",
     "name": "Abdout",
     "os": "macos",
+    "department": "tech",
     "departments": [
       "tech",
       "business",
@@ -26,6 +27,7 @@ export const MACHINE_PROFILES = [
     "login": "moed",
     "name": "معد",
     "os": "windows",
+    "department": "sales",
     "departments": [
       "sales",
       "marketing",

@@ -2,6 +2,7 @@
   "login": "abdout",
   "name": "Abdout",
   "os": "macos",
+  "department": "tech",
   "departments": [
     "tech",
     "business",
