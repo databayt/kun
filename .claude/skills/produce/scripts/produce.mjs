@@ -839,7 +839,7 @@ function readiness() {
   else {
     if (fix && !(bs.webkit && bs.chromium)) {
       console.error("readiness: installing playwright webkit chromium …")
-      spawnSync("node", [cli, "install", "webkit", "chromium"], { stdio: "inherit" })
+      spawnSync("node", [cli, "install", "webkit", "chromium"], { stdio: ["ignore", 2, 2] }) // progress to stderr: stdout stays JSON
       bs = browserState()
     }
     const missing = ["webkit", "chromium"].filter((n) => !bs[n])

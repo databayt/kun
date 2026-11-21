@@ -79,5 +79,20 @@
   "dirs": [
     "~/media"
   ],
-  "timeoutSecs": 7200
+  "timeoutSecs": 7200,
+  "health": {
+    "check": [
+      "node",
+      "~/.claude/skills/produce/scripts/produce.mjs",
+      "readiness",
+      "--json"
+    ],
+    "fix": [
+      "node",
+      "~/.claude/skills/produce/scripts/produce.mjs",
+      "readiness",
+      "--fix",
+      "--json"
+    ]
+  }
 }
