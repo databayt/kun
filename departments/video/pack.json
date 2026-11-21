@@ -8,6 +8,7 @@
     "skill:produce",
     "skill:edit",
     "skill:record",
+    "skill:shoot",
     "skill:blender",
     "skill:higgs",
     "agent:media-qa"
@@ -44,21 +45,21 @@
       "repos": [
         "hogwarts"
       ],
-      "label_ar": "فيديو تعريفي لبالقلم",
-      "label_en": "Balqalam intro film",
-      "prompt": "produce: تابع الفيديو التعريفي لبالقلم (HOG-INTRO-INTRODUCTION-20261120-V001). اقرأ /produce status وحقل focus في project.json وابدأ بالنسخة المحددة فيه (الآن sd-ar: السودان، عربي، جوال). نفّذ المراحل المتبقية بأدواتنا: لقطة Blender للريشة بلا نص (مشتركة)، ثم produce build --variant <focus> عبر FilmCraft، ثم QA، وتوقّف عند اعتماد النسخة. سجّل في النهاية ما تعطّل أو أبطأك.",
-      "description_en": "Move the Balqalam intro film forward — the focus version first (now Sudan · Arabic · mobile), Blender + FilmCraft, stop at approval.",
-      "description_ar": "انقل الفيديو التعريفي لبالقلم للأمام — نسخة التركيز أولاً (الآن السودان · عربي · جوال)، Blender ثم FilmCraft، وتوقّف عند الاعتماد."
+      "label_ar": "استيراد سكربت مرجعي",
+      "label_en": "Import a reference script",
+      "prompt": "produce: استورد السكربت المرجعي لفيديو بالقلم التعريفي. اسحب آخر فيديو من مجموعة واتساب «المدرسة 2.0» (balqalam-promo-v2.mp4، أُرسل 2026-11-18 واعتمد الفريق أسلوب كتابته) عبر wa-pull.py إلى ~/media/_projects/_inbox/، ثم أنشئ مشروع الإصدار الجديد بـ produce init --brand hogwarts --category intro --subject introduction --identity balqalam --markets sa,ae,eg,sd,rw --slug intro --from-reference <الفيديو>، واضبط focus على sd-ar. اعرض السكربت المفرَّغ سطراً سطراً مع لقطة التلامس، وسجّل ما تعطّل في 09-quality/friction.md.",
+      "description_en": "Pull the team-approved promo from «المدرسة 2.0», transcribe it, and open the new intro project from its script.",
+      "description_ar": "اسحب الفيديو المعتمد من «المدرسة 2.0»، فرّغ نصه، وافتح مشروع الفيلم التعريفي الجديد من سكربته."
     },
     {
       "repos": [
         "hogwarts"
       ],
-      "label_ar": "فيديو ميزة من الواجهة الحقيقية",
-      "label_en": "Feature video from the real app",
-      "prompt": "produce: فيديو ميزة من هوغورتس لفيسبوك — اقترح أقوى ٣ ميزات لملاك المدارس، وبعد اختياري سجّل الواجهة الحقيقية بمقاس الجوال (/record) واصنع شرحًا عموديًا ٣٠–٦٠ ثانية بنسختين عربية وإنجليزية، عبر سجل /produce.",
-      "description_en": "Record a real feature at phone size and cut a 30–60 s vertical Facebook explainer, in Arabic and English.",
-      "description_ar": "سجّل ميزة حقيقية بمقاس الجوال واصنع شرحًا عموديًا ٣٠–٦٠ ثانية لفيسبوك، بالعربية والإنجليزية."
+      "label_ar": "فحص الأدوات",
+      "label_en": "Tools check",
+      "prompt": "produce: فحص الأدوات لخط الفيديو. شغّل produce readiness (وأصلح بـ --fix ما يُصلح آلياً)، ثم شغّل كل أداة فعلياً واترك دليلاً في ~/media/_projects/_checks/<اليوم>/: (١) Blender: صورة ثابتة headless عبر blender.sh مع نص «بالقلم»، و get_scene_info عبر MCP إن كان Blender مفتوحاً؛ (٢) FilmCraft: command_list عبر MCP ثم render_frame لبطاقة عنوان ثانيتين؛ (٣) Claude: اكتب report.md بجدول ✓/✗ لكل أداة مع مسار الدليل والزمن. لا تُنتج الفيديو، افحص فقط.",
+      "description_en": "Run every tool for real — Blender, FilmCraft, Claude — and leave proof files and a ✓/✗ report.",
+      "description_ar": "شغّل كل أداة فعلياً — Blender و FilmCraft و Claude — واترك ملفات دليل وتقرير ✓/✗."
     },
     {
       "repos": [
@@ -66,13 +67,17 @@
       ],
       "label_ar": "مكتب الإنتاج",
       "label_en": "Production desk",
-      "prompt": "produce: مكتب الإنتاج — افحص جاهزية خط الفيديو (ffmpeg، Blender، FilmCraft، خوادم MCP، المساحة، الكهرباء)، ثم اعرض لكل مشروع فيديو لهوغورتس شبكة النسخ × المراحل، والبوابة المنتظرة، والروابط المتوقعة على CDN (produce url)، وسمِّ الخطوة التالية.",
-      "description_en": "Readiness check, then every Hogwarts video's version × stage grid, waiting gates and predicted CDN links.",
-      "description_ar": "فحص الجاهزية، ثم شبكة النسخ × المراحل لكل فيديو، والبوابات المنتظرة، والروابط المتوقعة على CDN."
+      "prompt": "produce: مكتب الإنتاج — produce readiness ثم produce status لكل مشاريع فيديو هوغورتس (شبكة النسخ × المراحل، البوابة المنتظرة، الروابط المتوقعة على CDN)، ثم سمِّ الخطوة التالية للنسخة في focus ونفّذها حتى البوابة البشرية القادمة.",
+      "description_en": "Readiness, then every Hogwarts video's version × stage grid, the waiting gate, and the next step for the focus version.",
+      "description_ar": "الجاهزية، ثم شبكة النسخ × المراحل لكل فيديو، والبوابة المنتظرة، والخطوة التالية لنسخة التركيز."
     }
   ],
   "cards": [
     "media",
     "voice"
-  ]
+  ],
+  "dirs": [
+    "~/media"
+  ],
+  "timeoutSecs": 7200
 }

@@ -29,6 +29,8 @@ $P url <ID> [--variant sa-ar]   # predicted CDN URLs, before anything renders
 $P build <ID> --variant sa-ar|--all [--dry-run]   # piece.mjs -> assemble.mjs per variant; unchanged inputs are skipped
 $P ship <ID> [--variant v|--all] --dry-run        # CDN keys + plan; real run only after the version approval
 $P index                        # rebuild the local video index
+$P readiness [--fix] [--json]   # ffmpeg, blender, filmcraft-cli, mlx_whisper, uv, Playwright browsers, disk >= 15 GB, power, Kun.app, MCPs, GEMINI key; exit 1 if a critical row fails (--fix installs webkit + chromium)
+$P init … --from-reference clip.mp4   # | from-reference <ID> clip.mp4: copy to 02-research/reference/, whisper transcript.srt, contact.png, seed 03-script/script.md; research = "seeded"
 ```
 
 **Focus** — `project.json → focus` (e.g. `["sd-ar"]`) is the build order: Machine's starter and `build` work those versions first.

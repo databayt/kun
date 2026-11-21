@@ -18,6 +18,9 @@
 //   produce ship <ID> [--variant <v>|--all] [--dry-run]
 //   produce index [--out <file>]
 //   produce validate <project.json|shot-list.json>
+//   produce init … --from-reference <video>        also copy the video to 02-research/reference/, transcribe it (mlx_whisper), cut a contact sheet, seed 03-script/script.md
+//   produce from-reference <ID> <video>            the same seeding on an existing project (no init)
+//   produce readiness [--fix] [--json]             tool/runtime/disk/power/MCP/key check; exit 0 when every critical row passes
 //
 // Projects live in ~/media/_projects/<ID>/ (outside every repo; override with PRODUCE_HOME).
 // A project with markets has variants <market>-<lang> (sa-ar, eg-en). Stages request..visual are shared; audio edit
@@ -29,12 +32,13 @@
 // Legacy keys (projects without markets): video/<brand>/<ID>/{master.mp4,fb-16x9.mp4,…,manifest.json}, plus video/index.json.
 // The existing <ns>/<lang>/<flow>/video.mp4 keys are untouched (publish.mjs modes unchanged).
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs"
-import { homedir } from "node:os"
+import { copyFileSync, existsSync, mkdtempSync, mkdirSync, rmSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs"
+import { homedir, tmpdir } from "node:os"
+import { createRequire } from "node:module"
 import { basename, dirname, isAbsolute, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { createHash } from "node:crypto"
-import { CDN_BUCKET, CDN_HOST, CONTENT_TYPE, brand as loadBrand, sh, sha8 } from "../../edit/scripts/media/rt.mjs"
+import { CDN_BUCKET, CDN_HOST, CONTENT_TYPE, KUN_DIR, brand as loadBrand, sh, sha8 } from "../../edit/scripts/media/rt.mjs"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const SCHEMA = join(HERE, "..", "schema")
@@ -84,7 +88,7 @@ const opt = (name, def) => {
   return i >= 0 && i + 1 < argv.length ? argv[i + 1] : def
 }
 const has = (name) => argv.includes(`--${name}`)
-const VALUE_FLAGS = new Set(["markets", "slug", "variant", "brand", "category", "subject", "lang", "title", "version", "by", "gate", "destination", "issue", "file", "verdict", "item", "usd", "note", "repo", "out", "identity", "audience", "objective"])
+const VALUE_FLAGS = new Set(["markets", "slug", "variant", "brand", "category", "subject", "lang", "title", "version", "by", "gate", "destination", "issue", "file", "verdict", "item", "usd", "note", "repo", "out", "identity", "audience", "objective", "from-reference"])
 const pos = () => {
   const out = []
   for (let i = 0; i < argv.length; i++) {
@@ -252,6 +256,8 @@ function init() {
   p.stages.request = { status: "done", file: "01-brief/request.json", at: now() }
   p.status = "in-production"
   save(p)
+  const ref = opt("from-reference")
+  if (ref) fromReferenceSeed(id, ref, true)
   console.log(JSON.stringify({ id, dir, brand: b, identity, cdn: kit.cdn, version: v, langs, slug: pslug, markets, variants: variants.map((x) => x.id), next: "research (02-research/product-research.md) — then `produce issue " + id + " --create`" }, null, 2))
 }
 
@@ -747,6 +753,137 @@ function validateFile(f) {
   process.exit(errs.length ? 1 : 0)
 }
 
+// ---- from-reference: a finished video becomes the seed of research + script -----------------------
+const fmtTime = (t) => t.replace(",", ".").replace(/^00:/, "").replace(/\.\d+$/, "")
+function parseSrt(text) {
+  return text.replace(/\r/g, "").split(/\n{2,}/).map((blk) => {
+    const l = blk.trim().split("\n")
+    const i = l.findIndex((x) => x.includes("-->"))
+    if (i < 0) return null
+    const [a, b] = l[i].split("-->").map((x) => x.trim())
+    return { time: `${fmtTime(a)}–${fmtTime(b)}`, line: l.slice(i + 1).join(" ").replace(/\|/g, "\\|").trim() }
+  }).filter((x) => x && x.line)
+}
+function fromReferenceSeed(id, video, fresh = false) {
+  const p = load(id)
+  const src = resolve(video)
+  if (!existsSync(src)) die(`reference video not found: ${src}`)
+  const dir = dirOf(id), refDir = join(dir, "02-research", "reference")
+  mkdirSync(refDir, { recursive: true })
+  mkdirSync(join(dir, "03-script"), { recursive: true })
+  const ext = (src.match(/\.[^.\/]+$/)?.[0] ?? ".mp4").toLowerCase()
+  copyFileSync(src, join(refDir, `video${ext}`))
+  console.error(`produce: copied reference -> 02-research/reference/video${ext}`)
+  const fail = (m) => { console.error(`produce: reference transcription failed: ${m}\n  (the copy is kept at ${join(refDir, "video" + ext)})`); process.exit(1) }
+  // contact sheet (best effort, never blocks the transcript)
+  const cs = spawnSync("ffmpeg", ["-y", "-v", "error", "-i", src, "-vf", "fps=1/8,scale=180:-1,tile=8x2", "-frames:v", "1", join(refDir, "contact.png")], { encoding: "utf8" })
+  if (cs.status !== 0) console.error(`produce: contact sheet failed: ${(cs.stderr || "").trim().split("\n").pop()}`)
+  const tmp = mkdtempSync(join(tmpdir(), "produce-ref-"))
+  try {
+    const wav = join(tmp, "transcript.wav")
+    const ex = spawnSync("ffmpeg", ["-y", "-v", "error", "-i", src, "-vn", "-ac", "1", "-ar", "16000", wav], { encoding: "utf8" })
+    if (ex.status !== 0) fail(`audio extract: ${(ex.stderr || ex.error?.message || "").trim()}`)
+    const lang = (p.langs?.[0] || "ar")
+    const w = spawnSync("mlx_whisper", [wav, "--model", "mlx-community/whisper-large-v3-turbo", "--language", lang, "--output-format", "srt", "--output-dir", refDir], { encoding: "utf8", maxBuffer: 1 << 26 })
+    if (w.status !== 0) fail(`mlx_whisper: ${(w.stderr || w.error?.message || "").trim().split("\n").slice(-6).join("\n")}`)
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+  const srtFile = join(refDir, "transcript.srt")
+  if (!existsSync(srtFile)) fail("no transcript.srt was written")
+  const rows = parseSrt(readFileSync(srtFile, "utf8"))
+  const md = [`# Reference script — transcribed from ${basename(src)}`, "", `Source: 02-research/reference/video${ext} · transcript: 02-research/reference/transcript.srt · whisper-large-v3-turbo (${p.langs?.[0] || "ar"}) · a machine draft, check it against the audio.`, "", "| # | time | line |", "| --- | --- | --- |", ...rows.map((r, i) => `| ${i + 1} | ${r.time} | ${r.line} |`), ""].join("\n")
+  writeFileSync(join(dir, "03-script", "script.md"), md)
+  p.stages.research = { status: "seeded", file: "02-research/reference/transcript.srt", at: now() }
+  save(p)
+  console.error(`produce: seeded 03-script/script.md (${rows.length} lines), research marked "seeded"`)
+  if (!fresh) console.log(JSON.stringify({ id, reference: `02-research/reference/video${ext}`, transcript: "02-research/reference/transcript.srt", contact: "02-research/reference/contact.png", lines: rows.length }, null, 2))
+}
+
+// ---- readiness ---------------------------------------------------------------------------------
+function readiness() {
+  const fix = has("fix"), asJson = has("json")
+  const rows = [] // {name, level: ok|warn|fail, critical, detail}
+  const add = (name, level, detail, critical = true) => rows.push({ name, level, critical, detail })
+  const run1 = (c, a, o = {}) => spawnSync(c, a, { encoding: "utf8", timeout: 60000, ...o })
+  const first = (r) => ((r.stdout || r.stderr || "").trim().split("\n")[0] || "").slice(0, 100)
+  const onPath = (c) => run1("/bin/sh", ["-c", `command -v ${c}`]).stdout.trim()
+
+  let r = run1("ffmpeg", ["-version"])
+  add("ffmpeg", r.status === 0 ? "ok" : "fail", r.status === 0 ? first(r) : "not found (brew install ffmpeg)")
+  r = run1("blender", ["--version"])
+  add("blender", r.status === 0 ? "ok" : "fail", r.status === 0 ? first(r) : "not found (brew install --cask blender)")
+  const fc = process.env.FILMCRAFT_CLI || join(homedir(), ".local", "bin", "filmcraft-cli")
+  if (!existsSync(fc)) add("filmcraft-cli", "fail", `missing: ${fc}`)
+  else {
+    let q = run1(fc, ["--version"])
+    if (q.status !== 0) q = run1(fc, ["--help"])
+    add("filmcraft-cli", q.status === 0 ? "ok" : "fail", q.status === 0 ? `${fc} ${first(q).slice(0, 40)}` : `${fc} exits ${q.status}`)
+  }
+  const mw = onPath("mlx_whisper")
+  add("mlx_whisper", mw ? "ok" : "fail", mw || "not on PATH (uv tool install mlx-whisper)")
+  const uv = onPath("uv")
+  add("uv", uv ? "ok" : "fail", uv || "not on PATH (brew install uv)")
+
+  // Playwright browsers for the media runtime
+  const MEDIA_RT = process.env.MEDIA_RT || join(homedir(), ".local", "share", "databayt", "media")
+  const cli = join(MEDIA_RT, "node_modules", "playwright-core", "cli.js")
+  const browserState = () => {
+    try {
+      const pw = createRequire(join(MEDIA_RT, "package.json"))("playwright-core")
+      const out = {}
+      for (const n of ["webkit", "chromium"]) { const e = pw[n].executablePath(); out[n] = e && existsSync(e) }
+      return out
+    } catch (e) { return { error: e.message.split("\n")[0] } }
+  }
+  let bs = browserState()
+  if (bs.error) add("playwright browsers", "fail", `${bs.error} (bash ~/.claude/skills/edit/scripts/media.sh setup)`)
+  else {
+    if (fix && !(bs.webkit && bs.chromium)) {
+      console.error("readiness: installing playwright webkit chromium …")
+      spawnSync("node", [cli, "install", "webkit", "chromium"], { stdio: "inherit" })
+      bs = browserState()
+    }
+    const missing = ["webkit", "chromium"].filter((n) => !bs[n])
+    add("playwright browsers", missing.length ? "fail" : "ok", missing.length ? `missing ${missing.join(", ")} (readiness --fix)` : `webkit + chromium in ${MEDIA_RT}`)
+  }
+
+  // disk
+  const df = run1("df", ["-k", "/"]).stdout.trim().split("\n").pop().split(/\s+/)
+  const freeGb = Number(df[3]) / 1048576
+  add("disk free on /", freeGb >= 15 ? "ok" : "fail", `${freeGb.toFixed(1)} GB (need 15)`)
+  // power
+  const pm = run1("pmset", ["-g", "batt"]).stdout
+  const pct = Number(/(\d+)%/.exec(pm)?.[1])
+  const ac = /AC Power/.test(pm)
+  add("power", !ac && pct < 30 ? "warn" : "ok", ac ? `AC${Number.isFinite(pct) ? ` (${pct}%)` : ""}` : `battery ${Number.isFinite(pct) ? pct + "%" : "?"}${pct < 30 ? " — plug in before a render" : ""}`, false)
+  // Kun.app freshness
+  const app = "/Applications/Kun.app/Contents/MacOS/machine"
+  if (!existsSync(app)) add("Kun.app", "warn", "not installed", false)
+  else {
+    const m = Math.floor(statSync(app).mtimeMs / 1000)
+    const g = run1("git", ["-C", join(homedir(), "machine"), "log", "-1", "--format=%ct", "origin/main"])
+    const head = Number(g.stdout.trim())
+    if (!head) add("Kun.app", "warn", "built " + new Date(m * 1000).toISOString().slice(0, 10) + "; ~/machine origin/main not readable", false)
+    else add("Kun.app", m >= head ? "ok" : "warn", m >= head ? "newer than machine origin/main" : `older than machine origin/main by ${((head - m) / 86400).toFixed(1)} d — rebuild`, false)
+  }
+  // MCP presence
+  let servers = null
+  try { servers = Object.keys(readJson(join(homedir(), ".claude.json")).mcpServers ?? {}) } catch {}
+  for (const n of ["blender", "blender-lab", "filmcraft", "filmcraft-desktop"]) add(`mcp ${n}`, servers === null ? "warn" : servers.includes(n) ? "ok" : "warn", servers === null ? "~/.claude.json unreadable" : servers.includes(n) ? "registered" : "not in ~/.claude.json mcpServers", false)
+  // Gemini key — same sources as edit/scripts/media/voice.mjs (env, then kun/.env); value never printed
+  let key = !!process.env.GEMINI_API_KEY?.trim()
+  if (!key) try { key = /^GEMINI_API_KEY=["']?\S+/m.test(readFileSync(join(KUN_DIR, ".env"), "utf8")) } catch {}
+  add("GEMINI_API_KEY", key ? "ok" : "fail", key ? "present" : "absent (env or kun/.env)")
+
+  const okAll = rows.every((x) => !x.critical || x.level === "ok")
+  if (asJson) console.log(JSON.stringify({ ok: okAll, rows }, null, 2))
+  else {
+    const w = Math.max(...rows.map((x) => x.name.length))
+    for (const x of rows) console.log(`${x.level === "ok" ? "✓" : x.level === "warn" ? "!" : "✗"} ${x.name.padEnd(w)}  ${x.detail}`)
+    console.log(okAll ? "\nready (every critical check passes)" : "\nNOT ready — " + rows.filter((x) => x.critical && x.level !== "ok").map((x) => x.name).join(", "))
+  }
+  process.exit(okAll ? 0 : 1)
+}
+
 // ---- dispatch --------------------------------------------------------------------------------
 const [cmd, ...rest] = pos()
 const run = {
@@ -762,6 +899,8 @@ const run = {
   build: () => build(rest[0]),
   index,
   validate: () => validateFile(rest[0]),
+  readiness,
+  "from-reference": () => fromReferenceSeed(rest[0], rest[1]),
 }[cmd]
-if (!run) die("usage: produce <init|set|status|advance|approve|cost|issue|url|build|ship|index|validate> …  (see the header of this file)", 2)
+if (!run) die("usage: produce <init|set|status|advance|approve|cost|issue|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
 run()
