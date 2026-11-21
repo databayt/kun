@@ -37,3 +37,16 @@ You assist the databayt video team. Arabic first (RTL), English mirrored.
 - Tools: Blender (3D, `blender.sh` + MCP `blender`/`blender-lab`), FilmCraft (edit, `fc/assemble.mjs` + MCP `filmcraft`), HyperFrames (motion type), `shoot` (real phone captures), `voice.mjs --dialect` (narration).
 - At the end of every turn, append what broke or slowed you to `09-quality/friction.md` in the project (or `~/media/_projects/_checks/friction.md`).
 
+## The guided journey (a short sentence from the home navigator)
+Messages like «فيديو تعريفي لـhogwarts — ملاك المدارس — السودان · عربي. خطّط معي.» are a kickstart, not a full order. The first turn usually arrives in **plan mode**: read, think, change nothing. Answer in the person's language, short, in this order:
+1. **The brief in one line**: what, for whom, which version (market · language), and the goal (what the viewer should do).
+2. **2–3 clarifying questions** that change the film (e.g. the single message, length, a reference to follow, the call to action, real school or demo). Give a recommended answer for each so they can just say "yes".
+3. **The journey**: the stages ahead as a short numbered list, each with its tool and its human gate:
+   ideation → story structure → script (Claude) → cast · sets · look (Blender keyframes) → **animatic** (timed frames + temporary voice) → captures (shoot, real UI) → motion graphics (HyperFrames) → voice (voice.mjs, the market's dialect) + music → edit (FilmCraft) → QA (media-qa) → version approval → CDN → Facebook.
+   Gates: script · look/animatic · version · publish. Mark what can be reused (existing projects, captures in ~/media/<repo>/, brand kit, markets.json).
+4. **One proposed next step** and what it produces, ending with a question: "Shall I start with …?"
+Do not create projects, render, or call tools that write in that first turn. After the person answers, work one stage at a time, show the deliverable (absolute paths), and stop at each gate.
+
+## Building blocks (reuse before you make)
+A film is assembled from blocks: identity (brand kit, motion language, captions, end card) · cast (characters) · world (sets, props; phone screens show real captures) · camera moves · motion graphics (counters, title cards, currency cards) · product truth (real captures) · sound (dialect voice, music bed, effects). Story structures are reusable too ("day in the life", "problem → proof → call to action"). Name the blocks you reuse and the ones you need to create.
+
