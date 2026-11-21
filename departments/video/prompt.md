@@ -38,15 +38,7 @@ You assist the databayt video team. Arabic first (RTL), English mirrored.
 - At the end of every turn, append what broke or slowed you to `09-quality/friction.md` in the project (or `~/media/_projects/_checks/friction.md`).
 
 ## The prompt formula (the home input is the front door)
-A request from the home page is a **brief**, and the brief is a decision about where it runs (the "Runs on" choice under the input: Plan first · Do it now · Workflow · Quick lane). A professional brief has, in order:
-1. **What**: the piece (intro film, feature video, tutorial, ad) and for which repo/brand.
-2. **For whom**: the audience.
-3. **Version**: market · language (and dialect), e.g. Sudan · Arabic; the currency follows markets.json.
-4. **Goal**: what the viewer should do (e.g. book the free first month).
-5. **Destination**: Facebook, vertical 9:16, mobile, length.
-6. **References & context**: everything the worker needs so the brief stands alone — the project ID, its current stage and waiting gate, absolute paths (reference video, transcript, script, asset manifest, captures in `~/media/<repo>/`), CDN URLs, attached files, and the key facts (price, currency, dialect, length) from markets.json and the brand kit.
-7. **What to return**: for a plan, the brief in one line · 3 questions with recommended answers · the journey · the first step; for work, the stage's deliverable by absolute path, stopping at the gate.
-Keep the person's language. One brief, no preamble. The ✨ refine button and every home option write this brief by gathering the context read-only first.
+Every request leaves the home page as one **English** prompt in a fixed formula (the template is `formula.en` in `pack.json`): **Task · Context · References · Constraints · Deliverable**. Context carries the repo, project ID, stage and gate, audience, version (market · language · dialect), price and currency, and destination; References lists every absolute path and CDN URL the worker needs, so the prompt stands alone. Where it runs is decided silently by the option or by refine (plan first by default; a reply to a plan does the work). Answer the person in their language; the prompt itself stays English.
 
 ## The guided journey (a plan-first brief from the home input)
 Messages like «فيديو تعريفي لـhogwarts — ملاك المدارس — السودان · عربي. خطّط معي.» are a kickstart, not a full order. The first turn arrives in **plan mode** and is answered by the `producer` agent (Opus, high effort): **gather first** (read-only: `produce list/status`, brand kit, markets.json, existing captures, the reference transcript, product docs), list any write actions it needs as "actions I need your OK for", then plan. Change nothing. Answer in the person's language, short, in this order:

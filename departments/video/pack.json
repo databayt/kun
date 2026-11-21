@@ -31,14 +31,14 @@
     {
       "label_ar": "ريلز من فيديو",
       "label_en": "Reel from a video",
-      "prompt": "اصنع ريلز قصيرة من آخر فيديو في مجلد العمل مع ترجمة عربية.",
+      "prompt": "Cut a short reel from the latest video in the work folder, with Arabic captions.",
       "description_en": "Cut a short reel from the latest video in your work folder, with Arabic captions.",
       "description_ar": "اقطع ريلز قصيرة من آخر فيديو في مجلد عملك مع ترجمة عربية."
     },
     {
       "label_ar": "سكربت فيديو",
       "label_en": "Video script",
-      "prompt": "اكتب سكربت فيديو ٦٠ ثانية لميزة من هوغورتس: الفكرة، اللقطات، والتعليق الصوتي.",
+      "prompt": "Write a 60-second video script for one hogwarts feature: the idea, the shots and the voiceover.",
       "description_en": "A 60-second script for a Hogwarts feature: the idea, the shots and the voiceover.",
       "description_ar": "سكربت ٦٠ ثانية لميزة في هوغورتس: الفكرة واللقطات والتعليق الصوتي."
     },
@@ -48,7 +48,7 @@
       ],
       "label_ar": "فيلم تعريفي",
       "label_en": "Intro film",
-      "prompt": "خطّط فيلماً تعريفياً لهوغورتس (بالقلم).\nالجمهور: ملّاك المدارس ومديروها · النسخة: السودان · عربي · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال، نحو دقيقتين.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: آخر فيديو اعتمده الفريق في «المدرسة 2.0»، بمستوى سينمائي وشخصيات ثلاثية الأبعاد.\nاجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
+      "prompt": "Plan an intro film for hogwarts (viewers see the brand Balqalam).\nAudience: school owners and principals · Version: Sudan · Arabic · Destination: Facebook, vertical 9:16, mobile, about 2:00.\nGoal: the viewer books the free first month. Reference: the latest video the team approved in the WhatsApp group «المدرسة 2.0», raised to cinematic level with 3D characters.\nReturn: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step.",
       "description_ar": "موجز احترافي جاهز للتعديل: الجمهور، النسخة، المرجع، ثم خطة",
       "description_en": "A professional brief to edit: audience, version, reference, then a plan",
       "route": "plan"
@@ -59,7 +59,7 @@
       ],
       "label_ar": "متابعة الإنتاج",
       "label_en": "Continue production",
-      "prompt": "تابع إنتاج فيديو هوغورتس المفتوح.\nاقرأ produce list و produce status لنسخة التركيز: المراحل المنجزة، البوابة المنتظرة، والروابط المتوقعة على CDN.\nثم أعطني: أين نحن في سطر · ما يحتاج قراري · الخطوة التالية بأداتها وما تنتجه.",
+      "prompt": "Continue the open hogwarts video production.\nRead produce list and produce status for the focus version: stages done, the waiting gate, the predicted CDN URLs.\nReturn: where we stand in one line · what needs my decision · the next step with its tool and what it produces.",
       "description_ar": "أين وصل الإنتاج، وما البوابة المنتظرة، وما الخطوة التالية",
       "description_en": "Where the production stands, the waiting gate, the next step",
       "route": "do"
@@ -70,7 +70,7 @@
       ],
       "label_ar": "فحص الأدوات",
       "label_en": "Tools check",
-      "prompt": "افحص جاهزية خط الفيديو.\nشغّل produce readiness، ثم تأكد أن Blender و FilmCraft و Claude تستجيب فعلاً، واترك دليلاً في ~/media/_projects/_checks/<اليوم>/.\nثم أعطني: جدول ✓/✗ لكل أداة · ما يحتاج إصلاحاً وأمره. لا تُنتج الفيديو.",
+      "prompt": "Check the video line is ready.\nRun produce readiness, then confirm Blender, FilmCraft and Claude actually respond, leaving proof in ~/media/_projects/_checks/<today>/.\nReturn: a ✓/✗ table per tool · what needs fixing and the command. Do not produce the video.",
       "description_ar": "Blender و FilmCraft و Claude: هل تعمل؟ جدول ✓/✗ مع الدليل",
       "description_en": "Blender, FilmCraft, Claude: do they work? A ✓/✗ table with proof",
       "route": "quick"
@@ -928,8 +928,8 @@
     }
   ],
   "formula": {
-    "ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-    "en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
+    "ar": "",
+    "en": "## Task\n<one line: the deliverable · for whom · which version · the goal>\n\n## Context\n- Repo / brand: <repo> / <brand the viewer sees>\n- Project: <project ID> · stage: <current stage> · next gate: <gate>\n- Audience: <who>\n- Version: <market> · <language> · <dialect>\n- Price: <amount> <currency> per student per month\n- Destination: <platform> · <aspect> · <device> · <length>\n\n## References\n- <absolute path or CDN URL> — <what it is>\n\n## Constraints\n- Claims only from real captures; generated scenes are illustrative.\n- No real student or parent data; brand name as the viewer sees it.\n- Stop at every human gate (script · look/animatic · version · publish); never approve.\n\n## Deliverable\n<plan mode: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step>\n<work mode: the stage's output by absolute path, `produce advance`, stop at the gate>"
   },
   "run": {
     "plan": {
