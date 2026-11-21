@@ -1,0 +1,193 @@
+---
+title: Jev
+description: A model that answers typed questions instead of writing text — what it is, what it costs, and where it could serve the engine and the products in later phases
+---
+
+# Jev
+
+**Jev** is a model from [TypeSafe](https://docs.typesafe.ai/introduction) that does not write
+text. You send it one **state** (a message, a record, an image) and several **typed
+questions**. It sends back answers that code can branch on, each with a probability. TypeSafe
+calls this class of model _System One_: fast gut-check judgments, with the rules kept in your
+own code.
+
+**Status: a watch item, off by default.** Nothing in kun or in any product calls Jev, no key is
+stored, and nothing is spent. This page records what we learned on 2026-11-21 so a later phase
+can start from here instead of redoing the research.
+
+> [thejevai.com](https://thejevai.com) and the `jev-ai/jev-ai` repository are a third-party
+> reseller, by their own description not the official site. They sell credit packs from $10.
+> The maker is TypeSafe; use `docs.typesafe.ai` and `api.typesafe.ai`.
+
+## The four question types
+
+| Type | Asks | Returns |
+| --- | --- | --- |
+| **Choice** | Which one of these options? | the option, a probability for each option, a confidence |
+| **Score** | Where on this ordered scale (calm, frustrated, very frustrated)? | a number that can fall between levels (1.4), a probability for each level, a confidence |
+| **Noul** | Is this statement true? | one number from 0 to 1: the probability of yes |
+| **Box** | Where is it in this image? | four edges as fractions of the image, a confidence |
+
+Any mix of types goes in one request. Every question is answered separately against the same
+state, so adding questions barely adds time.
+
+```bash
+curl https://api.typesafe.ai/v1/systemone \
+  -H "Authorization: Bearer $TYPESAFE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "jev-latest",
+    "state": "I was charged twice for my subscription this month. Please refund the extra charge.",
+    "questions": {
+      "billing": { "type": "noul", "instructions": "Is this message about billing?" }
+    }
+  }'
+```
+
+The answer comes back under the same name: `answers.billing.noul`, for example `0.97`.
+
+## Facts checked on 2026-11-21
+
+| Fact | Value | Source |
+| --- | --- | --- |
+| Price | $0.042 per million input tokens; output tokens are free | [Models](https://docs.typesafe.ai/models) |
+| What that means | 10,000 decisions of 2,000 tokens each cost about $0.84 | arithmetic |
+| Size limits | 64k tokens per request, 32k per question (262k with a long-context header, slower and less accurate) | [Models](https://docs.typesafe.ai/models) |
+| Input | text, JSON, PNG and JPEG images; no audio or video | [Models](https://docs.typesafe.ai/models) |
+| Current model | `jev-1.14.0` (alias `jev-latest`); Box needs 1.14 | [Models](https://docs.typesafe.ai/models) |
+| Customer data | not used for training, by their privacy policy | [Legal](https://docs.typesafe.ai/legal) |
+| Free tier | none found in the docs; the Playground is free to try by hand | [Quick start](https://docs.typesafe.ai/introduction/quickstart) |
+
+## Where it is weak
+
+From TypeSafe's own [list of rough edges](https://docs.typesafe.ai/model-jaggedness):
+
+- **Arithmetic, counting and date comparison.** Keep these in code and give Jev the result.
+- **Literal reading.** It answers the question as written, not as meant. Write the exact
+  condition and put the boundary cases in the criteria.
+- **A large state full of unrelated detail.** Filter first; send only what the question needs.
+- **Option order** can sway a Choice. Reorder and check the answer holds.
+
+And one of ours: **Arabic is untested.** Most of our text is Arabic, much of it Sudanese
+dialect, and nothing we read states how accurate Jev is there. That test comes before anything
+else (Phase A below).
+
+## Patterns worth copying, with or without Jev
+
+These are plain design rules. They hold for any model that returns a probability.
+
+| Pattern | The rule |
+| --- | --- |
+| [Screen with a yes/no first](https://docs.typesafe.ai/patterns/noul-screen) | Ask one cheap question on the bare input. Run the expensive step only on a clear yes; give "unsure" its own path instead of rounding it. |
+| [Companion yes/no](https://docs.typesafe.ai/patterns/companion-noul) | Next to a Choice, ask "does any option fit?", so code can tell when none does. |
+| [Fan-out](https://docs.typesafe.ai/patterns/fan-out) | Send every question you might need in one request and ignore the answers that don't apply. |
+| [Threshold by risk](https://docs.typesafe.ai/patterns/probability-routing) | Showing a page can act at 0.6; deleting or paying waits for 0.9 and a confirm. |
+| [Composite scoring](https://docs.typesafe.ai/patterns/composite-scoring) | Split a broad judgment into small scores and combine them with weights in code. Changing priorities means changing a number, not a prompt. |
+
+## Use cases by phase
+
+The phases are ordered by distance from revenue and by what must be proven first. None is
+scheduled. Each one opens only when its gate (next section) is met.
+
+### Phase A — prove it, no code
+
+| Step | What it decides |
+| --- | --- |
+| Paste 50 real Arabic messages into the [Playground](https://console.typesafe.ai/playground): parent questions, Mkan leads, user reports | Whether Jev reads our Arabic well enough to be worth any build |
+
+### Phase B — one script, close to revenue
+
+| Use case | Questions | What it replaces |
+| --- | --- | --- |
+| **Mkan inbound leads** ([funnel](/docs/funnel)) | Choice: renter, owner, broker, spam · Score: how serious · Noul: wants a viewing this week | reading every WhatsApp and web message by hand |
+| **User report triage** ([issue](/docs/issue)) | Noul: is this readable text · Choice: login, class access, feature, other · Noul per pair: same problem as report N | gibberish reaching the queue; the same "can't enter the class" report filed several times |
+
+### Phase C — the engine
+
+| Use case | Questions | What it replaces |
+| --- | --- | --- |
+| **Skill routing** ahead of the `<kun-route>` hint ([lanes](/docs/lanes)) | Call 1: rank every skill on one line each, plus "does this turn need a skill at all?" · Call 2: re-read the top three in full | the model guessing from a long truncated list |
+| **Model pick per prompt** | Score: how hard is this task | a fixed model per lane when the task is trivial |
+| **Job supervisor** | Noul on a job's log tail: did this run produce its output | trusting exit code 0 |
+| **Guard before a risky command** | Noul: does this action delete, pay or touch production | pattern lists that miss rephrased commands |
+
+Skill routing has outside evidence. TypeSafe's
+[skill suggestion cookbook](https://docs.typesafe.ai/cookbooks/skill_suggestion) ran 452 requests
+against the 194 skills of the Hermes catalog: wrong skill loads fell from 15.7% to 7.9%, and
+loads when no skill fit fell from 14.0% to 5.2%. Our repo and block routing stays as it is:
+`resolve.mjs` is deterministic on purpose.
+
+### Phase D — the products
+
+| Product | Use case | Questions |
+| --- | --- | --- |
+| Hogwarts | Parents' group digest for the school lead | Noul: is it a question · Choice: fees, login, class, other · Score: urgency |
+| Hogwarts | Short-answer grading against the teacher's rubric; the teacher reviews only the unsure ones | Score per rubric line |
+| Hogwarts | Chatbot answer check before sending | Noul: does this answer follow from the school's policy text |
+| Hogwarts | [Textbook](/docs/textbook) scans: send only doubtful pages to the expensive re-read | Noul: is this page fully legible · Box: where it is not |
+| Mkan | Plain-language home search | one Score per listing against the sentence |
+| Mkan | TikTok home frames for the trust gate | Noul: is this a home for rent · Noul: is a phone number visible · Box: where |
+| Sales | Tender fit ([jobs](/docs/jobs)): screen on the title, then score | Noul screen, then composite Score |
+| Business desk | A spreadsheet formula that scores a column of leads | Score |
+
+### Later
+
+- **Learned predictors.** A text model proposes questions, Jev answers them for every lead, and
+  a small classical model learns which answers predict a paying school
+  ([cookbook](https://docs.typesafe.ai/cookbooks/autoresearch_feature_discovery)). Needs far
+  more closed deals than we have.
+- **[Machine](/docs/machine) voice intents.** Map a spoken sentence straight to an action.
+- **Agent test environments.** [REA](/docs/reverse) records a product flow as an environment;
+  yes/no questions grade whether an agent completed it.
+
+## Gates
+
+| Before | This must be true |
+| --- | --- |
+| Any phase after A | The Arabic hand test passed on our own messages |
+| Any spend, however small | A `decide` entry, approved by Abdout |
+| Storing a key | It goes in the Keychain through [credentials](/docs/credentials) as `TYPESAFE_API_KEY`, never in a repo or browser code |
+| Phase C routing | One scored `bench` dispatch run exists as the baseline; without it nobody can show routing improved |
+| Any automatic action | Thresholds set per action, a path to a person for "unsure", and every decision logged with its model version |
+
+## Three routes and what each costs
+
+| | Local model ($0 cash) | Jev direct | Nothing now |
+| --- | --- | --- | --- |
+| Cash | $0 | under $1 a month at 10,000 decisions | $0 |
+| Build | a small `decide` module with tests | one thin API call | none |
+| Memory and disk | about 1–2 GB disk, 2–3 GB RAM while loaded (estimate) | none | none |
+| Arabic quality | weak on dialect for a small model; probabilities not calibrated | unknown until Phase A | — |
+| Proof | 50–100 labelled Arabic examples per use case | the same | — |
+
+The cash difference is about a dollar a month. The real cost on either route is the labelled
+examples, which only someone who knows the cases can write. On 2026-11-21 the choice was
+**nothing now**: zero paying schools, no routing baseline, and a Mac at 16 GB with swap near
+full. `llama-server` is already installed if the local route is ever tried.
+
+## What cannot be reverse engineered
+
+Jev runs on TypeSafe's servers. [REA](/docs/reverse) inspects what runs on our machine or in our
+browser, so it has nothing to open, and the request format is already public.
+
+- **Can be rebuilt:** the interface (state plus typed questions) and every pattern above, on a
+  local model that exposes token probabilities.
+- **Cannot be rebuilt:** the training that makes the probabilities trustworthy, which is the
+  product.
+- **Needs a legal read first:** training our own model on Jev's answers. We have not read the
+  customer agreement, and terms like it often forbid this.
+
+## What exists today
+
+- [Machine](/docs/machine)'s Tools page checks whether a `jev` binary is installed and whether
+  a key name is set (`JEV_API_KEY` or `TYPESAFE_API_KEY`). It never reads the key. Machine has
+  no decision feature.
+- The watch list in [References](/docs/references) carries the TypeSafe docs index, so the
+  `sync` skill sees new releases.
+
+## Sources
+
+- [TypeSafe docs index](https://docs.typesafe.ai/llms.txt)
+- [Introduction](https://docs.typesafe.ai/introduction) · [System One](https://docs.typesafe.ai/concepts/system-one) · [Confidence](https://docs.typesafe.ai/confidence)
+- [Models and price](https://docs.typesafe.ai/models) · [Rough edges](https://docs.typesafe.ai/model-jaggedness)
+- [Skill suggestion cookbook](https://docs.typesafe.ai/cookbooks/skill_suggestion)
