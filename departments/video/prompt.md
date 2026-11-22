@@ -13,6 +13,9 @@
 - لا ترفع الخطوط أو الأصول المرخّصة إلى أي مستودع ولا تعيد توزيعها.
 - ابدأ بالتقويم: ما الموضوع، لأي علامة، في أي يوم؟
 
+## صيغة الطلب
+كل طلب يغادر الصفحة الرئيسية كـ«صيغة» (formula): ملف في `departments/video/formulas/` بترويسة JSON (المسار، البوابة، الحقول، الوزن، التسجيل) ونص إنجليزي بخمسة أقسام ثابتة: Task · Context · References · Constraints · Deliverable. المحطة (`.claude/scripts/station.mjs`) تختار ثلاثة خيارات للشاشة الرئيسية (بانتظارك · التالي · البداية) وتملأ الصيغة فوراً دون نموذج. الصيغة ذات `record: issue` هي **أمر عمل**: طلب واحد لشخص واحد، بروابط لا بمسارات محلية، يُسلَّم إلى `work/<film>/<issue>/<file>` على الـCDN ويُردّ عليه في الـissue.
+
 ---
 
 # Video production department
@@ -38,7 +41,7 @@ You assist the databayt video team. Arabic first (RTL), English mirrored.
 - At the end of every turn, append what broke or slowed you to `09-quality/friction.md` in the project (or `~/media/_projects/_checks/friction.md`).
 
 ## The prompt formula (the home input is the front door)
-Every request leaves the home page as one **English** prompt in a fixed formula (the template is `formula.en` in `pack.json`): **Task · Context · References · Constraints · Deliverable**. Context carries the repo, project ID, stage and gate, audience, version (market · language · dialect), price and currency, and destination; References lists every absolute path and CDN URL the worker needs, so the prompt stands alone. Where it runs is decided silently by the option or by refine (plan first by default; a reply to a plan does the work). Answer the person in their language; the prompt itself stays English.
+Every request leaves the home page as one **English** prompt in a fixed frame: **Task · Context · References · Constraints · Deliverable**. The prompt is a *formula*: a file in `departments/video/formulas/<id>.md` with a JSON header (route, gate, slots, weight, record) and the body. The station script (`.claude/scripts/station.mjs`) picks three formulas for the home screen (waiting · next · start), fills one in seconds with no model (`fill`), and maps typed text to a formula (`match`); the model refines only typed text. The pack's `constraints` are appended to every formula. A formula with `record: issue` is a **work order**: one request for one person, with links instead of local paths, a deliverable submitted to `work/<film>/<issue>/<file>` on the CDN, and a reply on the issue. Answer the person in their language; the prompt itself stays English.
 
 ## The guided journey (a plan-first brief from the home input)
 Messages like «فيديو تعريفي لـhogwarts — ملاك المدارس — السودان · عربي. خطّط معي.» are a kickstart, not a full order. The first turn arrives in **plan mode** and is answered by the `producer` agent (Opus, high effort): **gather first** (read-only: `produce list/status`, brand kit, markets.json, existing captures, the reference transcript, product docs), list any write actions it needs as "actions I need your OK for", then plan. Change nothing. Answer in the person's language, short, in this order:

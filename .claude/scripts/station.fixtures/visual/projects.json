@@ -1,0 +1,52 @@
+[
+ {
+  "id": "hogwarts-demo-v001",
+  "brand": "hogwarts",
+  "category": "intro",
+  "subject": "demo",
+  "version": "V001",
+  "status": "in-production",
+  "createdAt": "2026-11-20T07:18:34Z",
+  "next": "visual",
+  "focus": [
+   "sd-ar"
+  ],
+  "variants": [
+   "sd-ar",
+   "sd-en"
+  ],
+  "stages": {
+   "request": {
+    "status": "done"
+   },
+   "research": {
+    "status": "done"
+   },
+   "brief": {
+    "status": "done"
+   },
+   "script": {
+    "status": "done"
+   },
+   "storyboard": {
+    "status": "done"
+   },
+   "assets": {
+    "status": "done"
+   }
+  },
+  "approvals": [
+   {
+    "gate": "script",
+    "version": "V001",
+    "by": "abdout"
+   }
+  ],
+  "issue": null,
+  "files": [
+   "03-script/script.md",
+   "04-storyboard/shot-list.json",
+   "01-brief/creative-brief.md"
+  ]
+ }
+]

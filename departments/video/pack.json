@@ -4,8 +4,25 @@
   "title_ar": "الفيديو",
   "description": "Record, edit and generate video — reels, demos and explainers — with a QA agent before anything goes out.",
   "description_ar": "التسجيل والمونتاج وتوليد الفيديو — ريلز وعروض وشروحات — مع وكيل مراجعة قبل أي نشر.",
+  "lead": "video",
+  "line": "produce",
+  "guard": "media-qa",
+  "keywords": {
+    "en": [
+      "video"
+    ],
+    "ar": [
+      "فيديو",
+      "الفيديو"
+    ]
+  },
+  "constraints": [
+    "Claims only from real captures; generated scenes are illustrative.",
+    "No real student or parent data; brand name as the viewer sees it.",
+    "Stop at every human gate (script · look/animatic · version · publish); never approve."
+  ],
   "items": [
-    "agent:producer",
+    "agent:video",
     "skill:produce",
     "skill:edit",
     "skill:record",
@@ -29,6 +46,7 @@
   "defaultDriver": "claude",
   "quickActions": [
     {
+      "id": "video.reel.footage",
       "label_ar": "ريلز من فيديو",
       "label_en": "Reel from a video",
       "prompt": "Cut a short reel from the latest video in the work folder, with Arabic captions.",
@@ -36,6 +54,7 @@
       "description_ar": "اقطع ريلز قصيرة من آخر فيديو في مجلد عملك مع ترجمة عربية."
     },
     {
+      "id": "video.script.only",
       "label_ar": "سكربت فيديو",
       "label_en": "Video script",
       "prompt": "Write a 60-second video script for one hogwarts feature: the idea, the shots and the voiceover.",
@@ -43,6 +62,7 @@
       "description_ar": "سكربت ٦٠ ثانية لميزة في هوغورتس: الفكرة واللقطات والتعليق الصوتي."
     },
     {
+      "id": "video.film.plan",
       "repos": [
         "hogwarts"
       ],
@@ -54,6 +74,7 @@
       "route": "plan"
     },
     {
+      "id": "video.film.continue",
       "repos": [
         "hogwarts"
       ],
@@ -65,6 +86,7 @@
       "route": "do"
     },
     {
+      "id": "video.tools.check",
       "repos": [
         "hogwarts"
       ],
@@ -99,848 +121,20 @@
       "--json"
     ]
   },
-  "starters": [
-    {
-      "id": "new",
-      "label_ar": "فيديو جديد",
-      "label_en": "New video",
-      "icon": "Clapperboard",
-      "description_ar": "النوع ← الجمهور ← السوق واللغة",
-      "description_en": "Type → audience → market & language",
-      "children": [
-        {
-          "id": "intro",
-          "label_ar": "فيديو تعريفي",
-          "label_en": "Intro film",
-          "icon": "Clapperboard",
-          "description_ar": "يعرّف بالمنتج كله في قصة واحدة",
-          "description_en": "The whole product in one story",
-          "set": {
-            "type": "intro"
-          },
-          "children": [
-            {
-              "id": "owners",
-              "label_ar": "ملاك المدارس ومديروها",
-              "label_en": "School owners & principals",
-              "description_ar": "يقرّرون ويدفعون",
-              "description_en": "They decide and pay",
-              "icon": "Users",
-              "set": {
-                "audience": "owners"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "parents",
-              "label_ar": "أولياء الأمور",
-              "label_en": "Parents",
-              "description_ar": "يتابعون أبناءهم",
-              "description_en": "They follow their children",
-              "icon": "Users",
-              "set": {
-                "audience": "parents"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "teachers",
-              "label_ar": "المعلمون",
-              "label_en": "Teachers",
-              "description_ar": "يستخدمونه كل يوم",
-              "description_en": "They use it every day",
-              "icon": "Users",
-              "set": {
-                "audience": "teachers"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "students",
-              "label_ar": "الطلاب",
-              "label_en": "Students",
-              "description_ar": "يتعلمون عليه",
-              "description_en": "They learn on it",
-              "icon": "Users",
-              "set": {
-                "audience": "students"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "feature",
-          "label_ar": "شرح ميزة",
-          "label_en": "Feature explainer",
-          "icon": "Film",
-          "description_ar": "ميزة واحدة من الواجهة الحقيقية",
-          "description_en": "One feature, from the real app",
-          "set": {
-            "type": "feature"
-          },
-          "children": [
-            {
-              "id": "owners",
-              "label_ar": "ملاك المدارس ومديروها",
-              "label_en": "School owners & principals",
-              "description_ar": "يقرّرون ويدفعون",
-              "description_en": "They decide and pay",
-              "icon": "Users",
-              "set": {
-                "audience": "owners"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "parents",
-              "label_ar": "أولياء الأمور",
-              "label_en": "Parents",
-              "description_ar": "يتابعون أبناءهم",
-              "description_en": "They follow their children",
-              "icon": "Users",
-              "set": {
-                "audience": "parents"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "teachers",
-              "label_ar": "المعلمون",
-              "label_en": "Teachers",
-              "description_ar": "يستخدمونه كل يوم",
-              "description_en": "They use it every day",
-              "icon": "Users",
-              "set": {
-                "audience": "teachers"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "students",
-              "label_ar": "الطلاب",
-              "label_en": "Students",
-              "description_ar": "يتعلمون عليه",
-              "description_en": "They learn on it",
-              "icon": "Users",
-              "set": {
-                "audience": "students"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "tutorial",
-          "label_ar": "فيديو تعليمي",
-          "label_en": "Tutorial",
-          "icon": "FileText",
-          "description_ar": "خطوة بخطوة لمستخدم",
-          "description_en": "Step by step, for a user",
-          "set": {
-            "type": "tutorial"
-          },
-          "children": [
-            {
-              "id": "owners",
-              "label_ar": "ملاك المدارس ومديروها",
-              "label_en": "School owners & principals",
-              "description_ar": "يقرّرون ويدفعون",
-              "description_en": "They decide and pay",
-              "icon": "Users",
-              "set": {
-                "audience": "owners"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "parents",
-              "label_ar": "أولياء الأمور",
-              "label_en": "Parents",
-              "description_ar": "يتابعون أبناءهم",
-              "description_en": "They follow their children",
-              "icon": "Users",
-              "set": {
-                "audience": "parents"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "teachers",
-              "label_ar": "المعلمون",
-              "label_en": "Teachers",
-              "description_ar": "يستخدمونه كل يوم",
-              "description_en": "They use it every day",
-              "icon": "Users",
-              "set": {
-                "audience": "teachers"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "students",
-              "label_ar": "الطلاب",
-              "label_en": "Students",
-              "description_ar": "يتعلمون عليه",
-              "description_en": "They learn on it",
-              "icon": "Users",
-              "set": {
-                "audience": "students"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "ad",
-          "label_ar": "إعلان قصير",
-          "label_en": "Short ad",
-          "icon": "Play",
-          "description_ar": "١٥–٣٠ ثانية للإعلانات المموّلة",
-          "description_en": "15–30 s for paid reach",
-          "set": {
-            "type": "ad"
-          },
-          "children": [
-            {
-              "id": "owners",
-              "label_ar": "ملاك المدارس ومديروها",
-              "label_en": "School owners & principals",
-              "description_ar": "يقرّرون ويدفعون",
-              "description_en": "They decide and pay",
-              "icon": "Users",
-              "set": {
-                "audience": "owners"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "parents",
-              "label_ar": "أولياء الأمور",
-              "label_en": "Parents",
-              "description_ar": "يتابعون أبناءهم",
-              "description_en": "They follow their children",
-              "icon": "Users",
-              "set": {
-                "audience": "parents"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "teachers",
-              "label_ar": "المعلمون",
-              "label_en": "Teachers",
-              "description_ar": "يستخدمونه كل يوم",
-              "description_en": "They use it every day",
-              "icon": "Users",
-              "set": {
-                "audience": "teachers"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "students",
-              "label_ar": "الطلاب",
-              "label_en": "Students",
-              "description_ar": "يتعلمون عليه",
-              "description_en": "They learn on it",
-              "icon": "Users",
-              "set": {
-                "audience": "students"
-              },
-              "children": [
-                {
-                  "id": "market",
-                  "label_ar": "السوق واللغة",
-                  "label_en": "Market & language",
-                  "source": "markets",
-                  "then": [
-                    {
-                      "id": "start",
-                      "label_ar": "ابدأ الإنتاج",
-                      "label_en": "Start production",
-                      "icon": "Play",
-                      "description_ar": "مشروع جديد: بحث، موجز، سكربت، ثم توقّف لاعتمادك",
-                      "description_en": "A new project: research, brief, script — then stop for your sign-off",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. إنتاج جديد. اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. A new production. Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    },
-                    {
-                      "id": "reference",
-                      "label_ar": "من فيديو مرجعي",
-                      "label_en": "From a reference video",
-                      "icon": "FolderOpen",
-                      "description_ar": "ابنِ السكربت من فيديو اعتمده الفريق (واتساب أو مرفق)",
-                      "description_en": "Build the script from a video the team approved (WhatsApp or attached)",
-                      "fill_ar": "خطّط {{type_label}} لـ{{repo}}.\nالجمهور: {{audience_label}} · النسخة: {{variant_label}} · الوجهة: فيسبوك، عمودي ٩:١٦ للجوال.\nالهدف: يحجز المشاهد الشهر الأول المجاني. المرجع: الفيديو المرفق، أو آخر فيديو اعتمده الفريق في «المدرسة 2.0». اجمع ما تحتاجه أولاً (حالة المشاريع، الهوية، الأسواق، اللقطات الموجودة، المرجع)، ثم أعطني: الموجز في سطر · ٣ أسئلة بإجابات مقترحة · الرحلة (مرحلة ← أداة ← بوابة ← ما نعيد استخدامه) · الخطوة الأولى.",
-                      "fill_en": "Plan a {{type_label}} for {{repo}}.\nAudience: {{audience_label}} · Version: {{variant_label}} · Destination: Facebook, vertical 9:16, mobile.\nGoal: the viewer books the free first month. Reference: the attached video, or the latest one the team approved in «المدرسة 2.0». Gather what you need first (projects, identity, markets, existing captures, the reference), then give me: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step."
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "continue",
-      "label_ar": "متابعة إنتاج",
-      "label_en": "Continue a production",
-      "icon": "Activity",
-      "description_ar": "مشروع ← نسخة ← الخطوة التالية",
-      "description_en": "Project → version → next step",
-      "source": "projects",
-      "then": [
-        {
-          "id": "variant",
-          "label_ar": "النسخة",
-          "label_en": "Version",
-          "source": "variants",
-          "then": [
-            {
-              "id": "next",
-              "label_ar": "الخطوة التالية",
-              "label_en": "Next step",
-              "icon": "Play",
-              "description_ar": "أنجز المرحلة التالية وتوقّف عند البوابة البشرية",
-              "description_en": "Do the next stage, stop at the human gate",
-              "fill_ar": "تابع {{project}} — النسخة {{variant_label}}.\nاقرأ الحالة، ثم اقترح الخطوة التالية: ما تنتجه، بأي أداة، وأين تتوقف للاعتماد.",
-              "fill_en": "Continue {{project}} — version {{variant_label}}.\nRead its status, then propose the next step: what it produces, with which tool, and where it stops for approval."
-            },
-            {
-              "id": "status",
-              "label_ar": "الحالة والروابط",
-              "label_en": "Status & links",
-              "icon": "Activity",
-              "description_ar": "المراحل والبوابات والرابط المتوقع على CDN",
-              "description_en": "Stages, gates and the predicted CDN link",
-              "fill_ar": "حالة {{project}} — النسخة {{variant_label}}: ما أُنجز، ما ينتظر اعتمادي، الرابط المتوقع على CDN، والخطوة التالية.",
-              "fill_en": "Status of {{project}} — version {{variant_label}}: what's done, what awaits my approval, the predicted CDN link, and the next step."
-            },
-            {
-              "id": "review",
-              "label_ar": "راجع آخر مخرَج",
-              "label_en": "Review the latest output",
-              "icon": "Film",
-              "description_ar": "اعرض آخر ما أُنتج لهذه النسخة مع ملاحظات المراجعة",
-              "description_en": "Show the latest deliverable for this version, with review notes",
-              "fill_ar": "راجع آخر مخرَج لـ{{project}} — النسخة {{variant_label}} بعين media-qa: ما يعمل، ما يجب تعديله، وما أقرّره أنا.",
-              "fill_en": "Review the latest output of {{project}} — version {{variant_label}} with a media-qa eye: what works, what to change, and what I must decide."
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "studio",
-      "label_ar": "الاستوديو",
-      "label_en": "Studio",
-      "icon": "Wrench",
-      "description_ar": "تحدّث مع الأدوات مباشرة",
-      "description_en": "Talk to the tools directly",
-      "children": [
-        {
-          "id": "blender",
-          "label_ar": "Blender",
-          "label_en": "Blender",
-          "icon": "Box",
-          "description_ar": "المشهد المفتوح، أو صورة ثابتة تجريبية",
-          "description_en": "The open scene, or a test still",
-          "fill_ar": "Blender: افحص المشهد المفتوح (أو اصنع لقطة تجريبية ١٠٨٠×١٩٢٠)، وقل لي ما الجاهز للفيلم وما ينقص.",
-          "fill_en": "Blender: read the open scene (or make a 1080×1920 test still) and tell me what's ready for the film and what's missing."
-        },
-        {
-          "id": "filmcraft",
-          "label_ar": "FilmCraft",
-          "label_en": "FilmCraft",
-          "icon": "Scissors",
-          "description_ar": "افحص المحرّك وأخرج إطاراً تجريبياً",
-          "description_en": "Check the engine and render a test frame",
-          "fill_ar": "FilmCraft: افحص المحرّك، أخرج إطاراً تجريبياً لبطاقة بالهوية، وقل لي ما الجاهز للمونتاج.",
-          "fill_en": "FilmCraft: check the engine, render a test frame of a branded card, and tell me what's ready for the edit."
-        },
-        {
-          "id": "voice",
-          "label_ar": "عيّنة صوت",
-          "label_en": "Voice sample",
-          "icon": "Mic",
-          "description_ar": "جملة واحدة بلهجة السوق المختار",
-          "description_en": "One line in a market's dialect",
-          "source": "markets",
-          "then": [
-            {
-              "id": "say",
-              "label_ar": "اسمع العيّنة",
-              "label_en": "Hear the sample",
-              "icon": "Mic",
-              "fill_ar": "عيّنة صوت — {{variant_label}}: جملة واحدة بلهجة السوق، مع اقتراح الصوت الأنسب.",
-              "fill_en": "Voice sample — {{variant_label}}: one line in the market's dialect, with the voice you recommend."
-            }
-          ]
-        },
-        {
-          "id": "capture",
-          "label_ar": "لقطات الجوال",
-          "label_en": "Phone captures",
-          "icon": "Camera",
-          "description_ar": "صوّر الواجهة الحقيقية بمقاس الجوال",
-          "description_en": "Shoot the real app at phone size",
-          "fill_ar": "لقطات جوال لـ{{repo}}: اقترح المسارات التي يحتاجها الفيلم الحالي، وما يمكن إعادة استخدامه من ~/media.",
-          "fill_en": "Phone captures for {{repo}}: propose the flows the current film needs, and what we can reuse from ~/media."
-        }
-      ]
-    }
-  ],
   "formula": {
     "ar": "",
-    "en": "## Task\n<one line: the deliverable · for whom · which version · the goal>\n\n## Context\n- Repo / brand: <repo> / <brand the viewer sees>\n- Project: <project ID> · stage: <current stage> · next gate: <gate>\n- Audience: <who>\n- Version: <market> · <language> · <dialect>\n- Price: <amount> <currency> per student per month\n- Destination: <platform> · <aspect> · <device> · <length>\n\n## References\n- <absolute path or CDN URL> — <what it is>\n\n## Constraints\n- Claims only from real captures; generated scenes are illustrative.\n- No real student or parent data; brand name as the viewer sees it.\n- Stop at every human gate (script · look/animatic · version · publish); never approve.\n\n## Deliverable\n<plan mode: the brief in one line · 3 questions with recommended answers · the journey (stage → tool → gate → reuse) · the first step>\n<work mode: the stage's output by absolute path, `produce advance`, stop at the gate>"
+    "en": "## Task\nOne line: the deliverable, for whom, which version, the goal.\n\n## Context\nThe repo and brand, the project and its stage, the audience, the version (market, language, dialect), the price and currency, the destination.\n\n## References\nEvery link or path the worker needs, each with what it is. A work order carries links only, never a local path.\n\n## Constraints\nWhat must hold: the department's rules (appended automatically) and anything specific to this piece.\n\n## Deliverable\nWhat comes back, where it goes and the gate it stops at. A plan turn returns the brief, the questions, the journey and the first step."
   },
   "run": {
     "plan": {
       "model": "opus",
       "effort": "high",
-      "agent": "producer"
+      "agent": "video"
     },
     "work": {
       "model": "opus",
       "effort": "medium",
-      "agent": "producer"
+      "agent": "video"
     }
   },
   "routes": [
@@ -952,9 +146,10 @@
       "description_ar": "المنتج يجمع ويسأل ويقترح الرحلة، دون أي تعديل",
       "description_en": "The producer gathers, asks and proposes the journey; changes nothing",
       "mode": "plan",
+      "lane": "judge",
       "model": "opus",
       "effort": "high",
-      "agent": "producer"
+      "agent": "video"
     },
     {
       "id": "do",
@@ -964,9 +159,10 @@
       "description_ar": "المنتج ينفّذ مرحلة واحدة ويتوقف عند البوابة",
       "description_en": "The producer works one stage and stops at the gate",
       "mode": "auto",
+      "lane": "work",
       "model": "opus",
       "effort": "medium",
-      "agent": "producer"
+      "agent": "video"
     },
     {
       "id": "workflow",
@@ -976,9 +172,10 @@
       "description_ar": "عدة وكلاء بالتوازي: نسخة لكل وكيل، ثم تحقّق",
       "description_en": "Agents in parallel: one per version, each verified",
       "mode": "auto",
+      "lane": "judge",
       "model": "opus",
       "effort": "high",
-      "agent": "producer",
+      "agent": "video",
       "suffix": "Run this as a workflow: use a workflow to fan out one Sonnet agent per version (or per independent piece), verify each result, and stop at the human gates. Never Fable."
     },
     {
@@ -989,6 +186,7 @@
       "description_ar": "مهام صغيرة: حالة، فحص، بحث",
       "description_en": "Small jobs: status, checks, lookups",
       "mode": "auto",
+      "lane": "research",
       "model": "sonnet",
       "effort": "low"
     }
