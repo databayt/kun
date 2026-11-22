@@ -17,14 +17,25 @@ stage belongs to an existing skill (table below). Blueprint: `~/.claude/playwrig
 
 ```bash
 P="node ~/.claude/skills/produce/scripts/produce.mjs"
-$P init --brand hogwarts --category intro --subject introduction --lang ar,en   # → HOG-INTRO-INTRODUCTION-20261120-V001
-$P issue <ID> --create          # one GitHub issue, label dept:video, kun block items=skill:produce
-$P status <ID>                  # stage table, gates, cost, next stage
-$P advance <ID> <stage> --file <deliverable> [--verdict pass|fail]
-$P approve <ID> --version V001 --by <login> [--gate script|version|publish] [--destination facebook] [--issue databayt/x#n]
-$P ship <ID> --dry-run          # CDN keys + plan; real run only after the version approval
+$P init --brand hogwarts --category intro --subject introduction --lang ar,en   # → hogwarts-intro-introduction-v001
+$P issue <ID> [--create|--sync] # the FILM issue (tracker): draft without a flag, create once, then rewrite from state
+$P order <ID> <formula> --to <login> [--set k=v]… [--after refs] [--create]   # a WORK ORDER for one person
+$P submit <issue-ref> <file>… [--summary …] [--next …] [--create]            # upload deliverables + receipt, status:review
+$P init … --markets sa,ae,eg,sd --slug intro   # market x language versions (content/media/markets.json)
+$P set <ID> identity balqalam   # change the on-film identity of an existing project
+$P set <ID> slug intro          # | set <ID> markets sa,ae,eg,sd
+$P status <ID>                  # shared stages, then a variant x per-variant-stage grid + predicted URLs
+$P advance <ID> <stage> --file <deliverable> [--verdict pass|fail] [--variant sa-ar]
+$P approve <ID> --version V001 --by <login> [--gate script|look|version|publish] [--variant sa-ar|--all] [--destination facebook] [--issue databayt/x#n]
+$P url <ID> [--variant sa-ar]   # predicted CDN URLs, before anything renders
+$P build <ID> --variant sa-ar|--all [--dry-run]   # piece.mjs -> assemble.mjs per variant; unchanged inputs are skipped
+$P ship <ID> [--variant v|--all] --dry-run        # CDN keys + plan; real run only after the version approval
 $P index                        # rebuild the local video index
+$P readiness [--fix] [--json]   # ffmpeg, blender, filmcraft-cli, mlx_whisper, uv, Playwright browsers, disk >= 15 GB, power, Kun.app, MCPs, GEMINI key; exit 1 if a critical row fails (--fix installs webkit + chromium)
+$P init … --from-reference clip.mp4   # | from-reference <ID> clip.mp4: copy to 02-research/reference/, whisper transcript.srt, contact.png, seed 03-script/script.md; research = "seeded"
 ```
+
+**Focus** — `project.json → focus` (e.g. `["sd-ar"]`) is the build order: Machine's starter and `build` work those versions first.
 
 ## The 14 stages
 
@@ -47,6 +58,17 @@ Deliverables live in `~/media/_projects/<ID>/` (never inside a repo). Run `advan
 | 13  | cdn        | `10-publishing/manifest.json`, CDN keys                                                               | `produce ship` → `edit/scripts/media/publish.mjs` (mp4) + wrapper (vtt/webp/json)                                                                  | refuses without approval                                                       |
 | 14  | publish    | `10-publishing/{caption.md,publishing-record.md}`                                                     | `/publish` + `/facebook` + `/social`                                                                                                               | **separate publish approval**: `approve --gate publish --destination facebook` |
 
+## Markets and versions
+
+`--markets sa,ae,eg,sd` (ids from `content/media/markets.json`: currency, on-screen price, symbol, voice dialect) turns a
+project into **variants** `<market>-<lang>` (`sa-ar`, `eg-en`). Stages 01–07 (request … visual) are **shared**, done once.
+Stages audio, edit, render, qa, approval, cdn, publish are **per variant**, stored in `project.json → variantStages[<variant>]`;
+`advance` takes `--variant` for them and errors with the list on a multi-variant project without it. `build` runs
+`piece.mjs` (writes `03-script/variants/<v>.json` + `06-production/editing/<v>.video.json`) then `assemble.mjs --deliver`
+into `08-render/<v>/fb-9x16.mp4`, skipping a variant whose input hash is unchanged. `approve --variant|--all` pins each
+variant's master sha; `ship` uploads the `_v/<Vnnn>/` archive, then the stable keys, then a merged `manifest.json`.
+Projects without markets keep the old single-line flow.
+
 ## Human gates (three, never merged)
 
 1. **Script sign-off** — light, before expensive stages (visual, audio, edit, render refuse without it unless `--force`).
@@ -62,19 +84,49 @@ Deliverables live in `~/media/_projects/<ID>/` (never inside a repo). Run `advan
 - Thmanyah fonts stay local (`~/Library/Fonts`); never commit or rehost.
 - Free and local by default (`engine.json → media`); log any spend with `produce cost`.
 
-## One production = one issue
+## One film issue and its work orders
 
-`produce issue <ID> --create` opens a GitHub issue labelled `dept:video` + `P2` whose last line is the kun block
-`<!-- kun: repos=kun; items=skill:produce; project=<ID> -->`, with the 14-stage checklist and the three gates in the
-body. Tick the boxes as stages land (`produce status`), pass `--issue repo#n` to `approve`, close it on publish.
+The film has **one tracker issue**; every piece a person does is **its own work order**. Nothing is written to GitHub
+without `--create` (draft output otherwise); `gh` missing means a clear message from the command that needed it.
+
+| Command | What it does |
+| --- | --- |
+| `issue <ID>` | prints the draft film issue: brief, versions with predicted CDN URLs, the 14 stages ticked from state, the four gates (script · look · version · publish), `## Work orders`, last line `<!-- kun: repos=<repo>; items=skill:produce; film=<ID> -->`. Labels `dept:video`, `P2`, `film` |
+| `issue <ID> --create` | creates it once and stores `issue` in project.json; if it exists, `--create` and `--sync` rewrite the body from current state |
+| `order <ID> <formula> --to <login> [--set k=v] [--after refs]` | draft of a work order: `station.mjs fill` writes the body (refuses on missing slots or a formula whose `record` is not `issue`), prints title, labels and the reference files it would upload |
+| `order … --create` | uploads local references to the CDN, creates the issue in the film issue's repo with labels `dept:video`, `P2`, `for:<login>` and the block `<!-- kun: repos=…; items=…; after=…; film=<ID>; formula=<id>; weight=<n> -->`, adds its line to the film issue, records it in `orders` |
+| `submit <issue-ref> <file>…` | for a machine with CDN keys: uploads to `work/<film>/<issue>/<file>`, comments the run receipt (same layout the API writes: artifact URLs, sha256, formula, stage, next) and sets `status:review`; draft without `--create` |
+| `advance`, `approve` | with an issue on the project they tick the film issue and comment (`advance: <stage> · <deliverable> · sha · by`, `approved: <gate> · <version> · by <login>`); a GitHub failure only warns |
+| `status <ID> [--json]` | adds Contributors (who · what · when, from orders, stage records and approvals); JSON carries `issue` and `orders` |
+
+A work order's issue body **is** the filled formula; references are links, never local paths. Only the CEO closes an
+issue; the film issue closes after publish. Tests: `node --test scripts/produce.test.mjs` (`PRODUCE_STUB_DIR` stubs gh, the uploader and station).
+
+## Identity
+
+**brand** = the production line, by its full name (hogwarts / mkan / databayt — never a code; CDN `video/<brand>/`). **identity** = the brand-kit
+face that appears on film — name, wordmark, colors. It defaults to the brand; set `init --identity balqalam` (or
+`set <ID> identity balqalam`) to make a hogwarts-line production under Balqalam, e.g. the intro film for school
+owners. `brand.mjs`, captions and the end card read `brand-kit[identity]`; a `balqalam` piece never carries the
+Hogwarts wordmark, a `hogwarts` piece never says بالقلم. `init` also takes `--audience` and `--objective`.
 
 ## Brands
 
 `content/media/brand-kit.json → production.<brand>` (read by `edit/scripts/media/brand.mjs`): logo, fonts,
-colors, `produce.{code,direction,voiceNote,subtitle,lowerThird,intro,outro}`. Codes HOG / MKN / DBY. Unknowns are `TODO`
+colors, `produce.{direction,voiceNote,subtitle,lowerThird,intro,outro}`. Unknowns are `TODO`
 (lower-third, intro, outro, approved examples) — fill them with the team, do not invent.
 
 ## CDN (`content/docs/cdn.mdx`, `media.mdx`)
+
+Variant projects (stable slug, URL known before the render, e.g. `https://cdn.databayt.org/video/hogwarts/intro/sa-ar/fb-9x16.mp4`):
+
+```
+video/<cdn>/<slug>/<variant>/{fb-9x16.mp4, poster.webp, <lang>.vtt}   stable — overwritten on re-approval, invalidated
+video/<cdn>/<slug>/manifest.json                                       every shipped variant (max-age 60)
+video/<cdn>/<slug>/_v/<Vnnn>/<variant>/…                               immutable archive per version
+```
+
+`ship` refuses when another film (different category/subject) already owns the brand+slug. Legacy projects:
 
 ```
 video/<brand>/<ID>/{master.mp4, fb-16x9.mp4, fb-9x16.mp4, fb-1x1.mp4, <lang>.vtt, poster.webp, manifest.json}

@@ -18,13 +18,15 @@ stage belongs to an existing skill (table below). Blueprint: `~/.claude/playwrig
 ```bash
 P="node ~/.claude/skills/produce/scripts/produce.mjs"
 $P init --brand hogwarts --category intro --subject introduction --lang ar,en   # → hogwarts-intro-introduction-v001
-$P issue <ID> --create          # one GitHub issue, label dept:video, kun block items=skill:produce
+$P issue <ID> [--create|--sync] # the FILM issue (tracker): draft without a flag, create once, then rewrite from state
+$P order <ID> <formula> --to <login> [--set k=v]… [--after refs] [--create]   # a WORK ORDER for one person
+$P submit <issue-ref> <file>… [--summary …] [--next …] [--create]            # upload deliverables + receipt, status:review
 $P init … --markets sa,ae,eg,sd --slug intro   # market x language versions (content/media/markets.json)
 $P set <ID> identity balqalam   # change the on-film identity of an existing project
 $P set <ID> slug intro          # | set <ID> markets sa,ae,eg,sd
 $P status <ID>                  # shared stages, then a variant x per-variant-stage grid + predicted URLs
 $P advance <ID> <stage> --file <deliverable> [--verdict pass|fail] [--variant sa-ar]
-$P approve <ID> --version V001 --by <login> [--gate script|version|publish] [--variant sa-ar|--all] [--destination facebook] [--issue databayt/x#n]
+$P approve <ID> --version V001 --by <login> [--gate script|look|version|publish] [--variant sa-ar|--all] [--destination facebook] [--issue databayt/x#n]
 $P url <ID> [--variant sa-ar]   # predicted CDN URLs, before anything renders
 $P build <ID> --variant sa-ar|--all [--dry-run]   # piece.mjs -> assemble.mjs per variant; unchanged inputs are skipped
 $P ship <ID> [--variant v|--all] --dry-run        # CDN keys + plan; real run only after the version approval
@@ -82,11 +84,23 @@ Projects without markets keep the old single-line flow.
 - Thmanyah fonts stay local (`~/Library/Fonts`); never commit or rehost.
 - Free and local by default (`engine.json → media`); log any spend with `produce cost`.
 
-## One production = one issue
+## One film issue and its work orders
 
-`produce issue <ID> --create` opens a GitHub issue labelled `dept:video` + `P2` whose last line is the kun block
-`<!-- kun: repos=kun; items=skill:produce; project=<ID> -->`, with the 14-stage checklist and the three gates in the
-body. Tick the boxes as stages land (`produce status`), pass `--issue repo#n` to `approve`, close it on publish.
+The film has **one tracker issue**; every piece a person does is **its own work order**. Nothing is written to GitHub
+without `--create` (draft output otherwise); `gh` missing means a clear message from the command that needed it.
+
+| Command | What it does |
+| --- | --- |
+| `issue <ID>` | prints the draft film issue: brief, versions with predicted CDN URLs, the 14 stages ticked from state, the four gates (script · look · version · publish), `## Work orders`, last line `<!-- kun: repos=<repo>; items=skill:produce; film=<ID> -->`. Labels `dept:video`, `P2`, `film` |
+| `issue <ID> --create` | creates it once and stores `issue` in project.json; if it exists, `--create` and `--sync` rewrite the body from current state |
+| `order <ID> <formula> --to <login> [--set k=v] [--after refs]` | draft of a work order: `station.mjs fill` writes the body (refuses on missing slots or a formula whose `record` is not `issue`), prints title, labels and the reference files it would upload |
+| `order … --create` | uploads local references to the CDN, creates the issue in the film issue's repo with labels `dept:video`, `P2`, `for:<login>` and the block `<!-- kun: repos=…; items=…; after=…; film=<ID>; formula=<id>; weight=<n> -->`, adds its line to the film issue, records it in `orders` |
+| `submit <issue-ref> <file>…` | for a machine with CDN keys: uploads to `work/<film>/<issue>/<file>`, comments the run receipt (same layout the API writes: artifact URLs, sha256, formula, stage, next) and sets `status:review`; draft without `--create` |
+| `advance`, `approve` | with an issue on the project they tick the film issue and comment (`advance: <stage> · <deliverable> · sha · by`, `approved: <gate> · <version> · by <login>`); a GitHub failure only warns |
+| `status <ID> [--json]` | adds Contributors (who · what · when, from orders, stage records and approvals); JSON carries `issue` and `orders` |
+
+A work order's issue body **is** the filled formula; references are links, never local paths. Only the CEO closes an
+issue; the film issue closes after publish. Tests: `node --test scripts/produce.test.mjs` (`PRODUCE_STUB_DIR` stubs gh, the uploader and station).
 
 ## Identity
 

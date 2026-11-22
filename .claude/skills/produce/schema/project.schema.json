@@ -19,7 +19,23 @@
     "variantStages": { "type": "object", "properties": {}, "$comment": "variant id -> {audio|edit|render|qa|approval|cdn|publish: {status,file,at,sha?,inputsHash?}}" },
     "status": { "type": "string", "enum": ["draft", "in-production", "in-review", "approved", "shipped", "published", "rejected"] },
     "createdAt": { "type": "string" },
-    "issue": { "type": ["string", "null"] },
+    "issue": { "type": ["string", "null"], "$comment": "the FILM issue (tracker) as <owner/repo>#<n>; null until `produce issue <ID> --create`" },
+    "orders": {
+      "type": "array",
+      "$comment": "work orders created by `produce order … --create`; each is its own issue made for one person",
+      "items": {
+        "type": "object",
+        "required": ["issue", "formula", "to", "createdAt", "by"],
+        "properties": {
+          "issue": { "type": "string", "pattern": "^[\\w.-]+/[\\w.-]+#\\d+$" },
+          "formula": { "type": "string" },
+          "to": { "type": "string" },
+          "label": { "type": "string" },
+          "createdAt": { "type": "string" },
+          "by": { "type": "string" }
+        }
+      }
+    },
     "owner": { "type": "string" },
     "reviewer": { "type": ["string", "null"] },
     "stages": {
@@ -41,7 +57,7 @@
         "type": "object",
         "required": ["gate", "version", "by", "at"],
         "properties": {
-          "gate": { "type": "string", "enum": ["script", "version", "publish"] },
+          "gate": { "type": "string", "enum": ["script", "look", "version", "publish"] },
           "version": { "type": "string", "pattern": "^V\\d{3}$" },
           "by": { "type": "string" },
           "at": { "type": "string" },

@@ -12,7 +12,10 @@
 //   produce advance <ID> <stage> --file <deliverable> [--verdict pass|fail] [--variant <v>]   (--variant for audio edit render qa publish)
 //   produce approve <ID> --version Vnnn --by <login> [--gate script|version|publish] [--variant <v>|--all] [--destination facebook] [--issue databayt/x#n]
 //   produce cost <ID> --item <what> --usd <n> [--note "…"]
-//   produce issue <ID> [--repo databayt/kun] [--create]
+//   produce issue <ID> [--repo databayt/kun] [--create] [--sync]   the FILM issue (tracker); no flag = print the draft
+//   produce order <ID> <formula-id> --to <login> [--set k=v]… [--after ref,ref] [--create]   a WORK ORDER issue for one person
+//   produce submit <issue-ref> <file>… [--summary "…"] [--next "…"] [--stage s] [--create]   upload deliverables + receipt comment
+//   (set PRODUCE_STUB_DIR=<dir> to stub gh, the CDN uploader and station in tests: calls are logged to <dir>/gh.log + upload.log)
 //   produce url <ID> [--variant <v>]               predicted stable + archive CDN URLs, before anything renders
 //   produce build <ID> --variant <v>|--all [--dry-run] [--force]   piece.mjs -> assemble.mjs per variant (skips unchanged inputs)
 //   produce ship <ID> [--variant <v>|--all] [--dry-run]
@@ -88,7 +91,8 @@ const opt = (name, def) => {
   return i >= 0 && i + 1 < argv.length ? argv[i + 1] : def
 }
 const has = (name) => argv.includes(`--${name}`)
-const VALUE_FLAGS = new Set(["markets", "slug", "variant", "brand", "category", "subject", "lang", "title", "version", "by", "gate", "destination", "issue", "file", "verdict", "item", "usd", "note", "repo", "out", "identity", "audience", "objective", "from-reference"])
+const optAll = (name) => argv.flatMap((a, i) => (a === `--${name}` && i + 1 < argv.length ? [argv[i + 1]] : []))
+const VALUE_FLAGS = new Set(["markets", "slug", "variant", "brand", "category", "subject", "lang", "title", "version", "by", "gate", "destination", "issue", "file", "verdict", "item", "usd", "note", "repo", "out", "identity", "audience", "objective", "from-reference", "to", "set", "after", "summary", "next", "stage", "items"])
 const pos = () => {
   const out = []
   for (let i = 0; i < argv.length; i++) {
@@ -105,6 +109,9 @@ const slug = (s) => s.toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-+|-+$
 const readJson = (p) => JSON.parse(readFileSync(p, "utf8"))
 const writeJson = (p, o) => writeFileSync(p, JSON.stringify(o, null, 2) + "\n")
 const sha256 = (f) => createHash("sha256").update(readFileSync(f)).digest("hex").slice(0, 16)
+const sha256Full = (f) => createHash("sha256").update(readFileSync(f)).digest("hex")
+// who is acting: --by, else KUN_LOGIN, else the git user, else $USER
+const actor = () => opt("by") || process.env.KUN_LOGIN || spawnSync("git", ["config", "user.name"], { encoding: "utf8" }).stdout.trim() || process.env.USER || "unknown"
 
 // A small JSON-schema subset (type, enum, pattern, required, properties, items, minItems) — enough for
 // the two shipped schemas, zero dependencies (the skill is copied to ~/.claude/skills, where kun's zod is out of reach).
@@ -216,10 +223,50 @@ const vFiles = (p, v) => {
   const d = join(dirOf(p.id), "08-render", v.id)
   return { mp4: vMaster(p, v.id), poster: join(d, "poster.webp"), vtt: join(d, `${v.lang}.vtt`) }
 }
-const gh = (args) => {
+// ---- gh + CDN, with a test stub ----------------------------------------------------------------
+// PRODUCE_STUB_DIR=<dir> (tests only): `gh` is never run and nothing is uploaded; every call is appended as a JSON
+// line to <dir>/gh.log or <dir>/upload.log. `issue create` answers https://github.com/<repo>/issues/<100+n>;
+// `issue view` answers <dir>/issue-view.json when present; station `fill` answers <dir>/station.json when present.
+const STUB = process.env.PRODUCE_STUB_DIR || ""
+const logStub = (name, o) => { mkdirSync(STUB, { recursive: true }); writeFileSync(join(STUB, name), JSON.stringify(o) + "\n", { flag: "a" }) }
+const stubLines = (name) => (existsSync(join(STUB, name)) ? readFileSync(join(STUB, name), "utf8").split("\n").filter(Boolean) : [])
+// -> {ok, out, err}; never exits. A machine with no gh gets a clear message, not a stack.
+function ghRun(args) {
+  if (STUB) {
+    logStub("gh.log", args)
+    if (args[0] === "issue" && args[1] === "create") return { ok: true, out: `https://github.com/${args[args.indexOf("--repo") + 1]}/issues/${99 + stubLines("gh.log").filter((l) => /"issue","create"/.test(l)).length}`, err: "" }
+    if (args[0] === "issue" && args[1] === "view") return { ok: true, out: existsSync(join(STUB, `issue-view-${args[2]}.json`)) ? readFileSync(join(STUB, `issue-view-${args[2]}.json`), "utf8") : existsSync(join(STUB, "issue-view.json")) ? readFileSync(join(STUB, "issue-view.json"), "utf8") : '{"body":"","state":"OPEN","labels":[],"title":""}', err: "" }
+    return { ok: true, out: "", err: "" }
+  }
   const r = spawnSync("gh", args, { encoding: "utf8" })
-  if (r.status !== 0) die(`gh ${args.slice(0, 3).join(" ")} failed: ${r.stderr}`)
-  return r.stdout.trim()
+  if (r.error?.code === "ENOENT") return { ok: false, out: "", err: "the GitHub CLI (gh) is not installed or not on PATH — install it (brew install gh) and run `gh auth login`" }
+  return { ok: r.status === 0, out: (r.stdout || "").trim(), err: (r.stderr || "").trim() }
+}
+const gh = (args) => {
+  const r = ghRun(args)
+  if (!r.ok) die(`gh ${args.slice(0, 3).join(" ")} failed: ${r.err}`)
+  return r.out
+}
+// a GitHub failure on a side effect warns and returns null (advance/approve must still succeed)
+const ghSoft = (args) => {
+  const r = ghRun(args)
+  if (!r.ok) { console.error(`produce: warning — gh ${args.slice(0, 3).join(" ")} failed: ${r.err}`); return null }
+  return r.out
+}
+const LABEL_COLORS = { "dept:video": "5319E7", P2: "fbca04", film: "0e8a16", "status:review": "0e8a16" }
+const ensureLabels = (repo, names, soft = false) => {
+  for (const n of names) ghRun(["label", "create", n, "--repo", repo, "--color", LABEL_COLORS[n] ?? (n.startsWith("for:") ? "5319e7" : "ededed")]) // exists already = fine
+}
+const parseRef = (r) => {
+  const m = /^(?:https:\/\/github\.com\/)?([\w.-]+\/[\w.-]+)(?:#|\/issues\/)(\d+)$/.exec(String(r ?? "").trim())
+  return m ? { repo: m[1], n: Number(m[2]), ref: `${m[1]}#${m[2]}` } : null
+}
+const contentTypeOf = (f) => CONTENT_TYPE[f.split(".").pop().toLowerCase()] ?? "application/octet-stream"
+// upload one local file to a CDN key (only reachable from --create paths); returns the public URL
+function uploadToCdn(file, key) {
+  if (STUB) { logStub("upload.log", { file, key }); return cdnUrl(key) }
+  aws(["s3", "cp", file, `s3://${CDN_BUCKET}/${key}`, "--content-type", contentTypeOf(file), "--cache-control", "public, max-age=3600", "--only-show-errors"])
+  return cdnUrl(key)
 }
 
 // ---- init ------------------------------------------------------------------------------------
@@ -260,10 +307,28 @@ function init() {
   console.log(JSON.stringify({ id, dir, brand: b, identity, cdn: kit.cdn, version: v, langs, slug: pslug, markets, variants: variants.map((x) => x.id), next: "research (02-research/product-research.md) — then `produce issue " + id + " --create`" }, null, 2))
 }
 
+// who did what, when: work orders, stage records that carry `by`, and approvals
+function contributors(p) {
+  const rows = []
+  for (const o of p.orders ?? []) rows.push({ who: o.to, what: `work order ${o.label ?? o.formula} (${o.issue})`, at: o.createdAt })
+  for (const [k, st] of Object.entries(p.stages ?? {})) if (st?.by) rows.push({ who: st.by, what: `stage ${k} ${st.status}`, at: st.at })
+  for (const [v, ss] of Object.entries(p.variantStages ?? {})) for (const [k, st] of Object.entries(ss)) if (st?.by) rows.push({ who: st.by, what: `stage ${k} ${st.status} [${v}]`, at: st.at })
+  for (const a of p.approvals ?? []) rows.push({ who: a.by, what: `approved ${a.gate} ${a.version}`, at: a.at })
+  return rows.sort((a, b) => String(a.at).localeCompare(String(b.at)))
+}
+
 // ---- status ----------------------------------------------------------------------------------
 function status(id) {
   const p = load(id)
   const vm = variantMode(p)
+  if (has("json")) {
+    return console.log(JSON.stringify({
+      id: p.id, title: p.title, status: p.status, version: p.version, issue: p.issue ?? null, orders: p.orders ?? [],
+      stages: Object.fromEntries(STAGES.map((s) => [s.key, stageDone(p, s)])),
+      gates: Object.fromEntries(GATE_NAMES.map((g) => [g, gateRec(p, g) ? { by: gateRec(p, g).by, at: gateRec(p, g).at } : null])),
+      contributors: contributors(p),
+    }, null, 2))
+  }
   console.log(`${p.id}  [${p.status}]  ${p.title}\n  brand ${p.brand}  identity ${p.identity ?? p.brand}  version ${p.version}  langs ${p.langs.join(",")}  owner ${p.owner}  issue ${p.issue ?? "—"}`)
   if (vm) console.log(`  slug ${slugOf(p)}  markets ${p.markets.join(",")}  variants ${variantList(p)}`)
   let next = null
@@ -285,7 +350,11 @@ function status(id) {
     for (const v of variantsOf(p)) console.log(`    ${v.id.padEnd(w)}${cdnUrl(`${stableBase(p, kit)}/${v.id}/fb-9x16.mp4`)}`)
   }
   const g = (gate) => approval(p, gate)
-  console.log(`  gates: script ${g("script") ? `signed by ${g("script").by}` : "NOT signed"} · version ${p.version} ${g("version") ? `approved by ${g("version").by}${g("version").variants ? ` (${Object.keys(g("version").variants).join(",")})` : ""}` : "NOT approved"} · publish ${g("publish") ? `approved by ${g("publish").by} (${g("publish").destination})` : "NOT approved"}`)
+  console.log(`  gates: look ${g("look") ? `approved by ${g("look").by}` : "NOT signed"} · script ${g("script") ? `signed by ${g("script").by}` : "NOT signed"} · version ${p.version} ${g("version") ? `approved by ${g("version").by}${g("version").variants ? ` (${Object.keys(g("version").variants).join(",")})` : ""}` : "NOT approved"} · publish ${g("publish") ? `approved by ${g("publish").by} (${g("publish").destination})` : "NOT approved"}`)
+  const orders = p.orders ?? []
+  if (orders.length) console.log(`  work orders: ${orders.map((o) => `${o.issue.split("#").pop()} ${o.label ?? o.formula} → ${o.to}`).join(" · ")}`)
+  const who = contributors(p)
+  if (who.length) { console.log("  contributors:"); for (const c of who) console.log(`    ${c.who.padEnd(12)} ${c.what}  ${c.at}`) }
   console.log(`  cost: $${p.cost.reduce((a, c) => a + c.usd, 0).toFixed(2)} over ${p.cost.length} item(s)`)
   console.log(next ? `  next: ${next.n} ${next.key}` : "  next: done")
 }
@@ -334,7 +403,7 @@ function recordVariantStage(p, vid, stage, abs, verdict) {
     status = verdict === "pass" ? "passed" : "failed"
     if (status === "passed" && !vdone(p, vid, "render")) die(`qa cannot pass before ${vid} is rendered`)
   }
-  const rec = { status, file: rel(p, abs), at: now(), ...(stage === "render" ? { sha: sha256(abs) } : {}) }
+  const rec = { status, file: rel(p, abs), at: now(), by: actor(), ...(stage === "render" ? { sha: sha256(abs) } : {}) }
   setV(p, vid, stage, rec)
   // a re-render invalidates that variant's qa and approval; a re-qa invalidates its approval
   if (stage === "render") { delV(p, vid, "qa"); delV(p, vid, "approval") }
@@ -368,7 +437,8 @@ function advance(id, stage) {
     if (stage === "publish" && !vdone(p, v.id, "cdn")) die(`publish: ${v.id} is not on the CDN yet (produce ship <ID> --variant ${v.id})`)
     const rec = recordVariantStage(p, v.id, stage, abs, opt("verdict"))
     save(p)
-    return console.log(`${id}: ${stage} ${rec.status} [${v.id}] (${rel(p, abs)})`)
+    console.log(`${id}: ${stage} ${rec.status} [${v.id}] (${rel(p, abs)})`)
+    return syncFilm(p, `advance: ${stage} [${v.id}] · ${rel(p, abs)} · sha ${sha256(abs)} · by ${actor()}`)
   }
   let status = "done"
   if (stage === "qa") {
@@ -377,21 +447,22 @@ function advance(id, stage) {
     status = v === "pass" ? "passed" : "failed"
     if (status === "passed" && !done(p, "render")) die("qa cannot pass before the render stage is done")
   }
-  p.stages[stage] = { status, file: rel(p, abs), at: now(), ...(stage === "render" ? { sha: sha256(abs) } : {}) }
+  p.stages[stage] = { status, file: rel(p, abs), at: now(), by: actor(), ...(stage === "render" ? { sha: sha256(abs) } : {}) }
   if (stage === "qa") p.status = status === "passed" ? "in-review" : "in-production"
   else if (p.status === "draft") p.status = "in-production"
   // a re-render or a re-QA invalidates anything downstream of it
   if (stage === "render") for (const k of ["qa"]) delete p.stages[k]
   save(p)
   console.log(`${id}: ${stage} ${status} (${rel(p, abs)})`)
+  syncFilm(p, `advance: ${stage} · ${rel(p, abs)} · sha ${sha256(abs)} · by ${actor()}`)
 }
 
 // ---- approve ---------------------------------------------------------------------------------
 function approve(id) {
   const p = load(id)
   const gate = opt("gate", "version"), version = opt("version"), by = opt("by")
-  if (!["script", "version", "publish"].includes(gate)) die("--gate is script|version|publish", 2)
-  if (!version || !by) die("usage: approve <ID> --version Vnnn --by <login> [--gate script|version|publish] [--variant <v>|--all] [--destination facebook] [--issue databayt/x#n]", 2)
+  if (!["script", "look", "version", "publish"].includes(gate)) die("--gate is script|look|version|publish", 2)
+  if (!version || !by) die("usage: approve <ID> --version Vnnn --by <login> [--gate script|look|version|publish] [--variant <v>|--all] [--destination facebook] [--issue databayt/x#n]", 2)
   if (version !== p.version) die(`this project is ${p.version}; approval is for the exact version, got ${version}`)
   const rec = { gate, version, by, at: now(), ...(opt("issue") ? { issue: opt("issue") } : {}) }
   const vm = variantMode(p)
@@ -428,6 +499,7 @@ function approve(id) {
   p.approvals.push(rec)
   save(p)
   console.log(JSON.stringify(rec, null, 2))
+  syncFilm(p, `approved: ${gate} · ${version} · by ${by}`)
 }
 
 // ---- cost / issue ----------------------------------------------------------------------------
@@ -440,35 +512,263 @@ function cost(id) {
   console.log(`${id}: +$${usd} ${item} (total $${p.cost.reduce((a, c) => a + c.usd, 0).toFixed(2)})`)
 }
 
-function issueBody(p) {
-  const box = (s) => `- [${p.stages[s.key] ? "x" : " "}] ${s.n} ${s.key} → \`${s.file}\``
+// ---- the film issue (tracker) + work orders ------------------------------------------------------
+// One film issue per film: the brief, versions, the 14 stages, the gates and a Work orders section.
+// A work order is its own issue: one request, one person, one deliverable (formula body from station.mjs fill).
+const GATE_NAMES = ["script", "look", "version", "publish"]
+const DEFAULT_REPO = "databayt/kun"
+const brandRepo = (p) => ({ hogwarts: "hogwarts", mkan: "mkan", databayt: "kun" })[p.brand] ?? p.brand
+// The only text a public tracker must never carry: commission or revenue-share terms. Prices (the public list price) are fine.
+const COMMISSION = /commission|revenue[\s-]*share|% of (?:the )?(?:first[- ]year )?revenue|عمولة|عمولات|حصة من الإيرادات/i
+const safeText = (t) => (t && typeof t === "string" && !COMMISSION.test(t) && t !== "TODO" ? t.replace(/\s+/g, " ").trim() : null)
+const stageDone = (p, s) => (variantMode(p) && PER_VARIANT.includes(s.key) ? variantsOf(p).every((v) => vdone(p, v.id, s.key)) : done(p, s.key))
+const gateRec = (p, g) => approval(p, g)
+const gateState = (p, g) => {
+  const a = gateRec(p, g)
+  return a ? `approved by ${a.by}` : "waiting"
+}
+function filmUrls(p) {
+  try {
+    const kit = loadBrand(p.brand)
+    if (variantMode(p)) return variantsOf(p).map((v) => ({ id: v.id, url: cdnUrl(`${stableBase(p, kit)}/${v.id}/fb-9x16.mp4`) }))
+    return [{ id: p.version, url: cdnUrl(`${cdnBase(p, kit)}/master.mp4`) }]
+  } catch { return [] }
+}
+function requestOf(p) {
+  const f = join(dirOf(p.id), "01-brief/request.json")
+  try { return readJson(f) } catch { return {} }
+}
+function briefLines(p) {
+  const r = requestOf(p)
+  const out = [`${p.brand}${p.identity && p.identity !== p.brand ? ` (on film: ${p.identity})` : ""} · ${p.category} · ${p.subject} · languages ${p.langs.join(", ")} · ${p.version}`]
+  const add = (label, v) => { const t = safeText(v); if (t) out.push(`${label}: ${t}`) }
+  add("Audience", r.audience)
+  add("Objective", r.objective)
+  add("Viewing", r.viewing)
+  if (r.formats?.length) out.push(`Formats: ${r.formats.join(", ")}`)
+  if (r.destinations?.length) out.push(`Destinations: ${r.destinations.join(", ")}`)
+  if (p.markets?.length) out.push(`Markets: ${p.markets.join(", ")}`)
+  return out
+}
+// closed work orders: one `gh issue view` per order; a failure warns and falls back to the last known state
+function orderStates(p) {
+  return Object.fromEntries((p.orders ?? []).map((o) => {
+    const r = parseRef(o.issue)
+    const v = r && ghSoft(["issue", "view", String(r.n), "--repo", r.repo, "--json", "state"])
+    let state = null
+    try { state = JSON.parse(v).state } catch {}
+    return [o.issue, state ? state === "CLOSED" : !!o.closed]
+  }))
+}
+const rememberClosed = (p, states) => {
+  let changed = false
+  for (const o of p.orders ?? []) if (states[o.issue] && !o.closed) { o.closed = true; changed = true }
+  if (changed) save(p)
+}
+function issueBody(p, states = orderStates(p)) {
+  const box = (s) => `- [${stageDone(p, s) ? "x" : " "}] ${s.n} ${s.key} → \`${s.file}\``
+  const orders = (p.orders ?? []).map((o) => `- [${states[o.issue] ? "x" : " "}] #${o.issue.split("#").pop()} ${o.label ?? o.formula} — ${o.to}`)
+  const urls = filmUrls(p).map((u) => `- ${u.id}: ${u.url}`)
+  const repo = (p.issue ?? DEFAULT_REPO).split("#")[0].split("/").pop()
   return `Production **${p.id}** — ${p.title}
 
-Brand ${p.brand} · category ${p.category} · subject ${p.subject} · languages ${p.langs.join(", ")} · version ${p.version}
+## Brief
+${briefLines(p).map((l) => `- ${l}`).join("\n")}
+
 Project folder: \`~/media/_projects/${p.id}/\` · driven by \`/produce\` (\`produce.mjs status ${p.id}\`)
+
+## Versions
+${urls.length ? urls.join("\n") : "- (no CDN keys yet)"}
 
 ## Stages
 ${STAGES.map(box).join("\n")}
 
-## Human gates
-- [ ] Script sign-off (light) — \`produce approve ${p.id} --gate script --version ${p.version} --by <login>\`
-- [ ] Exact-version approval before any master reaches the CDN — \`--gate version\`
-- [ ] Separate publish approval (destination named) — \`--gate publish --destination facebook\`
+## Gates
+${GATE_NAMES.map((g) => `- [${gateRec(p, g) ? "x" : " "}] ${g} — ${gateState(p, g)}`).join("\n")}
 
 Hard rules: real product UI only for product claims; generated property scenes are illustrative; no publish without approve.
 
-<!-- kun: repos=kun; items=skill:produce; project=${p.id} -->`
+## Work orders
+${orders.length ? orders.join("\n") : "_none yet — `produce order <ID> <formula> --to <login>`_"}
+
+<!-- kun: repos=${repo}; items=skill:produce; film=${p.id} -->`
 }
+const filmTitle = (p) => `video: ${p.title} (${p.id})`
+const FILM_LABELS = ["dept:video", "P2", "film"]
+
 function issue(id) {
   const p = load(id)
-  const body = issueBody(p)
-  if (!has("create")) return console.log(`title: video: ${p.title} (${p.id})\nlabels: dept:video, P2\n\n${body}`)
-  const repo = opt("repo", "databayt/kun")
-  spawnSync("gh", ["label", "create", "dept:video", "--repo", repo, "--color", "5319E7"], { encoding: "utf8" })
-  const url = gh(["issue", "create", "--repo", repo, "--title", `video: ${p.title} (${p.id})`, "--body", body, "--label", "dept:video", "--label", "P2"])
+  const write = has("create") || has("sync")
+  const states = orderStates(p) // read-only; in draft it shows what would be ticked
+  const body = issueBody(p, states)
+  if (!write) return console.log(`title: ${filmTitle(p)}\nlabels: ${FILM_LABELS.join(", ")}\n${p.issue ? `(existing issue ${p.issue}: --create or --sync would rewrite its body)\n` : "(no issue yet: --create would create it)\n"}\n${body}`)
+  if (p.issue) {
+    const r = parseRef(p.issue)
+    if (!r) die(`project.json issue "${p.issue}" is not repo#n`)
+    ensureLabels(r.repo, FILM_LABELS)
+    gh(["issue", "edit", String(r.n), "--repo", r.repo, "--title", filmTitle(p), "--body", body, "--add-label", FILM_LABELS.join(",")])
+    rememberClosed(p, states)
+    return console.log(`https://github.com/${r.repo}/issues/${r.n}  (body rewritten from current state)`)
+  }
+  if (has("sync")) die(`${id} has no film issue yet — run \`produce issue ${id} --create\` first`)
+  const repo = opt("repo", DEFAULT_REPO)
+  ensureLabels(repo, FILM_LABELS)
+  const url = gh(["issue", "create", "--repo", repo, "--title", filmTitle(p), "--body", body, ...FILM_LABELS.flatMap((l) => ["--label", l])])
   p.issue = `${repo}#${url.split("/").pop()}`
   save(p)
   console.log(url)
+}
+
+// Rewrite the film issue body from current state and add one comment. Never throws: a GitHub failure warns.
+function syncFilm(p, commentText) {
+  if (!p.issue) return
+  const r = parseRef(p.issue)
+  if (!r) return console.error(`produce: warning — project issue "${p.issue}" is not repo#n; film issue not updated`)
+  const states = orderStates(p)
+  ghSoft(["issue", "edit", String(r.n), "--repo", r.repo, "--body", issueBody(p, states)])
+  try { rememberClosed(p, states) } catch {}
+  if (commentText) ghSoft(["issue", "comment", String(r.n), "--repo", r.repo, "--body", commentText])
+}
+
+// ---- order ---------------------------------------------------------------------------------------
+function stationPath() {
+  for (const f of [join(HERE, "..", "..", "..", "scripts", "station.mjs"), join(KUN_DIR, ".claude", "scripts", "station.mjs")]) if (existsSync(f)) return f
+  return null
+}
+function formulaHeader(fid) {
+  for (const base of [KUN_DIR, join(HERE, "..", "..", "..", "..")]) {
+    const f = join(base, "departments", "video", "formulas", `${fid}.md`)
+    if (!existsSync(f)) continue
+    const m = /^---\s*\n([\s\S]*?)\n---/.exec(readFileSync(f, "utf8"))
+    try { return JSON.parse(m[1]) } catch { return {} }
+  }
+  return {}
+}
+const FORMULA_ITEMS = { blender: "skill:blender", capture: "skill:record", voice: "skill:edit", script: "skill:draft", pickup: "skill:produce", review: "skill:produce" }
+function itemsFor(fid, header) {
+  const needs = [].concat(header.needs ?? []).filter((x) => /^(skill|mcp|agent):/.test(x))
+  if (needs.length) return needs
+  return [FORMULA_ITEMS[fid.split(".").pop()] ?? "skill:produce"]
+}
+function fillOrder(p, fid, to) {
+  const sets = optAll("set")
+  const bad = sets.filter((x) => !x.includes("="))
+  if (bad.length) die(`--set takes k=v, got: ${bad.join(", ")}`, 2)
+  if (STUB && existsSync(join(STUB, "station.json"))) return readJson(join(STUB, "station.json"))
+  const st = stationPath()
+  if (!st) die("station.mjs not found (.claude/scripts/station.mjs) — it fills the formula")
+  const args = [st, "fill", fid, "--dept", "video", "--repo", brandRepo(p), "--login", actor(), "--project", p.id, "--set", `to=${to}`, ...sets.flatMap((x) => ["--set", x]), "--json"]
+  const r = spawnSync("node", args, { encoding: "utf8", maxBuffer: 1 << 26 })
+  if (r.status !== 0) die(`station fill failed: ${(r.stderr || r.stdout).slice(-400)}`)
+  try { return JSON.parse(r.stdout) } catch { return die(`station fill printed no JSON: ${r.stdout.slice(-300)}`) }
+}
+function orderCmd(id, fid) {
+  const p = load(id)
+  const to = opt("to")
+  if (!fid || !to) die("usage: order <ID> <formula-id> --to <login> [--set k=v]… [--after ref,ref] [--create]", 2)
+  if (!/^[a-z0-9][a-z0-9-]{0,31}$/.test(to)) die(`--to must be a kun login (lowercase letters, digits, hyphens), got "${to}"`, 2)
+  const f = fillOrder(p, fid, to)
+  if (f.missing?.length) die(`formula ${fid} still needs: ${f.missing.join(", ")} — pass --set <slot>=<value>`)
+  if (f.record !== "issue") die(`formula ${fid} is not a work order (record: ${f.record}) — only record=issue formulas become issues`)
+  if (!f.prompt) die(`formula ${fid} filled an empty prompt`)
+  if (!f.prompt.includes(p.id)) console.error(`produce: warning — the filled prompt does not mention ${p.id}`)
+  const header = formulaHeader(fid)
+  const label = header.label?.en ?? fid
+  const sets = Object.fromEntries(optAll("set").map((x) => [x.slice(0, x.indexOf("=")), x.slice(x.indexOf("=") + 1)]))
+  const piece = ["scene", "piece", "flow", "name", "topic"].map((k) => sets[k]).find(Boolean) ?? Object.entries(sets).find(([k]) => k !== "to")?.[1] ?? fid
+  const title = `${label}: ${piece} — ${p.title}`
+  const after = (opt("after") ?? "").split(",").map((x) => x.trim()).filter(Boolean)
+  const items = (opt("items") ? opt("items").split(",").map((x) => x.trim()).filter(Boolean) : itemsFor(fid, header))
+  const weight = header.weight ?? ""
+  const block = `<!-- kun: repos=${brandRepo(p)}; items=${items.join(",")}; after=${after.join(",")}; film=${p.id}; formula=${fid}; weight=${weight} -->`
+  const body = `${f.prompt.trim()}\n\n${block}`
+  const labels = ["dept:video", "P2", `for:${to}`]
+  const uploads = f.uploads ?? []
+  if (COMMISSION.test(f.prompt)) { if (has("create")) die("refusing to create: the filled prompt states a commission or revenue share — a work order never carries those; edit the formula or the --set values"); console.error("produce: warning — the filled prompt states a commission or revenue share; --create would refuse") }
+  if (!has("create")) {
+    console.log(`DRAFT — nothing created, nothing uploaded.\nfilm issue: ${p.issue ?? "(none yet — run `produce issue " + id + " --create` before --create here)"}\ntitle: ${title}\nlabels: ${labels.join(", ")}\nreferences to upload (${uploads.length}):`)
+    for (const u of uploads) console.log(`  ${u.local}${existsSync(u.local) ? "" : "  [ABSENT: would be skipped]"}\n    -> ${u.key}\n    => ${u.url}`)
+    return console.log(`\n${body}`)
+  }
+  if (!p.issue) die(`${id} has no film issue yet — run \`produce issue ${id} --create\` first`)
+  const fr = parseRef(p.issue)
+  if (!fr) die(`project.json issue "${p.issue}" is not repo#n`)
+  for (const u of uploads) {
+    if (!existsSync(u.local)) { console.error(`produce: warning — reference ${u.local} is absent; skipped (its link ${u.url} will not resolve)`); continue }
+    uploadToCdn(u.local, u.key)
+  }
+  ensureLabels(fr.repo, labels)
+  const url = gh(["issue", "create", "--repo", fr.repo, "--title", title, "--body", body, ...labels.flatMap((l) => ["--label", l])])
+  const n = url.split("/").pop()
+  ;(p.orders ??= []).push({ issue: `${fr.repo}#${n}`, formula: fid, to, label, createdAt: now(), by: actor() })
+  save(p)
+  syncFilm(p, `work order #${n} · ${label} · for ${to} · by ${actor()}`)
+  console.log(url)
+}
+
+// ---- submit --------------------------------------------------------------------------------------
+const RECEIPT_MARKER = "<!-- kun:receipt -->" // mirrors src/lib/machine/contract.ts; layout mirrors formatReceipt in tasks.ts
+function safeName(name) {
+  const base = name.split(/[\\/]/).pop() ?? ""
+  const clean = base.replace(/[\u0000-\u001f\u007f]/g, "").replace(/^\.+/, "").replace(/\s+/g, " ").trim()
+  return clean && clean !== "." && clean !== ".." ? clean : null
+}
+function formatReceipt({ login, summary, artifacts, hashes, formula, stage, next }) {
+  const bullets = (v) => (v.length ? v.map((x) => `- ${x}`).join("\n") : "- none")
+  return [
+    RECEIPT_MARKER,
+    `### Run receipt — ${login}`,
+    "",
+    "Driver: claude · Model: produce submit · Duration: 0s",
+    ...(formula || stage ? [[formula ? `Formula: ${formula}` : "", stage ? `Stage: ${stage}` : ""].filter(Boolean).join(" · ")] : []),
+    "",
+    "**Summary**",
+    summary,
+    "",
+    "**Commits**",
+    bullets([]),
+    "",
+    "**Artifacts**",
+    bullets(artifacts),
+    ...(hashes ? ["", "**Hashes (sha256)**", bullets(artifacts.map((a, i) => `${hashes[i]}  ${a}`))] : []),
+    ...(next ? ["", "**Next**", next] : []),
+    "",
+    "Ready for review (`status:review`). Only the CEO closes.",
+  ].join("\n")
+}
+function submitCmd(ref, files) {
+  const r = parseRef(ref)
+  if (!r || !files.length) die("usage: submit <databayt/repo#n|issue url> <file>… [--summary \"…\"] [--next \"…\"] [--stage s] [--create]", 2)
+  const abs = files.map((f) => resolve(f))
+  for (const f of abs) if (!existsSync(f) || !statSync(f).isFile()) die(`not a file: ${f}`)
+  const view = ghRun(["issue", "view", String(r.n), "--repo", r.repo, "--json", "title,body,state,labels"])
+  if (!view.ok) die(`cannot read ${r.ref}: ${view.err}`)
+  let info
+  try { info = JSON.parse(view.out) } catch { die(`gh printed no JSON for ${r.ref}`) }
+  const kun = /<!--\s*kun:([\s\S]*?)-->/i.exec(info.body ?? "")?.[1] ?? ""
+  const field = (k) => new RegExp(`(?:^|;)\\s*${k}=([^;]*)`, "i").exec(kun)?.[1]?.trim() || null
+  const film = (field("film") || r.repo.split("/").pop()).replace(/[^a-zA-Z0-9._-]/g, "-")
+  const plan = abs.map((f) => {
+    const name = safeName(basename(f))
+    if (!name) die(`file name is empty after cleaning: ${f}`)
+    return { file: f, name, key: `work/${film}/${r.n}/${name}`, url: cdnUrl(`work/${film}/${r.n}/${name}`) }
+  })
+  const hashes = plan.map((x) => sha256Full(x.file))
+  const body = formatReceipt({
+    login: actor(), summary: opt("summary") || "Submitted from the command line.", artifacts: plan.map((x) => x.url), hashes,
+    formula: field("formula"), stage: opt("stage") || field("stage"), next: opt("next"),
+  })
+  if (!has("create")) {
+    console.log(`DRAFT — nothing uploaded, nothing posted.\nissue: ${r.ref}  (${info.state ?? "?"})\nuploads:`)
+    for (const x of plan) console.log(`  ${x.file}\n    -> ${x.key}\n    => ${x.url}`)
+    return console.log(`then: comment the receipt below on ${r.ref}, remove label status:in-progress, add status:review\n\n${body}`)
+  }
+  for (const x of plan) uploadToCdn(x.file, x.key)
+  gh(["issue", "comment", String(r.n), "--repo", r.repo, "--body", body])
+  ensureLabels(r.repo, ["status:review"])
+  ghRun(["issue", "edit", String(r.n), "--repo", r.repo, "--remove-label", "status:in-progress"]) // absent label = fine
+  gh(["issue", "edit", String(r.n), "--repo", r.repo, "--add-label", "status:review"])
+  console.log(JSON.stringify({ issue: r.ref, uploaded: plan.map((x) => x.url), status: "review" }, null, 2))
 }
 
 // ---- CDN tier --------------------------------------------------------------------------------
@@ -485,7 +785,12 @@ function shipPlan(p, kit) {
   plan.push({ role: "poster", file: D("poster.webp"), key: `${base}/poster.webp`, required: true })
   return plan
 }
-const aws = (args) => sh("aws", args)
+const aws = (args) => {
+  try { return sh("aws", args) } catch (e) {
+    if (e.code === "ENOENT") die("the AWS CLI (aws) is not installed or not on PATH — it uploads to the CDN. Install it (brew install awscli) and run `aws configure`, or hand the files to a machine with CDN keys (or use Submit in the Kun app)")
+    throw e
+  }
+}
 function putObject(file, key, cacheControl) {
   const ext = file.split(".").pop().toLowerCase(), ct = CONTENT_TYPE[ext]
   const sha = sha8(file)
@@ -934,6 +1239,8 @@ const run = {
   approve: () => approve(rest[0]),
   cost: () => cost(rest[0]),
   issue: () => issue(rest[0]),
+  order: () => orderCmd(rest[0], rest[1]),
+  submit: () => submitCmd(rest[0], rest.slice(1)),
   ship: () => ship(rest[0]),
   url: () => urlCmd(rest[0]),
   build: () => build(rest[0]),
@@ -943,5 +1250,5 @@ const run = {
   list: listCmd,
   "from-reference": () => fromReferenceSeed(rest[0], rest[1]),
 }[cmd]
-if (!run) die("usage: produce <init|list|set|status|advance|approve|cost|issue|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
+if (!run) die("usage: produce <init|list|set|status|advance|approve|cost|issue|order|submit|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
 run()
