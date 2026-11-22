@@ -34,7 +34,9 @@
   "files": [
    "03-script/script.md",
    "04-storyboard/shot-list.json",
-   "01-brief/creative-brief.md"
+   "01-brief/creative-brief.md",
+   "05-assets/asset-manifest.json",
+   "07-audio/voiceover/sd-ar.wav"
   ]
  }
 ]

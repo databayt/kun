@@ -66,6 +66,23 @@
     },
     "scene_slug": {
       "slug": "scene"
+    },
+    "logo": {
+      "brand": "{{brand}}",
+      "field": "logo"
+    },
+    "fonts": {
+      "brand": "{{brand}}",
+      "field": "fonts"
+    },
+    "palette": {
+      "brand": "{{brand}}",
+      "field": "palette"
+    },
+    "direction": {
+      "brand": "{{brand}}",
+      "field": "direction",
+      "default": "as the brand kit says"
     }
   },
   "drive": 0.6,
@@ -90,7 +107,9 @@
   "order": [
     "scene",
     "to"
-  ]
+  ],
+  "model": "sonnet",
+  "effort": "medium"
 }
 ---
 
@@ -102,6 +121,10 @@ Build {{scene}} in Blender from the shot list and render a preview, on your own 
 - Film: {{project}} · {{repo}} / {{brand}} (the name the viewer sees)
 - Piece: {{scene}}
 - Format: vertical 9:16, 1080×1920, 30 fps
+- Look: {{direction}}
+- Palette: {{palette}}
+- Type: {{fonts}}
+- Logo: {{logo}}
 
 ## References
 - Script: {{script_url}}
@@ -112,11 +135,11 @@ Build {{scene}} in Blender from the shot list and render a preview, on your own 
 ## Constraints
 - Match the shot list for this scene: camera, timing, props and characters; phone and laptop screens show real captures only, supplied on the issue.
 - Characters and places are illustrative: mark them so in the file's notes.
-- Use the brand colours and type from the brand kit; never a licensed font that is not already in the kit.
+- Per shot, set the camera, the lens (mm) and the light from the shot list, and write them in the file's notes. Colour every material from the palette above, by hex; use no other colour. Type follows the fonts above; never a licensed font that is not already in the kit.
 - The order is one piece for one person. If something blocks you, say so on the issue instead of widening the work.
 
 ## Deliverable
 - The .blend file `{{scene_slug}}.blend` (packed textures, no absolute paths) and a preview render `{{scene_slug}}-preview.mp4`.
-- Note in the reply the Blender version and any add-on you used.
+- Note in the reply the Blender version and any add-on you used, and a table with one row per shot: camera, lens, light, palette colours used.
 - Submit through the Kun app: open this order and press Submit with the files attached. The app uploads them to `work/{{project}}/<issue number>/<file>` on the CDN and posts the receipt on this issue.
 - Reply on the issue with one line for the next person: what you did, what is left, anything they must know.

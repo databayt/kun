@@ -4,7 +4,7 @@ The Machine app's equivalent of AskUserQuestion. Headless runs cannot use that t
 
 - If an answer would change the result, ask before you plan. If nothing would change, plan.
 - Never ask what the prompt already states.
-- Write the questions in the person's language (Arabic if they wrote Arabic).
+- Write questions and replies in English. A film's version language (language, dialect) applies only to the film's own words.
 - Ask 1 to 4 questions. Each has 2 to 4 options, a short label and a one-line description.
 - Do not add an "Other" option. The app adds "Type something" and "Chat about this".
 - Put the recommended option first and end its label with " (Recommended)".

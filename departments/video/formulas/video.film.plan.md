@@ -268,6 +268,34 @@
         "en": "What kind of cut?",
         "ar": "ما نوع النسخة؟"
       }
+    },
+    "source": {
+      "ask": "the path of the source video, e.g. ~/Downloads/balqalam-promo-v2.mp4 (optional)",
+      "default": "none",
+      "q": {
+        "en": "Which source video?",
+        "ar": "أي فيديو مصدر؟"
+      }
+    },
+    "identity": {
+      "map": {
+        "Balqalam": "balqalam",
+        "Hogwarts": "hogwarts",
+        "Mkan": "mkan",
+        "Databayt": "databayt"
+      },
+      "of": "brand"
+    },
+    "projects": {
+      "exec": "projects",
+      "with": {
+        "line": "{{line}}"
+      },
+      "default": "none open"
+    },
+    "why": {
+      "context": "company.why",
+      "default": "cash flow first: a film earns its place only if it moves a school toward paying"
     }
   },
   "drive": 1,
@@ -325,10 +353,14 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}) in two turns: first ask the q
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
 - Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}} · {{length}}
-- Today: {{today}}. Project: none yet for this film type, unless `produce list` below shows one; if it does, say so and propose continuing it instead.
+- Source video: {{source}}
+- Open projects ({{line}} line): {{projects}}
+- Why this film: {{why}}
+- Today: {{today}}. If an open project above matches this film type, say so and propose continuing it instead.
 
 ## References
-- Open projects: run `node ~/.claude/skills/produce/scripts/produce.mjs list --json --repo {{line}}`, then `status <ID>` for any match. Read the project folder (reference video, transcript, script, asset manifest).
+- Open projects: already listed in Context, so do not run `produce list`. For a match, run `node ~/.claude/skills/produce/scripts/produce.mjs status <ID> --json` and read its project folder (reference video, transcript, script, asset manifest).
+- If a source video is given, it is the script and the voiceover; plan the picture over its timing.
 - Brand kit (identity): {{brand_kit_url}}
 - Markets (price, currency, dialect): {{markets_url}}
 - Real captures: look in ~/media/{{repo}}/ before proposing any new capture.
@@ -337,7 +369,8 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}) in two turns: first ask the q
 ## Constraints
 - Gather read-only first and say in one line what you read. Do not create a project, render, or call any tool that writes.
 - List every action that needs the person's yes under "actions I need your OK for", each with its exact command.
-- Answer the person in their own language; this prompt stays English.
+- Reply in English; the film's version language applies only to the film's own words.
+- Write the plan in your reply only; do not write a plan file.
 
 ## Deliverable
 **Turn 1: questions only.** After the read-only gathering, write one line saying what you read and what you found (an existing project, the reference status), then end the turn with a `kun-questions` block (the protocol in CLAUDE.md): up to three questions that change the film, each option a real choice, the recommended option first with "(Recommended)" at the end of its label. No brief, no journey and no plan in this turn. Never write the questions as prose.
@@ -345,5 +378,5 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}) in two turns: first ask the q
 **Turn 2, after the answers:** if an answer opens a new question that changes the film, ask it the same way. Otherwise write the plan:
 - The brief in one line: what · for whom · which version · the goal · the destination.
 - The journey as a numbered list: stage → tool → lane → gate → what is reused. Stages run request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish; gates are script · look · version · publish.
-- The actions that need the person's yes, each with its exact command.
+- The actions that need the person's yes, each with its exact command. If a source video is given (not `none`), the first step is `node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{line}} --identity {{identity}} --category {{film_type}} --subject <slug> --lang {{lang}} --markets {{market}}`, then `node ~/.claude/skills/produce/scripts/produce.mjs from-reference <ID> {{source}} --voiceover`.
 - The first step and what it produces, ending with the question "Shall I start with …?".
