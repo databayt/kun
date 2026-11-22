@@ -1,6 +1,6 @@
 ---
 title: Produce
-description: The video factory — one engine, three production lines, 14 stages from a request to Facebook, with three human gates and a CDN tier. Arabic-first, local, free by default
+description: The video factory — one engine, three production lines, 14 stages from a request to Facebook, with four human gates and a CDN tier. Arabic-first, local, free by default
 ---
 
 # Produce
@@ -8,7 +8,7 @@ description: The video factory — one engine, three production lines, 14 stages
 `produce` turns a request into a finished, approved video. It is a **ledger**, not a renderer: it
 creates the project folder, records each of the 14 stages, holds the human gates and ships the
 approved master to the CDN. The work of each stage belongs to a skill that already exists
-([draft](/docs/social), [record](/docs/record), [higgs](/docs/higgs), [edit](/docs/edit) and the
+([draft](/docs/social), [record](/docs/record), [higgs](/docs/media), [edit](/docs/edit) and the
 rest) — `produce` chains them and re-implements none.
 
 ## The three lines
@@ -27,7 +27,7 @@ $P init --brand hogwarts --identity balqalam --category intro --subject introduc
   --audience "School owners and principals" --objective "Book a 1-month free trial"
 $P status <ID>
 $P advance <ID> <stage> --file <deliverable> [--variant sa-ar]
-$P approve <ID> --version V001 --by <login> [--gate script|version|publish]
+$P approve <ID> --version V001 --by <login> [--gate script|look|version|publish]
 $P ship <ID> --dry-run
 ```
 
@@ -41,22 +41,72 @@ $P ship <ID> --dry-run
 | 04 | script | `03-script/script.md` | draft, Arabic first — **gate 1** |
 | 05 | storyboard | `04-storyboard/shot-list.json` | schema-validated |
 | 06 | assets | `05-assets/asset-manifest.json` | reuse first, then shoot / record / generate |
-| 07 | visual | `06-production/visual-manifest.json` | record, blender, higgs, HyperFrames |
+| 07 | visual | `06-production/visual-manifest.json` | record, blender, higgs, HyperFrames — **gate 2** |
 | 08 | audio | `07-audio/audio-package.json` | voice, music bed, loudness |
 | 09 | edit | `06-production/editing/edit-project.json` | edit, FilmCraft, captions |
 | 10 | render | `08-render/masters/master.mp4` + delivery cuts | encode, poster, VTT |
 | 11 | qa | `09-quality/qa-report.md` | media-qa agent — must pass |
-| 12 | approval | approval record | human — **gate 2** |
+| 12 | approval | approval record | human — **gate 3** |
 | 13 | cdn | `10-publishing/manifest.json` | `produce ship` |
-| 14 | publish | `10-publishing/publishing-record.md` | publish + facebook — **gate 3** |
+| 14 | publish | `10-publishing/publishing-record.md` | publish + facebook — **gate 4** |
 
-## The three human gates
+## The four human gates
 
-1. **Script sign-off** — light, before the expensive stages (visual, audio, edit, render refuse without it).
-2. **Exact-version approval** — tied to one `Vnnn` and the sha of its master. A re-render voids it.
-3. **Publish approval** — a separate yes that names the destination. Approving a version is not approving a post.
+A gate is a point where the work stops until a person says yes. Each is recorded with
+`approve --gate <name>`, in this order:
+
+1. **Script sign-off** (`script`) — light, before the expensive stages (visual, audio, edit, render refuse without it).
+2. **Look approval** (`look`) — after the visual stage: a person reviews the film's look, the keyframes or the animatic. The Kun app shows it as waiting until it is approved. `produce` records the approval and does not block a later stage on it.
+3. **Exact-version approval** (`version`) — tied to one `Vnnn` and the sha of its master. A re-render voids it.
+4. **Publish approval** (`publish`) — a separate yes that names the destination. Approving a version is not approving a post.
 
 Hard rules: real product UI only for product claims; generated scenes are illustrative; no publish without approve.
+
+## One film issue and its work orders
+
+A film is tracked on GitHub by **one film issue**. Every piece that a person does is **its own work
+order**: a separate issue with one request, for one person, with one deliverable. The film issue
+lists them all, so a film is no longer a single issue with a checklist and nothing else.
+
+Nothing reaches GitHub by accident. Each command below prints a **draft** first: what it would
+create, upload or post. Only `--create` writes. When a film plan is accepted in the Kun app, the
+Video department's lead runs these commands itself: the film issue first, then a work order for
+each piece the plan gives to another person.
+
+```bash
+$P issue <ID>                                              # draft of the film issue
+$P issue <ID> --create                                     # create it once
+$P order <ID> <formula> --to <login> --set scene="…"            # draft of a work order
+$P order <ID> <formula> --to <login> --set scene="…" --create   # upload its references and create it
+$P submit <issue> <file>…                                  # draft: the uploads and the receipt
+```
+
+| Command | What it does |
+| --- | --- |
+| `issue <ID>` | Prints the film issue: the brief, the versions with their predicted links, the 14 stages as a checklist ticked from the ledger, the four gates (script, look, version, publish), and a line for every work order |
+| `issue <ID> --create` | Creates it in `databayt/kun` (or the repo given with `--repo`) and stores it in `project.json`. When it exists, `--create` or `--sync` rewrites its body from the current state |
+| `order <ID> <formula> --to <login>` | Fills the formula for this film and prints the title, the labels, the reference files it would upload and the body. It refuses while a slot is missing, or when the formula is not a work order |
+| `order … --create` | Needs the film issue first. Uploads the references to the CDN, creates the work order in the film issue's repository, adds its line to the film issue and records it in `project.json → orders` |
+| `submit <issue> <file>…` | For a machine that holds the CDN keys. With `--create` it uploads the files to `work/<film>/<issue number>/<file>`, posts the receipt as a comment and sets `status:review`. In the Kun app the Submit button does the same and needs no keys |
+| `advance`, `approve` | These record themselves. When the project has a film issue, each one ticks its stage or its approval on the film issue and adds a comment: `advance: <stage> · <deliverable> · sha <hash> · by <login>` or `approved: <gate> · <version> · by <login>`. If GitHub cannot be reached, the command warns and the ledger is still updated |
+| `status <ID>` | Also lists the work orders and the contributors: who did what, and when |
+
+**The labels**
+
+| Label | On | Means |
+| --- | --- | --- |
+| `dept:video` | both | The work belongs to the Video department |
+| `film` | the film issue | This issue is a film's tracker |
+| `for:<login>` | a work order | The one person the order is for. Nobody else can start it |
+| `P2` | both | The priority both are created with |
+
+Three more labels appear as the work moves, and the machines set them: `holder:<login>` when the
+person starts the order, `status:in-progress` while it is being done, and `status:review` once the
+receipt is posted. Only the CEO closes an issue; the film issue closes after publish.
+
+The body of a work order is a filled formula, and its references are links, never paths on one
+computer. What a formula is, how an order is filled, and one order followed from the command to the
+closed issue are on the [Station](/docs/station) page.
 
 ## Project folder
 
@@ -87,8 +137,9 @@ $P set <ID> markets sa,ae,eg,sd      # or add them to an existing project
 $P set <ID> slug intro
 ```
 
-The film prices are 25 SAR, 25 AED and 7 USD (Egypt, Sudan), per Abdout on 2026-11-21. The pricing decision
-D-20261117 says 24 SAR per student; the film's 25 is his call for video, and pricing code is untouched.
+The film prices follow the pricing decision D-20261117: 24 SAR, 24 AED and 6.40 USD (Egypt, Sudan,
+Rwanda), each per student per year. They are read from `content/media/markets.json`, the same file
+the station's formulas and the Sales quote use, so a film never states a price the product does not charge.
 
 ## Shared vs per-version stages
 
@@ -147,11 +198,17 @@ is made for school owners under the Balqalam identity.
 
 ## From Machine
 
-In the Machine app, the **Video** department with the **hogwarts** repo shows three starters,
-defined in `departments/video/pack.json` with `repos: ["hogwarts"]`:
+In the Machine app, the home of the **Video** department shows at most three options. They are
+chosen by the station's board from the formulas in `departments/video/formulas/` and from this
+ledger's state: an open project, the stage it has reached, an approval that waits. With a Hogwarts
+film in production, the options on 2026-11-22 were:
 
-| Starter | What it does |
+| Option | What a tap does |
 | --- | --- |
-| Balqalam intro film | Moves the intro project to its next gate |
-| Feature video from the real app | Records a real feature at phone size and cuts a vertical Facebook explainer, Arabic and English |
-| Production desk | Checks the line's readiness and lists every project with its stage and waiting gate |
+| Continue production | Fills the prompt for the stage the open film has reached |
+| New film | Fills the prompt that plans a new film. Nothing is created until the plan is accepted |
+| Video script | Fills the prompt for a video script on its own |
+
+A tap fills the prompt with a script; no model runs. The [Station](/docs/station) page explains the
+board and the formulas, and the [Video pipeline](/docs/pipeline) page follows a film from the home
+screen step by step.

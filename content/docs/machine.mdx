@@ -37,13 +37,13 @@ cd $env:USERPROFILE\kun; powershell -ExecutionPolicy Bypass -File .\.claude\scri
 
 It does **not** run the engine install: no hooks, no rules, no full skill set. The app's catalog installs the items of the person's profile.
 
-With no `-MsiPath` or `-MsiUrl`, the script downloads the `.msi` of the [latest release of databayt/machine](https://github.com/databayt/machine/releases/latest); a build artifact of that repo's CI also works (pass it with `-MsiPath`). The installer is unsigned. Because it is unsigned, Windows SmartScreen shows **More info → Run anyway** once on first launch.
+With no `-MsiPath` or `-MsiUrl`, the script downloads the `.msi` of the [latest release of databayt/machine](https://github.com/databayt/machine/releases/latest); a build artifact of that repo's CI also works (pass it with `-MsiPath`). The installer is unsigned. Because it is unsigned, Windows SmartScreen stops it once on first launch: press **More info**, then **Run anyway**.
 
 ## First run
 
 1. In PowerShell run `claude` once and sign in with **your own** Claude account. Nobody signs in for you.
 2. Open **Kun** from the Start menu. The app picks up your name, department and agent from `settings.json`.
-3. The app opens on **Install** until the computer is ready. Press **Install everything**, sign in where it asks, then open **.claude → departments** and install your department's pack. After that, ask in Arabic or English.
+3. The app opens on **Install** until the computer is ready. Press **Install everything**, sign in where it asks, then open **.claude**, then **departments**, and install your department's pack. After that, ask in Arabic or English.
 4. Voice (optional): press the microphone, and the app downloads a small speech model once (about 142 MB). It runs on the CPU and nothing leaves the computer. A larger, slower, more accurate model (`small`, about 465 MB) can be chosen instead. Spoken replies use the Windows voices.
 
 ## The sidebar
@@ -63,10 +63,41 @@ The number beside **Install** (`· 82%`) is how ready the computer is; it disapp
 
 **Settings, link by link**
 
-- **General**: language, who you are and your department. (The default agent is under **Install → Agents → Default agent**; every repo is under **Install → Repos → All repositories**.)
+- **General**: language, who you are and your department. (The default agent is under **Install**, then **Agents**, then **Default agent**; every repo is under **Install**, then **Repos**, then **All repositories**.)
 - **Config**: the notifications line, your personal `settings.json` keys and the team secrets file. Every change is backed up first, and a failed health check puts the old content back.
 - **Health**: the engine's health check and app updates.
 - **Engine**: the engine's version and its own update. Hidden on machines whose profile does not manage the engine.
+
+## The home screen
+
+The home is where a request starts. It shows a greeting, the input box, and one line under the box: **Department ▾**, **Repo ▾** and the health light. Under that line there are at most **three options**.
+
+**The three options.** They are not a fixed list. They come from the station's board: a script reads your department's *formulas* (prompts written in advance, one file each) and the state of the work, and returns one option for each of three roles.
+
+| Role | What it offers |
+| --- | --- |
+| **Waiting** | Something that waits for you: one of a film's four approvals (script, look, version, publish), or a work order made for you |
+| **Next** | The next step of work that is already open |
+| **Start** | Something new |
+
+When a role has nothing to offer, the next best option takes its place, so you may see two options of one kind. How to use them:
+
+- **Tap an option** and the full prompt fills the box at once. No model runs, and nothing is sent until you press Enter. You can edit the prompt first.
+- **The ✕** at the end of a row takes that option off the list for this visit.
+- **If the board cannot answer**, the department's own short list from its pack shows instead, so the home is never empty for that reason.
+
+**Typing your own.** Write in Arabic or English and press the sparkle button beside the microphone. The app first looks for a formula that fits your words and fills it, with no model. Two kinds of sentence are understood as well as plain requests:
+
+- **A hand-over.** "Give the classroom scene to sedon" fills the work order for that piece, with the person and the piece already written in. Sending it asks the agent to create that issue for the person; it does not start the work on your machine.
+- **Another department.** "Sales quote a school for 48 students", typed while you are in Video, moves the Department menu to Sales without asking and fills Sales' quote.
+
+Only when no formula fits does a short Claude run rewrite your words into a full prompt.
+
+**Accept, under a plan.** A request that runs "plan first" comes back as a plan, and nothing has been changed yet. A typed reply answers or changes the plan, and still changes nothing. One button under the plan, **Accept** (اعتمد الخطة), turns it into work. What that means depends on what was planned. Under a film plan, the department's lead puts the film on GitHub: it creates the film issue, and a work order for each piece the plan gives to another person, and replies with the links. Under a plan for one work order, it creates that work order. Under any other plan it carries out the first step and stops at the next approval.
+
+**The Repo menu.** The list is not built into the app. It is the repos your department's pack and your profile name, limited to the ones kun's registry (`.claude/memory/repositories.json`) marks active, with Hogwarts first. A repo that has a word of its own in the registry shows that word: the databayt.org site repo is called `marketing` on GitHub and shows as `landing`.
+
+The whole design is on the [Station](/docs/station) page, and the [Video pipeline](/docs/pipeline) page walks through it step by step for the Video department.
 
 ## Install and uninstall
 
@@ -112,7 +143,7 @@ What you remove stays removed. The step shows as **removed by you**, it no longe
 | `departments` | A department's pack: its skills and agents in one item | Install the pack, or open it and pick items |
 | `mcp` | The outside services the agent can reach | Switch a server on or off |
 
-The first screen also shows three files, `CLAUDE.md`, `settings.json` and `.env`; opening one takes you to **Settings → Config**, where they are edited. Each folder ends with one line, for example `86 items · 61 on`.
+The first screen also shows three files, `CLAUDE.md`, `settings.json` and `.env`; opening one takes you to **Config** under **Settings**, where they are edited. Each folder ends with one line, for example `86 items · 61 on`.
 
 How to read a folder:
 
@@ -148,13 +179,21 @@ Profile: `machines/moed.json` — departments **sales**, **marketing**, **video*
 
 Work reaches the app as GitHub issues. The captain and weekly skills draft them; nothing is created until Abdout says "send". Each task carries a `dept:<department>` label, the sprint as its milestone (`Sprint <yyyy>-W<ww>`), a `P0` to `P3` priority and a hidden kun block naming the repos and catalog items it needs and the tasks it waits for (`after`).
 
-What a person sees in their department:
+A **work order** is a task made for one person: one request, one deliverable. It carries a `for:<login>` label, and its kun block also names the film it belongs to and the formula it was written from. A film's work orders are made with `produce order`, by the department's lead when a film plan is accepted or by hand later ([Station](/docs/station) shows a full example).
 
-- **The queue**, ordered by sprint, then priority, then what it waits for, then age.
+A work order made for you shows in two places. On the home screen it takes the Waiting place of its department's board, as the option "Start my work order": the `for:` label counts exactly like an issue assigned to you on GitHub. And it is in the queue below, whatever its department.
+
+What a person sees:
+
+- **The queue.** First come your department's tasks that you hold or that nobody holds, in queue order: priority, then sprint, then age. Then come the work orders made for you in other departments, so an order reaches you even when its department is not yours. Tasks that other people hold come last. The menu shows six at most.
 - **Readiness** on the top task: the repos it needs are local and fresh, its catalog items are installed, your profile allows them, every task it waits for is closed, and nobody else holds it. Anything missing is listed with a one-tap fix (clone the repo, install the items).
-- **Start**, once ready. It claims the task (it shows as in progress, with a comment saying which machine) and opens a chat seeded with the issue, its kun block and the repos.
+- **Start**, once ready. It claims the task (it shows as in progress, with a comment saying which machine) and opens a chat seeded with the issue, its kun block and the repos. A work order can be started only by the person it was made for.
 - **One task at a time.** Start is refused while you hold another in-progress task, unless the CEO has granted `wip:2`. Release hands a task back.
 - **Done** moves it to review with a summary comment. It is not finished yet.
+- **Submit** hands in the files of a task you hold. In the task's chat, write one line about the work in the box, press **Submit** (سلّم العمل) and choose the files. A line in the box that starts with `next:` is kept apart as the line for the next person.
+  - **What it uploads.** The files you chose, at most 20 at a time, from your home folder or an external drive and never from a hidden folder. Each file goes straight from your computer to the CDN, to `work/<film>/<issue number>/<file>`, through a short-lived link that kun hands out. No cloud key is ever on your computer.
+  - **The progress line.** One line under the box names the file being sent and its percentage, then says the receipt is being sent, then "Submitted. It is waiting for review." If kun refuses, the line shows kun's own reason.
+  - **The receipt.** When every file is up, the app posts one comment on the issue: your summary, the link to each file, a sha256 hash of each file and the line for the next person. The task moves to review. Nothing is posted unless every file arrived.
 - **The CEO closes it.** Only a closed issue counts as done, so nothing is skipped silently, and tasks waiting on it become ready.
 
 Holder and status labels are managed by the machines, never set by hand.

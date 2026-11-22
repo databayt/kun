@@ -1,12 +1,13 @@
 ---
 title: Video pipeline
-description: How a film starts in the Kun app, step by step. Phase 1 covers everything from the home input to the first plan, including the refine run that writes the prompt
+description: How a film starts in the Kun app, step by step. Phase 1 covers everything from the home screen to an accepted plan on GitHub, including how the prompt is filled
 ---
 
 ## Phase 1 — the flow
 
-From opening Kun to the producer's first plan, in four parts. Gold is what you do, teal is a Claude
-run, red is a failure path, blue hands over to the next part.
+From opening Kun to an accepted plan, in four parts. Gold is what you do, teal is a Claude run, red
+is a failure path, blue hands over to the next part. The design behind the options and the prompts
+is on the [Station](/docs/station) page.
 
 ### 1 · Open and choose
 
@@ -17,18 +18,23 @@ flowchart TD
     A --> B["Home screen<br/>input box · Department ▾ · Repo ▾<br/>health light · 3 options"]
     B --> P1[["Load the pack<br/>departments/video/pack.json"]]
     B --> H1[["Health check<br/>produce.mjs readiness"]]
+    B --> S1[["Ask the board<br/>station.mjs board"]]
     H1 --> HG["Green: all pass"]:::ok
     H1 --> HR["Orange or red<br/>tap: rows · Fix · Ask"]:::bad
+    S1 --> S2["3 options at most<br/>Waiting · Next · Start"]
     P1 --> D(["You choose<br/>Department: Video"]):::you
     D --> D1["Folder ~/.kun/machine/video<br/>--add-dir ~/media<br/>2-hour limit · route = plan"]
-    D1 --> R(["You choose<br/>Repo: Hogwarts"]):::you
-    R --> R1["Hogwarts options only, 3 at most<br/>--add-dir ~/hogwarts"]
+    D1 --> RM["Repo menu<br/>from kun's registry<br/>Hogwarts first"]
+    RM --> R(["You choose<br/>Repo: Hogwarts"]):::you
+    R --> R1["The board is asked again<br/>--add-dir ~/hogwarts"]
     R1 --> O{"How does the<br/>prompt start?"}
-    O -- "tap" --> O1(["You tap an option<br/>Intro film · Continue · Tools check"]):::you
-    O -- "type" --> T1(["You type in any language<br/>and press ✨"]):::you
-    O1 --> O2["Its English brief fills the box<br/>its route is set silently<br/>nothing is sent"]
-    O2 --> N(["→ Refine"]):::done
-    T1 --> N
+    S2 --> O
+    O -- "tap" --> O1(["You tap an option<br/>Continue production · New film · Video script"]):::you
+    O -- "type" --> T1(["You type in any language<br/>and press the sparkle button"]):::you
+    O1 --> O2["station.mjs fill, no model, no spinner<br/>the full prompt fills the box<br/>its route is set silently<br/>nothing is sent"]
+    O2 --> N2(["→ Send"]):::done
+    T1 --> T2["station.mjs match<br/>a formula is looked for first<br/>the model refine is the fallback"]
+    T2 --> N(["→ Match or refine"]):::done
 
     classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
     classDef claude fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
@@ -52,21 +58,21 @@ starts on its home screen.
 - **The health light**, a small coloured dot. It tells you whether the tools on this computer are
   ready.
 
-Under them there are **three options**, short buttons with an icon and a name. When you hover over
-one, a small ✕ appears. The ✕ empties the input box.
+Under them there are **three options**, short rows with an icon and a name. When you hover over
+one, a small ✕ appears at the end of its row. The ✕ takes that option off the list for this visit.
 
-As soon as the home screen opens, the app does two jobs without asking you. They are the two boxes
-with a double border in the chart.
+As soon as the home screen opens, the app does three jobs without asking you. They are the three
+boxes with a double border in the chart.
 
 **Load the pack.** Every department has a settings file in kun called its *pack*. For Video it is
 `departments/video/pack.json`. The app reads it to learn three things:
 
-- **the options** to show under the box,
 - **the routes**: the ways a request can be run (plan first, do it now, workflow, quick),
-- **the formula**: the fixed headings every finished prompt must use.
+- **the frame**: the five fixed headings every finished prompt uses,
+- **the fallback options**: a short list shown only when the board cannot answer.
 
-You never see this file. It is why the home screen looks different for each department. To change
-an option, its wording or the formula, you change this file; the app does not need a new version.
+You never see this file. To change a route or the frame, you change this file; the app does not
+need a new version.
 
 **Health check.** At the same time, the app checks that the video tools on this computer work. It
 runs one command, `produce.mjs readiness`, which tests 14 things: ffmpeg, Blender, FilmCraft,
@@ -82,9 +88,24 @@ light:
 
 You can choose your department and repo while the check is still running; nothing waits for it.
 
+**Ask the board.** The three options are chosen by a script, `station.mjs board`. The department
+keeps its prompts written in advance, one file each, in `departments/video/formulas/`. Each one is
+called a *formula*. The script reads them, looks at the state of the work (an open film, an approval
+that waits, a work order made for you), gives each formula a score, and returns three at most.
+There is one place for each role:
+
+- **Waiting**: something waits for you. It is either one of a film's four approvals (script, look,
+  version, publish) or a work order made for you.
+- **Next**: the next step of work that is already open.
+- **Start**: something new.
+
+No model runs for this, and the answer comes in a fraction of a second. If the board cannot answer,
+the home shows the pack's fallback options instead, so it is never empty for that reason.
+
 **You choose Department: Video.** Open the Department menu and pick **Video**. The app reads the
-Video pack again and resets the choice of how to run your request to the safe default, *plan
-first*. Three things are now settled for every run you start, even though nothing is shown:
+Video pack again, asks the board again, and resets the choice of how to run your request to the
+safe default, *plan first*. Three things are now settled for every run you start, even though
+nothing is shown:
 
 - **The working folder**: `~/.kun/machine/video`. This is the department's own room. Its
   `CLAUDE.md` holds the video team's rules: Arabic first, nothing is published without a check and
@@ -93,59 +114,95 @@ first*. Three things are now settled for every run you start, even though nothin
   earlier captures, projects and finished films.
 - **The time limit**: one answer may work for up to **2 hours**, because video work is slow.
 
+**The Repo menu.** The list in this menu is not built into the app. It comes from kun's registry of
+repos, the file `.claude/memory/repositories.json`. The menu shows the repos that your department's
+pack and your own profile name, keeps only the ones the registry marks as active, and puts Hogwarts
+first. A repo that has a word of its own in the registry is shown by that word: the databayt.org
+site repo is called `marketing` on GitHub and appears as `landing`.
+
 **You choose Repo: Hogwarts.** Open the Repo menu and pick **Hogwarts**. This does two things:
 
-- **It filters the options.** Only the options written for Hogwarts stay, and never more than three:
-  **Intro film**, **Continue production** and **Tools check**. With no repo chosen you see general
-  options instead, such as "Reel from a video".
+- **The board is asked again**, this time for Hogwarts, so it looks at the Hogwarts films.
 - **It opens the product's code to the agent.** The Hogwarts folder (`--add-dir ~/hogwarts`) is
   added, so the agent can read the real product to check what the film claims. A new chat also
   starts with one hidden line: *"Working in hogwarts for the video department."*
 
 The app remembers your choices, so next time Kun opens on Video and Hogwarts already.
 
-**How does the prompt start?** Now there are two ways to begin. Both lead to the same place.
+**The three options today.** With a Hogwarts film in production, the board shows:
 
-- **Tap an option.** Pick one of the three buttons:
+| Option | Role | Use it when | How it will run |
+| --- | --- | --- | --- |
+| **Continue production** | Next | A film is already under way and you want the next step | Do it now: one stage, then it stops at the next approval |
+| **New film** | Start | You want to plan another film | Plan first: the agent asks before it does anything |
+| **Video script** | Start | You want a script only | Do it now |
 
-  | Option | Use it when | How it will run |
-  | --- | --- | --- |
-  | **Intro film** | You want a new film introducing Hogwarts | Plan first: the agent asks before it does anything |
-  | **Continue production** | A film is already under way and you want the next step | Do it now: one stage, then it stops at the next approval |
-  | **Tools check** | You want to know whether the computer is ready | Quick: a small, fast job |
+There is no Waiting option today, because no approval is waiting and no work order has been made
+for you. When a role has nothing to offer, the board fills the empty place with the next best
+option, which is why there are two Start options. **New film** is the same formula as *Intro film*.
+It takes that name while a film is open, so that it does not look like a second way to continue.
 
-  **The option's English brief fills the box.** Tapping does not send anything. It writes a short
-  English request into the box. For Intro film that is: plan an intro film for Hogwarts (viewers see
+**How does the prompt start?** Now there are two ways to begin.
+
+- **Tap an option.** The full prompt fills the box at once. The same script, run as
+  `station.mjs fill`, takes the option's formula and fills its blanks from files and from the state
+  of the work: the
+  brand from the repo, the price and currency from the markets file, today's date, the open film
+  and its stage. No model runs and there is no spinner. Tapping does not send anything. At the same
+  moment the app quietly notes how the request should run (plan first, for New film). You see no
+  label for this; it happens in the background.
+
+  For New film the box now holds a complete request: plan a new intro film for Hogwarts (viewers see
   the brand Balqalam), for school owners and principals, the Sudan version in Arabic, for Facebook,
-  vertical, about two minutes. At the same moment the app quietly notes how it should run (plan
-  first, for Intro film). You see no label for this; it happens in the background.
+  vertical, about two minutes. For Continue production the script looks at the stage the open film
+  has reached and fills the prompt for that stage.
 
 - **Type your own.** Write what you want in the box in any language, Arabic or English, as roughly
-  as you like ("فيديو تعريفي لهوغورتس السودان"), then press the **✨** button beside the microphone.
+  as you like, then press the **sparkle button** beside the microphone.
 
-**→ Refine.** Either way, the short request now goes to *refine*, the run that turns it into a full,
-professional prompt. After a tap it starts on its own; after typing it starts when you press ✨.
-While it works, ✨ turns into a spinner. Part 2 explains what it does.
+**The sparkle button looks for a formula first.** The same script, run as `station.mjs match`, reads
+your words and tries to find the formula they mean. It finds one in three ways:
+
+| You type | What it finds | What fills the box |
+| --- | --- | --- |
+| Words that name a kind of work: "فيديو تعريفي لهوغورتس السودان" | The formula whose trigger phrases fit. Here it is the new film | The same prompt as a tap on New film |
+| A hand-over sentence: "give the classroom scene to sedon" | The work order for that kind of piece. Here it is the Blender scene | The request for Sedon, with his name and the piece already written in |
+| Words that name another department: "sales quote a school for 48 students" | That department's formula. Here it is Sales' quote | The app moves the Department menu to Sales without asking, and fills the quote |
+
+When a formula is found, it is filled exactly as a tap fills it: by script, with no model. Whatever
+the script cannot know stays visible in the box as `[unfilled: name]`; in the Sales example those
+are the number of students and the school's record id.
+
+**Only when no formula fits, the model refine runs.** Refine is a short, read-only Claude run that
+rewrites your words into a full prompt. It is the one case in which the sparkle button turns into a
+spinner for more than a moment. Part 2 shows both paths.
+
+**Send, or match first.** A tapped option is already complete, so it skips part 2 and goes straight
+to part 3. Typed text goes through part 2.
 
 **At the end of part 1:** the department and repo are chosen, the tools have been checked, the box
-holds a short request, and the app knows where that request will run. Nothing has been sent and
-nothing on the computer has changed.
+holds a complete prompt (after a tap, or after the sparkle button) or your own words, and the app
+knows where the request will run. Nothing has been sent and nothing on the computer has changed.
 
-### 2 · Refine: the prompt is written
+### 2 · Typed text: match first, refine only if nothing fits
 
 ```mermaid
 %%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
 flowchart TD
-    R0(["Refine starts: ✨ spins"]):::done
-    R0 --> RF["The refine run<br/>claude -p in plan mode<br/>read-only · sonnet · medium<br/>240 s at most · no session"]:::claude
-    RF --> G1["Gather, read-only<br/>department CLAUDE.md<br/>produce list · status · project folder"]:::claude
-    G1 --> G1b["brand-kit.json · markets.json<br/>captures in ~/media/hogwarts"]:::claude
-    G1b --> G2["Fill formula.en in English<br/>Task · Context · References<br/>Constraints · Deliverable"]:::claude
+    R0(["You pressed the sparkle button"]):::done
+    R0 --> M["The switch: station.mjs match<br/>another department's word<br/>a hand-over sentence<br/>trigger phrases, English and Arabic"]
+    M --> Q{"A formula fits?<br/>confidence 0.6 or more"}
+    Q -- "yes" --> MD["Another department named?<br/>the Department menu moves to it"]
+    MD --> MF["station.mjs fill, no model<br/>with the values the switch found<br/>the prompt replaces the box<br/>route applied"]
+    Q -- "no" --> RF["The refine run<br/>claude -p in plan mode<br/>read-only · sonnet · medium<br/>240 s at most · no session"]:::claude
+    RF --> G1["Gather, read-only<br/>department CLAUDE.md<br/>the pack's gather list"]:::claude
+    G1 --> G2["Fill the frame in English<br/>Task · Context · References<br/>Constraints · Deliverable"]:::claude
     G2 --> G3["Last line<br/>route: plan / do / workflow / quick"]:::claude
     G3 --> F{"Text came back?"}
-    F -- "no" --> FX["✨ turns red<br/>your text stays"]:::bad
+    F -- "no" --> FX["The button turns red<br/>your text stays"]:::bad
     F -- "yes" --> F1["Prompt replaces the box<br/>route line removed, applied<br/>⌘Z = earlier text"]
-    FX --> E(["You edit, attach with +<br/>and press Enter"]):::you
+    MF --> E(["You edit, attach with +<br/>and press Enter"]):::you
+    FX --> E
     F1 --> E
     E --> N(["→ Send"]):::done
 
@@ -163,13 +220,10 @@ flowchart TD
 flowchart TD
     S0(["Send"]):::done
     S0 --> S1["Your bubble<br/>an agent turn with the working line"]
-    S1 --> S2{"Route was plan?"}
-    S2 -- "yes" --> S3["Next turn is set to do"]
-    S2 -- "no" --> S4
-    S3 --> S4["Rust: chat::ask<br/>settings · profile · department<br/>repo allowed?"]
-    S4 --> S5["Build the run<br/>folder · --add-dir · route flags<br/>preface · suffix · 2-hour limit"]
+    S1 --> S4["Rust: chat::ask<br/>settings · profile · department<br/>repo allowed?"]
+    S4 --> S5["Build the run<br/>folder · --add-dir · route flags<br/>the lane's model and effort<br/>preface · suffix · 2-hour limit"]
     S5 --> C["claude -p stream-json<br/>--permission-mode plan<br/>--model opus --effort high<br/>--agent video"]:::claude
-    C --> N(["→ Producer"]):::done
+    C --> N(["→ The video agent"]):::done
 
     classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
     classDef claude fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
@@ -178,18 +232,24 @@ flowchart TD
     classDef done fill:#1d2540,stroke:#4a63b5,color:#d4dcf5;
 ```
 
-### 4 · The producer's plan turn: nothing is written
+### 4 · The plan turn: nothing is written until you accept
 
 ```mermaid
 %%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
 flowchart TD
-    L0(["Producer starts"]):::done
+    L0(["The video agent starts"]):::done
     L0 --> L["Loads department CLAUDE.md<br/>video.md · your rules,<br/>skills and hooks"]:::claude
     L --> PR1["Gathers: project · brand<br/>markets · captures · references"]:::claude
     PR1 --> PR2["Lists actions that need your OK<br/>each with its command"]:::claude
-    PR2 --> PR3["Writes the plan in your language<br/>brief · 2–3 questions · journey<br/>first step"]:::claude
-    PR3 --> END(["Plan on screen:<br/>Shall I start with …?"]):::done
-    END --> NEXT["Your reply runs on do<br/>with --resume → phase 2"]
+    PR2 --> PR3["Writes the plan in your language<br/>brief · 3 questions · journey<br/>first step"]:::claude
+    PR3 --> END["Plan on screen:<br/>Shall I start with …?<br/>one button: Accept"]
+    END --> RP(["You type a reply"]):::you
+    RP --> RP1["Stays on the plan route<br/>read-only, with --resume<br/>answers or changes the plan"]:::claude
+    RP1 --> END
+    END --> AC(["You press Accept"]):::you
+    AC --> AC1["One fixed message<br/>on the do route, with --resume"]
+    AC1 --> IS["The video agent creates<br/>the film issue<br/>a work order for each piece<br/>given to another person"]:::claude
+    IS --> GH(["Plan accepted and on GitHub<br/>film issue · first work orders<br/>→ phase 2"]):::done
     C1[["started → sessions.json<br/>→ Sessions"]]
     C2[["tool → folded steps<br/>text → the answer live"]]
     L -.-> C1
@@ -213,8 +273,8 @@ as they settle.
 
 | Phase | From | To |
 | --- | --- | --- |
-| **1 · The front door** | You open Kun | The producer's first plan is on screen |
-| 2 · Pre-production | You answer the plan | The script gate |
+| **1 · The front door** | You open Kun | The plan is accepted and on GitHub |
+| 2 · Pre-production | The plan is accepted | The script gate |
 | 3 · Production | Script approved | The version gate |
 | 4 · Delivery | Version approved | CDN and publish |
 
@@ -222,13 +282,20 @@ as they settle.
 
 ## Phase 1 — the front door
 
-**This phase succeeds when two things exist:**
+**This phase succeeds when three things exist:**
 
-- **A professional prompt.** It is always in English, follows one fixed formula, and carries every
-  reference: absolute paths, CDN URLs, project ID, stage and gate, price, currency, dialect and
-  length.
+- **A professional prompt.** It is always in English, uses the same five headings, and carries every
+  reference the worker needs: the project ID, the stage and gate, the price, currency, dialect and
+  length, and the links or paths to read.
 - **A decision on where it runs.** That means the agent, the model, the effort and the permission
   mode. The app makes this choice silently: you never see a selector.
+- **An accepted plan on GitHub.** One film issue that tracks the film, and the first work orders.
+  A *work order* is one request for one person with one deliverable, written as a GitHub issue.
+
+Four words are used from here on. A *formula* is a prompt written in advance for one kind of work.
+A *slot* is a blank in a formula that is filled when it is used. A *route* is one way of running a
+request. A *gate* is a point where the work stops until a person says yes; a film has four: script,
+look, version and publish. The [Station](/docs/station) page explains each of them in full.
 
 ### Step 0 — You open Kun
 
@@ -237,24 +304,29 @@ You land on the home screen. It shows:
 - a greeting,
 - the input box,
 - under the box, the **context line**: Department ▾ · Repo ▾ · a health light,
-- under that, **three options**. Each has an icon and a label, and a ✕ appears on hover to clear
-  the box.
+- under that, **three options**. Each has an icon and a label, and a ✕ appears on hover to take that
+  option off the list.
 
-The app does two things in the background:
+The app does three things in the background:
 
 | What | How | Source |
 | --- | --- | --- |
-| Loads the department's pack | `packInfo(department, repo)` reads the pack file and returns its options, routes and prompt formula | `kun/departments/video/pack.json` |
+| Loads the department's pack | `packInfo(department)` reads the pack file and returns its routes, its frame and its fallback options | `kun/departments/video/pack.json` |
 | Checks the department's health | Runs `node ~/.claude/skills/produce/scripts/produce.mjs readiness --json` without a shell, 120 s at most. The result sets the light: green when every check passes, orange on a warning, red on a critical failure. | `pack.json → health.check` |
+| Asks the board | Runs `node <kun>/.claude/scripts/station.mjs board --dept video --repo hogwarts --login <you> --json` without a shell, 5 s at most, adding `--health` with the light's colour once it is known. An empty answer never blocks the home: the pack's `quickActions` show instead. | `kun/.claude/scripts/station.mjs`, `kun/departments/video/formulas/` |
 
 If the light is not green, you can tap it to see the failing rows and run the fix
 (`readiness --fix`, up to 15 min). You can also ask the agent about a row; that question runs on the
 "do" route.
 
+The board is asked again whenever the department, the repo or the colour of the health light
+changes. When the light is red, the options that need the tools are left out and **Tools check**
+takes the Start place.
+
 ### Step 1 — Choose the department (Video)
 
-The pack loads again for the new department, and the route choice goes back to that department's
-default. The department sets three things:
+The pack loads again for the new department, the board is asked again, and the route choice goes
+back to that department's default. The department sets three things:
 
 - **The working folder.** Every run starts in `~/.kun/machine/video/`. That folder's `CLAUDE.md` is
   the department's rules (Arabic first, `media-qa` before anything is published, no real student
@@ -265,36 +337,130 @@ default. The department sets three things:
 
 ### Step 2 — Choose the repo (Hogwarts)
 
+The Repo menu is built from kun's registry, `.claude/memory/repositories.json`. It lists the repos
+that the department's pack and your profile name, limited to the ones the registry marks `active`,
+with Hogwarts first. A repo with a `word` in the registry shows that word (`marketing` shows as
+`landing`). The same list is checked again before every run, so a run can never name a repo that is
+not on the menu.
+
 The repo decides two things:
 
-- **Which options you see.** An option that lists `repos: ["hogwarts"]` appears only for Hogwarts.
-  Without a repo, you see the general options instead ("Reel from a video", "Video script"). There
-  are never more than three.
+- **Which films the board looks at.** The board reads the open projects of that repo's production
+  line (`produce.mjs list --json --repo hogwarts`). The repo also sets some defaults in a prompt:
+  for Hogwarts the brand the viewer sees is Balqalam.
 - **What the run can read.** `/Users/abdout/hogwarts` joins the run as `--add-dir`. A new chat also
   opens with the line *"Working in hogwarts for the video department."*
 
-The Hogwarts options:
+The three options the board returned for Video with Hogwarts on 2026-11-22:
 
-| Option | Silent route | What its brief asks |
-| --- | --- | --- |
-| **Intro film** | `plan` | Plan an intro film for Hogwarts (the viewer sees the brand Balqalam). Sudan · Arabic · Facebook 9:16 · about 2:00 |
-| **Continue production** | `do` | Pick up the open project at its current stage |
-| **Tools check** | `quick` | Check that the production tools are ready |
+| Option | Role | Formula | Silent route | Why the board chose it |
+| --- | --- | --- | --- | --- |
+| **Continue production** | Next | `video.film.continue` | `do` | `continue: open project hogwarts-intro-introduction-v001` · `drive 0.9` |
+| **New film** | Start | `video.film.plan` | `plan` | `drive 1` |
+| **Video script** | Start | `video.script.only` | `do` | `drive 0.5` |
+
+How the scores are made, and what would put an option in the Waiting place, is in
+[the board section of the Station page](/docs/station#the-board).
 
 ### Step 3 — Tap an option
 
 **A tap fills the box. It never sends.** Three things happen at once:
 
-1. The option's short English brief appears in the box, with the caret at the end.
-2. The option's route is chosen silently (Intro film → `plan`).
-3. **Refine starts on its own.** The ✨ button turns into a spinner. Step 4 covers what it does.
+1. The tap is noted in `~/.kun/machine/station-log.jsonl`. The board reads this log, so an option
+   you pick often scores a little higher, and one you dismiss with ✕ scores a little lower.
+2. The app runs `station.mjs fill <formula> --dept video --repo hogwarts --login <you> --json`
+   (10 s at most), with the values the board attached to the option. The finished prompt appears in
+   the box, with the caret at the end.
+3. The formula's route is chosen silently. For New film that is `plan`.
 
-You can also type your own request in any language and press ✨ yourself. It is the same run.
+**No model runs, and there is no spinner.** The script fills each slot from a file, from the state
+of the work, or from a default. A slot it cannot fill stays visible in the box as
+`[unfilled: name]`, so nothing is missing silently.
 
-### Step 4 — Refine: the AI that loads while the prompt is written
+**Continue production follows the film.** Its formula hands over to the formula of the stage the
+open film has reached. Today the film is at the visual stage, so the tap fills `video.stage.visual`.
 
-This is the spinner you see while the prompt is being built. It is a **separate, short Claude run**
-that turns a rough request into the professional prompt. It has nothing to do with your chat.
+**What New film writes.** This is the real prompt the tap puts in the box (your home folder is
+written in full; it is shortened to `~` here):
+
+```markdown
+## Task
+Plan a new intro film for Balqalam (hogwarts): the brief in one line, the questions that change the film, the journey and the first step. Plan only; change nothing.
+
+## Context
+- Repo / brand: hogwarts / Balqalam (the name the viewer sees)
+- Audience: school owners and principals
+- Goal: the viewer books the free first month
+- Version: Sudan · Arabic · msa dialect
+- Price: 6.4 USD per student per year
+- Destination: Facebook · vertical 9:16, mobile · about 2:00
+- Today: 2026-11-22. Project: none yet for this film type, unless `produce list` below shows one; if it does, say so and propose continuing it instead.
+
+## References
+- Open projects: run `node ~/.claude/skills/produce/scripts/produce.mjs list --json --repo hogwarts`, then `status <ID>` for any match. Read the project folder (reference video, transcript, script, asset manifest).
+- Brand kit (identity): https://github.com/databayt/kun/blob/main/content/media/brand-kit.json
+- Markets (price, currency, dialect): https://github.com/databayt/kun/blob/main/content/media/markets.json
+- Real captures: look in ~/media/hogwarts/ before proposing any new capture.
+- Reference film: the latest video the team approved in the WhatsApp group «المدرسة 2.0», raised to a cinematic level with 3D characters. A WhatsApp video is pulled with `wa-pull.py` and seeded with `produce from-reference <ID> <video>`; both are actions that need the person's yes first.
+
+## Constraints
+- Gather read-only first and say in one line what you read. Do not create a project, render, or call any tool that writes.
+- List every action that needs the person's yes under "actions I need your OK for", each with its exact command.
+- Answer the person in their own language; this prompt stays English.
+- Claims only from real captures; generated scenes are illustrative.
+- No real student or parent data; brand name as the viewer sees it.
+- Stop at every human gate (script · look/animatic · version · publish); never approve.
+
+## Deliverable
+- The brief in one line: what · for whom · which version · the goal · the destination.
+- Three questions that change the film, each with a recommended answer the person can accept with "yes".
+- The journey as a numbered list: stage → tool → lane → gate → what is reused. Stages run request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish; gates are script · look · version · publish.
+- The first step and what it produces, ending with the question "Shall I start with …?".
+```
+
+The prompt comes from three places, each kept in one file:
+
+| Layer | What it gives | Where |
+| --- | --- | --- |
+| The frame | The five headings, in this order | `pack.json → formula.en` |
+| The department's constraints | The last three lines under Constraints, added to every Video prompt | `pack.json → constraints` |
+| The formula | Everything else, with its slots filled | `departments/video/formulas/video.film.plan.md` |
+
+The price is the list price **per student per year**, read from `kun/content/media/markets.json`.
+
+### Step 4 — Typed text: match, then refine
+
+You can also type your own request in any language and press the sparkle button. Two things can
+happen, and the first is tried first.
+
+**First, the switch looks for a formula.** The app runs
+`station.mjs match "<your text>" --dept video --repo hogwarts --json` (5 s at most). The script
+answers with a formula, a confidence, and the values it could read out of your words. It looks in
+this order:
+
+1. **Another department's word.** If the text names another department and not your own, the text
+   is matched against that department's formulas, and the answer names the department.
+2. **A hand-over sentence.** "Give, hand, assign or send *a piece* to *a person*", or the same in
+   Arabic (اعط، سلّم، كلّف … لـ or إلى). The words of the piece choose the work order (a scene is a
+   Blender order, a script is a script order), and the answer carries the person and the piece.
+3. **Trigger phrases.** Each formula lists phrases in English and Arabic; the longest one that
+   appears in your text wins.
+
+With a formula and a confidence of 0.6 or more, the app fills that formula exactly as a tap does,
+handing over the values the switch found. If the answer names another department, the app first
+moves the Department menu to it, without asking. No model runs.
+
+Three real answers:
+
+| Typed in Video | Formula | Confidence | Also returned |
+| --- | --- | --- | --- |
+| «فيديو تعريفي لهوغورتس السودان» | `video.film.plan` | 0.92 | nothing |
+| "give the classroom scene to sedon" | `video.order.blender` | 0.92 | `to: sedon`, `scene: the classroom scene` |
+| "sales quote a school for 48 students" | `sales.quote.school` | 0.99 | the department, `sales` |
+
+**Only when nothing fits, refine runs.** Refine is a **separate, short Claude run** that turns a
+rough request into the professional prompt. While it works, the sparkle button turns into a spinner.
+It has nothing to do with your chat.
 
 **How it runs**
 
@@ -302,91 +468,70 @@ that turns a rough request into the professional prompt. It has nothing to do wi
 | --- | --- | --- |
 | Program | `claude -p --output-format stream-json --verbose` | The same Claude Code as the chat, signed in with your own account |
 | Permission mode | `plan` (read-only) | It may read files and run status commands, but it cannot write, render or create a project |
-| Model · effort | `sonnet` · `medium` | Rewriting is cheap work. Opus is kept for the producer |
-| Agent | none | Refine is not the producer; it only writes the prompt |
+| Model · effort | `sonnet` · `medium` | Rewriting is cheap work. Opus is kept for the video agent |
+| Agent | none | Refine is not the video agent; it only writes the prompt |
 | Folder | `~/.kun/machine/video/`, plus `--add-dir` for the repo and `~/media` | It sees exactly what the real run will see |
-| Time limit | 240 s | It gathers before it writes. A typical run takes 45 s to 2 min |
+| Time limit | 240 s | It gathers before it writes |
 | Session | none kept | It does not appear in Sessions |
 
 **What it is told**, in this order:
 
 1. Rewrite the request as one professional prompt, **in English whatever language it was typed in**.
-2. **Gather first, read-only:**
-   - the department's `CLAUDE.md`,
-   - `produce.mjs list --json --repo hogwarts` and `status <ID>` for the matching project,
+2. **Gather first, read-only:** the department's `CLAUDE.md`, then everything in the pack's own
+   list, `pack.json → gather`. For Video that list is:
+   - `produce.mjs list --json --repo hogwarts` and `status <ID>` of the matching project,
    - that project's folder (reference video, transcript, script, asset manifest),
-   - `kun/content/media/brand-kit.json` (the identity),
-   - `kun/content/media/markets.json` (price, currency, dialect),
-   - existing captures under `~/media/hogwarts/`.
+   - `kun/content/media/brand-kit.json` and `markets.json` (price, currency, dialect),
+   - existing captures.
 3. Put every fact the worker needs into the prompt, so that it stands alone: absolute paths, CDN
    URLs, project ID, stage and gate, price, currency, dialect and length. **Do not start the work.**
-4. Fill the **formula** exactly: the same headings in the same order, with "none" where nothing
+4. Fill the **frame** exactly: the same headings in the same order, with "none" where nothing
    applies.
 5. End with one last line, `route: <id>`, choosing one of `plan`, `do`, `workflow` or `quick`.
 
-**The formula** is stored in `pack.json → formula.en`, so you can change it there without a new app
+**The frame** is stored in `pack.json → formula.en`, so you can change it there without a new app
 build:
 
 ```markdown
 ## Task
-<one line: the deliverable · for whom · which version · the goal>
+One line: the deliverable, for whom, which version, the goal.
 
 ## Context
-- Repo / brand: <repo> / <brand the viewer sees>
-- Project: <project ID> · stage: <current stage> · next gate: <gate>
-- Audience: <who>
-- Version: <market> · <language> · <dialect>
-- Price: <amount> <currency> per student per month
-- Destination: <platform> · <aspect> · <device> · <length>
+The repo and brand, the project and its stage, the audience, the version (market, language, dialect), the price and currency, the destination.
 
 ## References
-- <absolute path or CDN URL> — <what it is>
+Every link or path the worker needs, each with what it is. A work order carries links only, never a local path.
 
 ## Constraints
-- Claims only from real captures; generated scenes are illustrative.
-- No real student or parent data; brand name as the viewer sees it.
-- Stop at every human gate (script · look/animatic · version · publish); never approve.
+What must hold: the department's rules (appended automatically) and anything specific to this piece.
 
 ## Deliverable
-<plan mode: the brief in one line · 3 questions with recommended answers · the journey · the first step>
-<work mode: the stage's output by absolute path, `produce advance`, stop at the gate>
+What comes back, where it goes and the gate it stops at. A plan turn returns the brief, the questions, the journey and the first step.
 ```
 
-**When it finishes**
+**When the sparkle button finishes**
 
 - The box text is **replaced** by the finished prompt.
-- The app reads the `route:` line, **removes it from the text** and chooses that route silently.
-  This is why refine can move "Intro film" from `plan` to `do`: it found that the project already
-  exists. An id that is not in the pack is ignored.
-- A code fence around the answer is removed.
+- After a refine run, the app reads the `route:` line, **removes it from the text** and chooses that
+  route silently. An id that is not in the pack is ignored. After a match, the route is the
+  formula's own.
+- A code fence around a refined answer is removed.
 - **⌘Z** brings back the text you had before, as long as you have not edited the result.
-- **If it fails** (time limit, no answer), the ✨ turns red and your text stays as it was. You can
-  send it unrefined or press ✨ again.
-
-In a real test on «فيديو تعريفي لهوغورتس السودان عربي», refine returned the full formula in English
-with about 25 references:
-
-- the project ID and its stage (visual),
-- the Sudan script and every iPhone capture by scene,
-- the brand colours and the Sudan price ($6.40),
-- the CDN URL the film will have (`https://cdn.databayt.org/video/hogwarts/intro/sd-ar/fb-9x16.mp4`).
-
-It also raised the open questions it found (price wording, an empty music folder).
+- **If refine fails** (time limit, no answer), the sparkle button turns red and your text stays as
+  it was. You can send it as it is or press the button again.
 
 ### Step 5 — Edit, attach, send
 
 - Change the prompt as much as you like. It is just text now.
-- **+ → Attach** adds files. Each file becomes a line under References (an absolute path, or a CDN
-  URL for a media file).
+- **Attach**, under the **+** button, adds files. Each file becomes a line under References (an
+  absolute path, or a CDN URL for a media file).
 - **Enter**, or the send button, sends it.
 
 ### Step 6 — What happens right after Send
 
 **In the window**
 
-1. Your prompt appears as your bubble, and an empty agent turn opens with an orange working line.
-2. If the route was `plan`, the app switches the *next* turn to `do`, so your answer to the plan
-   carries out the work.
+Your prompt appears as your bubble, and an empty agent turn opens with an orange working line.
 
 **In the app's Rust side** (`chat::ask`):
 
@@ -394,7 +539,7 @@ It also raised the open questions it found (price wording, an empty music folder
 2. It builds the run:
    - the folder `~/.kun/machine/video/`,
    - `--add-dir /Users/abdout/hogwarts` and `--add-dir ~/media`,
-   - the route's flags,
+   - the route's flags: the permission mode, the agent, and the model and effort of the route's lane,
    - the 2-hour limit.
 3. It adds the opening line *"Working in hogwarts for the video department."* (new chats only), plus
    the route's suffix if it has one.
@@ -407,17 +552,20 @@ claude -p --output-format stream-json --verbose --permission-mode plan \
   -- "Working in hogwarts for the video department.
 
 ## Task
-…the refined prompt…"
+…the filled prompt…"
 ```
 
-**The four routes.** They are defined in `pack.json → routes` and never shown in the app.
+**The four routes.** They are defined in `pack.json → routes` and never shown in the app. Each route
+names a *lane*: a row in `kun/.claude/engine.json → lanes` that fixes the model and the effort for
+one kind of work. The lane's model and effort win over the route's own. The lanes are listed on the
+[Lanes](/docs/lanes) page.
 
-| Route | Mode | Agent · model · effort | Used for |
-| --- | --- | --- | --- |
-| `plan` (default) | plan, read-only | producer · opus · high | A new film: gather, ask, propose the journey |
-| `do` | auto | producer · opus · medium | Work one stage, then stop at the gate. Also every reply to a plan |
-| `workflow` | auto | producer · opus · high | Many versions at once. Its suffix asks for a workflow: one Sonnet agent per version, each one verified, never Fable |
-| `quick` | auto | sonnet · low, no agent | Status, checks, lookups |
+| Route | Mode | Lane | Agent · model · effort | Used for |
+| --- | --- | --- | --- | --- |
+| `plan` (default) | plan, read-only | `judge` | video · opus · high | A new film: gather, ask, propose the journey. Also every typed reply to a plan |
+| `do` | auto | `work` | video · opus · medium | Work one stage, then stop at the gate. Also the turn that follows Accept |
+| `workflow` | auto | `judge` | video · opus · high | Many versions at once. Its suffix asks for a workflow: one Sonnet agent per version, each one verified, never Fable |
+| `quick` | auto | `research` | sonnet · low, no agent | Status, checks, lookups |
 
 **Inside Claude Code**, the run loads:
 
@@ -425,8 +573,8 @@ claude -p --output-format stream-json --verbose --permission-mode plan \
 - the **video** agent (`.claude/agents/video.md`),
 - your user-level rules, skills and hooks.
 
-The producer is the only role that talks to you. Any building it hands off goes to Sonnet
-sub-agents.
+The video agent is the department's lead, and the only role that talks to you. Any building it
+hands off goes to Sonnet sub-agents.
 
 **The stream back.** Claude prints one JSON line per event, and the app turns each into something on
 screen:
@@ -439,7 +587,7 @@ screen:
 | `done` | The final text. If "read replies aloud" is on, it is spoken |
 | `error` | A red line with **Retry** |
 
-**What the producer does on a plan turn** (it writes nothing):
+**What the video agent does on a plan turn** (it writes nothing):
 
 1. **Gathers** the produce project, the brand kit, the markets, the captures, any reference
    transcript and the product docs, then says in one line what it read.
@@ -447,34 +595,73 @@ screen:
    reference, transcribing, creating the project.
 3. **Writes the plan**, in your language:
    - the brief in one line,
-   - 2 or 3 questions that change the film, each with a recommended answer,
-   - the journey (stage → tool → lane → gate → what is reused),
+   - three questions that change the film, each with a recommended answer,
+   - the journey: for each stage, its tool, its lane, its gate and what is reused,
    - the first step, ending with *"Shall I start with …?"*
+
+### Step 7 — Reply, or Accept
+
+When the plan is on screen, two things can follow. They are not the same.
+
+**A typed reply stays in plan mode.** It runs on the `plan` route again, on the same session
+(`--resume`), and it is read-only. It answers a question or changes the plan. You can reply as many
+times as you like; nothing on the computer or on GitHub changes.
+
+**Accept turns the plan into work.** One button, **Accept**, sits under the plan once it has
+finished without an error. Pressing it does two things: it moves the chat to the working route (`do`,
+the first route that is not plan mode), and it sends one fixed English message on that route. The
+formula that filled the box says what accepting it means, in its `record` field:
+
+| The formula's `record` | What the message asks for |
+| --- | --- |
+| `film` (a film plan, such as New film) | Create the production if it does not exist yet. Create the film issue with `produce issue <ID> --create`. For each piece the plan gives to another person, create its work order with `produce order <ID> <formula> --to <login> --create`. Reply with the links, then stop at the next gate |
+| `issue` (a work order) | Create the work order as an issue and reply with its link. Then stop |
+| `none` | Carry out the first step, then stop at the next gate |
+
+**What the video agent does after Accept on a film plan.** Its own instructions have a section for
+this moment. It prints the film issue as a draft, reads it, and then creates it. For each piece the
+plan gives to another person it prints the work order as a draft and, when nothing is missing,
+creates it. A piece the agent does itself needs no work order: recording the stage ticks it on the
+film issue. It then replies with the links and stops at the next gate.
+
+A typed sentence can also hand a piece over later: "give the classroom scene to sedon", with the
+sparkle button, fills the Blender work order for him, and sending it asks the video agent to create
+that issue. The [Station](/docs/station#done-means-an-issue)
+page follows that order from the sentence to the closed issue.
 
 ### Phase 1 ends here
 
-The plan is on screen, nothing has been written, and the next turn is set to `do`. Your answer to
-the plan, on the same session (`--resume`), opens phase 2.
+Phase 1 is done when the plan is accepted and on GitHub: the film issue, and a work order for each
+piece given to another person. Accept is what puts them there, and the film issue's link is the
+proof. Phase 2 starts from those issues.
 
 ### Who is involved
 
 | Part | Role in phase 1 | Where it lives |
 | --- | --- | --- |
-| Kun app (UI) | Home, options, ✨, silent route, the stream on screen | `~/machine/src/components/chat/` |
-| Kun app (Rust) | `ask` and `refine` commands; builds and starts each run | `~/machine/src/components/chat/rust.rs` |
-| Video pack | Options, routes, formula, folders, health check, time limit | `kun/departments/video/pack.json` |
+| Kun app (UI) | Home, the three options, the sparkle button, Accept, silent route, the stream on screen | `~/machine/src/components/chat/` |
+| Kun app (Rust) | `ask` and `refine` commands; `board`, `fill` and `match_text`, which run the station script; builds and starts each run | `~/machine/src/components/chat/rust.rs`, `~/machine/src/components/pack/station.rs` |
+| Station script | Chooses the three options, fills a formula, matches typed text. No model | `kun/.claude/scripts/station.mjs` |
+| Formulas | The prompts written in advance, one file each | `kun/departments/video/formulas/` |
+| Video pack | Routes and their lanes, the frame, the department's constraints, the gather list, the fallback options, folders, health check, time limit | `kun/departments/video/pack.json` |
+| Lanes | The model and effort each route gets | `kun/.claude/engine.json → lanes` |
 | Department folder | Where every run starts; its rules | `~/.kun/machine/video/` (from `departments/video/prompt.md`) |
-| Claude Code | Runs refine and the turn on your own subscription | `claude` on your computer |
-| Video agent | Plans, asks, routes; never approves | `kun/.claude/agents/video.md` |
-| produce ledger | Projects, stages, gates; `readiness` for the light | `~/.claude/skills/produce/scripts/produce.mjs` |
+| Claude Code | Runs every turn, and refine when it is needed, on your own subscription | `claude` on your computer |
+| Video agent | The department's lead: plans, asks, routes; after Accept it creates the film issue and the work orders; never approves | `kun/.claude/agents/video.md` |
+| produce ledger | Projects, stages, gates; `readiness` for the light; the film issue and its work orders | `~/.claude/skills/produce/scripts/produce.mjs` |
 | Brand and markets | Identity, price, currency, dialect | `kun/content/media/brand-kit.json`, `markets.json` |
 | Media library | Captures, projects, deliverables | `~/media/`, `~/media/_projects/<ID>/` |
 
 ### Rules in this phase
 
-- **The prompt is always English**, in the one formula. The agent still answers you in your language.
-- **Routing is silent.** There is no selector or label in the app; to change a route, edit `pack.json`.
-- **The options stay a flat list of three**, with a ✕ to clear. There is no accordion and no
-  drill-down.
+- **The prompt is always English**, under the five headings of the frame. The agent still answers
+  you in your language.
+- **Routing is silent.** There is no selector or label in the app. To change a route, edit
+  `pack.json`; to change the model behind it, edit the lane in `engine.json`.
+- **The options stay a flat list of three at most**, with a ✕ to take one off. There is no
+  accordion and no drill-down.
+- **A tap never runs a model.** The station script fills the formula. A model writes the prompt only
+  for typed text that fits no formula.
 - **Fable is never used** in refine, a route or a sub-agent. The pack rejects it.
-- **Nothing is written before a plan is answered.** Refine and the `plan` route are both read-only.
+- **Nothing is written before a plan is accepted.** Refine, the `plan` route and every typed reply
+  to a plan are read-only. Only Accept moves to work.

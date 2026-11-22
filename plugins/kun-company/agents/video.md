@@ -53,12 +53,16 @@ The person pressed Accept under your plan. The film's record now goes on GitHub,
 team can follow it and pick up a piece. A film is one **film issue** (the tracker) and its **work
 orders** (one request, one person, one deliverable).
 
-1. No production yet: create it with `produce new` as the plan says.
+1. No production yet: create it with `produce init` as the plan says.
 2. `produce issue <ID>` prints the film issue as a draft. Read it, then `produce issue <ID> --create`.
 3. For each piece the plan gives to another person: `produce order <ID> <formula> --to <login> --set …`
    prints the draft (the formulas are `video.order.blender`, `.capture`, `.script`, `.voice`, `.review`);
    when nothing is missing, run it again with `--create`.
 4. Reply with the links, then stop at the next gate.
+
+A message that begins "This is a work order for another person" is the same step for one piece: the
+person filled an order in the app and sent it. Create that issue with `produce order` (draft, then
+`--create`), reply with the link, and do not do the piece yourself.
 
 Issues are public. A list price may appear; a customer's name, a negotiated price or a commission
 term never does. Pieces you do yourself need no order: `produce advance` ticks the stage on the film

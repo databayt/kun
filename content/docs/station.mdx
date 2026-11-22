@@ -1,0 +1,694 @@
+---
+title: Station
+description: How a choice or a few typed words become the right prompt and a tracked piece of work — formulas, the board of three options, fill and match, routes and lanes, and GitHub issues as the record
+---
+
+## What it is
+
+The station is the part of Kun that turns a choice, or a few typed words, into a full request and
+sends it to the right place. It works like a central train station. You hold a ticket, a board shows
+the trains that leave now, and every train already knows where it is going. Nothing here needs a
+model: one script, `.claude/scripts/station.mjs`, does the choosing and the filling, and it costs
+zero tokens.
+
+| Station word | In Kun |
+| --- | --- |
+| Ticket | Who is asking, the department, the repo, and where the work stands: the open film, its stage, an approval that waits |
+| Train | A **formula**: a prompt written in advance, with its destination in its header |
+| Destination | The route the formula runs on, the gate it stops at, what comes back, and whether it is recorded as an issue |
+| Departure board | The three options on the home screen |
+| Switch | The code that maps typed text to one formula (`match`). No model |
+| Conductor | The code that fills a formula's blanks (`fill`). A model runs only for typed text that fits no formula |
+| Signals | The facts the board scores with: waiting, continue, sprint, drive, due and habit |
+
+The [Video pipeline](/docs/pipeline) page shows the same thing from the user's side, step by step.
+
+## The two kinds of word
+
+There are two kinds of word: a **department word** (`video`, `sales`) and a **repo word**
+(`hogwarts`, `mkan`). Each word is four things at once: the keyword you say, the slash command, the
+agent, and the entry in the app's menu.
+
+| | Department word (`video`) | Repo word (`hogwarts`) |
+| --- | --- | --- |
+| Where it is defined | `departments/video/pack.json` | `.claude/memory/repositories.json` |
+| Keyword | `video`, `الفيديو` | `hogwarts` |
+| Slash command | `/video`, the department's door: its board, its formulas, its lead | `/hogwarts`, the place's door: its rules, blocks and open issues |
+| Agent | `video`, the department's lead | `hogwarts`, the product reference |
+| Menu entry | Department ▾ | Repo ▾ |
+| On an issue | the label `dept:video` | the repository the issue is in |
+
+**How to say them.** Say the department first, then the repo, then the request:
+`video hogwarts intro film`. In the app the same ticket is Video ▾, Hogwarts ▾ and a tap on an option.
+
+- A department word counts when it comes first in the prompt (`sales: quote a school`,
+  `/marketing this week's calendar`), or among the first three words when every word before it is a
+  repo or a department (`hogwarts video intro film`).
+- Anywhere else it is an ordinary word. "Add support for dark mode" is not the support department.
+- The explicit forms work anywhere: `<word> department`, `<word> dept`, `<word> team`, `<word> desk`,
+  `department of <word>`, `dept:<word>`, and in Arabic `قسم <name>` or `فريق <name>`.
+
+**Marketing and landing.** `marketing` alone is the department. The databayt.org site lives in a
+repo whose GitHub name is also `marketing`, so that repo has its own word, `landing`. Say it first
+(`landing fix the hero`), or say `landing repo`, `landing site` or `in landing`.
+
+A repo word gets all four forms once a department's pack lists the repo. Today those are `kun`,
+`hogwarts`, `mkan`, `codebase` and `catalog`. Any other repo is a keyword only. One script,
+`.claude/scripts/compile-words.mjs`, writes the door skills and the reference agents from the two
+sources, so nobody keeps them by hand. The full list of words is on the [Places](/docs/places) page.
+
+## Formulas
+
+A **formula** is a prompt written in advance for one kind of work. It has blanks, called **slots**,
+that are filled at the moment it is used. Each formula is one file:
+`departments/<department>/formulas/<id>.md`. Video has 30 formulas and Sales has 7.
+
+A formula file has two parts. The first is a header, written as JSON between two `---` lines. The
+second is the prompt, under five fixed headings (Task, Context, References, Constraints,
+Deliverable), with each slot written as `{{name}}`.
+
+**The header fields**
+
+| Field | What it is | Example |
+| --- | --- | --- |
+| `id` | The formula's name. It starts with the department and matches the file name | `video.film.plan` |
+| `label` | The option's name in English and Arabic | `Intro film` · `فيلم تعريفي` |
+| `icon` | The icon shown beside the option | `Film` |
+| `when` | When it applies: a sentence for the reader, plus conditions the board checks | `{"project": "open", "gate": "script"}` in `video.gate.script` |
+| `route` | The route it runs on (see [Routes and lanes](#routes-and-lanes)) | `plan` |
+| `gate` | The gate it stops at, or `null` | `look` in `video.stage.visual` |
+| `slots` | The blanks, and where each value comes from | see the next table |
+| `drive` | How close the work is to revenue, from 0 to 1. The board scores with it | `1` |
+| `weight` | The points the work is worth in the record | `5` in `video.order.blender` |
+| `role` | Its place on the board: `waiting`, `next` or `start` | `start` |
+| `board` | Whether it may appear on the board | `true` |
+| `record` | What accepting it puts on GitHub. `none`: nothing. `issue`: a work order, one issue for one person. `film`: the film issue and its first work orders | `film` in `video.film.plan`, `issue` in `video.order.blender` |
+| `triggers` | English and Arabic phrases the switch listens for | `intro film`, `فيديو تعريفي` |
+
+Some formulas carry a few more fields:
+
+| Field | What it does | Used by |
+| --- | --- | --- |
+| `redirects` | Sends the request to another formula when a film is already open | `video.film.continue` goes to the formula of the film's current stage (`video.stage.{stage}`) |
+| `needs` | `["tools"]` hides the formula while the health light is red | `video.film.continue`, `video.reel.footage`, `video.versions.fanout` |
+| `due` | The weekdays on which the formula is due | `sales.followup.today` |
+| `health_boost`, `health_only` | Bring the formula forward only when the tools are not healthy | `video.tools.check` |
+| `submit` | `comment` when a work order's result is a reply on the issue, not a file | `sales.order.call` |
+
+**Where a slot's value comes from**
+
+| Source | The value is | Example |
+| --- | --- | --- |
+| `context` | A fact of the moment: the repo, your login, today's date, the open film's id or stage | `repo`, `project` |
+| `choice` | One of a short list, with a default (the default can differ by repo) | `audience`, `market` |
+| `json` | Read from a JSON file in kun | `price` from `content/media/markets.json` |
+| `argv` | The output of a read-only command: `node` and a script inside kun or `~/.claude`, never a shell | a film's predicted video link |
+| `map` | Looked up from another slot's value | `language` from `lang` |
+| `mul` | Numbers multiplied together | the total of a quote: price times students |
+| `slug` | Another slot's value made safe for a file name | `scene_slug` |
+| `value` | A fixed text | the brand kit's link |
+| `ref` | A file in the film's folder, turned into a link | `script_url` |
+| `ask` | Nothing: the person must give it | `scene`, `to` |
+
+**Formula or slot?** One rule separates them. A choice that changes the *work* (the stages, the
+tools, the gate, what comes back) is a new formula. A choice that only changes a *value* is a slot.
+The old Video pack held a tree of 32 ready-made prompts. Their text was the same apart from three
+values, so they were really one formula with three slots, and that is what replaced them.
+
+**The three layers.** A finished prompt is built from three layers, each kept in one place:
+
+1. **The frame.** The five headings and what each must hold. It is `pack.json → formula.en`, and
+   every formula of the department must use those headings in that order.
+2. **The department's constraints.** The rules that hold for every piece of the department's work.
+   They are `pack.json → constraints`, and `fill` adds them to the Constraints section of every
+   prompt. Video has three: claims only from real captures, no real student or parent data, and stop
+   at every human gate.
+3. **The formula.** The text of this one kind of work, with its slots.
+
+**One choice can set several values.** In `video.film.plan` the slot `market` is one choice. It sets
+the market's name, the price and the currency, all read from `content/media/markets.json`, and,
+together with the language, the voice's dialect. Choosing `sd` gives Sudan, 6.4 USD and the `msa`
+dialect in Arabic. Choosing `sa` gives Saudi Arabia, 24 SAR and the `saudi` dialect. The price is
+per student per year. The language itself is a separate slot, `lang`.
+
+## The board
+
+The board is the list of three options on the home screen. It has three fixed **roles**, always in
+this order:
+
+| Role | What it offers |
+| --- | --- |
+| **Waiting** | Something that waits for you: one of an open film's four approvals (script, look, version, publish), or a work order made for you |
+| **Next** | The next step of work that is already open |
+| **Start** | Something new |
+
+The board scores every formula that has `board: true`, then takes the best one for each role. When
+no formula qualifies for a role, the board fills the empty place with the next best option of any
+role. That is why, today, neither department shows a Waiting row.
+
+**What a person sees.** Three plain rows, each with an icon and a name. There is no label for the
+role, the score or the route. Hovering over a row shows a ✕ at its end; pressing it takes that
+option off the list for this visit and counts against it next time.
+
+**The signals.** A **signal** is one fact about the moment. Each has a weight, kept in
+`.claude/engine.json → board.weights`. A formula's score is the sum of weight times signal.
+
+| Signal | Weight | It is on when |
+| --- | --- | --- |
+| `waiting` | 5 | A gate (script, look, version or publish) waits in an open film, or an open issue with the department's label is yours: it is assigned to you on GitHub, or it carries the label `for:<login>` with your login |
+| `continue` | 3 | There is an open project in the department and repo |
+| `sprint` | 3 | An open issue in the current sprint carries the department's label and matches the formula |
+| `drive` | 2 | Always. Its size is the formula's own `drive`, from 0 to 1 |
+| `due` | 2 | The formula's `due` rule names today's weekday |
+| `habit` | 1 | You picked this option recently. Picks add and dismissals subtract, over the last 14 days |
+
+Three more things change the board:
+
+- **The health light.** When it is red, every formula that needs the tools is left out and Tools
+  check takes the Start place. When it is orange, Tools check is offered. When it is green, Tools
+  check appears only if nothing else is left.
+- **Your profile.** A formula listed under `hidden` in `machines/<login>.json` is never shown. A
+  department that is not in your profile has an empty board, and the app shows the pack's own short
+  list (`quickActions`) instead.
+- **A film already open.** `video.film.plan` is named "Intro film". While a film is open it is shown
+  as "New film", so it does not look like a second way to continue.
+
+**What the board shows today.** These are the two real commands and what they returned on
+2026-11-22, a Sunday.
+
+```bash
+node .claude/scripts/station.mjs board --dept video --repo hogwarts --login abdout --json
+node .claude/scripts/station.mjs board --dept sales --login abdout --json
+```
+
+Video with Hogwarts:
+
+| Role | Option | Formula | Score | Why |
+| --- | --- | --- | --- | --- |
+| Next | Continue production | `video.film.continue` | 4.8 | `continue: open project hogwarts-intro-introduction-v001` · `drive 0.9` |
+| Start | New film | `video.film.plan` | 2 | `drive 1` |
+| Start | Video script | `video.script.only` | 1 | `drive 0.5` |
+
+Sales:
+
+| Role | Option | Formula | Score | Why |
+| --- | --- | --- | --- | --- |
+| Next | Who to follow up | `sales.followup.today` | 4 | `drive 1` · `due today` |
+| Next | Log a reply | `sales.reply.log` | 1.8 | `drive 0.9` |
+| Start | Quote a school | `sales.quote.school` | 2 | `drive 1` |
+
+The scores can be checked by hand. Continue production is 3 for `continue` plus 2 times 0.9 for
+`drive`, which is 4.8. Who to follow up is 2 times 1 for `drive` plus 2 for `due`, which is 4.
+
+## Fill and match
+
+**A tap fills.** When you tap an option, the app runs `station.mjs fill` with the option's formula
+and the values the board attached to it. The script fills every slot from files and from the state
+of the work, and the finished prompt appears in the box at once. No model runs and nothing is sent.
+The formula's route is set silently at the same moment.
+
+Continue production shows the redirect at work. Its formula, `video.film.continue`, looks at the
+open film's stage and hands over to that stage's formula. Today the film is at the visual stage, so
+the tap fills `video.stage.visual`.
+
+**The sparkle button matches first.** When you type your own words and press the sparkle button,
+the app first runs `station.mjs match`. This is the switch. It answers with a formula, a confidence
+between 0 and 0.99, and a `set`: the values it could read out of your words. With a formula and a
+confidence of 0.6 or more, the app fills that formula exactly as a tap does, handing the `set` to
+`fill`. No model runs.
+
+The switch finds a formula in three ways, tried in this order:
+
+1. **Another department's word.** When the text names another department and not your own, the
+   switch matches it against that department's formulas and names the department in its answer. The
+   app then moves the Department menu to it, without asking, and fills the formula there.
+2. **A hand-over sentence.** "Give, hand, assign or send *a piece* to *a person*", or in Arabic
+   اعط، سلّم or كلّف with لـ or إلى before the person. The words of the piece choose the work order:
+   a scene is a Blender order, a script is a script order, a voice is a voiceover order. The answer
+   carries the person as `to` and the piece itself.
+3. **Trigger phrases.** Each formula lists phrases in English and in Arabic under `triggers`. The
+   longest phrase found in your text wins.
+
+A text that names another department, typed in Video:
+
+```bash
+node .claude/scripts/station.mjs match "sales quote a school for 48 students" --dept video --json
+```
+
+```json
+{
+  "id": "sales.quote.school",
+  "confidence": 0.99,
+  "dept": "sales",
+  "set": {}
+}
+```
+
+The `set` is empty here: the switch finds the formula and does not read the number out of the
+sentence. After the fill, the number of students and the school's record id stay in the box as
+unfilled slots for you to write. A request that fits a trigger phrase is simpler still:
+«فيديو تعريفي لهوغورتس السودان» returns `video.film.plan` with a confidence of 0.92. The hand-over
+sentence is shown in the [worked example](#a-worked-example-the-classroom-scene-goes-to-sedon)
+below.
+
+Only when nothing fits does a model run. That run is called *refine*: a short, read-only Claude run
+on sonnet at medium effort that rewrites your words into the frame. Before it writes, it reads the
+department's `CLAUDE.md` and everything the pack's `gather` list names. Step 4 of the
+[Video pipeline](/docs/pipeline) page covers it.
+
+**A slot that cannot be filled stays visible.** The script never leaves a blank silently. The slot
+appears in the prompt as `[unfilled: scene]`, and the answer lists it under `missing`. In the app
+you see the marker in the box and write the value yourself. A work order is stricter:
+`produce order` refuses while anything is missing, and names the slot to pass with `--set`.
+
+**How a film is pinned.** With no instruction, `fill` uses the first open film of the repo. To name
+the film, pass `--project <film id>` (or `--set project=<film id>`). Every slot, every reference
+link and every upload then comes from that film. An id that is not a known film is reported as
+`missing: ["project"]`; the script never falls back to another film. The board pins for you:
+Continue production carries the film's id, and `produce order` always pins its own film.
+
+## Routes and lanes
+
+A **route** is one way of running a request: plan it first, do it now, fan it out to several agents,
+or do a quick small job. A **lane** is a row in the engine's table that fixes the model and the
+effort for one kind of work. A route names a lane, and the lane decides the model: when a route
+names a lane, the app takes the lane's model and effort over the route's own. The lanes are on the
+[Lanes](/docs/lanes) page.
+
+The four routes of the Video pack (`departments/video/pack.json → routes`):
+
+| Route | Mode | Lane | Model · effort from the lane | Agent | Used for |
+| --- | --- | --- | --- | --- | --- |
+| `plan` (default) | plan, read-only | `judge` | opus · high | `video` | A new film: gather, ask, propose the journey. Changes nothing |
+| `do` | auto | `work` | opus · medium | `video` | Work one stage, then stop at the gate |
+| `workflow` | auto | `judge` | opus · high | `video` | Many versions at once: one Sonnet agent per version, each one verified |
+| `quick` | auto | `research` | sonnet · low | none | Status, checks, lookups |
+
+Routes are never shown in the app. A formula names its route in its header, and the app applies it
+silently. Sales has three of the same routes (`plan`, `do`, `quick`) with the `sales` agent.
+
+## Done means an issue
+
+Three words first. A **gate** is a point where the work stops until a person says yes. Video has
+four: script, look, version and publish. A **work order** is one request for one person with one
+deliverable, written as a GitHub issue. A **receipt** is the comment on that issue that records what
+was delivered.
+
+"Done" means something different at each level, and each level has its own proof:
+
+| Level | Done means | Proof |
+| --- | --- | --- |
+| A prompt | The right formula, filled, in the box | None. It lives in one window |
+| Phase 1 | The plan is accepted and on GitHub: the film issue and its first work orders | The film issue's link |
+| A work order | Its deliverable is submitted and the receipt is on the issue | The receipt comment |
+| A gate | A person's approval is recorded on the film issue | The approval comment |
+| The film | The CEO closes the film issue after publish | The closed issue |
+
+The formula and the issue are not two things. **The body of a work order is the filled formula.**
+
+**How a plan gets onto GitHub.** Under a finished plan the app shows one button, **Accept**. A typed
+reply never starts work: it stays in plan mode and only answers or changes the plan. Accept moves to
+the working route and sends one fixed English message. The formula that filled the box decides the
+message, through its `record`:
+
+| The formula's `record` | What the message asks the lead to do |
+| --- | --- |
+| `film` | Create the production if it does not exist yet, then its film issue (`produce issue <ID> --create`). For each piece the plan gives to another person, create its work order (`produce order <ID> <formula> --to <login> --create`). Reply with the links, then stop at the next gate |
+| `issue` | Create the work order as an issue and reply with its link. Then stop |
+| `none` | Carry out the first step, then stop at the next gate |
+
+The formula that plans a film, `video.film.plan`, has `record: film`. So accepting a film plan is
+what puts the film on GitHub, and phase 1 ends there. The `video` agent's own instructions cover
+the moment: it prints each draft, reads it, and then creates it. A piece the agent does itself needs
+no work order.
+
+**The two kinds of issue**
+
+| | Film issue | Work order |
+| --- | --- | --- |
+| How many | One for each film | As many as the film needs: one for each piece a person does |
+| Shows | The brief, the versions with their links, the 14 stages as a checklist, the four gates, and a line for every work order | One request under the five headings |
+| Labels | `dept:video`, `P2`, `film` | `dept:video`, `P2`, `for:<login>` |
+| Held by | Nobody. It is the tracker | One person |
+| Created by | `produce issue <ID> --create` | `produce order <ID> <formula> --to <login> --create` |
+| Closed by | The CEO, after publish | The CEO, after the receipt is reviewed |
+
+**Why a work order must travel.** A prompt that names a file on one Mac is useless on another
+machine. A work order is read by a teammate on his own computer, so three things hold, and
+`station.mjs lint` refuses a formula that breaks them:
+
+- **Links, never paths.** Each reference in the film's folder becomes a link on the CDN,
+  `https://cdn.databayt.org/work/<film>/ref/<file>`. The files are uploaded when the order is created.
+- **Where to submit.** The Deliverable section names the place the result goes:
+  `work/<film>/<issue number>/<file>`. An order whose result is words, not a file, says "Reply on
+  this issue" instead.
+- **Who it is for.** Every order has a `to` slot, and the Context section names both the person it
+  is for and the person who ordered it.
+
+### A worked example: the classroom scene goes to Sedon
+
+The owner wants a teammate named Sedon to build the classroom scene of the Hogwarts intro film in
+Blender.
+
+**1. The sentence, then the command.** In the app the owner can simply type "give the classroom
+scene to sedon" and press the sparkle button. The switch recognises a hand-over sentence. This is
+the real answer:
+
+```bash
+node .claude/scripts/station.mjs match "give the classroom scene to sedon" --dept video --repo hogwarts --json
+```
+
+```json
+{
+  "id": "video.order.blender",
+  "confidence": 0.92,
+  "dept": null,
+  "set": {
+    "to": "sedon",
+    "scene": "the classroom scene"
+  }
+}
+```
+
+The word "scene" chose the Blender order, and the sentence gave the person and the piece. The app
+hands that `set` to `fill`, so the box holds the whole request for Sedon, ready to read and to
+edit. Filling the box creates nothing.
+
+Sending it does not start the work on your own machine. Because the formula records to an issue,
+the app puts one fixed line in front of the text, "This is a work order for another person, not
+work for you", and the video agent answers it by creating the issue and replying with the link.
+
+What creates the issue, from the app or from a terminal, is one command, `produce order`. Without
+`--create` it is a draft: it prints what would be made and changes nothing.
+
+```bash
+node ~/.claude/skills/produce/scripts/produce.mjs order hogwarts-intro-introduction-v001 \
+  video.order.blender --to sedon --set scene="the classroom scene"
+```
+
+**2. What the issue will contain.** This is the real draft the command printed (the home folder is
+shortened to `~`):
+
+```text
+DRAFT — nothing created, nothing uploaded.
+film issue: (none yet — run `produce issue hogwarts-intro-introduction-v001 --create` before --create here)
+title: Blender scene: the classroom scene — hogwarts intro — introduction
+labels: dept:video, P2, for:sedon
+references to upload (2):
+  ~/media/_projects/hogwarts-intro-introduction-v001/03-script/script.md
+    -> work/hogwarts-intro-introduction-v001/ref/03-script/script.md
+    => https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/03-script/script.md
+  ~/media/_projects/hogwarts-intro-introduction-v001/04-storyboard/shot-list.json
+    -> work/hogwarts-intro-introduction-v001/ref/04-storyboard/shot-list.json
+    => https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/04-storyboard/shot-list.json
+
+## Task
+Build the classroom scene in Blender from the shot list and render a preview, on your own machine.
+
+## Context
+- Work order: Blender scene, for sedon · ordered by Abdout
+- Film: hogwarts-intro-introduction-v001 · hogwarts / Balqalam (the name the viewer sees)
+- Piece: the classroom scene
+- Format: vertical 9:16, 1080×1920, 30 fps
+
+## References
+- Script: https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/03-script/script.md
+- Shot list: https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/04-storyboard/shot-list.json
+- Brand kit: https://github.com/databayt/kun/blob/main/content/media/brand-kit.json
+- Product look to match: ed.databayt.org
+
+## Constraints
+- Match the shot list for this scene: camera, timing, props and characters; phone and laptop screens show real captures only, supplied on the issue.
+- Characters and places are illustrative: mark them so in the file's notes.
+- Use the brand colours and type from the brand kit; never a licensed font that is not already in the kit.
+- The order is one piece for one person. If something blocks you, say so on the issue instead of widening the work.
+- Claims only from real captures; generated scenes are illustrative.
+- No real student or parent data; brand name as the viewer sees it.
+- Stop at every human gate (script · look/animatic · version · publish); never approve.
+
+## Deliverable
+- The .blend file `the-classroom-scene.blend` (packed textures, no absolute paths) and a preview render `the-classroom-scene-preview.mp4`.
+- Note in the reply the Blender version and any add-on you used.
+- Submit through the Kun app: open this order and press Submit with the files attached. The app uploads them to `work/hogwarts-intro-introduction-v001/<issue number>/<file>` on the CDN and posts the receipt on this issue.
+- Reply on the issue with one line for the next person: what you did, what is left, anything they must know.
+
+<!-- kun: repos=hogwarts; items=skill:blender; after=; film=hogwarts-intro-introduction-v001; formula=video.order.blender; weight=5 -->
+```
+
+The last three lines under Constraints were not in the formula. They are the Video department's
+constraints, added by `fill`. The last line of all is the kun block; the app reads it and people do
+not need to.
+
+**3. The film issue comes first.** The second line of the draft says this film has no film issue
+yet. `order --create` refuses until one exists. A film planned today gets its film issue when its
+plan is accepted. This film was started before that, so the owner creates the issue once:
+`produce issue hogwarts-intro-introduction-v001 --create`.
+
+**4. Create the order.** The same command with `--create` uploads the two references to the CDN,
+creates the issue in the film issue's repository with its three labels, adds a line for it under
+"Work orders" on the film issue, and records it in the film's ledger.
+
+**5. What Sedon sees.** The order reaches him in two places in his Kun app.
+
+- **On the board.** The label `for:sedon` counts exactly like an issue assigned to him on GitHub.
+  So the Video board puts the order in his Waiting place, as the option "Start my work order".
+- **In the queue.** The app lists every open order labelled `for:` his login, whatever its
+  department.
+
+The board of a department shows only to a person whose profile has that department. If Video is
+not in Sedon's profile, the queue is where he finds the order. The kun block says the order needs
+`skill:blender`, so the app's readiness check offers to install it if it is missing. (Sedon needs a
+profile in `machines/` before the app can show him anything; the example uses his name only.)
+
+**6. Start.** Start claims the order. The issue gets the labels `holder:sedon` and
+`status:in-progress`, and a chat opens with the request in it. Nobody else can start it: for anyone
+else the claim is refused with "this order is for sedon".
+
+**7. The work.** Sedon builds the scene in Blender on his own machine. The references open as links.
+
+**8. Submit.** In the order's chat he writes one line about the work in the box. A line that starts
+with `next:` is kept apart as the line for the next person. He presses **Submit** and chooses the
+files, at most 20 at a time. The app asks kun for one short-lived upload link per file and sends
+each file straight to `work/hogwarts-intro-introduction-v001/<issue number>/<file>` on the CDN. No
+cloud key is ever on his computer. One line shows the progress, for example
+"Uploading the-classroom-scene.blend (1/2)" with a percentage, then "Sending the receipt…", then
+"Submitted. It is waiting for review."
+
+**9. The receipt.** When every file is up, the app posts the receipt as a comment on the issue: the
+summary, the links, a sha256 hash of each file, and the line for the next person. The issue moves
+from `status:in-progress` to `status:review`. Only the person who holds the order can post it.
+
+**10. Review and close.** The owner opens the links and reviews the work. Closing the issue is what
+makes it done, and only the CEO closes. The next time the film issue is rewritten, the order's line
+on it is ticked, and `produce status` lists Sedon among the film's contributors.
+
+## The record
+
+**What a receipt carries.** Every receipt is one comment with the same layout, so it can be read by
+a person and counted by a script:
+
+```text
+<!-- kun:receipt -->
+### Run receipt — <login>
+
+Driver: <driver> · Model: <model> · Duration: <time>
+Formula: <formula id> · Stage: <stage>
+
+**Summary**
+<what was done>
+
+**Commits**
+- none
+
+**Artifacts**
+- https://cdn.databayt.org/work/<film>/<issue number>/<file>
+
+**Hashes (sha256)**
+- <hash>  https://cdn.databayt.org/work/<film>/<issue number>/<file>
+
+**Next**
+<one line for the next person>
+
+Ready for review (`status:review`). Only the CEO closes.
+```
+
+The first line is a marker the app looks for. The Formula line, the hashes and the Next line appear
+only when they exist. A receipt posted by Submit in the app records the model as `human`.
+
+**The kun block.** Every film issue and work order ends with one hidden line that machines read:
+
+| Field | What it names | In the example |
+| --- | --- | --- |
+| `repos` | The repos the work needs | `hogwarts` |
+| `items` | The skills or agents the machine must have installed | `skill:blender` |
+| `after` | The issues that must be closed before this one can start | none |
+| `film` | The film the order belongs to | `hogwarts-intro-introduction-v001` |
+| `formula` | The formula the order was filled from | `video.order.blender` |
+| `weight` | The formula's weight | `5` |
+| `driver` | The agent program to use, when the order names one | not set |
+
+**Only the CEO closes.** The labels say where an issue stands: `for:<login>` is who it was made for,
+`holder:<login>` is who has claimed it, and `status:in-progress` and `status:review` are its state.
+The holder and status labels are set by the machines, never by hand. Closed means done, and nothing
+else does.
+
+**Points come from the weight.** A formula's `weight` is copied into the kun block of every order
+made from it, and the receipt names the formula. Points are the weight of the work, not the hours
+spent on it. The calculation that turns points into a share is not built yet (see [Later](#later)).
+
+**Issues are public.** An issue is written for anyone to read. A list price is fine, for example
+the 24 SAR per student per year in `content/media/markets.json`. A commission or a share of revenue
+is not. `produce order` checks the filled prompt for those words in English and Arabic; a draft
+prints a warning, and `--create` refuses. A Sales issue names a school by its CRM record id only,
+never by its name.
+
+## Adding a department
+
+Sales was the second department on this contract, and it is the example to copy.
+
+1. **The pack**, `departments/<word>/pack.json`. It holds `lead` (the agent that talks to the
+   person), `guard` (the check before anything goes out), `keywords` in English and Arabic,
+   `constraints`, the `routes` with a `lane` each and a `defaultRoute`, `formula.en` (the frame,
+   starting at `## Task`), and `quickActions` (the short list shown when the board cannot answer;
+   an action with an `id` must be a formula). `health` and `gather` are optional.
+2. **The ledger.** A ledger is where the department keeps its projects, stages and gates. Video's
+   is produce, with 14 stages and four gates. Sales has none, and says so:
+   `"ledger": { "adapter": "none", "gates": [], "stages": [] }`. A department with no ledger has no
+   project slots and no gates, so its board scores from issues, sprint, drive, due and habit.
+3. **A `formulas/` folder** beside the pack. The board needs at least one formula with
+   `board: true` for each role: `waiting`, `next` and `start`.
+4. **Check the formulas:** `node .claude/scripts/station.mjs lint --dept <word>`. It lists every
+   error and exits with 1 when there is one.
+5. **Check the words:** `node .claude/scripts/compile-words.mjs --check`. It lists any door skill,
+   agent or spell that is missing or out of date. It is the check to run before the work is
+   committed. Running it without `--check` writes the generated ones.
+
+A Sales work order shows the other way to deliver. `sales.order.call` has `"submit": "comment"`:
+its result is a reply on the issue, not a file on the CDN.
+
+## Commands in one place
+
+**The station** (`node .claude/scripts/station.mjs …`). Always pass the department with `--dept`;
+without it the script uses `video`.
+
+| Command | What it does |
+| --- | --- |
+| `board --dept <d> [--repo <r>] [--login <l>] [--health green\|orange\|red] --json` | Returns at most three options, each with its role, score and `why` |
+| `fill <formula-id> --dept <d> [--repo <r>] [--login <l>] [--project <film>] [--set k=v]… --json` | Returns the filled prompt, its route, its `record`, what is `missing`, and the references to upload |
+| `match "<text>" --dept <d> [--repo <r>] --json` | Returns the formula the text fits, a confidence, the values read out of the text (`set`), and the other department when the text names one (`dept`) |
+| `lint [--dept <d>]` | Checks every formula; with no department it checks every department that has formulas |
+| `--test` | Runs the fixed test cases. No network |
+| `--page` | Writes the formula matrix of every department at the end of this page |
+
+**The issues** (`node ~/.claude/skills/produce/scripts/produce.mjs …`). Every command that writes to
+GitHub prints a draft first; only `--create` writes.
+
+| Command | What it does |
+| --- | --- |
+| `issue <ID>` | Prints the draft of the film issue |
+| `issue <ID> --create` | Creates the film issue once. When it exists, `--create` or `--sync` rewrites its body from the current state |
+| `order <ID> <formula> --to <login> [--set k=v]… [--after <refs>]` | Prints the draft of a work order: title, labels, references, body |
+| `order … --create` | Uploads the references, creates the work order and adds its line to the film issue |
+| `submit <issue> <file>…` | Prints what would be uploaded and the receipt. With `--create`, from a machine that holds the CDN keys, it uploads, posts the receipt and sets `status:review` |
+| `advance <ID> <stage> --file <deliverable>` | Records a stage. With a film issue it also ticks the stage and comments |
+| `approve <ID> --gate script\|look\|version\|publish --version <Vnnn> --by <login>` | Records an approval. With a film issue it also ticks the gate and comments |
+| `status <ID> [--json]` | Shows the stages, the gates, the work orders and who did what |
+
+## What we took from other products
+
+| Pattern | Seen in | Evidence | Where it lands in Kun | State |
+| --- | --- | --- | --- | --- |
+| A preset is an id, a name and a few parameter defaults, sent beside the person's own prompt, which stays required | Higgsfield Marketing Studio API docs | maker's docs | A formula's header and slots; the box stays editable | built |
+| A skill is listed by one short line and loaded in full only when chosen | Hermes (`skills/AGENTS.md`: a 60-character description) | source | Door skills with a 60-character description; a formula's header is read for the board, its body only on fill | built |
+| Three outcomes for an action: go ahead, ask first, hand back to the person, and a short list no rule can unlock | OpenAI Dots controls; Grok Bot auto review | makers' docs | The mandate in `engine.json`, the gates in formulas | already had |
+| Park a pending approval and finish the rest of the work | Claude Duet help page | maker's docs | A gate waits on the film issue while other work orders go on | built |
+| Fail closed when nobody can answer | DeepSeek Harness `user-approval` | source | Plan mode is read-only; anything that writes needs `--create` or Accept | built |
+| One lead talks to the person; named single-job workers do the work | Grok Bot (primary and specialists); DeepSeek Harness (named children, depth limit) | docs and source | The department's lead agent and its sub-agents | built |
+| Check every few hours, not all the time | Claude Duet (sources disagree) | coverage | `aware.mjs` every 30 minutes at zero tokens | already had |
+| Suggestions ranked from a person's own state | none of the seven documents it | none | The board's scoring is our own bet: three fixed roles keep it stable and the weights sit in one place | watch |
+| Work recorded as GitHub issues | none | none | The film issue and its work orders | our own design |
+| One harness, any model behind it | free-claude-code (a router; AGPL-3.0) | source | An engine choice on a route | later |
+| An always-on cloud computer for each agent | Dots, Muse, Grok Bot | makers' pages | Nothing | skipped: 120 to 500 dollars a month against a subscription-only rule |
+| A selection travels as a reference id plus where it came from (a preset or free text), not as expanded text, so the same id can be linked to directly | Higgsfield Marketing Studio | own session, the page's code | The formula id on the issue's kun block and on the receipt; recording whether a run began from a tapped option or typed text is still to do | built, one part later |
+| A small fixed set of presets ships with the app; the long tail comes from a catalogue | Higgsfield Marketing Studio | own session, the page's code | Formulas read from the kun clone; the pack's quick actions as the fallback | built |
+
+The evidence is of four kinds. The rows for Hermes, DeepSeek Harness and free-claude-code come from
+reading their source code. The rows for Higgsfield's API, Dots, Grok Bot and Claude Duet come from
+the makers' own documents and help pages. The last two rows come from an observation made on
+2026-11-22 in the owner's own signed-in Higgsfield session, by reading the page's code. The row
+about how often Duet checks comes from coverage, not from the maker, and the sources disagree.
+Muse's help pages did not load, so Muse appears only where its public pages say something. Two rows
+have no outside evidence at all: ranking suggestions from a person's own state, and recording work
+as GitHub issues. Those are our own design.
+
+Claude Duet could not be observed: the account's pages showed no Duet surface by the routes tried,
+so nothing was learned about how it lists tasks. Whether choosing a Higgsfield preset rewrites the
+prompt box also stayed unanswered, because nothing was clicked.
+
+## Later
+
+These are understood and not built.
+
+- **The operations room.** One list of everything that waits for a yes, across all departments.
+- **The share calculation.** Turning the points on closed issues into each member's share.
+- **The plan's questions as option cards.** The Agent SDK's `canUseTool` receives `AskUserQuestion`
+  and `ExitPlanMode`, so the lead's questions could become cards to tap.
+- **free-claude-code as a local engine.** It could run the cheaper lanes on a teammate's machine,
+  under three conditions. It is licensed AGPL-3.0, so it runs as its own program and its code is
+  never copied into Kun. Prompts leave to third-party providers, so no CRM, student or customer data
+  goes through it. It is measured before any lane depends on it.
+
+## The formula matrix
+
+Every formula of every department that has a `formulas/` folder, Video first, written by
+`node .claude/scripts/station.mjs --page`. Do not edit the tables by hand; edit the formula and run
+the command again.
+
+{/* station:matrix:start */}
+### Video
+
+| Id | Label | Route | Role | Gate | Record | Board | Weight | Drive |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `video.film.continue` | Continue production · متابعة الإنتاج | do | next | — | none | yes | 1 | 0.9 |
+| `video.film.plan` | Intro film · فيلم تعريفي | plan | start | — | film | yes | 1 | 1 |
+| `video.gate.look` | Review the look · مراجعة الشكل | do | waiting | look | none | yes | 2 | 0.9 |
+| `video.gate.publish` | Approve publishing · اعتماد النشر | do | waiting | publish | none | yes | 2 | 0.9 |
+| `video.gate.script` | Review the script · مراجعة السكربت | do | waiting | script | none | yes | 2 | 0.9 |
+| `video.gate.version` | Approve a version · اعتماد نسخة | do | waiting | version | none | yes | 2 | 0.9 |
+| `video.order.blender` | Blender scene · مشهد بلندر | do | next | — | issue | — | 5 | 0.6 |
+| `video.order.capture` | Product capture · تصوير المنتج | do | next | — | issue | — | 3 | 0.6 |
+| `video.order.pickup` | Start my work order · ابدأ طلب العمل | do | waiting | — | none | yes | 1 | 0.8 |
+| `video.order.review` | Review of a version · مراجعة نسخة | do | next | — | issue | — | 2 | 0.6 |
+| `video.order.script` | Script writing · كتابة سكربت | do | next | — | issue | — | 3 | 0.6 |
+| `video.order.voice` | Voiceover · تعليق صوتي | do | next | — | issue | — | 2 | 0.6 |
+| `video.reel.footage` | Reel from a video · ريلز من فيديو | do | start | — | none | yes | 2 | 0.4 |
+| `video.script.only` | Video script · سكربت فيديو | do | start | — | none | yes | 1 | 0.5 |
+| `video.stage.approval` | Version approval · اعتماد النسخة | do | next | version | none | — | 2 | 0.8 |
+| `video.stage.assets` | Assets · الأصول | do | next | — | none | — | 3 | 0.8 |
+| `video.stage.audio` | Audio · الصوت | do | next | — | none | — | 3 | 0.8 |
+| `video.stage.brief` | Creative brief · الملخص الإبداعي | do | next | — | none | — | 2 | 0.8 |
+| `video.stage.cdn` | Ship to the CDN · رفع إلى CDN | do | next | — | none | — | 2 | 0.8 |
+| `video.stage.edit` | Edit · المونتاج | do | next | — | none | — | 4 | 0.8 |
+| `video.stage.publish` | Publish package · حزمة النشر | do | next | publish | none | — | 2 | 0.8 |
+| `video.stage.qa` | Quality check · فحص الجودة | do | next | — | none | — | 3 | 0.8 |
+| `video.stage.render` | Render · الإخراج | do | next | — | none | — | 3 | 0.8 |
+| `video.stage.request` | Open the project · فتح المشروع | do | next | — | none | — | 1 | 0.8 |
+| `video.stage.research` | Research · البحث | do | next | — | none | — | 2 | 0.8 |
+| `video.stage.script` | Script · السكربت | do | next | script | none | — | 3 | 0.8 |
+| `video.stage.storyboard` | Storyboard · القصة المصورة | do | next | — | none | — | 3 | 0.8 |
+| `video.stage.visual` | Visuals · المرئيات | do | next | look | none | — | 5 | 0.8 |
+| `video.tools.check` | Tools check · فحص الأدوات | quick | start | — | none | yes | 1 | 0.3 |
+| `video.versions.fanout` | All versions at once · كل النسخ معاً | workflow | next | — | none | yes | 3 | 0.7 |
+
+### Sales
+
+| Id | Label | Route | Role | Gate | Record | Board | Weight | Drive |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `sales.followup.today` | Who to follow up · من أتابع اليوم؟ | plan | next | — | none | yes | 2 | 1 |
+| `sales.leads.find` | Find leads · عملاء جدد | plan | start | — | none | yes | 2 | 0.8 |
+| `sales.order.call` | Call or visit order · طلب اتصال أو زيارة | do | next | — | issue | — | 2 | 0.9 |
+| `sales.order.pickup` | Start my sales order · ابدأ طلب المبيعات | do | waiting | — | none | yes | 1 | 0.9 |
+| `sales.proposal.write` | Write a proposal · اكتب عرضاً | do | start | — | none | yes | 4 | 0.85 |
+| `sales.quote.school` | Quote a school · عرض سعر لمدرسة | do | start | — | none | yes | 3 | 1 |
+| `sales.reply.log` | Log a reply · سجّل رداً | do | next | — | none | yes | 1 | 0.9 |
+{/* station:matrix:end */}
