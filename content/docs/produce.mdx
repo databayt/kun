@@ -212,3 +212,34 @@ film in production, the options on 2026-11-22 were:
 A tap fills the prompt with a script; no model runs. The [Station](/docs/station) page explains the
 board and the formulas, and the [Video pipeline](/docs/pipeline) page follows a film from the home
 screen step by step.
+
+### Get the computer ready (in the app)
+
+Everything a video machine needs is set up from the app, not the Terminal:
+
+| Where | What |
+| --- | --- |
+| **Apps** | Blender, FilmCraft, whisper-cli, OBS, ffmpeg and, when a film needs them, ComfyUI and ArtCraft. **+** installs, **…** uninstalls |
+| **Setup → Accounts / Identity** | GitHub sign-in and SSH key, Claude sign-in, Figma for the look |
+| **Setup → the doctor** | The video department's minimum: the video pack (produce, edit, record, shoot, blender, higgs, the video and media-qa agents), the engine's hooks and rules, Blender, FilmCraft, whisper-cli and a real Whisper model |
+
+The doctor shows one of three levels. **Green**: everything passes. **Orange**: the minimum is there
+and some extras are missing (for example the Whisper model); you can chat and contribute, and the
+app names what is missing. **Red**: the minimum shared intelligence is missing; you can still chat,
+but you cannot take or submit work until it is fixed. The doctor runs on its own the first time the
+app opens and after every update. See [Machine](/docs/machine).
+
+### Make a film from the app
+
+1. **Home → Department: Video → Repo: Hogwarts.**
+2. **Say what you want**, for example "intro film for hogwarts" or «فيديو تعريفي لهوغورتس». A chip
+   offers the standard formula (`⇥ Tab · Intro film · Balqalam · 9:16`); **Tab** fills it. Tapping
+   **New film** on the board does the same.
+3. **Send.** The plan runs first; nothing is created until you **Accept**. Accept opens the film
+   issue and a work order for each piece handed to another person.
+4. **The four gates are yours.** Script, look (animatic), version and publish each stop for your
+   approval; the app never approves. Between gates, **Continue production** on the board fills the
+   next stage.
+5. **Heavy steps** (a Blender render, transcription, the encode) run on this computer, or as a
+   [pool](/docs/machine#pool) job on a teammate's idle machine.
+6. Files land under `~/media/<line>/<film>/`, and approved masters go to the CDN as described above.

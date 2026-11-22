@@ -433,6 +433,13 @@ The price is the list price **per student per year**, read from `kun/content/med
 You can also type your own request in any language and press the sparkle button. Two things can
 happen, and the first is tried first.
 
+**You usually don't need the button.** While you type, the composer asks the switch by itself after
+a short pause (three words or more). When a formula fits, a chip appears above the box, such as
+`⇥ Tab · Intro film · Balqalam · 9:16 · Facebook`. Press **Tab** and the formula is filled with the
+values your sentence gave, the same as a tap; press **Esc** to dismiss it; press **Enter** to send
+your words as they are. Typing `/` lists the formulas and skills to pick from. The steps below are
+what the switch does in either case.
+
 **First, the switch looks for a formula.** The app runs
 `station.mjs match "<your text>" --dept video --repo hogwarts --json` (5 s at most). The script
 answers with a formula, a confidence, and the values it could read out of your words. It looks in

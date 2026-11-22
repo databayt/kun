@@ -217,6 +217,16 @@ between 0 and 0.99, and a `set`: the values it could read out of your words. Wit
 confidence of 0.6 or more, the app fills that formula exactly as a tap does, handing the `set` to
 `fill`. No model runs.
 
+**Typing matches too, without the button.** Since 2026-11-22 the composer runs the same switch on
+its own: when you stop typing for a quarter of a second and the box holds three words or more, it
+asks `match`. A formula that clears the bar shows as a quiet chip above the box, for example
+`⇥ Tab · Intro film · Balqalam · 9:16`, with up to three values the switch already read from your
+words. **Tab** fills that formula, exactly as a tap or the sparkle button does; **Esc** dismisses the
+chip and records a dismissal for the board's scoring; **Enter** sends your words as typed. When no
+formula fits but a skill's trigger words do, the chip offers the skill instead (`⇥ Tab · /edit`).
+Typing `/` opens a menu of this department's formulas, then its pack's skills, then the rest, the
+way Claude Code lists its commands. Words the app picked up are underlined lightly.
+
 The switch finds a formula in three ways, tried in this order:
 
 1. **Another department's word.** When the text names another department and not your own, the
