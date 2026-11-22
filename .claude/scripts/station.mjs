@@ -2,7 +2,8 @@
 // station.mjs — the department station: a departure board, a switch and a conductor. Zero tokens.
 //
 //   node .claude/scripts/station.mjs board --dept video [--repo hogwarts] [--login abdout] [--health green|orange|red] [--lang ar|en] --json
-//   node .claude/scripts/station.mjs fill <formula-id> --dept video [--repo r] [--login l] [--set k=v]… --json
+//   node .claude/scripts/station.mjs fill <formula-id> --dept video [--repo r] [--login l] [--project <film id>] [--set k=v]… --json
+//        (--project, or --set project=<id>, pins the film for every slot, ref and upload; an unknown id reports missing: ["project"])
 //   node .claude/scripts/station.mjs match "<text in any language>" --dept video [--repo r] --json
 //   node .claude/scripts/station.mjs lint [--dept video]       exit 1 and list every error
 //   node .claude/scripts/station.mjs --test                    golden cases, deterministic, no network
@@ -34,8 +35,21 @@ const GATES = ["script", "look", "version", "publish"]
 const ROLES = ["waiting", "next", "start"]
 const HEADINGS = ["Task", "Context", "References", "Constraints", "Deliverable"]
 const DONE_STATUS = new Set(["done", "published", "archived", "cancelled", "closed"])
+// What the Video ledger (the produce adapter) offers. A pack names its own under `ledger`; a pack whose
+// `line` is "produce" and which declares none gets this (so Video needs no change). Any other pack gets
+// the "none" adapter: no projects, no stage or gate vocabulary, signals from issues, sprint, drive, habit.
 const STAGE_KEYS = ["request", "research", "brief", "script", "storyboard", "assets", "visual", "audio", "edit", "render", "qa", "approval", "cdn", "publish"] // the 14 produce stages
 const PER_VARIANT = ["audio", "edit", "render", "qa", "approval", "cdn", "publish"] // mirrors produce.mjs
+const PRODUCE_LEDGER = { adapter: "produce", gates: GATES, stages: STAGE_KEYS, new_label: { en: "New film", ar: "فيلم جديد" } }
+const NO_LEDGER = { adapter: "none", gates: [], stages: [], new_label: null }
+export const ledgerOf = (pack) => {
+  const l = pack?.ledger
+  if (l && typeof l === "object") {
+    const base = l.adapter === "produce" ? PRODUCE_LEDGER : NO_LEDGER
+    return { adapter: base.adapter, gates: Array.isArray(l.gates) ? l.gates : base.gates, stages: Array.isArray(l.stages) ? l.stages : base.stages, new_label: l.new_label ?? base.new_label }
+  }
+  return pack?.line === "produce" ? PRODUCE_LEDGER : NO_LEDGER
+}
 const DEFAULT_WEIGHTS = { waiting: 5, continue: 3, sprint: 3, drive: 2, due: 2, habit: 1 }
 const CACHE_SECS = 300
 
@@ -106,12 +120,36 @@ const hasPhrase = (text, phrase) => {
 export function loadPack(dept) {
   return readJson(path.join(ROOT, "departments", dept, "pack.json"))
 }
+// A formatter that reads the header as YAML (prettier does, on every Edit) rewrites the object with
+// a comma after its last member. That is still the same object, so drop those commas before
+// JSON.parse — outside strings only.
+export function dropTrailingCommas(src) {
+  let out = ""
+  let inString = false
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i]
+    if (inString) {
+      out += ch
+      if (ch === "\\") out += src[++i] ?? ""
+      else if (ch === '"') inString = false
+      continue
+    }
+    if (ch === '"') inString = true
+    if (ch === ",") {
+      let j = i + 1
+      while (j < src.length && /\s/.test(src[j])) j++
+      if (src[j] === "}" || src[j] === "]") continue
+    }
+    out += ch
+  }
+  return out
+}
 export function parseFormula(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/.exec(text)
   if (!m) throw new Error("no header between two --- lines")
   let header
   try {
-    header = JSON.parse(m[1])
+    header = JSON.parse(dropTrailingCommas(m[1]))
   } catch (e) {
     throw new Error(`header is not valid JSON: ${e.message}`)
   }
@@ -193,7 +231,7 @@ function waitingGates(p) {
   if (vs.some((s) => s?.cdn === "done" || s?.cdn?.status === "done") && !approved("publish")) out.push("publish")
   return out
 }
-function loadProjects(ctx, repo) {
+function loadProduceProjects(ctx, repo) {
   let list = []
   if (ctx.fixtures) list = asList(fxJson(ctx, "projects.json"))
   else {
@@ -213,6 +251,10 @@ function loadProjects(ctx, repo) {
     waiting: waitingGates(p),
     dir: path.join(ctx.produceHome, p.id ?? ""),
   }))
+}
+const LEDGERS = { produce: loadProduceProjects, none: () => [] }
+function loadProjects(ctx, ledger, repo) {
+  return (LEDGERS[ledger?.adapter] ?? LEDGERS.none)(ctx, repo)
 }
 const isOpen = (p) => !DONE_STATUS.has(p.status)
 
@@ -367,6 +409,9 @@ function makeResolver(ctx, f, inputs, state) {
           } else v = out.trim() || null
         }
       }
+    } else if (spec.mul) {
+      const nums = spec.mul.map((x) => (/^-?\d+(\.\d+)?$/.test(String(x)) ? Number(x) : Number(get(String(x), stack))))
+      if (nums.length && nums.every((n) => Number.isFinite(n))) v = String(Math.round(nums.reduce((a, b) => a * b, 1) * 100) / 100)
     } else if (spec.map) {
       const k = get(spec.of, stack)
       v = k == null ? null : spec.map[k] ?? null
@@ -406,10 +451,12 @@ function makeResolver(ctx, f, inputs, state) {
 
 // ---- state for one ticket ------------------------------------------------------------------------
 function loadState(ctx, dept, inputs) {
-  const all = loadProjects(ctx, inputs.repo)
+  const pin = inputs.project || inputs.set.project || ""
+  // a pinned film is looked up across every repo; an unknown id never falls back to another project
+  const all = loadProjects(ctx, ledgerOf(loadPack(dept)), pin ? "" : inputs.repo)
   const open = all.filter(isOpen)
-  const project = (inputs.set.project && all.find((p) => p.id === inputs.set.project)) || open[0] || null
-  return { projects: all, open, project }
+  const project = pin ? all.find((p) => p.id === pin) || null : open[0] || null
+  return { projects: all, open, project, pinned: pin || null }
 }
 
 // ---- fill ----------------------------------------------------------------------------------------
@@ -424,7 +471,7 @@ function addConstraints(body, lines) {
   return body.slice(0, start) + [section, ...extra].join("\n") + "\n" + body.slice(end).replace(/^\n*/, "\n")
 }
 export function fill(ctx, dept, id, input = {}) {
-  const inputs = { repo: input.repo || "", login: input.login || (ctx.fixtures ? "" : process.env.KUN_LOGIN || savedLogin()), set: input.set || {} }
+  const inputs = { repo: input.repo || "", login: input.login || (ctx.fixtures ? "" : process.env.KUN_LOGIN || savedLogin()), set: input.set || {}, project: input.project || "" }
   const pack = loadPack(dept) || {}
   const { formulas } = loadFormulas(dept)
   let f = formulas.find((x) => x.id === id)
@@ -444,6 +491,7 @@ export function fill(ctx, dept, id, input = {}) {
   const r = makeResolver(ctx, f, inputs, state)
   let body = addConstraints(f.body, asList(pack.constraints))
   body = body.replace(/\{\{(\w+)\}\}/g, (_, n) => r.get(n) ?? `[unfilled: ${n}]`)
+  if (state.pinned && !state.project) r.missing.add("project") // a pinned id that is not a known film: say so, never use another
   if (f.header.record !== "issue") body = body.replace(/(^|[\s`(])~\//gm, (_, p) => `${p}${HOME.replace(/\\/g, "/")}/`)
   return { id: f.id, prompt: body, route: f.header.route, record: f.header.record ?? "none", missing: [...r.missing].sort(), redirected_from: redirected, ...(r.uploads.length ? { uploads: r.uploads } : {}) }
 }
@@ -499,6 +547,7 @@ export function board(ctx, dept, input = {}) {
   const profile = loadProfile(ctx, login)
   if (asList(profile.departments).length && !profile.departments.includes(dept)) return res
   const { formulas } = loadFormulas(dept)
+  const ledger = ledgerOf(loadPack(dept))
   const weights = engineWeights()
   const state = loadState(ctx, dept, { repo, login, set: {} })
   const openP = state.open
@@ -570,9 +619,9 @@ export function board(ctx, dept, input = {}) {
     }
     // the new film never duplicates "Continue production": with a film open it becomes the generic "New film"
     let label = h.label
-    if (h.redirects?.if === "open_project_same_type" && openP.length) {
+    if (h.redirects?.if === "open_project_same_type" && openP.length && ledger.new_label) {
       set.new = "1"
-      label = { en: "New film", ar: "فيلم جديد" }
+      label = ledger.new_label ?? label
     }
     const cand = { f, score, why, set, label, role: ROLES.includes(h.role) ? h.role : "next" }
     if (h.health_only && health === "green") lastResort.push(cand)
@@ -608,20 +657,22 @@ export function board(ctx, dept, input = {}) {
 
 // ---- lint ----------------------------------------------------------------------------------------
 const LOCAL_PATH = /(^|[\s`'"(])(~\/|\/Users\/|\/home\/|[A-Za-z]:\\|file:\/\/)/
-export const unknownStages = (list) => asList(list).filter((k) => !STAGE_KEYS.includes(k))
+export const unknownStages = (list, stages = STAGE_KEYS) => asList(list).filter((k) => !stages.includes(k))
 const slotRefs = (spec) => {
   const s = JSON.stringify(spec)
   const out = new Set([...s.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]))
   if (spec.of) out.add(spec.of)
   if (spec.slug) out.add(spec.slug)
+  for (const x of asList(spec.mul)) if (!/^-?\d+(\.\d+)?$/.test(String(x))) out.add(String(x))
   return out
 }
-const slotKind = (s) => ["context", "choice", "json", "argv", "map", "slug", "value", "ask", "ref"].find((k) => k in s) ?? null
+const slotKind = (s) => ["context", "choice", "json", "argv", "map", "slug", "value", "ask", "ref", "mul"].find((k) => k in s) ?? null
 export function lint(dept) {
   const errors = []
   const pack = loadPack(dept)
   if (!pack) return [`departments/${dept}/pack.json missing or invalid`]
   const routes = new Set(asList(pack.routes).map((r) => r.id))
+  const ledger = ledgerOf(pack)
   const { formulas, errors: parseErrors } = loadFormulas(dept)
   errors.push(...parseErrors)
   if (!formulas.length) errors.push(`${dept}: no formulas found`)
@@ -638,7 +689,7 @@ export function lint(dept) {
     if (!h.label?.en || !h.label?.ar) e("label needs en and ar")
     if (typeof h.icon !== "string" || !h.icon) e("icon missing")
     if (!routes.has(h.route)) e(`route "${h.route}" is not in the pack's routes (${[...routes].join(", ")})`)
-    if (h.gate !== null && !GATES.includes(h.gate)) e(`gate must be null or one of ${GATES.join(", ")}`)
+    if (h.gate !== null && !ledger.gates.includes(h.gate)) e(`gate must be null${ledger.gates.length ? ` or one of ${ledger.gates.join(", ")}` : ` (the ${dept} ledger has no gates)`}`)
     if (!ROLES.includes(h.role)) e(`role must be one of ${ROLES.join(", ")}`)
     if (typeof h.board !== "boolean") e("board must be true or false")
     if (!["issue", "none"].includes(h.record)) e('record must be "issue" or "none"')
@@ -657,7 +708,7 @@ export function lint(dept) {
     for (const [n, s] of Object.entries(declared)) {
       if (!refd.has(n)) e(`slot "${n}" is declared but never used`)
       const k = slotKind(s)
-      if (!k) e(`slot "${n}" has no known source (context, choice, json, argv, map, slug, value, ask, ref)`)
+      if (!k) e(`slot "${n}" has no known source (context, choice, json, argv, map, slug, value, ask, ref, mul)`)
       for (const r of slotRefs(s)) if (!declared[r]) e(`slot "${n}" refers to undeclared slot {{${r}}}`)
       if (k === "argv" && !argvAllowed(s.argv.map((a) => (/\{\{\w+\}\}/.test(a) ? "x" : a)))) e(`slot "${n}": argv must be node + a script under the kun repo or ~/.claude`)
       if (k === "json" && !fs.existsSync(path.join(ROOT, s.json))) e(`slot "${n}": ${s.json} does not exist`)
@@ -665,10 +716,18 @@ export function lint(dept) {
       if (h.record === "issue" && k === "context" && /^(project\.dir|media\.)/.test(s.context)) e(`record issue: slot "${n}" is a local path`)
     }
     if (h.record === "issue" && LOCAL_PATH.test(f.body)) e("record issue: the body names a local path; use links")
-    if (h.record === "issue" && !/work\/\{\{project\}\}\/<issue number>\//.test(f.body)) e("record issue: Deliverable must say where to submit (work/<film>/<issue>/<file>)")
+    if (h.record === "issue") {
+      // submit: "cdn" (default) = files go to work/<project>/<issue>/<file>; "comment" = the result is a reply on the issue
+      if (h.submit === "comment") {
+        if (!/reply on this issue/i.test(f.body.split("## Deliverable")[1] ?? "")) e('record issue: Deliverable must say "Reply on this issue" (submit: comment)')
+      } else if (!/work\/\{\{project\}\}\/<issue number>\//.test(f.body)) e("record issue: Deliverable must say where to submit (work/<film>/<issue>/<file>)")
+      if (h.submit !== undefined && !["cdn", "comment"].includes(h.submit)) e('submit must be "cdn" or "comment"')
+      if (!declared.to) e('record issue: a work order needs a "to" slot (the assignee)')
+    }
+    if (ledger.adapter === "none") for (const [n, s] of Object.entries(declared)) if (/^project\./.test(s.context ?? "")) e(`slot "${n}": the ${dept} ledger has no projects`)
     if (h.when?.stage_in !== undefined) {
       if (!Array.isArray(h.when.stage_in) || !h.when.stage_in.length) e("when.stage_in must be a non-empty list of stage keys")
-      else for (const k of unknownStages(h.when.stage_in)) e(`when.stage_in: unknown stage "${k}" (${STAGE_KEYS.join(", ")})`)
+      else for (const k of unknownStages(h.when.stage_in, ledger.stages)) e(`when.stage_in: unknown stage "${k}" (${ledger.stages.join(", ")})`)
     }
     if (h.redirects) {
       const re = new RegExp("^" + h.redirects.to.replace(/[.*+?^$()|[\]\\]/g, "\\$&").replace("{stage}", "[a-z]+") + "$")
@@ -788,6 +847,25 @@ function runTests() {
     ok(r.prompt.includes("work/hogwarts-demo-v001/<issue number>/"), "where to submit")
     ok(Array.isArray(r.uploads) && r.uploads.length >= 2, "uploads listed for the app")
   })
+  t("fill --project pins the film for context, refs, uploads and redirects; an unknown id is missing, never another film", () => {
+    const ctx = mk("two-open")
+    const base = { repo: "hogwarts", login: "abdout", set: { to: "sedon", scene: "x" } }
+    const open = fill(ctx, "video", "video.order.blender", base) // unpinned: the first open film
+    ok(open.prompt.includes("Film: hogwarts-first-v001"), "unpinned = first open")
+    for (const how of [{ project: "hogwarts-second-v002" }, { set: { ...base.set, project: "hogwarts-second-v002" } }]) {
+      const r = fill(ctx, "video", "video.order.blender", { ...base, ...how })
+      ok(r.prompt.includes("Film: hogwarts-second-v002"), "context value")
+      ok(r.prompt.includes("work/hogwarts-second-v002/ref/03-script/script.md"), "ref link")
+      ok(!r.prompt.includes("hogwarts-first-v001"), "nothing from the other film")
+      ok(r.uploads.length >= 1 && r.uploads.every((u) => u.key.startsWith("work/hogwarts-second-v002/") && u.local.includes("hogwarts-second-v002")), "uploads")
+      eq(r.missing, [])
+    }
+    const rd = fill(ctx, "video", "video.film.continue", { repo: "hogwarts", login: "abdout", project: "hogwarts-second-v002" })
+    eq(rd.id, "video.stage.assets", "redirect follows the pinned film's stage")
+    const bad = fill(ctx, "video", "video.order.blender", { ...base, project: "hogwarts-nope-v009" })
+    ok(bad.missing.includes("project"), "unknown id reported")
+    ok(!bad.prompt.includes("hogwarts-first-v001") && !bad.prompt.includes("hogwarts-second-v002"), "no other film used")
+  })
   t("fill: an unfillable slot is reported, never silent", () => {
     const r = fill(mk("script-gate"), "video", "video.order.blender", { repo: "hogwarts", login: "abdout" })
     ok(r.missing.includes("scene") && r.missing.includes("to"), "scene and to are missing")
@@ -871,6 +949,81 @@ function runTests() {
     ok(n.set.new === undefined, "no new flag")
     eq(fill(mk("script-gate"), "video", "video.film.plan", { repo: "hogwarts", login: "abdout", set: { new: "1" } }).redirected_from, null)
   })
+  // ---- sales: the second department on the contract (invented ids, no customer data) ----
+  const sa = JSON.parse(fs.readFileSync(path.join(FX, "sales-none", "markets.json"), "utf8")).sa
+  t("lint: both departments pass, and plain lint covers every department with formulas", () => {
+    eq(lint("sales"), [])
+    eq(lint("video"), [])
+    const withFormulas = departments().filter((d) => fs.existsSync(path.join(ROOT, "departments", d, "formulas")))
+    ok(withFormulas.includes("sales") && withFormulas.includes("video"), "both found")
+  })
+  t("ledger: video keeps produce, sales declares none", () => {
+    eq(ledgerOf(loadPack("video")).adapter, "produce")
+    eq(ledgerOf(loadPack("sales")).adapter, "none")
+    eq(ledgerOf(loadPack("sales")).gates, [])
+    eq(ledgerOf({}).adapter, "none")
+  })
+  t("board, sales with no issues: three next/start options, best drive first within a role", () => {
+    const b = board(mk("sales-none"), "sales", { login: "abdout" })
+    eq(b.options.length, 3)
+    ok(b.options.every((o) => o.role === "next" || o.role === "start"), "no waiting without an order")
+    eq(b.options.map((o) => o.id), ["sales.followup.today", "sales.reply.log", "sales.quote.school"])
+    const order = b.options.map((o) => ROLES.indexOf(o.role))
+    eq(order, [...order].sort((x, y) => x - y), "role order")
+    const next = b.options.filter((o) => o.role === "next").map((o) => o.score)
+    eq(next, [...next].sort((x, y) => y - x), "score order inside a role")
+    ok(b.options.every((o) => o.why.some((w) => w.startsWith("drive"))), "drive explains each")
+    ok(b.options.every((o) => o.id && o.label_en && o.label_ar && o.icon && o.route && o.record && Array.isArray(o.why) && o.set), "option fields")
+  })
+  t("board, sales with an open issue assigned to the login: waiting is the pickup", () => {
+    const b = board(mk("sales-assigned"), "sales", { login: "ali" })
+    eq(b.options[0].role, "waiting")
+    eq(b.options[0].id, "sales.order.pickup")
+    ok(b.options[0].set.issue_url.startsWith("https://github.com/"), "issue link")
+    ok(b.options[0].score >= 5, "waiting weight")
+    ok(b.options.length <= 3, "at most three")
+  })
+  t("fill sales.quote.school: 48 students in the Saudi market, total from markets.json, five headings", () => {
+    const r = fill(mk("sales-none"), "sales", "sales.quote.school", { login: "abdout", set: { students: "48", market: "sa" } })
+    const heads = [...r.prompt.matchAll(/^## (.+)$/gm)].map((m) => m[1])
+    eq(heads, HEADINGS)
+    const total = Math.round(sa.price * 48 * 100) / 100
+    ok(r.prompt.includes(`${total} ${sa.currency}`), "total = price x students")
+    ok(r.prompt.includes(`${sa.price} ${sa.currency} per student`), "unit price")
+    ok(r.prompt.includes(`${total * 0.5} ${sa.currency} at signing`), "signing share")
+    eq(r.missing, ["record_id"])
+    ok(r.prompt.includes("[unfilled: record_id]"), "the asked slot is visible, not silent")
+    ok(!r.prompt.replace("[unfilled: record_id]", "").includes("{{"), "no other token left")
+    ok(r.prompt.includes("explicit yes") || r.prompt.includes("Nothing is sent"), "pack constraints appended")
+    eq(r.route, "do")
+    eq(r.record, "none")
+  })
+  t("fill sales.quote.school: the total follows the market (no hardcoded figure)", () => {
+    const rw = JSON.parse(fs.readFileSync(path.join(FX, "sales-none", "markets.json"), "utf8")).rw
+    const r = fill(mk("sales-none"), "sales", "sales.quote.school", { set: { students: "10", market: "rw", record_id: "crm-000" } })
+    ok(r.prompt.includes(`${Math.round(rw.price * 10 * 100) / 100} ${rw.currency}`), "10 students in rw")
+    eq(r.missing, [])
+  })
+  t("match: an Arabic follow-up phrase goes to the follow-up formula", () => {
+    const m = match(mk("sales-none"), "sales", "من أتابع اليوم؟", "")
+    eq(m.id, "sales.followup.today")
+    ok(m.confidence >= 0.7, "confidence")
+    eq(match(mk("sales-none"), "sales", "عرض سعر لمدرسة", "").id, "sales.quote.school")
+    eq(match(mk("sales-none"), "sales", "اقترح مدارس نتواصل معها", "").id, "sales.leads.find")
+    eq(match(mk("sales-none"), "sales", "zzz qqq", "").id, null)
+  })
+  t("a sales work order has no local path, names its assignee, records to an issue", () => {
+    const r = fill(mk("sales-none"), "sales", "sales.order.call", { login: "abdout", set: { to: "ali", record_id: "crm-000" } })
+    eq(r.record, "issue")
+    eq(r.missing, [])
+    ok(r.prompt.includes("for ali · ordered by abdout"), "assignee and orderer")
+    ok(!LOCAL_PATH.test(r.prompt), "no local path")
+    ok(!("uploads" in r), "nothing to upload")
+    ok(/Reply on this issue/.test(r.prompt.split("## Deliverable")[1]), "says where to reply")
+    ok(r.prompt.includes("crm-000"), "the CRM record id is the only reference to the school")
+    const lacking = fill(mk("sales-none"), "sales", "sales.order.call", { login: "abdout" })
+    ok(lacking.missing.includes("to") && lacking.missing.includes("record_id"), "to and record id are asked")
+  })
   t("norm: Arabic forms fold together", () => eq(norm("إنتاج  فيديو"), norm("انتاج فيديو")))
   console.log(`station: ${pass} passed, ${fails.length} failed`)
   return fails.length === 0
@@ -879,7 +1032,7 @@ function runTests() {
 // ---- cli -------------------------------------------------------------------------------------------
 function parseArgs(argv) {
   const a = { _: [], set: {} }
-  const val = new Set(["dept", "repo", "login", "health", "lang"])
+  const val = new Set(["dept", "repo", "login", "health", "lang", "project"])
   for (let i = 0; i < argv.length; i++) {
     const x = argv[i]
     if (x === "--set") {
@@ -923,7 +1076,7 @@ function main() {
   }
   try {
     if (cmd === "board") return out(a, board(ctx, dept, { repo: a.repo, login: a.login, health: a.health, lang: a.lang }), (r) => r.options.map((o) => `${o.role.padEnd(8)}${o.id.padEnd(26)}${o.score}  ${o.why.join(", ")}`).join("\n"))
-    if (cmd === "fill") return out(a, fill(ctx, dept, a._[1], { repo: a.repo, login: a.login, set: a.set }), (r) => r.prompt + (r.missing.length ? `\n\n(missing: ${r.missing.join(", ")})` : ""))
+    if (cmd === "fill") return out(a, fill(ctx, dept, a._[1], { repo: a.repo, login: a.login, set: a.set, project: a.project }), (r) => r.prompt + (r.missing.length ? `\n\n(missing: ${r.missing.join(", ")})` : ""))
     if (cmd === "match") return out(a, match(ctx, dept, a._.slice(1).join(" "), a.repo), (r) => `${r.id ?? "none"} (${r.confidence})${r.dept ? ` dept=${r.dept}` : ""}`)
   } catch (e) {
     // never fail loudly: the app reads JSON and treats an empty answer as "nothing to show"

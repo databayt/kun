@@ -4,6 +4,43 @@
   "title_ar": "المبيعات",
   "description": "Find leads, convert replies, write proposals and price the product — the cash-flow department.",
   "description_ar": "اكتشاف العملاء، تحويل الردود، كتابة العروض وتسعير المنتج — قسم التدفق النقدي.",
+  "lead": "sales",
+  "line": "funnel",
+  "guard": "funnel",
+  "ledger": {
+    "adapter": "none",
+    "gates": [],
+    "stages": [],
+    "signals": [
+      "issues:dept:sales",
+      "sprint",
+      "drive",
+      "habit"
+    ]
+  },
+  "keywords": {
+    "en": [
+      "sales",
+      "quote",
+      "leads",
+      "proposal",
+      "follow up",
+      "crm"
+    ],
+    "ar": [
+      "مبيعات",
+      "المبيعات",
+      "عرض سعر",
+      "عملاء",
+      "متابعة"
+    ]
+  },
+  "constraints": [
+    "Prices only from the approved pricing source (content/media/markets.json; terms in hogwarts pricing/rates.ts); never invent a price, a discount or a clause.",
+    "Nothing is sent in the company's name, and no message reaches a person, without the owner's explicit yes (funnel agent rule 6: a drafted touch never sends without a recorded human yes).",
+    "Every contact is logged in the CRM; nothing lives only in the chat.",
+    "No contact details or personal data outside the CRM; an issue or a note carries the CRM record id only."
+  ],
   "items": [
     "skill:scrape",
     "skill:funnel",
@@ -11,7 +48,7 @@
     "skill:pricing",
     "skill:jobs",
     "agent:lead",
-    "agent:revenue"
+    "agent:sales"
   ],
   "repos": [
     "kun",
@@ -28,25 +65,31 @@
   "defaultDriver": "claude",
   "quickActions": [
     {
+      "id": "sales.quote.school",
       "label_ar": "عرض سعر لمدرسة",
       "label_en": "Quote a school",
-      "prompt": "جهّز عرض سعر لمدرسة: اسأل عن عدد الطلاب ثم استخدم التسعير المعتمد.",
+      "prompt": "Prepare a quote for one school: ask for the student count and the market, then price it from the approved pricing in content/media/markets.json. Draft only; send nothing.",
       "description_en": "Ask for the student count, then build a quote from the approved pricing.",
-      "description_ar": "اسأل عن عدد الطلاب ثم جهّز عرض السعر من التسعير المعتمد."
+      "description_ar": "اسأل عن عدد الطلاب ثم جهّز عرض السعر من التسعير المعتمد.",
+      "route": "do"
     },
     {
+      "id": "sales.followup.today",
       "label_ar": "من أتابع اليوم؟",
       "label_en": "Who to follow up",
-      "prompt": "من العملاء الذين يجب أن أتابعهم اليوم؟ رتّبهم حسب الأولوية.",
+      "prompt": "Tell me who to follow up today: replied-and-stalled leads first, ranked, each with what to say. Read the CRM; send nothing.",
       "description_en": "The leads to follow up today, ranked by priority, with what to say to each.",
-      "description_ar": "العملاء الذين تتابعهم اليوم مرتبين حسب الأولوية، مع ما تقوله لكل منهم."
+      "description_ar": "العملاء الذين تتابعهم اليوم مرتبين حسب الأولوية، مع ما تقوله لكل منهم.",
+      "route": "plan"
     },
     {
+      "id": "sales.leads.find",
       "label_ar": "عملاء جدد",
       "label_en": "Find leads",
-      "prompt": "اقترح ١٠ مدارس جديدة نتواصل معها هذا الأسبوع.",
+      "prompt": "Propose ten new schools worth contacting this week, with why each fits. Measure the contact gap first; read only.",
       "description_en": "Ten new schools worth contacting this week, with why each one fits.",
-      "description_ar": "عشر مدارس جديدة تستحق التواصل هذا الأسبوع، مع سبب مناسبة كل منها."
+      "description_ar": "عشر مدارس جديدة تستحق التواصل هذا الأسبوع، مع سبب مناسبة كل منها.",
+      "route": "plan"
     }
   ],
   "cards": [
@@ -55,5 +98,69 @@
     "connectors",
     "dispatch",
     "voice"
-  ]
+  ],
+  "timeoutSecs": 3600,
+  "health": {
+    "check": [
+      "node",
+      "~/.claude/skills/funnel/scripts/crm-health.mjs"
+    ]
+  },
+  "formula": {
+    "ar": "",
+    "en": "## Task\nOne line: the deliverable, for which school or lead, and the goal.\n\n## Context\nThe CRM record id (never a name or a number), the market, the price and currency from the approved pricing, the date.\n\n## References\nEvery link the worker needs, each with what it is. A work order carries links only, never a local path.\n\n## Constraints\nWhat must hold: the department's rules (appended automatically) and anything specific to this task.\n\n## Deliverable\nWhat comes back and where it is logged. Anything addressed to a person is a draft that waits for the owner's yes."
+  },
+  "run": {
+    "plan": {
+      "model": "opus",
+      "effort": "high",
+      "agent": "sales"
+    },
+    "work": {
+      "model": "opus",
+      "effort": "medium",
+      "agent": "sales"
+    }
+  },
+  "routes": [
+    {
+      "id": "plan",
+      "label_ar": "خطة أولاً",
+      "label_en": "Plan first",
+      "icon": "ListChecks",
+      "description_ar": "المبيعات تقرأ الـ CRM وتقترح، دون أي تعديل أو إرسال",
+      "description_en": "Sales reads the CRM and proposes; changes and sends nothing",
+      "mode": "plan",
+      "lane": "judge",
+      "model": "opus",
+      "effort": "high",
+      "agent": "sales"
+    },
+    {
+      "id": "do",
+      "label_ar": "نفّذ الآن",
+      "label_en": "Do it now",
+      "icon": "Play",
+      "description_ar": "المبيعات تجهّز المسودة وتسجّل في الـ CRM، والإرسال بموافقتك",
+      "description_en": "Sales drafts and logs in the CRM; sending waits for your yes",
+      "mode": "auto",
+      "lane": "work",
+      "model": "opus",
+      "effort": "medium",
+      "agent": "sales"
+    },
+    {
+      "id": "quick",
+      "label_ar": "مسار سريع",
+      "label_en": "Quick lane",
+      "icon": "Zap",
+      "description_ar": "مهام صغيرة: بحث وقراءة",
+      "description_en": "Small jobs: lookups and reads",
+      "mode": "auto",
+      "lane": "research",
+      "model": "sonnet",
+      "effort": "low"
+    }
+  ],
+  "defaultRoute": "plan"
 }

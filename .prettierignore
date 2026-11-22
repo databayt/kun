@@ -7,3 +7,7 @@
 .claude/mcp.json
 .claude/memory/
 .claude/patterns/registry.json
+
+# A formula's header is one JSON object between two --- lines (station.mjs reads it with no
+# dependency). Prettier reads that header as YAML and reflows it with trailing commas.
+departments/*/formulas/

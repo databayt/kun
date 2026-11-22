@@ -191,5 +191,11 @@
       "effort": "low"
     }
   ],
-  "defaultRoute": "plan"
+  "defaultRoute": "plan",
+  "gather": [
+    "`node ~/.claude/skills/produce/scripts/produce.mjs list --json{repo_flag}` and `status <ID>` of the matching project",
+    "the matching project's folder (reference video, transcript, script, asset manifest)",
+    "kun/content/media/brand-kit.json and markets.json (price, currency, dialect)",
+    "existing captures"
+  ]
 }
