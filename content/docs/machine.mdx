@@ -175,6 +175,33 @@ Profile: `machines/moed.json` — departments **sales**, **marketing**, **video*
 - Publish anything on a brand page without a human approval.
 - Run the engine's hooks or its Mac-only scripts.
 
+## Free models
+
+Settings has a **Model** page with four routes: **Claude** (the default, on your own sign-in), **NVIDIA** (Nemotron 550B through Free Claude Code, a free key), **OpenRouter** (free models; 50 requests a day, or 1,000 after a $10 top-up) and **OmniRoute** (stacks the free tiers). Each is opt-in, per person.
+
+- Keys live in the keychain; the app only shows "set" or "not set". Get them from build.nvidia.com/settings/api-keys and openrouter.ai/keys.
+- The app starts the local proxy itself (`fcc-server` on `127.0.0.1:8082`, or `omniroute serve --headless` on `:20128`) and stops only a proxy it started. The installs are readiness steps `fcc.cli` and `omniroute.cli` on the Apps page.
+- A free provider can read what a run sends. **Keep client code on Claude.** The company pays $0; any OpenRouter credit is your own.
+- A route that is chosen but not ready fails with one line naming the missing step. It never falls back to Claude silently.
+
+## Machines
+
+The **Machines** page lists every machine on the network: name, OS, department, an online dot (seen in the last 15 minutes) and one line of resources, for example "M4 Pro · 48 GB · 20-core GPU · 120 GB free · on power". Open one for every row: CPU, RAM, GPU, free disk, Google Drive (read locally from Drive for desktop, no Google sign-in), internet, power, last seen, current task and readiness.
+
+Each heartbeat carries these as optional fields, so an older app or a failed read still reports. kun keeps the last values on the machine's row and serves them in `GET /api/machine/team`.
+
+## Pool
+
+Heavy jobs can run on a teammate's idle machine. It is opt-in on both ends.
+
+- **Donor.** Turn on **Share when idle** on your machine card and pick the kinds you accept. A job is claimed only when you are on mains power, idle for at least 10 minutes (configurable), have the RAM and disk the job needs and the tool installed. If you come back, the run stops and the job goes back to the queue.
+- **Kinds are fixed templates:** `transcribe` (whisper to `.srt` or `.txt`), `render` (Blender, frame range and engine) and `encode` (ffmpeg presets `h264-web`, `hevc`, `proxy`). Parameters are validated on both ends and never reach a shell. **Claude runs are not a pool kind.**
+- **Requester.** On the Machines page choose **Send a job**, pick a kind and files, optionally target one machine, and send. Jobs show status and progress, with **Download** when done.
+- **Files** go through presigned links under `pool/<jobId>/` (2 GB each; downloads expire in 10 minutes). The donor deletes its local copy when the job ends, and the bucket expires `pool/` after 7 days.
+- **Reliability.** Claiming is an atomic compare-and-swap, a job is claimed at most twice, and a running job silent for 15 minutes returns to the queue.
+
+API (bearer token): `POST /api/machine/pool` (create), `GET /api/machine/pool` (mine + queue), `POST /pool/claim`, `/pool/progress`, `/pool/done` (returns output upload links), `/pool/finish`, `/pool/cancel`. The shapes are in `src/lib/machine/contract.ts`.
+
 ## Tasks and the gate
 
 Work reaches the app as GitHub issues. The captain and weekly skills draft them; nothing is created until Abdout says "send". Each task carries a `dept:<department>` label, the sprint as its milestone (`Sprint <yyyy>-W<ww>`), a `P0` to `P3` priority and a hidden kun block naming the repos and catalog items it needs and the tasks it waits for (`after`).

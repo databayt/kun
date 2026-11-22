@@ -77,6 +77,8 @@ Five lanes, one launcher letter each — pick which to install in the wizard's m
 | **opencode** | `o` | Tertiary — open-source terminal agent | **Config-level**: the installer writes `"permission": "allow"` into `~/.config/opencode/opencode.json` (no flag exists — this is the `o`-lane equivalent of `--dangerously-skip-permissions`, and it is just as permissive) |
 | **Hermes** | `h` | Optional **assistant gateway** (Slack/WhatsApp/Telegram channels) — NOT a coding CLI. NousResearch's [hermes-agent](https://github.com/nousresearch/hermes-agent) | n/a — its interactive setup (`hermes gateway setup`) runs later, never headless. See [Hermes](/docs/hermes) |
 
+**Optional free-model keys.** Machine's Settings → Model can route Claude Code through free models. None is required, and Claude on your own sign-in stays the default. If you want them, bring your own: an NVIDIA key (build.nvidia.com/settings/api-keys), an OpenRouter key (openrouter.ai/keys; the free tier is 50 requests a day, and a $10 top-up you pay yourself lifts it) or an OmniRoute key. They are stored in the keychain; the company pays nothing. Keep client code on Claude. See [Machine](/docs/machine#free-models).
+
 The launchers live in one managed block in `~/.zshrc` / `~/.bashrc` (`# BEGIN databayt agents … # END databayt agents`) — idempotent across re-runs; legacy `function c` lines migrate in automatically.
 
 ---

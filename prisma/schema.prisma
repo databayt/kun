@@ -569,8 +569,38 @@ model Machine {
   currentTask String?
   /// { percent, failing[], catalogVersion } from the machine's readiness probes
   readiness   Json?
+  /// cpu, ram, gpu, disk, drive, internet, power, idleSecs — see resourcesSchema in lib/machine/contract.ts
+  resources   Json?
+  /// pool opt-in: { enabled, kinds[], idleMinutes }
+  share       Json?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+/// A heavy job lent to a teammate's idle machine (transcribe | render | encode). See the pool section
+/// of lib/machine/contract.ts. Files live under pool/<id>/{in,out}/ in the CDN bucket (7-day expiry).
+model ComputeJob {
+  id             String    @id @default(cuid())
+  kind           String
+  params         Json
+  requester      String
+  target         String?
+  donor          String?
+  /// queued | running | done | failed | cancelled
+  status         String    @default("queued")
+  inputs         Json
+  outputs        Json?
+  needs          Json?
+  progress       Float     @default(0)
+  log            String    @default("")
+  claims         Int       @default(0)
+  lastProgressAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  finishedAt     DateTime?
+
+  @@index([status])
+  @@index([requester])
 }
 
 model MachineMessage {

@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "note": "Readiness catalog. Probes: .claude/scripts/kun-ready <probe>. Shared by onboarding-mac.sh --doctor and the Machine app.",
   "stages": [
     "identity",
@@ -1675,6 +1675,72 @@
       "fix": {
         "kind": "terminal",
         "cmd": "hermes gateway setup"
+      }
+    },
+    {
+      "id": "fcc.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "Free Claude Code",
+        "en": "Free Claude Code installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "uv"
+      ],
+      "human": false,
+      "check": {
+        "probe": "fcc.cli",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "uv tool install git+https://github.com/Alishahryar1/free-claude-code"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "uv tool uninstall free-claude-code"
+      }
+    },
+    {
+      "id": "omniroute.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "OmniRoute",
+        "en": "OmniRoute installed"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [
+        "node"
+      ],
+      "human": false,
+      "check": {
+        "probe": "omniroute.cli",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "npm i -g omniroute"
+      },
+      "uninstall": {
+        "kind": "auto",
+        "cmd": "npm rm -g omniroute"
       }
     },
     {

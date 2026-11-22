@@ -1,6 +1,6 @@
 // Presigned PUT links for a work order's deliverables: `work/<film>/<issue>/<file>` on the CDN bucket.
 // The signer is injectable so tests never touch AWS.
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { Task, UploadRequest, UploadResponse } from "./contract";
 import { uploadKey } from "./tasks";
@@ -44,3 +44,9 @@ export async function presignUploads(
     })),
   );
 }
+
+/** Presigned GET for an object key (pool inputs and outputs); short expiry, the caller passes seconds. */
+export type GetSigner = (key: string, expiresIn: number) => Promise<string>;
+
+export const defaultGetSigner: GetSigner = (key, expiresIn) =>
+  getSignedUrl(s3(), new GetObjectCommand({ Bucket: CDN_BUCKET, Key: key }), { expiresIn });

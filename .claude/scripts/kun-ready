@@ -173,6 +173,8 @@ p_agy_eligible() {
     local out; out="$(agy -p hi --output-format json 2>&1 </dev/null | head -c 2000)"
     echo "$out" | grep -qi "not eligible" && bad "agy: account not eligible" || ok "agy answers"
 }
+p_fcc_cli() { has fcc-server && ok "fcc-server installed" || bad "fcc-server not installed"; }
+p_omniroute_cli() { has omniroute && ok "$(omniroute --version 2>/dev/null | head -1)" || bad "omniroute not installed"; }
 p_opencode_cli() { has opencode && ok "$(opencode --version 2>/dev/null | head -1)" || bad "opencode not installed"; }
 p_opencode_allow() { _ag_opencode_bypass && ok "permission allow" || bad "opencode.json lacks permission: allow"; }
 p_codex_cli() { has codex && ok "$(codex --version 2>/dev/null | head -1)" || bad "codex not installed"; }

@@ -22,6 +22,8 @@ export async function POST(request: Request): Promise<Response> {
       currentTask: body.currentTask,
       // Only overwrite when the machine sent a summary (older apps omit it).
       ...(body.readiness ? { readiness: body.readiness } : {}),
+      ...(body.resources ? { resources: body.resources } : {}),
+      ...(body.share ? { share: body.share } : {}),
       name: auth.profile.name,
     },
   });
