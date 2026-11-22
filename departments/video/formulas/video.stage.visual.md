@@ -116,5 +116,5 @@ Produce the look of the film: cast, sets, camera moves and the keyframes or anim
 ## Deliverable
 - Deliverable file: `{{project_dir}}/06-production/visual-manifest.json`.
 - Keyframes or an animatic with temporary voice under `{{project_dir}}/06-production/`, and the manifest listing every piece.
-- Stop at the look gate: show the frames by path and ask the person for a clear yes. `produce approve` has no look gate, so record the yes in the reply and on the film issue.
+- Stop at the look gate: show the frames by path and ask the person for a clear yes. The person records it with `produce approve {{project}} --gate look --version {{version}} --by <login>`; never run it yourself.
 - When the deliverable exists, record it: `node ~/.claude/skills/produce/scripts/produce.mjs advance {{project}} visual --file <06-production/visual-manifest.json>`.

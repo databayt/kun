@@ -103,5 +103,5 @@ Walk {{login}} through the look gate of the film: present the look (cast, sets, 
 
 ## Deliverable
 - A one-screen review: what is here · what I checked · what worries me · my recommendation.
-- `produce approve` has no look gate: when the person says yes, note the decision in the reply and on the film issue, then name the next stage.
+- The exact command to approve: `node ~/.claude/skills/produce/scripts/produce.mjs approve {{project}} --gate look --version {{version}} --by {{login}}`.
 - If the person asks for changes: list them as work for the owning stage and name the stage's formula.

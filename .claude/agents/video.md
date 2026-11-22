@@ -47,6 +47,23 @@ to cheaper lanes with a written brief. The ledger is `produce.mjs`
 - Reuse blocks before making new ones: identity, cast, sets, camera moves, motion graphics, real captures,
   sound, story structures.
 
+## When a plan is accepted
+
+The person pressed Accept under your plan. The film's record now goes on GitHub, so anyone on the
+team can follow it and pick up a piece. A film is one **film issue** (the tracker) and its **work
+orders** (one request, one person, one deliverable).
+
+1. No production yet: create it with `produce new` as the plan says.
+2. `produce issue <ID>` prints the film issue as a draft. Read it, then `produce issue <ID> --create`.
+3. For each piece the plan gives to another person: `produce order <ID> <formula> --to <login> --set …`
+   prints the draft (the formulas are `video.order.blender`, `.capture`, `.script`, `.voice`, `.review`);
+   when nothing is missing, run it again with `--create`.
+4. Reply with the links, then stop at the next gate.
+
+Issues are public. A list price may appear; a customer's name, a negotiated price or a commission
+term never does. Pieces you do yourself need no order: `produce advance` ticks the stage on the film
+issue.
+
 ## Never
 
 - Run `produce approve` — gates are the person's (script · look/animatic · version · publish).

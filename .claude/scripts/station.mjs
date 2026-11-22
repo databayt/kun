@@ -226,6 +226,7 @@ function waitingGates(p) {
   const approved = (g) => asList(p.approvals).some((a) => a.gate === g && (!a.version || a.version === p.version))
   const done = (k) => p.stages?.[k]?.status === "done"
   if (done("script") && !approved("script")) out.push("script")
+  if (done("visual") && !approved("look")) out.push("look") // the look gate follows the visual stage (produce approve --gate look)
   const vs = Object.values(p.variantStages ?? {})
   if (vs.some((s) => s?.qa === "done" || s?.qa?.status === "done") && !approved("version")) out.push("version")
   if (vs.some((s) => s?.cdn === "done" || s?.cdn?.status === "done") && !approved("publish")) out.push("publish")
@@ -266,13 +267,24 @@ function ghJson(args, timeout) {
     return null
   }
 }
+// An open issue is "for" a login when it is assigned to them on GitHub OR carries the label `for:<login>`
+// (a team member may have no GitHub account; `produce order --create` writes that label).
+export function pickAssigned(list, login) {
+  if (!login) return []
+  const who = String(login).toLowerCase()
+  const name = (x) => String(x?.login ?? x?.name ?? x ?? "").toLowerCase()
+  return asList(list)
+    .filter((i) => asList(i.assignees).some((a) => name(a) === who) || asList(i.labels).some((l) => name(l) === `for:${who}`))
+    .map((i) => ({ number: i.number, title: i.title, url: i.url }))
+}
 const cacheFile = (dept, repo, login) => path.join(HOME, ".claude", "state", `station-issues-${slugify(dept)}-${slugify(repo || "all")}-${slugify(login || "anon")}.json`)
 function fetchIssues(dept, repo, login) {
   const week = isoWeek(new Date())
   const sprint = `Sprint ${week.year}-W${String(week.week).padStart(2, "0")}`
   const data = { assigned: [], sprint: [] }
-  const assigned = login ? ghJson(["search", "issues", "--owner", "databayt", "--assignee", login, "--label", `dept:${dept}`, "--state", "open", "--json", "number,title,url,repository", "--limit", "20"], 1500) : []
-  if (assigned) data.assigned = assigned.map((i) => ({ number: i.number, title: i.title, url: i.url }))
+  // one call for the department's open issues; assignee and the for:<login> label are both read from it
+  const open = login ? ghJson(["search", "issues", "--owner", "databayt", "--label", `dept:${dept}`, "--state", "open", "--json", "number,title,url,labels,assignees", "--limit", "100"], 1500) : []
+  if (open) data.assigned = pickAssigned(open, login)
   const list = ghJson(["issue", "list", "--repo", `databayt/${repo || "kun"}`, "--state", "open", "--label", `dept:${dept}`, "--json", "number,title,url,labels,milestone", "--limit", "50"], 1500)
   if (list) data.sprint = list.filter((i) => i.milestone?.title === sprint).map((i) => ({ number: i.number, title: i.title, url: i.url, labels: asList(i.labels).map((l) => l.name) }))
   return data
@@ -280,7 +292,12 @@ function fetchIssues(dept, repo, login) {
 // Stale-while-revalidate: a cache of any age answers at once; an old one is refreshed in the background.
 function loadIssues(ctx, dept, repo, login) {
   const empty = { assigned: [], sprint: [] }
-  if (ctx.fixtures) return fxJson(ctx, "issues.json") || empty
+  if (ctx.fixtures) {
+    const fx = fxJson(ctx, "issues.json") || empty
+    const seen = new Set()
+    const assigned = [...asList(fx.assigned), ...pickAssigned(fx.open, login)].filter((i) => !seen.has(i.number) && seen.add(i.number))
+    return { ...fx, assigned, sprint: asList(fx.sprint) }
+  }
   const file = cacheFile(dept, repo, login)
   const c = readJson(file)
   const now = Date.now()
@@ -512,15 +529,53 @@ function deptWords(d) {
   const k = p.keywords ?? {}
   return [...new Set([d, ...asList(DEPT_WORDS[d]), ...asList(k.en), ...asList(k.ar)])]
 }
-export function match(ctx, dept, text, repo) {
-  const own = deptWords(dept).some((w) => hasPhrase(text, w))
-  const other = own ? null : departments().filter((d) => d !== dept).find((d) => deptWords(d).some((w) => hasPhrase(text, w))) ?? null
-  if (other) return { id: null, confidence: 0, dept: other }
+// A hand-over sentence: "give|hand|assign|send <piece> to <login>" or "اعط|أعط|سلّم|سلم|كلّف <piece> لـ|ل|إلى <login>".
+const HAND_EN = /\b(?:give|hand|assign|send)\s+(.+?)\s+to\s+@?([^\s.!?]+)\s*[.!?]*$/i
+const HAND_AR = /(?:[اأإآ]عط|سل\u0651?م|كل\u0651?ف)\s+(.+?)\s+(?:ل\u0640?|[إا]لى)\s*@?([^\s.!؟?]+)\s*[.!؟?]*$/
+// The words of the piece choose the work order: the formula whose id ends `.order.<kind>` in the department.
+const HAND_KINDS = [
+  ["blender", ["blender", "scene", "3d", "بلندر", "مشهد", "ثلاثي"]],
+  ["script", ["script", "سكربت", "نص"]],
+  ["voice", ["voice", "voiceover", "narration", "تعليق", "صوت"]],
+  ["capture", ["capture", "screen", "phone", "recording", "تصوير", "شاشه"]],
+  ["review", ["review", "check", "مراجعه", "راجع", "فحص"]],
+  ["call", ["call", "visit", "اتصال", "مكالمه", "زياره", "زيارة"]],
+]
+export function handOver(text) {
+  const m = HAND_EN.exec(String(text).trim()) || HAND_AR.exec(String(text).trim())
+  if (!m) return null
+  const piece = m[1].trim().replace(/[.!?؟]+$/, "")
+  const login = /^[a-z0-9][a-z0-9_-]*$/i.test(m[2]) ? m[2].toLowerCase() : null
+  // the first keyword in the piece wins ("the script for scene two" is a script), then the most keywords
+  const np = norm(piece)
+  const kind = HAND_KINDS.map(([k, words]) => {
+    const hits = words.filter((w) => hasPhrase(piece, w))
+    return [k, hits.length, Math.min(...hits.map((w) => np.indexOf(norm(w))).filter((i) => i >= 0), Infinity)]
+  }).filter(([, n]) => n).sort((x, y) => x[2] - y[2] || y[1] - x[1])[0]?.[0]
+  return kind ? { kind, piece, to: login } : null
+}
+function matchIn(ctx, dept, text, repo) {
   const { formulas } = loadFormulas(dept)
+  const scoped = (f) => !(repo && f.header.repos && !f.header.repos.includes(repo))
+  const ho = handOver(text)
+  if (ho) {
+    const f = formulas.find((x) => scoped(x) && x.header.record === "issue" && x.id.endsWith(`.order.${ho.kind}`))
+    if (f) {
+      const set = {}
+      if (ho.to) set.to = ho.to
+      const slots = f.header.slots ?? {}
+      for (const k of ["scene", "flow"]) if (slots[k]?.ask) set[k] = ho.piece
+      if (slots.action?.choice) {
+        const c = slots.action.choice.find((x) => hasPhrase(ho.piece, x) || hasPhrase(ho.piece, x.split(" ")[0]))
+        if (c) set.action = c
+      }
+      return { id: f.id, confidence: ho.to ? 0.92 : 0.75, set }
+    }
+  }
   let best = null
   let open = null
   for (const f of formulas) {
-    if (repo && f.header.repos && !f.header.repos.includes(repo)) continue
+    if (!scoped(f)) continue
     if (f.header.when?.stage_in) {
       open = open ?? loadState(ctx, dept, { repo, set: {} }).open
       if (!open.some((p) => f.header.when.stage_in.includes(p.next_stage))) continue
@@ -534,7 +589,15 @@ export function match(ctx, dept, text, repo) {
     const score = words * 100 + top.length
     if (!best || score > best.score) best = { id: f.id, confidence: Math.round(conf * 100) / 100, score }
   }
-  return best ? { id: best.id, confidence: best.confidence, dept: null } : { id: null, confidence: 0, dept: null }
+  return best ? { id: best.id, confidence: best.confidence, set: {} } : { id: null, confidence: 0, set: {} }
+}
+// Text that names another department is matched against THAT department's formulas: the answer carries
+// its best id and confidence together with `dept` (id null when nothing there matches).
+export function match(ctx, dept, text, repo) {
+  const own = deptWords(dept).some((w) => hasPhrase(text, w))
+  const other = own ? null : departments().filter((d) => d !== dept).find((d) => deptWords(d).some((w) => hasPhrase(text, w))) ?? null
+  const r = matchIn(ctx, other ?? dept, text, repo)
+  return { id: r.id, confidence: r.confidence, dept: other, set: r.set }
 }
 
 // ---- board ---------------------------------------------------------------------------------------
@@ -657,6 +720,9 @@ export function board(ctx, dept, input = {}) {
 
 // ---- lint ----------------------------------------------------------------------------------------
 const LOCAL_PATH = /(^|[\s`'"(])(~\/|\/Users\/|\/home\/|[A-Za-z]:\\|file:\/\/)/
+// What a formula's `record` may say: none (nothing is recorded), issue (a work order: one issue for one person),
+// film (accepting this plan creates the film issue and its first work orders; no `to` slot, no submit line).
+export const RECORDS = ["none", "issue", "film"]
 export const unknownStages = (list, stages = STAGE_KEYS) => asList(list).filter((k) => !stages.includes(k))
 const slotRefs = (spec) => {
   const s = JSON.stringify(spec)
@@ -692,7 +758,7 @@ export function lint(dept) {
     if (h.gate !== null && !ledger.gates.includes(h.gate)) e(`gate must be null${ledger.gates.length ? ` or one of ${ledger.gates.join(", ")}` : ` (the ${dept} ledger has no gates)`}`)
     if (!ROLES.includes(h.role)) e(`role must be one of ${ROLES.join(", ")}`)
     if (typeof h.board !== "boolean") e("board must be true or false")
-    if (!["issue", "none"].includes(h.record)) e('record must be "issue" or "none"')
+    if (!RECORDS.includes(h.record)) e(`record must be one of ${RECORDS.join(", ")}`)
     if (typeof h.drive !== "number" || h.drive < 0 || h.drive > 1) e("drive must be a number from 0 to 1")
     if (typeof h.weight !== "number") e("weight must be a number")
     if (!h.when || typeof h.when !== "object") e("when must be an object")
@@ -750,10 +816,15 @@ export function matrix(dept) {
   }
   return rows.join("\n")
 }
+// One sub-table per department that has a formulas/ folder, Video first.
+export function matrixAll() {
+  const depts = departments().filter((d) => fs.existsSync(path.join(ROOT, "departments", d, "formulas"))).sort((a, b) => (a === "video" ? -1 : b === "video" ? 1 : a.localeCompare(b)))
+  return depts.map((d) => `### ${loadPack(d)?.title ?? d}\n\n${matrix(d)}`).join("\n\n")
+}
 const MARK_START = "{/* station:matrix:start */}"
 const MARK_END = "{/* station:matrix:end */}"
-function page(dept) {
-  const table = `${MARK_START}\n${matrix(dept)}\n${MARK_END}`
+function page() {
+  const table = `${MARK_START}\n${matrixAll()}\n${MARK_END}`
   const file = path.join(ROOT, "content", "docs", "station.mdx")
   const text = readText(file)
   if (text == null || !text.includes(MARK_START) || !text.includes(MARK_END)) {
@@ -763,7 +834,7 @@ function page(dept) {
   const a = text.indexOf(MARK_START)
   const b = text.indexOf(MARK_END) + MARK_END.length
   fs.writeFileSync(file, text.slice(0, a) + table + text.slice(b))
-  console.log(`station: wrote the matrix into content/docs/station.mdx (${loadFormulas(dept).formulas.length} formulas)`)
+  console.log(`station: wrote the matrix into content/docs/station.mdx (${departments().filter((d) => fs.existsSync(path.join(ROOT, "departments", d, "formulas"))).length} departments)`)
   return true
 }
 
@@ -897,7 +968,7 @@ function runTests() {
   t("match: a text that names another department sets dept", () => {
     const m = match(mk("none"), "video", "write a sales proposal for a school", "hogwarts")
     eq(m.dept, "sales")
-    eq(m.id, null)
+    eq(m.id, "sales.proposal.write") // the other department's own formula, since 2026-11-22
     const a = match(mk("none"), "video", "اعمل عرض مبيعات لمدرسة", "hogwarts")
     eq(a.dept, "sales")
   })
@@ -1024,6 +1095,70 @@ function runTests() {
     const lacking = fill(mk("sales-none"), "sales", "sales.order.call", { login: "abdout" })
     ok(lacking.missing.includes("to") && lacking.missing.includes("record_id"), "to and record id are asked")
   })
+  t("record: film is a valid record, carried by lint, board, fill and the page", () => {
+    eq(RECORDS, ["none", "issue", "film"])
+    eq(loadFormulas("video").formulas.find((f) => f.id === "video.film.plan").header.record, "film")
+    eq(fill(mk("none"), "video", "video.film.plan", { repo: "hogwarts", login: "abdout" }).record, "film")
+    eq(board(mk("none"), "video", { repo: "hogwarts", login: "abdout" }).options.find((o) => o.id === "video.film.plan").record, "film")
+    ok(/video\.film\.plan` \|[^\n]*\| film \|/.test(matrix("video")), "the matrix shows film")
+    eq(lint("video"), [], "film needs no to slot and no submit line")
+  })
+  t("orders by label: for:<login> counts like an assignee, in any department", () => {
+    eq(board(mk("order-label"), "video", { repo: "hogwarts", login: "sedon" }).options[0].id, "video.order.pickup")
+    ok(!board(mk("order-label"), "video", { repo: "hogwarts", login: "ali" }).options.some((o) => o.id === "video.order.pickup"), "someone else's label is not mine")
+    eq(board(mk("order-assignee"), "video", { repo: "hogwarts", login: "sedon" }).options[0].id, "video.order.pickup")
+    const b = board(mk("sales-label"), "sales", { login: "ali" })
+    eq(b.options[0].id, "sales.order.pickup")
+    ok(b.options[0].set.issue_url.endsWith("/issues/51"), "the labelled issue")
+    eq(pickAssigned([{ number: 1, labels: ["for:sedon"] }, { number: 2, assignees: [{ login: "SEDON" }] }, { number: 3, labels: ["for:ali"] }], "sedon").map((i) => i.number), [1, 2])
+  })
+  t("look gate: a film with the visual stage done and no look approval shows the look review waiting", () => {
+    const b = board(mk("look-gate"), "video", { repo: "hogwarts", login: "abdout" })
+    eq(b.options[0].role, "waiting")
+    eq(b.options[0].id, "video.gate.look")
+    eq(b.options[0].set.gate, "look")
+    ok(!board(mk("edit"), "video", { repo: "hogwarts", login: "abdout" }).options.some((o) => o.id === "video.gate.look"), "an approved look is not waiting")
+    const r = fill(mk("look-gate"), "video", "video.gate.look", { repo: "hogwarts", login: "abdout" })
+    ok(r.prompt.includes("approve hogwarts-demo-v001 --gate look"), "the look approve command")
+    eq(r.missing, [])
+  })
+  t("match: a hand-over sentence picks the work order and returns the captured values", () => {
+    const m = match(mk("none"), "video", "give the classroom scene to sedon", "hogwarts")
+    eq(m.id, "video.order.blender")
+    eq(m.set, { to: "sedon", scene: "the classroom scene" })
+    ok(m.confidence >= 0.9, "confidence")
+    eq(match(mk("none"), "video", "assign the voiceover to Ali", "hogwarts").id, "video.order.voice")
+    eq(match(mk("none"), "video", "hand the script for scene two to ali", "hogwarts").id, "video.order.script")
+    const c = match(mk("none"), "video", "send the phone capture of attendance to sedon", "hogwarts")
+    eq(c.id, "video.order.capture")
+    eq(c.set.flow, "the phone capture of attendance")
+    eq(match(mk("none"), "video", "give the review of the render to ali", "hogwarts").id, "video.order.review")
+    const ar = match(mk("none"), "video", "اعط مشهد الفصل لـsedon", "hogwarts")
+    eq(ar.id, "video.order.blender")
+    eq(ar.set.to, "sedon")
+    eq(ar.set.scene, "مشهد الفصل")
+    eq(match(mk("none"), "video", "سلّم السكربت إلى ali", "hogwarts").id, "video.order.script")
+    const call = match(mk("sales-none"), "sales", "give the visit to ali", "")
+    eq(call.id, "sales.order.call")
+    eq(call.set, { to: "ali", action: "visit" })
+    eq(match(mk("none"), "video", "send someone to visit", "").id, null, "no piece, no hand-over")
+  })
+  t("match: text naming another department is matched in that department, with dept set", () => {
+    const m = match(mk("none"), "video", "sales quote a school for 48 students", "")
+    eq(m.dept, "sales")
+    eq(m.id, "sales.quote.school")
+    ok(m.confidence > 0.5, "confidence")
+    const n = match(mk("none"), "video", "sales zzz qqq", "")
+    eq(n.dept, "sales")
+    eq(n.id, null)
+    eq(match(mk("none"), "video", "فيديو تعريفي", "").dept, null)
+  })
+  t("--page: one sub-table per department that has formulas", () => {
+    const all = matrixAll()
+    ok(/### Video/.test(all) && /### Sales/.test(all), "a heading per department")
+    for (const d of ["video", "sales"]) for (const f of loadFormulas(d).formulas) ok(all.includes("`" + f.id + "`"), `${f.id} in the page`)
+    ok(all.indexOf("### Video") < all.indexOf("### Sales"), "Video first")
+  })
   t("norm: Arabic forms fold together", () => eq(norm("إنتاج  فيديو"), norm("انتاج فيديو")))
   console.log(`station: ${pass} passed, ${fails.length} failed`)
   return fails.length === 0
@@ -1055,7 +1190,7 @@ function main() {
   const ctx = makeCtx()
   const dept = a.dept || "video"
   if (a.test) process.exit(runTests() ? 0 : 1)
-  if (a.page) return void page(dept)
+  if (a.page) return void page()
   if (cmd === "refresh-issues") {
     const data = fetchIssues(dept, a.repo || "", a.login || "")
     const file = cacheFile(dept, a.repo, a.login)

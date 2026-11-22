@@ -1,0 +1,21 @@
+{
+ "assigned": [],
+ "sprint": [],
+ "open": [
+  {
+   "number": 43,
+   "title": "Voice: scene 2",
+   "url": "https://github.com/databayt/hogwarts/issues/43",
+   "labels": [
+    {
+     "name": "dept:video"
+    }
+   ],
+   "assignees": [
+    {
+     "login": "Sedon"
+    }
+   ]
+  }
+ ]
+}

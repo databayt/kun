@@ -19,4 +19,4 @@ Request: $ARGUMENTS — if it names a repo (kun · hogwarts), add `--repo <repo>
    - `id` is null: no formula fits. Hand the request to the `sales` agent in the department's frame (`departments/sales/pack.json` → `formula.en`: Task · Context · References · Constraints · Deliverable).
 3. The agent plans and judges; building goes to cheaper lanes with a written brief. It stops at every human gate and never approves.
 
-Tools of the department: `/scrape` · `/funnel` · `/proposal` · `/pricing` · `/jobs` · the `lead` agent · the `revenue` agent.
+Tools of the department: `/scrape` · `/funnel` · `/proposal` · `/pricing` · `/jobs` · the `lead` agent · the `sales` agent.

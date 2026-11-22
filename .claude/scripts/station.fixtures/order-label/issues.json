@@ -1,0 +1,31 @@
+{
+ "assigned": [],
+ "sprint": [],
+ "open": [
+  {
+   "number": 41,
+   "title": "Blender: the classroom scene",
+   "url": "https://github.com/databayt/hogwarts/issues/41",
+   "labels": [
+    {
+     "name": "dept:video"
+    },
+    {
+     "name": "for:sedon"
+    }
+   ],
+   "assignees": []
+  },
+  {
+   "number": 42,
+   "title": "Other",
+   "url": "https://github.com/databayt/hogwarts/issues/42",
+   "labels": [
+    {
+     "name": "dept:video"
+    }
+   ],
+   "assignees": []
+  }
+ ]
+}

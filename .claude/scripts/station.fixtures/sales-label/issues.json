@@ -1,0 +1,20 @@
+{
+ "assigned": [],
+ "sprint": [],
+ "open": [
+  {
+   "number": 51,
+   "title": "Call: follow up a reply",
+   "url": "https://github.com/databayt/kun/issues/51",
+   "labels": [
+    {
+     "name": "dept:sales"
+    },
+    {
+     "name": "for:ali"
+    }
+   ],
+   "assignees": []
+  }
+ ]
+}

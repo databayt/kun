@@ -1,0 +1,3 @@
+{
+ "produce.mjs url hogwarts-demo-v001 --variant sd-ar": "sd-ar  (sd, ar)\n  video    https://cdn.databayt.org/video/hogwarts/intro/sd-ar/fb-9x16.mp4\n  poster   https://cdn.databayt.org/video/hogwarts/intro/sd-ar/poster.webp\n  captions https://cdn.databayt.org/video/hogwarts/intro/sd-ar/ar.vtt\n  archive  https://cdn.databayt.org/video/hogwarts/intro/_v/V001/sd-ar/fb-9x16.mp4   (V001, immutable)\n"
+}

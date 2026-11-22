@@ -158,7 +158,7 @@
   "weight": 1,
   "role": "start",
   "board": true,
-  "record": "none",
+  "record": "film",
   "redirects": {
     "to": "video.stage.{stage}",
     "if": "open_project_same_type"
