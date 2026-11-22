@@ -37,6 +37,100 @@ flowchart TD
     classDef done fill:#1d2540,stroke:#4a63b5,color:#d4dcf5;
 ```
 
+#### What happens in part 1, box by box
+
+**You open Kun.** You open the app the way you open any app on your Mac. You type nothing. The app
+starts on its home screen.
+
+**The home screen.** You see five things:
+
+- **A greeting** in the middle of the screen.
+- **The input box**, the large box where your request goes. It is empty.
+- **Department ▾**, a small menu under the box. It names the team you are working for, such as
+  Video or Sales.
+- **Repo ▾**, a second menu beside it. It names the product the work is about, such as Hogwarts.
+- **The health light**, a small coloured dot. It tells you whether the tools on this computer are
+  ready.
+
+Under them there are **three options**, short buttons with an icon and a name. When you hover over
+one, a small ✕ appears. The ✕ empties the input box.
+
+As soon as the home screen opens, the app does two jobs without asking you. They are the two boxes
+with a double border in the chart.
+
+**Load the pack.** Every department has a settings file in kun called its *pack*. For Video it is
+`departments/video/pack.json`. The app reads it to learn three things:
+
+- **the options** to show under the box,
+- **the routes**: the ways a request can be run (plan first, do it now, workflow, quick),
+- **the formula**: the fixed headings every finished prompt must use.
+
+You never see this file. It is why the home screen looks different for each department. To change
+an option, its wording or the formula, you change this file; the app does not need a new version.
+
+**Health check.** At the same time, the app checks that the video tools on this computer work. It
+runs one command, `produce.mjs readiness`, which tests 14 things: ffmpeg, Blender, FilmCraft,
+the speech-to-text model, the recording browsers, free disk space, mains power, the Kun app itself,
+the Blender and FilmCraft connections, and the Gemini key. The check may take up to two minutes. Its answer sets the colour of the
+light:
+
+- **Green: all pass.** Everything is ready, and you can carry on.
+- **Orange or red.** Orange means something is missing but the work can still go on. Red means
+  something important is broken. Tap the light to see the list of checks, each with its result.
+  **Fix** tries to repair what it can by itself (it may take up to 15 minutes). **Ask** sends the
+  problem to the agent, which works on it.
+
+You can choose your department and repo while the check is still running; nothing waits for it.
+
+**You choose Department: Video.** Open the Department menu and pick **Video**. The app reads the
+Video pack again and resets the choice of how to run your request to the safe default, *plan
+first*. Three things are now settled for every run you start, even though nothing is shown:
+
+- **The working folder**: `~/.kun/machine/video`. This is the department's own room. Its
+  `CLAUDE.md` holds the video team's rules: Arabic first, nothing is published without a check and
+  a person's yes, no real faces or names of students, never the real camera.
+- **The media library**: `~/media` is opened to the agent too (`--add-dir ~/media`), so it can see
+  earlier captures, projects and finished films.
+- **The time limit**: one answer may work for up to **2 hours**, because video work is slow.
+
+**You choose Repo: Hogwarts.** Open the Repo menu and pick **Hogwarts**. This does two things:
+
+- **It filters the options.** Only the options written for Hogwarts stay, and never more than three:
+  **Intro film**, **Continue production** and **Tools check**. With no repo chosen you see general
+  options instead, such as "Reel from a video".
+- **It opens the product's code to the agent.** The Hogwarts folder (`--add-dir ~/hogwarts`) is
+  added, so the agent can read the real product to check what the film claims. A new chat also
+  starts with one hidden line: *"Working in hogwarts for the video department."*
+
+The app remembers your choices, so next time Kun opens on Video and Hogwarts already.
+
+**How does the prompt start?** Now there are two ways to begin. Both lead to the same place.
+
+- **Tap an option.** Pick one of the three buttons:
+
+  | Option | Use it when | How it will run |
+  | --- | --- | --- |
+  | **Intro film** | You want a new film introducing Hogwarts | Plan first: the agent asks before it does anything |
+  | **Continue production** | A film is already under way and you want the next step | Do it now: one stage, then it stops at the next approval |
+  | **Tools check** | You want to know whether the computer is ready | Quick: a small, fast job |
+
+  **The option's English brief fills the box.** Tapping does not send anything. It writes a short
+  English request into the box. For Intro film that is: plan an intro film for Hogwarts (viewers see
+  the brand Balqalam), for school owners and principals, the Sudan version in Arabic, for Facebook,
+  vertical, about two minutes. At the same moment the app quietly notes how it should run (plan
+  first, for Intro film). You see no label for this; it happens in the background.
+
+- **Type your own.** Write what you want in the box in any language, Arabic or English, as roughly
+  as you like ("فيديو تعريفي لهوغورتس السودان"), then press the **✨** button beside the microphone.
+
+**→ Refine.** Either way, the short request now goes to *refine*, the run that turns it into a full,
+professional prompt. After a tap it starts on its own; after typing it starts when you press ✨.
+While it works, ✨ turns into a spinner. Part 2 explains what it does.
+
+**At the end of part 1:** the department and repo are chosen, the tools have been checked, the box
+holds a short request, and the app knows where that request will run. Nothing has been sent and
+nothing on the computer has changed.
+
 ### 2 · Refine: the prompt is written
 
 ```mermaid
