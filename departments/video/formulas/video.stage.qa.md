@@ -117,7 +117,7 @@ Check the rendered master of one version against the numbers and by eye, and wri
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price: {{price}} {{currency}} per student per month
+- Price: {{price}} {{currency}} per student per year
 - Stage: 11 qa (per variant)
 
 ## References

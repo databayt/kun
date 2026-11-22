@@ -196,7 +196,7 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}): the brief in one line, the q
 - Audience: {{audience}}
 - Goal: {{goal}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price: {{price}} {{currency}} per student per month
+- Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}} · {{length}}
 - Today: {{today}}. Project: none yet for this film type, unless `produce list` below shows one; if it does, say so and propose continuing it instead.
 

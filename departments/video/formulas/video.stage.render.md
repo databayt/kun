@@ -137,7 +137,7 @@ Render the master of one version and confirm it plays.
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price: {{price}} {{currency}} per student per month
+- Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}}
 - Stage: 10 render (per variant)
 

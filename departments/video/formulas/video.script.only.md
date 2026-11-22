@@ -135,7 +135,7 @@ Write a 60-second video script for one {{repo}} feature: the idea, the shots and
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Audience: {{audience}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price, if the script mentions it: {{price}} {{currency}} per student per month
+- Price, if the script mentions it: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}}
 
 ## References

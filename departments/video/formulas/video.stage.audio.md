@@ -117,7 +117,7 @@ Produce the audio package for one version: narration in the market's dialect, th
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price: {{price}} {{currency}} per student per month
+- Price: {{price}} {{currency}} per student per year
 - Voice: {{voice_style}}
 - Stage: 08 audio (per variant)
 

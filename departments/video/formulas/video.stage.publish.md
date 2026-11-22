@@ -162,7 +162,7 @@ Prepare the publishing package of one variant for the destination and stop at th
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price: {{price}} {{currency}} per student per month
+- Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}}
 - Stage: 14 publish (per variant). Gate: publish
 

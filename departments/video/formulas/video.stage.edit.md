@@ -137,7 +137,7 @@ Assemble the edit of one version from the visuals, captures, audio and captions.
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price: {{price}} {{currency}} per student per month
+- Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}} · {{length}}
 - Stage: 09 edit (per variant)
 

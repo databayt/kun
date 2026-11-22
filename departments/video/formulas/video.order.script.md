@@ -123,14 +123,14 @@
 ---
 
 ## Task
-Write the script for {{scene}} of the film, in {{language}} in the {{market_name}} dialect, and return it for review.
+Write the script for {{scene}}, in {{language}} ({{dialect}} dialect) for the {{market_name}} version, and return it for review.
 
 ## Context
 - Work order: Script writing, for {{to}} · ordered by {{login}}
 - Film: {{project}} · {{repo}} / {{brand}} (the name the viewer sees)
 - Piece: {{scene}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price, if spoken: {{price}} {{currency}} per student per month
+- Price, if spoken: {{price}} {{currency}} per student per year
 
 ## References
 - Script: {{script_url}}

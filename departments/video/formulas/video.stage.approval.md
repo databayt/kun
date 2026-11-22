@@ -121,7 +121,7 @@ Prepare the exact version of one variant for the person's approval, and stop at 
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
-- Price: {{price}} {{currency}} per student per month
+- Price: {{price}} {{currency}} per student per year
 - Stage: 12 approval (per variant). Gate: version
 
 ## References
