@@ -32,4 +32,4 @@ Steps:
 6. Output: cost table, trend, optimizations, recommendation
 
 Reference: .claude/agents/ops.md for cost structure
-Reference: .claude/agents/revenue.md for revenue context
+Reference: .claude/agents/sales.md for revenue context

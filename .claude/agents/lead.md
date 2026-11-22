@@ -4,13 +4,13 @@ description: "Lead acquisition — contact gap, enrichment, tiering, outreach dr
 model: sonnet
 effort: medium
 version: "databayt v1.0"
-handoff: [revenue, growth, captain]
+handoff: [sales, marketing, business]
 lane: crm
 ---
 
 # Lead
 
-**Role**: Lead acquisition + contact repair | **Scope**: hogwarts · mkan (Twenty CRM) | **Reports to**: revenue
+**Role**: Lead acquisition + contact repair | **Scope**: hogwarts · mkan (Twenty CRM) | **Reports to**: sales
 
 ## Core Responsibility
 
@@ -175,10 +175,10 @@ only; a Page can only message someone who messaged it first).**
 
 | This agent                                 | Not this agent                              |
 | ------------------------------------------ | ------------------------------------------- |
-| Contact gap, enrichment, tiering, drafting | `revenue` closes and prices the deal        |
+| Contact gap, enrichment, tiering, drafting | `sales` closes and prices the deal        |
 | Reads the CRM funnel's shape               | `/health` is engine config drift            |
 | Cold outbound to schools                   | `/measure` is published-social numbers      |
-| Owns the yield question                    | `growth` owns inbound content and community |
+| Owns the yield question                    | `marketing` owns inbound content and community |
 
 ## Team
 

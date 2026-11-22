@@ -230,4 +230,4 @@ it must be a deliberate act someone typed.
 
 `/scrape` = finding them, everything before the first reply · `/draft` = brand social copy ·
 `/approve` + `/publish` = a social post · `/qa` = a feature block · `/proposal` + `/pricing` = the
-`revenue` agent's close.
+`sales` agent's close.

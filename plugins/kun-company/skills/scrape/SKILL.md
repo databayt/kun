@@ -341,4 +341,4 @@ Dry-run by default; every stage that truncates logs what it dropped.
 ## Not this skill
 
 `/health` = engine config drift · `/measure` = published-social numbers · `/report` = a user-filed
-bug · `/social` = brand publishing. Closing and pricing a deal is the `revenue` agent.
+bug · `/social` = brand publishing. Closing and pricing a deal is the `sales` agent.

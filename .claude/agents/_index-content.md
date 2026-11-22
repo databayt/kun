@@ -6,9 +6,9 @@
 
 | Agent                    | What it does for you                             |
 | ------------------------ | ------------------------------------------------ |
-| **growth**               | Gives you content briefs, SEO keywords, calendar |
+| **marketing**               | Gives you content briefs, SEO keywords, calendar |
 | **product**              | Shows you features to write about                |
-| **analyst**              | Provides market data for content pieces          |
+| **rnd**              | Provides market data for content pieces          |
 | **support**              | Knowledge base articles you help write           |
 | **internationalization** | Arabic/English translation patterns              |
 | **semantic**             | Accessibility and color tokens for content       |
@@ -17,11 +17,11 @@
 
 | You need to...                      | Use this agent         |
 | ----------------------------------- | ---------------------- |
-| Write a blog post or article        | `growth`               |
+| Write a blog post or article        | `marketing`               |
 | Translate content AR/EN             | `internationalization` |
 | Create help documentation           | `support`              |
 | Understand a feature to write about | `product`              |
-| Research for content                | `analyst`              |
+| Research for content                | `rnd`              |
 | Check content accessibility         | `semantic`             |
 
 ## Your MCP Tools

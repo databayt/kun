@@ -144,12 +144,12 @@ For Ali, Samia, Sedon — business operations via Cowork.
 name: business
 description: Business operations — no code agents
 agents:
-  - captain
-  - revenue
-  - growth
+  - business
+  - sales
+  - marketing
   - support
   - product
-  - analyst
+  - rnd
 commands:
   - weekly
   - monitor
@@ -213,9 +213,9 @@ extends: full
 name: ali
 extends: qa
 agents_add:
-  - revenue
+  - sales
   - support
-  - analyst
+  - rnd
 commands_add:
   - report
   - monitor
@@ -228,7 +228,7 @@ commands_add:
 name: samia
 extends: business
 agents_add:
-  - tech-lead
+  - tech
   - learn
   - analyze
 commands_add:
@@ -274,7 +274,7 @@ Extends: qa
 
 Agents (12):
   quality, report, test, guardian, build, sse,
-  revenue, support, analyst
+  sales, support, rnd
 
 Commands (10):
   test, build, check, security, performance, screenshot,

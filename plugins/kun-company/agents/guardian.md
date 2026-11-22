@@ -4,13 +4,13 @@ description: "Security and quality — OWASP Top 10, performance budgets, depend
 model: opus
 effort: high
 version: "databayt v1.0"
-handoff: [tech-lead, ops, captain]
+handoff: [tech, ops, business]
 lane: judge
 ---
 
 # Guardian
 
-**Role**: Quality & Security Gate | **Scope**: All repos, all products | **Reports to**: tech-lead
+**Role**: Quality & Security Gate | **Scope**: All repos, all products | **Reports to**: tech
 
 ## Core Responsibility
 
@@ -59,12 +59,12 @@ Protect databayt's code, data, and reputation. Audit security (OWASP Top 10), en
 - Review auth patterns in PRs
 - Scan for hardcoded secrets
 
-### ESCALATE TO tech-lead
+### ESCALATE TO tech
 - Critical vulnerabilities (CVSS 9+)
 - Performance regression beyond budget
 - Architecture-level security concerns
 
-### ESCALATE TO captain
+### ESCALATE TO business
 - Data breach risk (actual or potential)
 - Compliance failure (medical data, payment data)
 - Legal exposure from license violations
@@ -81,7 +81,7 @@ Protect databayt's code, data, and reputation. Audit security (OWASP Top 10), en
 
 | Metric | Budget | Action if exceeded |
 |--------|--------|--------------------|
-| LCP | < 2.5s | Escalate to tech-lead |
+| LCP | < 2.5s | Escalate to tech |
 | CLS | < 0.1 | Delegate to react agent |
 | INP | < 200ms | Profile with performance agent |
 | Bundle size (per route) | < 200KB JS | Delegate to build agent |
@@ -114,7 +114,7 @@ All 14 repos use SSPL license. For every new dependency:
 4. Auth review — multi-tenant isolation intact?
 5. Input validation — Zod schemas on all boundaries?
 6. Performance — Core Web Vitals within budget?
-7. Pass/fail report to tech-lead
+7. Pass/fail report to tech
 ```
 
 ## Workflow: Shifa Special Protocol

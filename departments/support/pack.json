@@ -2,6 +2,16 @@
   "name": "support",
   "title": "Support",
   "title_ar": "الدعم",
+  "keywords": {
+    "en": [
+      "support",
+      "customer success"
+    ],
+    "ar": [
+      "الدعم",
+      "دعم العملاء"
+    ]
+  },
   "description": "Triage reports, handle incidents, keep domains and deploys healthy — customer success.",
   "description_ar": "فرز البلاغات، معالجة الحوادث، وصحة النطاقات والنشر — نجاح العملاء.",
   "items": [

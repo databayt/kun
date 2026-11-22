@@ -9,7 +9,7 @@
 | **ops** | Your main agent — deployments, costs, monitoring |
 | **guardian** | Security checks you should run periodically |
 | **support** | Customer issues you handle in Saudi market |
-| **tech-lead** | Technical escalation for infrastructure issues |
+| **tech** | Technical escalation for infrastructure issues |
 | **build** | Build failures and CI/CD issues |
 | **deploy** | Deployment to Vercel staging/production |
 
@@ -20,7 +20,7 @@
 | Check if everything is running | `ops` |
 | Review security posture | `guardian` |
 | Handle a Saudi customer inquiry | `support` |
-| Report an infrastructure problem | `tech-lead` |
+| Report an infrastructure problem | `tech` |
 | Fix a build failure | `build` |
 | Deploy an update | `deploy` |
 

@@ -20,16 +20,16 @@ The captain sits above everything and never writes code — it allocates, decide
 
 | Agent | Scope |
 |-------|-------|
-| **captain** | CEO brain — weekly allocation, revenue strategy, coordination across products and the 7 humans |
+| **business** | CEO brain — weekly allocation, revenue strategy, coordination across products and the 7 humans |
 
 ### Business (6)
 
 | Agent | Scope |
 |-------|-------|
-| **revenue** | Pricing, proposals, contracts, cost analysis, revenue tracking |
-| **growth** | Content strategy, SEO, social, developer relations, community |
+| **sales** | Pricing, proposals, contracts, cost analysis, revenue tracking |
+| **marketing** | Content strategy, SEO, social, developer relations, community |
 | **support** | Customer onboarding, issue triage, knowledge base, SLA tracking |
-| **analyst** | Market intelligence per vertical, competitors, usage analytics, churn |
+| **rnd** | Market intelligence per vertical, competitors, usage analytics, churn |
 | **lead** | Lead acquisition — contact-gap analysis, enrichment, tiering, outreach drafting against the CRM |
 | **funnel** | Conversion — gate state, segmentation, value ladder, the stall clock from first reply to paying customer |
 
@@ -38,7 +38,7 @@ The captain sits above everything and never writes code — it allocates, decide
 | Agent | Scope |
 |-------|-------|
 | **product** | Roadmap across the 5 products — stories, scope, prioritization, releases |
-| **tech-lead** | Architecture across the repos — shared patterns, breaking changes, tech debt |
+| **tech** | Architecture across the repos — shared patterns, breaking changes, tech debt |
 | **ops** | CI/CD, API spend, monitoring, infrastructure, uptime |
 | **guardian** | OWASP Top 10, performance budgets, dependency health, SSPL compliance |
 | **cloudflare** | The production platform — Workers, Containers, zone DNS, cron triggers, the balqalam.com lane |
@@ -122,7 +122,7 @@ You don't name agents. You say a keyword and the engine routes:
   → orchestration → prisma (schema) + block (UI) + stripe MCP
 
 "ship hogwarts admission"
-  → captain → product (stories) → tech-lead (architecture)
+  → business → product (stories) → tech (architecture)
             → orchestration → stack specialists
 ```
 

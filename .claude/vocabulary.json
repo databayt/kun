@@ -3393,7 +3393,7 @@
             },
             {
               "type": "familiar",
-              "name": "analyst"
+              "name": "rnd"
             },
             {
               "type": "ward",
@@ -3647,7 +3647,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -4881,7 +4881,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "captain"
+              "name": "business"
             },
             {
               "type": "skill",
@@ -4906,7 +4906,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "captain"
+              "name": "business"
             },
             {
               "type": "skill",
@@ -5323,7 +5323,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "captain"
+              "name": "business"
             },
             {
               "type": "memory",
@@ -5347,7 +5347,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "captain"
+              "name": "business"
             },
             {
               "type": "skill",
@@ -5372,7 +5372,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "captain"
+              "name": "business"
             },
             {
               "type": "skill",
@@ -5748,7 +5748,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -5777,7 +5777,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -5867,7 +5867,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -5901,7 +5901,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -5934,7 +5934,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -5968,7 +5968,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -6003,7 +6003,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -6039,7 +6039,7 @@
           "order": [
             {
               "type": "familiar",
-              "name": "growth"
+              "name": "marketing"
             },
             {
               "type": "skill",
@@ -7458,6 +7458,208 @@
           ],
           "connects": [
             "follow up"
+          ],
+          "depends": []
+        }
+      ]
+    },
+    {
+      "id": "departments",
+      "number": "22",
+      "name": "The Departments",
+      "subtitle": "One word per department",
+      "description": "Each department is one word — the keyword, the slash command, the lead agent and the spell. Say the word with a repository and a request, and the door shows the board or fills the right formula and hands it to the lead.",
+      "quote": "\"video hogwarts intro film\" — the same ticket as Video, Hogwarts, Intro film in the app.",
+      "spells": [
+        {
+          "name": "video",
+          "effect": "Films from a one-line brief to an approved master — plan, script, shoot, edit, review",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "video"
+            },
+            {
+              "type": "skill",
+              "name": "/video"
+            }
+          ],
+          "steps": [
+            "Open the video door: the board, or match your request to a formula",
+            "Hand the filled prompt to the video lead on its route",
+            "Stop at every human gate; never approve for the person"
+          ],
+          "connects": [
+            "produce",
+            "edit"
+          ],
+          "depends": []
+        },
+        {
+          "name": "image",
+          "effect": "Stills and image packs — real captures, generated heroes, carousels, checked before they go out",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "image"
+            },
+            {
+              "type": "skill",
+              "name": "/image"
+            }
+          ],
+          "steps": [
+            "Open the image door: the board, or match your request to a formula",
+            "Hand the filled prompt to the image lead on its route",
+            "Run media-qa before anything is published"
+          ],
+          "connects": [
+            "shoot",
+            "higgs"
+          ],
+          "depends": []
+        },
+        {
+          "name": "marketing",
+          "effect": "Brand content — calendar, drafts, approval, publishing and the numbers back",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "marketing"
+            },
+            {
+              "type": "skill",
+              "name": "/marketing"
+            }
+          ],
+          "steps": [
+            "Open the marketing door: the board, or match your request to a formula",
+            "Hand the filled prompt to the marketing lead on its route",
+            "Stop at the human approval gate before anything is published"
+          ],
+          "connects": [
+            "social",
+            "draft"
+          ],
+          "depends": []
+        },
+        {
+          "name": "sales",
+          "effect": "Leads to paying schools — outreach, funnel, proposals and pricing",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "sales"
+            },
+            {
+              "type": "skill",
+              "name": "/sales"
+            }
+          ],
+          "steps": [
+            "Open the sales door: the board, or match your request to a formula",
+            "Hand the filled prompt to the sales lead on its route",
+            "Keep money and customer names off public issues"
+          ],
+          "connects": [
+            "funnel",
+            "scrape"
+          ],
+          "depends": []
+        },
+        {
+          "name": "business",
+          "effect": "The company level — what to do next, the weekly cadence, decisions and the canon",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "business"
+            },
+            {
+              "type": "skill",
+              "name": "/business"
+            }
+          ],
+          "steps": [
+            "Open the business door: the board, or match your request to a formula",
+            "Hand the filled prompt to the business lead on its route",
+            "Weigh the options against the drive — cash flow first"
+          ],
+          "connects": [
+            "captain",
+            "weekly"
+          ],
+          "depends": []
+        },
+        {
+          "name": "support",
+          "effect": "Customers and reports — triage, incidents, domains and monitoring",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "support"
+            },
+            {
+              "type": "skill",
+              "name": "/support"
+            }
+          ],
+          "steps": [
+            "Open the support door: the board, or match your request to a formula",
+            "Hand the filled prompt to the support lead on its route",
+            "Close the loop with the person who reported"
+          ],
+          "connects": [
+            "report",
+            "incident"
+          ],
+          "depends": []
+        },
+        {
+          "name": "tech",
+          "effect": "Engineering — build, check, ship, watch and QA the products",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "tech"
+            },
+            {
+              "type": "skill",
+              "name": "/tech"
+            }
+          ],
+          "steps": [
+            "Open the tech door: the board, or match your request to a formula",
+            "Hand the filled prompt to the tech lead on its route",
+            "Verify with the check gate before anything ships"
+          ],
+          "connects": [
+            "check",
+            "ship"
+          ],
+          "depends": []
+        },
+        {
+          "name": "rnd",
+          "effect": "Research and development — sync, bench, learn and the textbook twins",
+          "order": [
+            {
+              "type": "familiar",
+              "name": "rnd"
+            },
+            {
+              "type": "skill",
+              "name": "/rnd"
+            }
+          ],
+          "steps": [
+            "Open the rnd door: the board, or match your request to a formula",
+            "Hand the filled prompt to the rnd lead on its route",
+            "Keep evidence with the finding"
+          ],
+          "connects": [
+            "sync",
+            "learn"
           ],
           "depends": []
         }

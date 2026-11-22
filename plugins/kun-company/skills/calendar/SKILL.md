@@ -40,7 +40,7 @@ formats), and **the Aug 23 Saudi school-year window is not the clock**. Reasonin
 ## Steps
 
 1. **Read the strategy** — `content/docs/social/strategy.mdx` for per-brand cadence
-   and the kill criteria; `.claude/agents/growth.md` for the content pillars
+   and the kill criteria; `.claude/agents/marketing.md` for the content pillars
    (Arabic-first tech · product marketing per vertical · dev relations · founder
    story). The standing week-by-week allocation lives in `content/social/pillars.json`
    — the seed lane (`scripts/seed-drafts.sh`, Mondays 07:00) files it into the draft
@@ -75,5 +75,5 @@ A dated table in which every row carries brand, topic, channel set, and owner �
 and every slipped slot from the previous period is either rescheduled or
 explicitly dropped with a reason.
 
-Reference: `.claude/agents/growth.md` (Samia is the primary content creator) ·
+Reference: `.claude/agents/marketing.md` (Samia is the primary content creator) ·
 `content/docs/social/strategy.mdx`.

@@ -89,7 +89,7 @@ If denied, stop. The issue has the spec for later.
 For non-trivial features, execute the `plan` workflow (`.claude/skills/plan/SKILL.md`):
 
 1. Read the approved spec from the issue
-2. Delegate architecture judgment to `tech-lead` + `architecture`
+2. Delegate architecture judgment to `tech` + `architecture`
 3. Append an `## Implementation Plan` comment (pattern choices, decisions, mirror target, tradeoffs, risks)
 
 Skip for trivial changes — note "trivial — skipping plan" on the issue.

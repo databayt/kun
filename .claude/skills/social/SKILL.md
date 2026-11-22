@@ -143,5 +143,5 @@ A multi-slide deck → `/carousel`. Media alone → `/higgs`. Planning alone →
 `/calendar`. Shipping _code_ → `/ship` or `/release`. Posting into `#social` as a
 human → just post; this is the audience lane.
 
-Reference: `.claude/agents/growth.md` · `content/docs/social/` ·
+Reference: `.claude/agents/marketing.md` · `content/docs/social/` ·
 `content/docs/brand.mdx` · `docs/SOCIAL-AUTOMATION.md`.

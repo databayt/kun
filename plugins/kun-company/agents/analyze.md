@@ -4,7 +4,7 @@ description: "Repo config generator — derive a repo's CLAUDE.md, agents, rules
 model: sonnet
 effort: medium
 version: "databayt v1.0"
-handoff: [learn, tech-lead, github]
+handoff: [learn, tech, github]
 lane: build
 ---
 
@@ -227,9 +227,9 @@ Before committing to `main`:
 | Agent         | Relationship                                           |
 | ------------- | ------------------------------------------------------ |
 | **learn**     | Feeds conventions and patterns to analyze              |
-| **tech-lead** | Reviews generated config for architectural consistency |
+| **tech** | Reviews generated config for architectural consistency |
 | **github**    | Handles issue tracking and commit/push to `main`       |
-| **captain**   | Decides which repos to analyze, prioritizes            |
+| **business**   | Decides which repos to analyze, prioritizes            |
 | **profile**   | Generated config includes profile recommendations      |
 
 **Rule**: Every repo deserves an engine. Analyze gives it one — not by guessing, but by reading what's already there and making it explicit. The best config is the one the team was already following without knowing it.

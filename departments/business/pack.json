@@ -2,6 +2,16 @@
   "name": "business",
   "title": "Business",
   "title_ar": "الأعمال",
+  "keywords": {
+    "en": [
+      "business",
+      "ceo"
+    ],
+    "ar": [
+      "الأعمال",
+      "أعمال"
+    ]
+  },
   "description": "Set the week, decide with the canon, price and propose — the CEO-desk department.",
   "description_ar": "تحديد أولويات الأسبوع، القرار بالكتب المرجعية، التسعير والعروض — قسم مكتب الإدارة.",
   "items": [
@@ -11,8 +21,8 @@
     "skill:canon",
     "skill:decide",
     "skill:weekly",
-    "agent:revenue",
-    "agent:analyst"
+    "agent:sales",
+    "agent:rnd"
   ],
   "repos": [
     "kun"

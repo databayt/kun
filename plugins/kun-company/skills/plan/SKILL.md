@@ -35,7 +35,7 @@ Identify the closest existing feature to mirror (the spec usually names one). Re
 
 ### 3. DESIGN — Generate the plan
 
-Delegate the architecture judgment to `tech-lead` (and the user-level `architecture` agent). Produce, using `.claude/templates/plan.md` as the shape:
+Delegate the architecture judgment to `tech` (and the user-level `architecture` agent). Produce, using `.claude/templates/plan.md` as the shape:
 
 - **Pattern choices** — which pattern cards + rule files govern this feature, cited by name
 - **Architecture decisions** — data flow, server/client boundaries, caching (`'use cache'` where it applies), auth + tenant-isolation placement

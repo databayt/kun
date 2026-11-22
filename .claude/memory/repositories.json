@@ -509,9 +509,11 @@
           "src/app/"
         ],
         "aliases": [
+          "landing",
           "databayt.org",
           "www.databayt.org"
-        ]
+        ],
+        "word": "landing"
       },
       {
         "id": "apple",

@@ -70,10 +70,10 @@
   }
  },
  "counts": {
-  "project_agents": 57,
+  "project_agents": 61,
   "user_agents": 55,
   "commands": 0,
-  "project_skills": 86,
+  "project_skills": 100,
   "user_skills": 90,
   "pattern_cards": 16,
   "project_rules": 8,
@@ -81,7 +81,7 @@
   "project_mcp": 24,
   "user_mcp": 28,
   "hooks": 20,
-  "vocabulary_spells": 246,
+  "vocabulary_spells": 256,
   "workflows": 13,
   "$plugins_comment": "The two plugins are how the fleet reaches other machines. kun-company also carries the rules, pattern cards, hooks, and workflows. Since 2026-11-14 the stack fleet is in this repo too: .claude/agents holds the company agents and the 27 stack agents (kun-company skips the stack ones, and Explore), and every stack skill is also a company skill, so the union of both skill sets is 85.",
   "plugin_kun_company_agents": 28,
@@ -91,7 +91,7 @@
  },
  "eval": {
   "$comment": "Declared POLICY for the bench layers. Measured state lives in .claude/memory/skill-scores.json — never here, because every engine.json field is something health.sh checks reality against and a score has no declared counterpart. listing_cap is a shared, zero-sum budget: the fleet listing is loaded into EVERY session before a word is typed, so accuracy bought with prefix bloat is a regression, not a win. Raising a cap is a deliberate, recorded act — never a silent accommodation of the thing that just breached it.",
-  "listing_cap": 34600,
+  "listing_cap": 35264,
   "skill_cap": 1200,
   "holdout_pct": 20,
   "cadence_days": 7,
@@ -131,6 +131,12 @@
      "from": 33500,
      "to": 34600,
      "why": "the fleet went from 85 to 89 listed skills: four user-level skills from the HyperFrames install (hyperframes, hyperframes-cli, hyperframes-registry, media-use) joined the listing with no trigger phrases, taking it from 33,334 to 34,559 chars. Nothing was trimmed to fit, because trimming descriptions before a measurement is what this budget exists to stop: the bench run that follows this reset is the evidence the trim (name-only listing for skills no prompt ever reaches) will be judged on. The cap sits 41 chars above the fleet so the next addition is again a deliberate decision. Approved in the plan of 2026-11-14 (reset the baseline on purpose)."
+   },
+   {
+     "date": "2026-11-22",
+     "from": 34600,
+     "to": 35264,
+     "why": "one word everywhere (decided by Abdout, plan of 2026-11-22): every department word and every repo word a department works in became a door skill — business, image, marketing, rnd, sales, support, tech, video, and catalog, hogwarts, kun, mkan. Twelve skills, 664 chars in total: a description of at most 60 chars each and no trigger list, because resolve.mjs routes the word (class dept) and the listing only has to make the name invocable. The cap rises by exactly those 664 chars and no more. It does NOT cover the 1,076 chars the fleet already stood above the old cap before this change (35,676 measured on a clean export of HEAD), so the guard stays red until that earlier overage is trimmed or decided on its own. corpus_hash had also already moved at HEAD; the eight new department spells move it again, and the baseline reset (one bench dispatch run, about 31 agents and 2.8M tokens) waits for Abdout's word."
    }
   ],
   "harness_listing_fraction": 0.02,
@@ -164,6 +170,7 @@
   "judge": { "model": "opus", "effort": "high", "skill": "inline", "runs": "the main loop or an opus agent" },
   "captain": { "model": "opus", "effort": "xhigh", "skill": "inline", "runs": "the main loop, attended" },
   "crm": { "model": "sonnet", "effort": "medium", "skill": "inline", "runs": "the lead or funnel agent against Twenty (crm-api.databayt.org); reads and hygiene that a script already does stay on the script lane" },
+  "work": { "model": "opus", "effort": "medium", "skill": "inline", "runs": "a department's lead agent working one stage or one work order" },
   "escalate": { "model": "fable", "effort": "xhigh", "runs": "by hand, attended only — never unattended" },
   "$routes": {
    "$comment": "Keyword and MCP → lane (2026-11-15). resolve.mjs matches a prompt's words against these (whole words, case-insensitive, longest phrase first) and adds one `lane` line to <kun-route>; resolve.mjs --lane \"<task>\" prints the lane for Hermes (default build; captain and escalate never come back from --lane — they cap at judge). An MCP call runs on whatever model makes it: the route says WHO should make it — a lookup batch goes to the haiku Explore agent, not the Opus main loop.",
@@ -173,6 +180,11 @@
    "captain": ["pricing", "canon", "strategy", "captain", "hiring", "fundraise", "runway", "what should i do next"],
    "crm": ["crm", "twenty", "lead", "leads", "pipeline", "prospect", "qualify", "follow up", "outreach", "عملاء محتملين", "متابعة"]
   }
+ },
+ "board": {
+  "$comment": "The department station's departure board (2026-11-22). station.mjs board scores each formula with board:true as the sum of weight × signal and picks one per role (waiting, next, start); these are the weights, read from here. waiting: a human gate is waiting in an open produce project, or an open issue is assigned to the login with the department's label · continue: an open project in the department and repo · sprint: an open issue in the current sprint milestone with the dept label · drive: the formula's own closeness to revenue (0-1) · due: the formula's due rule fires today · habit: recent picks minus dismissals from ~/.kun/machine/station-log.jsonl. Read by .claude/scripts/station.mjs; the Machine app calls it through the pack's station argv. Plan: ~/.claude/plans/let-s-have-a-discussion-immutable-tiger-of-0ce7b055-98c8-4727-9958-5f9d26d39469.md.",
+  "weights": { "waiting": 5, "continue": 3, "sprint": 3, "drive": 2, "due": 2, "habit": 1 },
+  "roles": ["waiting", "next", "start"]
  },
  "devices": {
   "$comment": "Declared POLICY for the Mac ↔ iPhone ↔ Claude-surface lane, read by .claude/scripts/devices.sh (--status, --brief at SessionStart, --install). Measured state is never stored here — devices.sh reads it live. Facts verified against code.claude.com docs on 2026-09-27 (remote-control, mobile, desktop, settings-reference, env-vars): push is two settings keys (agentPushNotifEnabled, inputNeededNotifEnabled, both default false); `max` effort cannot be saved as a default (session-only unless CLAUDE_CODE_EFFORT_LEVEL pins it, which also overrides every agent's effort frontmatter — never set it); Dispatch is closed to new users; the Claude app offers Manual / Accept edits / Plan for Remote Control sessions, so the server's starting mode is set here.",

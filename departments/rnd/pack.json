@@ -2,6 +2,16 @@
   "name": "rnd",
   "title": "R&D",
   "title_ar": "البحث والتطوير",
+  "keywords": {
+    "en": [
+      "rnd",
+      "r&d",
+      "research and development"
+    ],
+    "ar": [
+      "البحث والتطوير"
+    ]
+  },
   "description": "Mine patterns, benchmark the engine, sync upstream and convert textbooks.",
   "description_ar": "استخراج الأنماط، قياس المحرك، المزامنة مع المصادر وتحويل الكتب.",
   "items": [
@@ -10,7 +20,7 @@
     "skill:sync",
     "skill:textbook",
     "skill:convert",
-    "agent:analyst"
+    "agent:rnd"
   ],
   "repos": [
     "kun",

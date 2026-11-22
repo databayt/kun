@@ -595,7 +595,7 @@ full draft queues for a human on `/social/publish`.
 
 | Stage | Owner | Notes |
 |-------|-------|-------|
-| **Plan** | `calendar` skill · `weekly` cadence · `growth` agent pillars | What to say, to whom, when. `content/social/pillars.json` IS the recurring calendar — the Monday seeder rotates it into the draft queue, and `/social/calendar` renders it with a **Queue now** button |
+| **Plan** | `calendar` skill · `weekly` cadence · `marketing` agent pillars | What to say, to whom, when. `content/social/pillars.json` IS the recurring calendar — the Monday seeder rotates it into the draft queue, and `/social/calendar` renders it with a **Queue now** button |
 | **Draft** | `draft` skill — **Claude, natively** — the agent window on `/social/draft`, or **the composer itself** on `/social/publish` | Arabic-first bilingual copy against [Brand & Voice](/docs/brand), **plus the media half**. Three askers, one queue: all of them file a `SocialDraftRequest`, the inline Gemini lane answers in ~11s where it can, and a Claude Code session on the Max pool answers the rest — the API lane of D-20260730 has no funded key, so drafting stays on the subscription. Contributor-gated |
 | **Media** | `media` keyword → `/higgs` (text-free) · `/carousel` (text-bearing) | **Pick before you generate**: `library.json` by brand + type, or the brief's `(library: id)` hint. New renders register in the library, then attach to the draft (`social-drafts.mjs attach`, or the showroom's **Attach**) |
 | **Approve** | `approve` skill → human (Abdout / Ali / Samia) | The gate — the **review queue** on `/social/publish` is the primary lane; a signed 12h link covers a remote approver. See [Autonomy ladder](#autonomy-ladder) |
@@ -767,7 +767,7 @@ commands, so a stage with no name is a stage that cannot be reached. Each skill'
 carries an explicit *negative* clause naming its siblings, which is what stops "publish it" from
 routing to `/ship`.
 
-The `growth` agent owns the strategy layer above them; `.claude/vocabulary.json` holds them all
+The `marketing` agent owns the strategy layer above them; `.claude/vocabulary.json` holds them all
 in the *Pensieve* school. No slash needed — say the word.
 
 ## Current status
@@ -902,4 +902,4 @@ The pipeline executes through six canonical, end-to-end production scenarios:
 - [CRM & Listings Schema](/docs/crm) — Twenty CRM listings integration.
 - [Brand & Voice](/docs/brand) — the rules every post obeys.
 - [Connectors](/docs/connectors) — the MCP-backed service integrations.
-- `/higgs` skill — media generation · `calendar` · `draft` · `approve` · `publish` · `measure` · `carousel` · `growth` agent.
+- `/higgs` skill — media generation · `calendar` · `draft` · `approve` · `publish` · `measure` · `carousel` · `marketing` agent.

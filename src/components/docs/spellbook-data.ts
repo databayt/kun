@@ -1636,7 +1636,7 @@ export const schools: School[] = [
         name: "reverse",
         effect:
           "Tear down how a competitor's feature works — requests, routes, API shape — with evidence",
-        order: [s("/reverse"), f("analyst"), w("cowork-bridge")],
+        order: [s("/reverse"), f("rnd"), w("cowork-bridge")],
         steps: [
           "Script the feature as a browser scenario (or read the HAR / app)",
           "Capture evidence with REA",
@@ -1773,7 +1773,7 @@ export const schools: School[] = [
         name: "facebook",
         effect:
           "Connect a brand's Facebook Page to the pipeline — grant, permanent token, registration, a verified-then-retracted first post",
-        order: [f("growth"), s("/facebook")],
+        order: [f("marketing"), s("/facebook")],
         steps: [
           "The Page id is NOT the number in profile.php?id= — that is the profile number and Graph rejects it (error_subcode 33); take the real id from the Page picker or /me/accounts",
           "App must be Business type — a Consumer app can never request Pages scopes ('Invalid Scopes') and the type cannot be changed after creation",
@@ -2448,7 +2448,7 @@ export const schools: School[] = [
         name: "captain",
         effect:
           "CEO brain — synthesize identity + state + journal, surface the next action",
-        order: [f("captain"), s("/captain")],
+        order: [f("business"), s("/captain")],
         steps: [
           "Read identity (CONSTITUTION, NORTH-STAR, CANON) + current state",
           "Weigh options against the drive — cash flow first",
@@ -2462,7 +2462,7 @@ export const schools: School[] = [
         name: "weekly",
         effect:
           "The captain's cadence — Monday plan, Wednesday check, Friday review",
-        order: [f("captain"), s("/weekly")],
+        order: [f("business"), s("/weekly")],
         steps: [
           "Monday: allocate the week — people, priorities, value-at-stake",
           "Wednesday: check progress against the plan",
@@ -2706,7 +2706,7 @@ export const schools: School[] = [
         name: "canon",
         effect:
           "Surface the right book + one operating move for a business or leadership decision — passive, no slash needed",
-        order: [f("captain"), m("docs/CANON.md")],
+        order: [f("business"), m("docs/CANON.md")],
         steps: [
           "Detect the decision type in natural conversation — hiring, pricing, positioning, runway, build-or-not",
           "Map it via the retrieval index to one of the 10 books",
@@ -2720,7 +2720,7 @@ export const schools: School[] = [
         name: "decide",
         effect:
           "Decision journal — Type 1/2 classification, premortem, expected outcome, review date",
-        order: [f("captain"), s("/decide")],
+        order: [f("business"), s("/decide")],
         steps: [
           "Classify: Type 1 (one-way door) or Type 2 (reversible)",
           "Run the premortem on Type 1 decisions",
@@ -2734,7 +2734,7 @@ export const schools: School[] = [
         name: "premortem",
         effect:
           "Klein premortem — assume it failed, write the story, surface the risks",
-        order: [f("captain"), s("/premortem")],
+        order: [f("business"), s("/premortem")],
         steps: [
           "Assume the decision failed spectacularly",
           "Write the failure story backwards",
@@ -2940,7 +2940,7 @@ export const schools: School[] = [
         name: "calendar",
         effect:
           "Plan the content calendar — which brand publishes what, on which day, and what slipped",
-        order: [f("growth"), s("/calendar")],
+        order: [f("marketing"), s("/calendar")],
         steps: [
           "Read strategy cadence + growth pillars, then each brand's page under content/docs/social/",
           "The recurring calendar IS content/social/pillars.json — the Monday seeder rotates it into the draft queue, and /social/calendar renders it live: this week's picks highlighted, a queue chip per brief, Queue-now files an ask on the spot",
@@ -2956,7 +2956,7 @@ export const schools: School[] = [
         name: "draft",
         effect:
           "Write the FULL draft — copy (Arabic crafted first, English mirrored, UTM on every link) and/or its media set",
-        order: [f("growth"), s("/draft")],
+        order: [f("marketing"), s("/draft")],
         steps: [
           "Resolve the brand against PRODUCT_IDS (accepts both moallimee spellings)",
           "Read content/docs/brand.mdx voice doctrine + the brand's social page",
@@ -3010,7 +3010,7 @@ export const schools: School[] = [
         name: "approve",
         effect:
           "The human gate — the review queue on /social/publish approves in-app, or a signed one-click link reaches a remote approver; either way it ends by stopping",
-        order: [f("growth"), s("/approve"), p("Slack")],
+        order: [f("marketing"), s("/approve"), p("Slack")],
         steps: [
           "Assemble copy + media per channel, exactly as it will appear",
           "Pre-flight: Arabic glyphs, no text baked into a render, AI media labelled, consent for faces",
@@ -3026,7 +3026,7 @@ export const schools: School[] = [
         name: "publish",
         effect:
           "The review queue decides, the lanes deliver — approved full drafts drained where an API exists, copy-out where none does",
-        order: [f("growth"), s("/publish")],
+        order: [f("marketing"), s("/publish")],
         steps: [
           "/social/publish is a REVIEW QUEUE, not a composer: next-up draft, browse the rest, fine-tune, never create from blank",
           "Verify the gate — refuse without a recorded approval (request consumed), a pending variant with a live link, or a human yes in-session",
@@ -3043,7 +3043,7 @@ export const schools: School[] = [
         name: "measure",
         effect:
           "Read the numbers back — platform reach and engagement plus UTM attribution, per post and per brand",
-        order: [f("growth"), s("/measure"), p("PostHog")],
+        order: [f("marketing"), s("/measure"), p("PostHog")],
         steps: [
           "Refresh via /api/social/metrics with the CRON_SECRET bearer, or read what is stored",
           "Read SocialMetric as a time series — latest row per variant plus the delta from the previous",
@@ -3058,7 +3058,7 @@ export const schools: School[] = [
         name: "social",
         effect:
           "One spell — calendar, draft, media, approve, publish, measure for a brand post. Eight distribution channels reach an audience; Slack is the one internal channel",
-        order: [f("growth"), s("/social")],
+        order: [f("marketing"), s("/social")],
         steps: [
           "Pre-flight: resolve the brand and its wired DISTRIBUTION_CHANNELS; refuse Slack as a destination and say why",
           "Stage 1 /calendar — pick the slot from pillars.json (skipped when the topic arrived as an argument)",
@@ -3085,7 +3085,7 @@ export const schools: School[] = [
         name: "carousel",
         effect:
           "Multi-slide bilingual brand carousels — Claude writes the deck, the kun render route draws Anthropic-styled slides, Playwright captures exact platform sizes, a human approves before any channel sees it",
-        order: [f("growth"), s("/carousel"), p("Figma")],
+        order: [f("marketing"), s("/carousel"), p("Figma")],
         steps: [
           "Resolve brand + topic from content/docs/social/<brand>.mdx and brand.mdx (block-scoped decks read the block records)",
           "Write the bilingual deck (AR crafted first, never translated) into content/carousels/<brand>/<slug>.json — hook cover, one idea per slide, CTA close",
@@ -3109,7 +3109,7 @@ export const schools: School[] = [
         name: "produce",
         effect:
           "The video factory — one engine, three lines (hogwarts, mkan, databayt); a request becomes a project, 14 stages chained over the existing skills, three human gates, an approved master on the CDN video tier",
-        order: [f("growth"), s("/produce"), s("/edit")],
+        order: [f("marketing"), s("/produce"), s("/edit")],
         steps: [
           "produce init — brand, category, subject → ID like HOG-INTRO-20261120-V001 and ~/media/_projects/<ID>/",
           "Research, brief, script (/draft) — script sign-off before any heavy stage",
@@ -3881,6 +3881,121 @@ export const schools: School[] = [
         order: [f("funnel"), s("/funnel")],
         steps: ["Identical to `follow up` — see its steps"],
         connects: ["follow up"],
+        depends: [],
+      },
+    ],
+  },
+  {
+    id: "departments",
+    number: "22",
+    name: "The Departments",
+    subtitle: "One word per department",
+    description:
+      "Each department is one word — the keyword, the slash command, the lead agent and the spell. Say the word with a repository and a request, and the door shows the board or fills the right formula and hands it to the lead.",
+    quote:
+      '"video hogwarts intro film" — the same ticket as Video, Hogwarts, Intro film in the app.',
+    spells: [
+      {
+        name: "video",
+        effect:
+          "Films from a one-line brief to an approved master — plan, script, shoot, edit, review",
+        order: [f("video"), s("/video")],
+        steps: [
+          "Open the video door: the board, or match your request to a formula",
+          "Hand the filled prompt to the video lead on its route",
+          "Stop at every human gate; never approve for the person",
+        ],
+        connects: ["produce", "edit"],
+        depends: [],
+      },
+      {
+        name: "image",
+        effect:
+          "Stills and image packs — real captures, generated heroes, carousels, checked before they go out",
+        order: [f("image"), s("/image")],
+        steps: [
+          "Open the image door: the board, or match your request to a formula",
+          "Hand the filled prompt to the image lead on its route",
+          "Run media-qa before anything is published",
+        ],
+        connects: ["shoot", "higgs"],
+        depends: [],
+      },
+      {
+        name: "marketing",
+        effect:
+          "Brand content — calendar, drafts, approval, publishing and the numbers back",
+        order: [f("marketing"), s("/marketing")],
+        steps: [
+          "Open the marketing door: the board, or match your request to a formula",
+          "Hand the filled prompt to the marketing lead on its route",
+          "Stop at the human approval gate before anything is published",
+        ],
+        connects: ["social", "draft"],
+        depends: [],
+      },
+      {
+        name: "sales",
+        effect:
+          "Leads to paying schools — outreach, funnel, proposals and pricing",
+        order: [f("sales"), s("/sales")],
+        steps: [
+          "Open the sales door: the board, or match your request to a formula",
+          "Hand the filled prompt to the sales lead on its route",
+          "Keep money and customer names off public issues",
+        ],
+        connects: ["funnel", "scrape"],
+        depends: [],
+      },
+      {
+        name: "business",
+        effect:
+          "The company level — what to do next, the weekly cadence, decisions and the canon",
+        order: [f("business"), s("/business")],
+        steps: [
+          "Open the business door: the board, or match your request to a formula",
+          "Hand the filled prompt to the business lead on its route",
+          "Weigh the options against the drive — cash flow first",
+        ],
+        connects: ["captain", "weekly"],
+        depends: [],
+      },
+      {
+        name: "support",
+        effect:
+          "Customers and reports — triage, incidents, domains and monitoring",
+        order: [f("support"), s("/support")],
+        steps: [
+          "Open the support door: the board, or match your request to a formula",
+          "Hand the filled prompt to the support lead on its route",
+          "Close the loop with the person who reported",
+        ],
+        connects: ["report", "incident"],
+        depends: [],
+      },
+      {
+        name: "tech",
+        effect: "Engineering — build, check, ship, watch and QA the products",
+        order: [f("tech"), s("/tech")],
+        steps: [
+          "Open the tech door: the board, or match your request to a formula",
+          "Hand the filled prompt to the tech lead on its route",
+          "Verify with the check gate before anything ships",
+        ],
+        connects: ["check", "ship"],
+        depends: [],
+      },
+      {
+        name: "rnd",
+        effect:
+          "Research and development — sync, bench, learn and the textbook twins",
+        order: [f("rnd"), s("/rnd")],
+        steps: [
+          "Open the rnd door: the board, or match your request to a formula",
+          "Hand the filled prompt to the rnd lead on its route",
+          "Keep evidence with the finding",
+        ],
+        connects: ["sync", "learn"],
         depends: [],
       },
     ],

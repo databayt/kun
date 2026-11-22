@@ -888,7 +888,7 @@ _The art of seeing ahead — planning, architecting, predicting what must be bui
 All divination spells channel the **BMAD method** installed at `~/.claude/bmad/`:
 
 > **Shared Order:**
-> **Familiar:** `orchestration` | **Backup:** `architecture`, `product`, `tech-lead`
+> **Familiar:** `orchestration` | **Backup:** `architecture`, `product`, `tech`
 
 ### `bmad`
 

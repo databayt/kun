@@ -8,7 +8,7 @@ memory: user
 maxTurns: 30
 color: purple
 version: "databayt v1.0"
-handoff: [record, growth]
+handoff: [record, marketing]
 lane: judge
 ---
 

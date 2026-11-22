@@ -2,6 +2,17 @@
   "name": "image",
   "title": "Image",
   "title_ar": "الصور",
+  "keywords": {
+    "en": [
+      "image",
+      "images",
+      "stills"
+    ],
+    "ar": [
+      "الصور",
+      "صور"
+    ]
+  },
   "description": "Shoot screenshots, generate stills and build carousels — with a QA agent before anything goes out.",
   "description_ar": "لقطات الشاشة وتوليد الصور وبناء الكاروسيل — مع وكيل مراجعة قبل أي نشر.",
   "items": [

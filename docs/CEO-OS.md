@@ -244,7 +244,7 @@ The captain consciousness must hold accurate, dated, queryable knowledge across 
 
 **What the captain knows about each product**: stage, what's true vs. pitch, technical-debt registry, bet thesis (why this exists, when it's killed).
 
-**Source of truth**: `captain.md` "Product Portfolio" table + `docs/repositories/*.md` per-repo profiles + `tech-lead.md` agent.
+**Source of truth**: `business.md` "Product Portfolio" table + `docs/repositories/*.md` per-repo profiles + `tech.md` agent.
 
 **Per-product stage today**:
 
@@ -729,12 +729,12 @@ The principles above are encoded into Kun (the captain operating system) via fil
 | Agent            | Scope                                 |
 | ---------------- | ------------------------------------- |
 | `captain`        | CEO brain — strategic, never executes |
-| `revenue`        | Pricing, deals, contracts, MRR        |
-| `growth`         | Content, SEO, social, dev relations   |
+| `sales`          | Pricing, deals, contracts, MRR        |
+| `marketing`      | Content, SEO, social, dev relations   |
 | `support`        | Onboarding, customer success, SLAs    |
 | `product`        | Roadmap, ICE, releases                |
-| `analyst`        | Market intel, competitor analysis     |
-| `tech-lead`      | Cross-repo architecture               |
+| `rnd`            | Market intel, competitor analysis     |
+| `tech`           | Cross-repo architecture               |
 | `ops`            | CI/CD, costs, infrastructure          |
 | `guardian`       | Security, performance, compliance     |
 | (31 specialists) | Engineering execution                 |

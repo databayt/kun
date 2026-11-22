@@ -2,6 +2,15 @@
   "name": "marketing",
   "title": "Marketing",
   "title_ar": "التسويق",
+  "keywords": {
+    "en": [
+      "marketing"
+    ],
+    "ar": [
+      "التسويق",
+      "تسويق"
+    ]
+  },
   "description": "Plan the calendar, draft Arabic-first posts, build carousels, get approval, publish and measure.",
   "description_ar": "تخطيط التقويم، كتابة منشورات عربية أولاً، تصميم الكاروسيل، الاعتماد، النشر وقياس الأداء.",
   "items": [

@@ -13,8 +13,8 @@ Arguments: $ARGUMENTS (product name, e.g., "hogwarts" or "souq")
 
 Steps:
 
-1. Load pricing strategy from .claude/agents/revenue.md
-2. Use analyst agent to pull competitor pricing benchmarks
+1. Load pricing strategy from .claude/agents/sales.md
+2. Use rnd agent to pull competitor pricing benchmarks
 3. Calculate cost structure from .claude/agents/ops.md cost tracking
 4. Generate pricing table with tiers: Free, Starter, Pro, Enterprise
 5. Show cost vs margin analysis for each tier

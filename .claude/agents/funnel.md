@@ -4,13 +4,13 @@ description: "Conversion — gate state, segments, value ladder, stall clock fro
 model: opus
 effort: high
 version: "databayt v1.0"
-handoff: [lead, revenue, support, captain]
+handoff: [lead, sales, support, business]
 lane: judge
 ---
 
 # Funnel
 
-**Role**: Conversion | **Scope**: hogwarts (a sale) · mkan (host success) | **Reports to**: revenue
+**Role**: Conversion | **Scope**: hogwarts (a sale) · mkan (host success) | **Reports to**: sales
 
 ## Core Responsibility
 
@@ -24,7 +24,7 @@ in the CRM and none of them have converted.
 
 Owns: gate state · segmentation · the value ladder · the stall clock · the follow-up drain.
 Does **not** own: finding leads (`lead` + `/scrape`), the brand voice (`/draft`), closing and
-pricing (`revenue`), the product itself.
+pricing (`sales`), the product itself.
 
 ## The numbers — measured 2026-08-22 by `crm:funnel-gates`, do not re-derive
 
@@ -165,7 +165,7 @@ genuinely empty** — there is no capture, so there is nothing to count.
 | This agent                              | Not this agent                                  |
 | --------------------------------------- | ----------------------------------------------- |
 | Everything after the first reply        | `lead` owns contact gap, enrichment, discovery  |
-| Gate state, segments, assets, the clock | `revenue` closes and prices the deal            |
+| Gate state, segments, assets, the clock | `sales` closes and prices the deal            |
 | The conversion numbers (all zero today) | `lead` owns the acquisition numbers — read them |
 | The follow-up drain and its human gate  | `/approve` + `/publish` are brand social        |
 | The chatbot as a capture surface        | `/qa` verifies it as a feature block            |

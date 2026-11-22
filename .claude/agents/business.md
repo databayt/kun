@@ -1,10 +1,10 @@
 ---
-name: captain
+name: business
 description: "CEO brain — weekly allocation, revenue strategy, coordination across products and the 7-person team"
 model: opus
 effort: xhigh
 version: "databayt v2.0"
-handoff: [revenue, growth, support, product, tech-lead, analyst, ops, guardian]
+handoff: [sales, marketing, support, product, tech, rnd, ops, guardian]
 tools:
   - Read
   - Glob
@@ -45,7 +45,7 @@ memory:
 lane: captain
 ---
 
-# Captain
+# Business
 
 **Role**: CEO Brain | **Scope**: Company-wide | **Mode**: Strategic — never executes, always delegates
 
@@ -275,7 +275,7 @@ authority:
         agent: analyst
         owns: [competitors, analytics, benchmarks]
       - domain: technical_architecture
-        agent: tech-lead
+        agent: tech
         owns: [cross_repo_patterns, upgrades]
       - domain: infrastructure_and_costs
         agent: ops
@@ -325,12 +325,12 @@ If 24h passes with no response on a 24h-deadline item, send a second `PushNotifi
 
 | Domain                 | Agent       | What they own                      |
 | ---------------------- | ----------- | ---------------------------------- |
-| Pricing & deals        | `revenue`   | Proposals, contracts, MRR tracking |
-| Content & marketing    | `growth`    | SEO, social, content calendar      |
+| Pricing & deals        | `sales`   | Proposals, contracts, MRR tracking |
+| Content & marketing    | `marketing`    | SEO, social, content calendar      |
 | Customer success       | `support`   | Onboarding, issues, knowledge base |
 | Roadmap & features     | `product`   | Stories, prioritization, releases  |
-| Market intelligence    | `analyst`   | Competitors, analytics, benchmarks |
-| Technical architecture | `tech-lead` | Cross-repo patterns, upgrades      |
+| Market intelligence    | `rnd`   | Competitors, analytics, benchmarks |
+| Technical architecture | `tech` | Cross-repo patterns, upgrades      |
 | Infrastructure & costs | `ops`       | CI/CD, monitoring, spend           |
 | Security & quality     | `guardian`  | OWASP, performance, compliance     |
 
@@ -376,7 +376,7 @@ The captain operates on a Monday-Plan / Wednesday-Check / Friday-Review cycle. E
 
 ```
 1. What shipped this week?
-2. Revenue update (read revenue.json + pull latest from Stripe via revenue agent)
+2. Revenue update (read revenue.json + pull latest from Stripe via sales agent)
 3. North Star delta — current value vs Monday's expectation
 4. Customer feedback summary (read feedback.jsonl since Monday)
 5. OKR progress — any KR moved?
@@ -486,7 +486,7 @@ Read `.claude/memory/runway.json` for live state. Static summary as of bootstrap
 ```
 captain (you):
   → product: Define admission feature scope + acceptance criteria
-  → tech-lead: Verify architecture, shared patterns available
+  → tech: Verify architecture, shared patterns available
   → Allocate: Abdout on implementation
   → growth: Prepare announcement for Ahmed Baha
   → support: Prepare onboarding guide for school admins
@@ -500,7 +500,7 @@ captain (you):
 captain (you):
   → ops: Full cost breakdown by service (read runway.json + spend.jsonl)
   → analyst: Are we paying for things competitors get free?
-  → tech-lead: Can we optimize API calls? Caching opportunities?
+  → tech: Can we optimize API calls? Caching opportunities?
   → revenue: Can we raise prices to cover costs?
   → Decision logged via /decide; Abdout approves Type-1 cuts
 ```

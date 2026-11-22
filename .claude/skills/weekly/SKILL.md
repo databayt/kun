@@ -57,5 +57,5 @@ Steps:
      draft he has not approved, never edit an approved one silently, never message a school or a person
      outside the group from this step.
 
-Reference: .claude/agents/captain.md for weekly rhythm
+Reference: .claude/agents/business.md for weekly rhythm
 Reference: .claude/memory/team.json for team profiles

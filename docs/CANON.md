@@ -130,7 +130,7 @@ When you face the decision on the left, the book on the right has the move — s
 - Talk about their life and problems, not your solution — the idea never comes up.
 - Dig for commitment and currency (time, reputation, money already spent), not compliments.
 
-**Powers** principle #13 + #9 (customer empathy) · **Skill**: customer-development discipline (Q2 OKR-O3), `analyst` agent.
+**Powers** principle #13 + #9 (customer empathy) · **Skill**: customer-development discipline (Q2 OKR-O3), `rnd` agent.
 **Databayt application.** Ali's ≥1 customer interview/week must follow Mom-Test rules or it generates false signal; this is the direct counter to Abdout's "build before talking to users" watch-out.
 **Source:** `NEW to engine` — propose adding under [CEO-OS Part V §E](./CEO-OS.md#part-v--the-bibliography-heavy-with-passages).
 
@@ -144,7 +144,7 @@ When you face the decision on the left, the book on the right has the move — s
 - Build the whole product (integrations, references, docs) for that one segment, not a thin layer for all.
 - Use the first segment's references as the bowling pin into the next.
 
-**Powers** principle #16 (pick a beachhead) · **Skill**: `/captain` (beachhead weighting), `analyst` agent.
+**Powers** principle #16 (pick a beachhead) · **Skill**: `/captain` (beachhead weighting), `rnd` agent.
 **Databayt application.** King Fahad Schools → similar Sudan private schools → MENA private schools. Don't skip pins.
 **Source:** [CEO-OS Part V §E](./CEO-OS.md#part-v--the-bibliography-heavy-with-passages).
 
@@ -158,7 +158,7 @@ When you face the decision on the left, the book on the right has the move — s
 - Lower the cost of contribution (docs, good-first-issues, clear ownership) _before_ asking for it.
 - Choose the community structure deliberately (federation vs stadium); reputation and governance are the real moat.
 
-**Powers** principle #21 (open by default) + #22 (community is the moat) · **Skill**: `growth` agent, [`SHARE-ECONOMY-MODEL.md`](./SHARE-ECONOMY-MODEL.md).
+**Powers** principle #21 (open by default) + #22 (community is the moat) · **Skill**: `marketing` agent, [`SHARE-ECONOMY-MODEL.md`](./SHARE-ECONOMY-MODEL.md).
 **Databayt application.** The Contribution-Unit model treats contributors as owners — this is the operating manual for making that sustainable instead of extractive.
 **Source:** `NEW to engine` — propose adding under [CEO-OS Part V §G](./CEO-OS.md#part-v--the-bibliography-heavy-with-passages).
 
@@ -172,7 +172,7 @@ When you face the decision on the left, the book on the right has the move — s
 - Lead with the value you uniquely enable, then pick the market frame that makes that value obvious.
 - Re-position when the frame stops fitting — don't let the first story trap the product.
 
-**Powers** principle #16 + #13 · **Skill**: `/proposal`, `growth` agent.
+**Powers** principle #16 + #13 · **Skill**: `/proposal`, `marketing` agent.
 **Databayt application.** "School-operations OS for Arabic-speaking communities" is a positioning _choice_; for most target schools the alternative is paper + WhatsApp + spreadsheets — position against that, not against enterprise SIS.
 **Source:** `NEW to engine` — propose adding under [CEO-OS Part V §E](./CEO-OS.md#part-v--the-bibliography-heavy-with-passages).
 

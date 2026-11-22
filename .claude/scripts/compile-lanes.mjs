@@ -133,7 +133,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   } else if (mode === "--page") {
     // The public page: the lane table and who is on each lane. Generated, so it cannot go stale.
     const lanes = JSON.parse(fs.readFileSync(path.join(ROOT, ".claude/engine.json"), "utf8")).lanes || {};
-    const order = ["script", "mechanical", "lookup", "research", "build", "judge", "captain", "crm", "escalate"];
+    const order = ["script", "mechanical", "lookup", "research", "build", "work", "judge", "captain", "crm", "escalate"];
     const code = (x) => "`" + x + "`";
     const on = (lane, kind) => rows.filter((r) => r.lane === lane && r.kind === kind).map((r) => r.name);
     const L = ["---", "title: Lanes", "description: One table decides which model and how much effort each kind of work gets", "---", ""];

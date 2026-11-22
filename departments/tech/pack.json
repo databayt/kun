@@ -2,6 +2,16 @@
   "name": "tech",
   "title": "Technology",
   "title_ar": "التقنية",
+  "keywords": {
+    "en": [
+      "tech",
+      "engineering"
+    ],
+    "ar": [
+      "التقنية",
+      "الهندسة"
+    ]
+  },
   "description": "Build, check, ship and watch the products — the engineering department.",
   "description_ar": "بناء المنتجات وفحصها وشحنها ومراقبتها — قسم الهندسة.",
   "items": [
@@ -12,7 +22,7 @@
     "skill:qa",
     "skill:fix",
     "skill:test",
-    "agent:tech-lead",
+    "agent:tech",
     "agent:guardian"
   ],
   "repos": [

@@ -200,7 +200,7 @@ export const topicDetails: Record<string, TopicDetail> = {
     lastReviewed: "2026-03-31",
     progress: [
       "40 agents defined across 4 tiers with clear hierarchy",
-      "9 leadership agents (captain, revenue, growth, support, product, analyst, tech-lead, ops, guardian)",
+      "9 leadership agents (business, sales, marketing, support, product, rnd, tech, ops, guardian)",
       "31 specialist agents covering stack, design, UI, DevOps, VCS, domain",
       "Worktree isolation tested for parallel execution",
     ],

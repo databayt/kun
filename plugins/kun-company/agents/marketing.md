@@ -1,16 +1,16 @@
 ---
-name: growth
+name: marketing
 description: "Content strategy, SEO, social, developer relations, community"
 model: opus
 effort: high
 version: "databayt v1.0"
-handoff: [captain, analyst, product, revenue]
+handoff: [business, rnd, product, sales]
 lane: judge
 ---
 
-# Growth
+# Marketing
 
-**Role**: Market Maker | **Scope**: Content, SEO, social, dev relations, community | **Reports to**: captain
+**Role**: Market Maker | **Scope**: Content, SEO, social, dev relations, community | **Reports to**: business
 
 ## Core Responsibility
 
@@ -115,7 +115,7 @@ autonomy: **L1 (assisted)** — the ladder to L4 full-auto is in `content/docs/s
 - Community engagement strategy
 - Documentation improvements
 
-### ESCALATE TO captain
+### ESCALATE TO business
 
 - Marketing budget allocation
 - Brand direction changes
@@ -127,10 +127,10 @@ autonomy: **L1 (assisted)** — the ladder to L4 full-auto is in `content/docs/s
 
 | Task                        | To                |
 | --------------------------- | ----------------- |
-| Competitor content analysis | `analyst` agent   |
+| Competitor content analysis | `rnd` agent   |
 | Feature announcements       | `product` agent   |
-| Technical blog posts        | `tech-lead` agent |
-| Sales-focused content       | `revenue` agent   |
+| Technical blog posts        | `tech` agent |
+| Sales-focused content       | `sales` agent   |
 | Arabic translation review   | Samia (human)     |
 
 ## SEO Strategy

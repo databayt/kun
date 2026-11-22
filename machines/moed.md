@@ -14,8 +14,8 @@ real port · **ABDOUT-ONLY** stays on Abdout's Mac; Moed reaches it only through
 |---|---|---|---|---|
 | scrape | sales | PORTABLE (OSM/website lane only) | node, tsx, `TWENTY_API_URL`+key, scrapling (uv) | set URL: `scripts/lib/twenty-rest.mjs:18`, `scripts/jobs/board.ts:14` default `localhost:3100` is Abdout's SSH tunnel; Keychain fallback `twenty-rest.mjs:27`, `board.ts:58` harmless if env key set |
 | funnel | sales | ABDOUT-ONLY | hogwarts prod Postgres, Evolution WhatsApp sender, launchd | none (see notes) |
-| proposal | sales | READY | kun clone, `analyst`/`revenue` agents | optional: `proposal/SKILL.md:15` names Ali as deliverer |
-| pricing | sales | READY | kun clone, `.claude/agents/revenue.md`, `ops.md` | none |
+| proposal | sales | READY | kun clone, `rnd`/`sales` agents | optional: `proposal/SKILL.md:15` names Ali as deliverer |
+| pricing | sales | READY | kun clone, `.claude/agents/sales.md`, `ops.md` | none |
 | draft | marketing | PORTABLE (hand-run); queue mode ABDOUT-ONLY | kun clone, `copy.mdx` | `scripts/social-drafts.mjs:64-68` exits if `DATABASE_URL` unset, even for `check`; make DB lazy |
 | calendar | marketing | PORTABLE | kun clone; Hub `/social/calendar` | step 3 `calendar/SKILL.md:60-62` reads `SocialPiece` from prod DB; use the Hub instead |
 | social | marketing | ABDOUT-ONLY (chain); Moed uses the Hub | all of draft/approve/publish | none |
@@ -46,7 +46,7 @@ roll scripts live in `hogwarts/scripts/funnel/`; the clock is launchd (`:49`, `:
 `:88`; WhatsApp via Evolution. Moed can still work the Twenty Kanban on sales.databayt.org by hand
 (drag a card, add a note) and write follow-up copy to paste; the skill itself should not be exposed.
 
-**proposal / pricing.** Pure prompt skills over repo files (`.claude/agents/revenue.md`,
+**proposal / pricing.** Pure prompt skills over repo files (`.claude/agents/sales.md`,
 `ops.md`, `memory/team.json`). Note `ops.md` carries company cost tracking; he is the business role,
 so acceptable, but Abdout should decide. No binaries, no keys.
 

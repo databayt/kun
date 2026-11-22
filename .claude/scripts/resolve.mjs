@@ -41,6 +41,12 @@
 //     silences", "راجع الطابور"), anywhere in the prompt gets `skill X ← "phrase"`. The phrases
 //     are each skill's own "Triggers on:" list, so the documented wording routes without a
 //     model reading 85 descriptions to find it. Single plain words are left to the listing.
+//   - a department word (departments/<word>/pack.json: its name, title_ar and optional
+//     keywords {en, ar}; video, image, marketing, sales, business, support, tech, rnd) said as a
+//     keyword — first in the prompt, among the first three after only repo/department words, or in
+//     an explicit form ("<word> department", "قسم <name>"); rnd and r&d anywhere — gets `dept X → skill X · lead X`. `marketing` bare is the department; the
+//     databayt.org site repo is `landing` (door position or "landing repo/site", never "landing page"). A department other than sales also drops a `crm`
+//     lane hit ("the video pipeline page" is not CRM work).
 // The hook never builds or scans; without an index it stays silent. Every hit is logged
 // to ~/.claude/logs/resolve.jsonl so improve.mjs can review false positives and latency.
 
@@ -215,6 +221,7 @@ export function build() {
         id: r.id,
         path: dir ? fs.realpathSync(dir) : null,
         aliases: (r.aliases || []).map((a) => a.toLowerCase()),
+        word: r.word && r.word !== r.id ? String(r.word).toLowerCase() : null,
         bare: !!r.bareMatch && !neverBare.has(r.id),
         never: neverBare.has(r.id),
         private: r.visibility === "private",
@@ -250,11 +257,21 @@ export function build() {
     blocks[r.id] = bj.blocks;
     if (bj.protocol === "light") light.push(r.id);
   }
+  const depts = [];
+  try {
+    for (const d of fs.readdirSync(path.join(KUN, "departments")).sort()) {
+      const pack = readJSON(path.join(KUN, "departments", d, "pack.json"));
+      if (!pack?.name) continue;
+      const words = [pack.name, pack.title_ar, ...(pack.keywords?.en || []), ...(pack.keywords?.ar || [])].filter(Boolean).map((w) => String(w).toLowerCase().trim());
+      depts.push({ word: pack.name, title: pack.title || pack.name, title_ar: pack.title_ar || "", words: [...new Set(words)] });
+    }
+  } catch {}
   const keywords = classify(blocks, repos, new Set(rcfg.always_bare || rcfg.global_blocks || []), engineWords());
   const idx = {
     schema: 2,
     built: new Date().toISOString(),
     repos,
+    depts,
     blocks,
     light,
     keywords,
@@ -295,20 +312,78 @@ function matchBlocks(blocks, prompt, cap = 3) {
   }
   return out;
 }
+// ── door position ──────────────────────────────────────────────────────────
+// A department word (and a repo's own `word`, like `landing`) is a keyword only where a person
+// says it as a keyword: first in the prompt, or among the first three when every word before it
+// is itself a repo or department word ("hogwarts video intro film"); or in an explicit form
+// ("marketing department", "قسم التسويق"). In the middle of a sentence it is an ordinary word.
+const COMPOUNDS = new Set(["tech debt", "tech stack", "business logic", "business rules", "image upload", "image optimization"]);
+const ANYWHERE = new Set(["rnd", "r&d"]); // not ordinary English words — they match anywhere
+const norm = (w) => w.toLowerCase().replace(/^(?:~\/|\/)+/, "").replace(/[:,.;!?،؛]+$/, "");
+function doorTokens(prompt) {
+  return prompt.trim().split(/\s+/).filter(Boolean).map(norm);
+}
+function doorStarts(tokens, chain) {
+  const out = [];
+  for (let i = 0; i < 3 && i < tokens.length; i++) {
+    out.push(i);
+    if (!chain.has(tokens[i])) break;
+  }
+  return out;
+}
+function chainWords(idx) {
+  const c = new Set();
+  for (const r of Object.values(idx.repos)) for (const w of [r.id, r.word, ...(r.aliases || []).filter((a) => !a.includes("."))]) if (w) c.add(w.toLowerCase());
+  for (const d of idx.depts || []) for (const w of d.words) if (!/\s/.test(w)) c.add(w);
+  return c;
+}
+function atDoor(tokens, chain, phrases) {
+  const set = new Set(phrases);
+  for (const i of doorStarts(tokens, chain)) for (let n = 1; n <= 4 && i + n <= tokens.length; n++) if (set.has(tokens.slice(i, i + n).join(" "))) return i;
+  return -1;
+}
+function deptHit(d, prompt, tokens, chain) {
+  if (d.words.some((w) => ANYWHERE.has(w)) && word(d.words.filter((w) => ANYWHERE.has(w)).map(esc).join("|")).test(prompt)) return true;
+  const at = atDoor(tokens, chain, d.words);
+  if (at >= 0) {
+    // a department word that opens a stock compound is the ordinary compound: "tech debt", "business logic"
+    const pair = tokens.slice(at, at + 2).join(" ");
+    if (!COMPOUNDS.has(pair)) return true;
+  }
+  const en = d.words.filter((w) => !/[^\x00-\x7f]/.test(w)).map((w) => esc(w).replace(/\s+/g, "\\s+"));
+  const ar = d.words.filter((w) => /[\u0600-\u06ff]/.test(w)).map((w) => esc(w.replace(/^ال/, "")).replace(/\s+/g, "\\s+"));
+  if (en.length) {
+    const a = en.join("|");
+    if (word(`(?:${a})\\s+(?:department|dept|team|desk)|department\\s+of\\s+(?:${a})|dept:\\s*(?:${a})`).test(prompt)) return true;
+  }
+  if (ar.length && word(`(?:قسم|فريق)\\s+(?:ال)?(?:${ar.join("|")})`).test(prompt)) return true;
+  return false;
+}
 export function resolve(idx, text, projectDir) {
   const prompt = (text || "").toLowerCase();
   const here = projectRepo(idx, projectDir);
   const lightRepos = new Set(idx.light || []);
   const repos = [];
+  const rtokens = doorTokens(prompt);
+  const chain = chainWords(idx);
   for (const r of Object.values(idx.repos)) {
     if (!r.path) continue;
-    const names = [r.id, ...r.aliases];
+    const rword = r.word || null; // a repo's own word (landing): door position or explicit form only
+    const names = [r.id, ...r.aliases.filter((a) => a !== rword)];
     const domains = r.aliases.filter((a) => a.includes("."));
-    const plain = r.aliases.filter((a) => !a.includes("."));
+    const plain = r.aliases.filter((a) => !a.includes(".") && a !== rword);
     const explicit = names.flatMap((n) => [`in ${esc(n)}`, `${esc(n)} repo`, `~/${esc(n)}`, `databayt/${esc(n)}`, `${esc(n)}'s`]);
     const bare = r.bare ? [r.id, ...plain].map(esc) : plain.map(esc); // aliases are curated — always bare
     const alts = [...explicit, ...bare].filter(Boolean).join("|");
     let hit = !!alts && word(alts).test(prompt);
+    if (!hit && rword) {
+      const w = esc(rword);
+      if (word(`in ${w}(?!\\s+pages?\\b)|${w}\\s+(?:repo|site)|~/${w}|databayt/${w}`).test(prompt)) hit = true;
+      else {
+        const i = atDoor(rtokens, chain, [rword]);
+        hit = i >= 0 && !/^pages?$/.test(rtokens[i + 1] || "");
+      }
+    }
     // a domain alias must not match inside a longer host name (databayt.org ≠ kun.databayt.org)
     if (!hit && domains.length) hit = domain(domains.map(esc).join("|")).test(prompt);
     // the repo's name right before one of its own blocks: "food kitchen", "space cafe"
@@ -358,8 +433,14 @@ export function resolve(idx, text, projectDir) {
     const names = idx.phrases[p].filter((n) => !skills.some((x) => x.names.includes(n)));
     if (names.length) skills.push({ names, phrase: p, ...(idx.skills?.[names[0]] || {}) });
   }
+  // departments: any of a pack's words, whole-word, Unicode-aware
+  const depts = [];
+  for (const d of idx.depts || []) {
+    if (deptHit(d, prompt, rtokens, chain)) depts.push(d.word);
+  }
   return {
     project: here?.id || null,
+    depts,
     repos: repos.filter((id) => !(here && id === here.id)).map((id) => ({ id, path: idx.repos[id].path })),
     local,
     named,
@@ -392,9 +473,12 @@ function protocol(b, root) {
 // Keyword/MCP phrases → lane. Whole words, case-insensitive, Unicode-aware; the longest
 // matched phrase wins, ties go to the higher lane (captain > judge > crm > build > lookup).
 const ROUTE_ORDER = ["captain", "judge", "crm", "build", "lookup"];
+// URLs and file paths carry words ("…/docs/pipeline") that are not the person's own: strip them first.
+const stripLinks = (t) => t.replace(/https?:\/\/\S+/gi, " ").split(/\s+/).filter((w) => !/[\/\\]/.test(w)).join(" ");
 export function routeLane(prompt, lanes) {
   const routes = lanes && lanes["$routes"];
   if (!routes || !prompt) return null;
+  prompt = stripLinks(prompt);
   let best = null;
   for (const [rank, lane] of ROUTE_ORDER.entries()) {
     for (const phrase of Array.isArray(routes[lane]) ? routes[lane] : []) {
@@ -405,6 +489,12 @@ export function routeLane(prompt, lanes) {
     }
   }
   return best ? { lane: best.lane, phrase: best.phrase } : null;
+}
+// A department other than sales means the words of the work are the department's, not the CRM's.
+export function routeFor(res, prompt, lanes) {
+  const r = routeLane(prompt, lanes);
+  if (r && r.lane === "crm" && (res?.depts || []).some((d) => d !== "sales")) return null;
+  return r;
 }
 const ROUTE_DIRECTIVE = {
   lookup: "hand the reads/MCP lookups to the Explore agent (haiku), not the main loop",
@@ -434,6 +524,7 @@ export function render(idx, res, route = null, lanes = null) {
     const how = s.names.length > 1 ? "pick by context" : s.fork ? `lane ${s.lane}: a ${s.model} fork — invoke it, do not do its work in the main loop` : `lane ${s.lane}`;
     lines.push(`skill ${s.names.join(" or ")} ← "${s.phrase}" (${how})`);
   }
+  for (const d of res.depts || []) lines.push(`dept ${d} → skill ${d} · lead ${d}`);
   for (const r of res.repos) lines.push(`repo ${r.id} → ${tilde(r.path)} (another repo: its own CLAUDE.md applies there; use absolute paths)`);
   for (const b of res.named) {
     const at = tilde(path.join(idx.repos[b.repo].path, b.path));
@@ -497,6 +588,11 @@ export function page(idx, force = false) {
   L.push("- **shared** — several repos have a block of that name, or the word is already a repo, a skill, an agent or a spell. It works alone inside its own repo; anywhere else, say the repo with it.");
   L.push("- **common** — a plain single word (`form`, `file`, `settings`). Same rule as shared.");
   L.push("", "To make a plain word work alone from anywhere, add it to `resolver.always_bare` in `.claude/engine.json` and rebuild the index (`node .claude/scripts/resolve.mjs --build`). To give a repo its block list, run `node .claude/scripts/generate-blocks.mjs <repo>`.", "");
+  L.push("## Departments", "");
+  L.push("A department is one word: the keyword, the slash command (its door), the lead agent and the spell. Say the department first, then the repository, then the request — `video hogwarts intro film`, `sales: quote a school`, `/marketing this week's calendar`.", "");
+  L.push("| Department | Say | Skill | Lead |", "| --- | --- | --- | --- |");
+  for (const d of idx.depts || []) L.push(`| ${d.title}${d.title_ar ? ` · ${d.title_ar}` : ""} | ${d.words.map(code).join(" · ")} | ${code("/" + d.word)} | ${code(d.word)} |`);
+  L.push("", "The words come from each `departments/<word>/pack.json` (`name`, `title_ar`, `keywords`). A department word counts only where it is said as a keyword: first in the prompt (an optional `/` before it, a `:` after it), or among the first three words when every word before it is a repository or a department word (`hogwarts video intro film`). Anywhere else it is an ordinary word — `add support for dark mode` is not the support department. Explicit forms work anywhere: `<word> department`, `<word> dept`, `<word> team`, `<word> desk`, `department of <word>`, `dept:<word>`, and in Arabic `قسم <name>` or `فريق <name>`. `rnd` and `r&d` are not ordinary words and match anywhere. `marketing` alone is the department; the databayt.org site repository is `landing`, said first (`landing fix the hero`) or as `landing repo` / `landing site` / `in landing` — never `landing page`.", "");
   L.push("## Repositories", "");
   L.push("| Repository | Say | Blocks | Protocol |", "| --- | --- | --- | --- |");
   for (const r of listed) {
@@ -581,7 +677,7 @@ const CASES = [
   ["the menu modifiers are wrong", "~/food", { local: [] }], // light repo, no records → silent
   ["the food kitchen screen flickers", "~/kun", { repos: ["food"], named: ["kitchen"] }], // repo name right before its block
   ["space cafe prices", "~/kun", { repos: ["space"], named: ["cafe", "space"] }], // space also has a block called space
-  ["a marketing video for the school", "~/kun", { none: true }], // marketing is never_bare — no repo-before-block
+  ["a marketing video for the school", "~/kun", { none: true }], // mid-sentence words are ordinary words: no department, not the marketing repo
   ["a saas dashboard for a client", "~/kun", { none: true }], // both parts are engine words → shared
   ["the seek console is empty", "~/hogwarts", { none: true }], // kun's seek block is also a skill → shared
   ["in kun, the seek console is empty", "~/hogwarts", { repos: ["kun"], named: ["seek"] }],
@@ -607,6 +703,53 @@ const CASES = [
   ["is it live yet", "~/hogwarts", { skills: ["watch"] }],
   ["we should check the report", "~/kun", { none: true }], // single plain words are left to the listing
   ["", "~/kun", { none: true }],
+  // departments (2026-11-22): a word counts at the door (first, or after only repo/department words) or in an explicit form
+  ["video for the launch", "~/kun", { depts: ["video"] }],
+  ["الفيديو الجديد", "~/kun", { depts: ["video"] }],
+  ["image for the hero", "~/kun", { depts: ["image"] }],
+  ["الصور الجديدة", "~/kun", { depts: ["image"] }],
+  ["marketing", "~/kun", { depts: ["marketing"], repos: [] }],
+  ["التسويق لهذا الشهر", "~/kun", { depts: ["marketing"] }],
+  ["sales numbers this week", "~/kun", { depts: ["sales"] }],
+  ["المبيعات هذا الأسبوع", "~/kun", { depts: ["sales"] }],
+  ["business review on friday", "~/kun", { depts: ["business"] }],
+  ["الأعمال هذا الشهر", "~/kun", { depts: ["business"] }],
+  ["support for the school", "~/kun", { depts: ["support"] }],
+  ["الدعم الفني", "~/kun", { depts: ["support"] }],
+  ["tech review of the stack", "~/kun", { depts: ["tech"] }],
+  ["التقنية الجديدة", "~/kun", { depts: ["tech"] }],
+  ["rnd on the new model", "~/kun", { depts: ["rnd"] }],
+  ["the new model needs r&d", "~/kun", { depts: ["rnd"] }], // rnd and r&d are not ordinary words: anywhere
+  ["البحث والتطوير", "~/kun", { depts: ["rnd"] }],
+  ["video pipeline page", "~/kun", { depts: ["video"], route: null }], // "pipeline" is not the crm lane inside a video prompt
+  ["sales pipeline health", "~/kun", { depts: ["sales"], route: "crm" }], // sales keeps its crm lane
+  ["the pipeline is stuck", "~/kun", { depts: [], route: "crm" }], // no department: the lane hit stays
+  ["video hogwarts intro film", "~/kun", { depts: ["video"], repos: ["hogwarts"] }],
+  ["hogwarts video intro film", "~/kun", { depts: ["video"], repos: ["hogwarts"] }],
+  ["sales: quote a school", "~/kun", { depts: ["sales"] }],
+  ["sales quote a school for 48 students", "~/kun", { depts: ["sales"] }],
+  ["/marketing this week's calendar", "~/kun", { depts: ["marketing"] }],
+  ["the marketing department needs a post", "~/kun", { depts: ["marketing"] }],
+  ["قسم التسويق منشور عن الحضور", "~/kun", { depts: ["marketing"] }],
+  ["فريق الدعم يحتاج رداً", "~/kun", { depts: ["support"] }],
+  ["ask the tech team about it", "~/kun", { depts: ["tech"] }],
+  ["dept:sales needs a quote", "~/kun", { depts: ["sales"] }],
+  // false positives from the review: the word in the middle of a sentence is an ordinary word
+  ["fix the image upload in the profile form", "~/kun", { depts: [] }],
+  ["add support for dark mode", "~/kun", { depts: [] }],
+  ["the business logic in the cart is wrong", "~/kun", { depts: [] }],
+  ["tech debt in the auth module", "~/kun", { depts: [] }],
+  ["record a video of the login flow", "~/kun", { depts: [] }],
+  ["build a landing page for mkan", "~/kun", { repos: ["mkan"], depts: [] }],
+  ["reference http://localhost:3000/en/docs/pipeline we are focusing on the film", "~/kun", { route: null }], // a word inside a URL is not a lane word
+  ["see ~/kun/docs/pipeline.md for the film", "~/kun", { route: null }],
+  // the site repo is `landing`: door position or explicit form, never "landing page"
+  ["landing", "~/kun", { repos: ["marketing"], depts: [] }],
+  ["landing fix the hero", "~/kun", { repos: ["marketing"] }],
+  ["the landing repo needs a new footer", "~/kun", { repos: ["marketing"] }],
+  ["in landing, fix the footer", "~/kun", { repos: ["marketing"] }],
+  ["landing page for the school", "~/kun", { repos: [] }],
+  ["the marketing repo needs a new footer", "~/kun", { repos: ["marketing"], depts: [] }], // explicit forms still name the repo
 ];
 function test(idx) {
   let pass = 0;
@@ -622,9 +765,15 @@ function test(idx) {
       if (want !== undefined && got !== [...want].sort().join(",")) errs.push(`${name}: got [${got}] want [${[...want].sort()}]`);
     };
     if (exp.none) {
-      if (res.repos.length || res.local.length || res.named.length || res.global.length || res.skill || res.skills.length) errs.push(`expected nothing, got ${JSON.stringify({ repos: ids(res.repos), local: ids(res.local), named: ids(res.named), global: ids(res.global) })}`);
+      if (res.repos.length || res.local.length || res.named.length || res.global.length || res.skill || res.skills.length || (res.depts || []).length) errs.push(`expected nothing, got ${JSON.stringify({ depts: (res.depts || []).join(","), repos: ids(res.repos), local: ids(res.local), named: ids(res.named), global: ids(res.global) })}`);
     } else {
       eq("repos", ids(res.repos), exp.repos);
+      eq("depts", (res.depts || []).join(","), exp.depts);
+      if (exp.route !== undefined) {
+        const lanesJ = readJSON(path.join(KUN, ".claude/engine.json"), {})?.lanes || {};
+        const got = routeFor(res, prompt, lanesJ)?.lane || null;
+        if (got !== exp.route) errs.push(`route: got ${got} want ${exp.route}`);
+      }
       eq("local", res.local.map((b) => b.key).sort().join(","), exp.local);
       eq("named", res.named.map((b) => b.key).sort().join(","), exp.named);
       eq("global", res.global.map((b) => b.key).sort().join(","), exp.global);
@@ -684,11 +833,11 @@ try {
         const said = /<task-notification>|\[SYSTEM NOTIFICATION|^\s*<system-reminder>/.test(input.prompt || "") ? "" : input.prompt || "";
         const res = resolve(idx, said, process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd());
         const lanes = readJSON(path.join(KUN, ".claude/engine.json"), {})?.lanes || {};
-        const route = said ? routeLane(said, lanes) : null;
+        const route = said ? routeFor(res, said, lanes) : null;
         const out = render(idx, res, route, lanes);
         if (out) {
           process.stdout.write(out + "\n");
-          const hit = { ts: new Date().toISOString(), project: res.project, ...(res.skill ? { skill: res.skill.name, lane: res.skill.lane } : {}), ...(route ? { route: route.lane } : {}), ...(res.skills.length ? { phrases: res.skills.map((x) => `${x.names.join("|")}:${x.phrase}`) } : {}), repos: res.repos.map((r) => r.id), local: res.local.map((b) => b.key), named: res.named.map((b) => `${b.repo}/${b.key}`), global: res.global.map((b) => `${b.repo}/${b.key}`), ms: Math.round(ms()) };
+          const hit = { ts: new Date().toISOString(), project: res.project, ...(res.skill ? { skill: res.skill.name, lane: res.skill.lane } : {}), ...(route ? { route: route.lane } : {}), ...(res.depts.length ? { depts: res.depts } : {}), ...(res.skills.length ? { phrases: res.skills.map((x) => `${x.names.join("|")}:${x.phrase}`) } : {}), repos: res.repos.map((r) => r.id), local: res.local.map((b) => b.key), named: res.named.map((b) => `${b.repo}/${b.key}`), global: res.global.map((b) => `${b.repo}/${b.key}`), ms: Math.round(ms()) };
           try {
             fs.mkdirSync(path.dirname(LOG), { recursive: true });
             fs.appendFileSync(LOG, JSON.stringify(hit) + "\n");

@@ -1,14 +1,14 @@
 ---
-name: analyst
+name: rnd
 description: "Market intelligence per vertical — competitors, usage analytics, churn, pricing research"
 model: opus
 effort: high
 version: "databayt v1.0"
-handoff: [product, revenue, growth, captain]
+handoff: [product, sales, marketing, business]
 lane: judge
 ---
 
-# Analyst
+# R&D
 
 **Role**: Market Intelligence | **Scope**: All verticals (education, e-commerce, rentals, medical) | **Reports to**: product
 
@@ -88,9 +88,9 @@ Know the market better than anyone. Track competitors per vertical, interpret us
 ### DELEGATE
 | Task | To |
 |------|----|
-| Content creation from insights | `growth` agent |
-| Pricing adjustments | `revenue` agent |
-| Technical competitive analysis | `tech-lead` agent |
+| Content creation from insights | `marketing` agent |
+| Pricing adjustments | `sales` agent |
+| Technical competitive analysis | `tech` agent |
 
 ## Analytics Interpretation
 

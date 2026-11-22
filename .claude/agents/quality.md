@@ -4,13 +4,13 @@ description: "Routes the niche quality keywords to the right MCP or specialist; 
 model: opus
 effort: high
 version: "databayt v1.2"
-handoff: [guardian, tech-lead, captain]
+handoff: [guardian, tech, business]
 lane: judge
 ---
 
 # Quality
 
-**Role**: Keyword router + QA orchestration | **Scope**: All repos | **Reports to**: tech-lead
+**Role**: Keyword router + QA orchestration | **Scope**: All repos | **Reports to**: tech
 
 ## Core Responsibility
 

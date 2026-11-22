@@ -28,7 +28,7 @@ Steps:
    - Determine if rollback is needed
 4. Respond based on severity:
    - P0: Alert Abdout via Slack immediately, recommend rollback
-   - P1: Create Linear issue, delegate to tech-lead
+   - P1: Create Linear issue, delegate to tech
    - P2: Log for next sprint, inform support agent
 5. Track:
    - Create Linear issue with all context

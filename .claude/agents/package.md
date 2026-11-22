@@ -4,13 +4,13 @@ description: "Cross-repo dependency audits and coordinated upgrades"
 model: sonnet
 effort: medium
 version: "databayt v1.0"
-handoff: [tech-lead, build, ops, guardian]
+handoff: [tech, build, ops, guardian]
 lane: build
 ---
 
 # Package Manager
 
-**Role**: Dependency Health | **Scope**: All 7 repositories | **Reports to**: tech-lead
+**Role**: Dependency Health | **Scope**: All 7 repositories | **Reports to**: tech
 
 ## Core Responsibility
 
@@ -181,7 +181,7 @@ Flag these patterns automatically:
 
 | Situation                     | Hand to          |
 | ----------------------------- | ---------------- |
-| Major framework upgrade plan  | `tech-lead`      |
+| Major framework upgrade plan  | `tech`      |
 | Build failure after update    | `build`          |
 | Security vulnerability in dep | `guardian`       |
 | Deployment after updates      | `ops` / `deploy` |

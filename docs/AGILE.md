@@ -57,7 +57,7 @@ Everything that already works stays untouched:
 |------------|--------|-----------|---------------|
 | **Product Owner** | Abdout | Sprint goals, architecture, final approval | `product` agent writes stories and ICE scores; Abdout approves |
 | **QA Lead** | Ali | Judgment QA, client demos, sales pipeline | `quality` agent runs automated QA; Ali does human judgment passes |
-| **Research Lead** | Samia | Vision input, R&D, Kun caretaking | `growth` agent drafts content; Samia reviews and directs via screen reader |
+| **Research Lead** | Samia | Vision input, R&D, Kun caretaking | `marketing` agent drafts content; Samia reviews and directs via screen reader |
 | **Operations Lead** | Sedon | Saudi ops, physical tasks, reliable delivery | `ops` agent monitors infrastructure; Sedon executes physical tasks |
 | **Scrum Facilitator** | captain agent | Runs all ceremonies, tracks metrics, generates reports | N/A — IS the AI |
 
@@ -414,7 +414,7 @@ LEAD → RESEARCH → PITCH → FOLLOW-UP → CONVERT or CLOSE
 
 Kanban-style — Ali manages his pipeline. Not sprint-committed (sales has its own rhythm).
 
-**Owner**: Ali + `revenue` agent (proposal generation)
+**Owner**: Ali + `sales` agent (proposal generation)
 **Tracking**: GitHub Issue with `type:sales` label
 
 **Stages (tracked as issue labels):**
@@ -434,7 +434,7 @@ QUESTION → RESEARCH → FINDINGS → APPLY or ARCHIVE
 
 **Time-boxed**: 1 week maximum. If not answered in a week, archive with what was found.
 
-**Owner**: Samia + `growth` agent (drafts, summaries)
+**Owner**: Samia + `marketing` agent (drafts, summaries)
 **Tracking**: GitHub Issue with `type:research` label
 
 **Format:**

@@ -168,7 +168,7 @@ flowchart TD
     S2 -- "no" --> S4
     S3 --> S4["Rust: chat::ask<br/>settings · profile · department<br/>repo allowed?"]
     S4 --> S5["Build the run<br/>folder · --add-dir · route flags<br/>preface · suffix · 2-hour limit"]
-    S5 --> C["claude -p stream-json<br/>--permission-mode plan<br/>--model opus --effort high<br/>--agent producer"]:::claude
+    S5 --> C["claude -p stream-json<br/>--permission-mode plan<br/>--model opus --effort high<br/>--agent video"]:::claude
     C --> N(["→ Producer"]):::done
 
     classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
@@ -184,7 +184,7 @@ flowchart TD
 %%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
 flowchart TD
     L0(["Producer starts"]):::done
-    L0 --> L["Loads department CLAUDE.md<br/>producer.md · your rules,<br/>skills and hooks"]:::claude
+    L0 --> L["Loads department CLAUDE.md<br/>video.md · your rules,<br/>skills and hooks"]:::claude
     L --> PR1["Gathers: project · brand<br/>markets · captures · references"]:::claude
     PR1 --> PR2["Lists actions that need your OK<br/>each with its command"]:::claude
     PR2 --> PR3["Writes the plan in your language<br/>brief · 2–3 questions · journey<br/>first step"]:::claude
@@ -403,7 +403,7 @@ It also raised the open questions it found (price wording, an empty music folder
 ```bash
 claude -p --output-format stream-json --verbose --permission-mode plan \
   --add-dir /Users/abdout/hogwarts --add-dir /Users/abdout/media \
-  --model opus --effort high --agent producer \
+  --model opus --effort high --agent video \
   -- "Working in hogwarts for the video department.
 
 ## Task
@@ -422,7 +422,7 @@ claude -p --output-format stream-json --verbose --permission-mode plan \
 **Inside Claude Code**, the run loads:
 
 - the department's `CLAUDE.md`,
-- the **producer** agent (`.claude/agents/producer.md`),
+- the **video** agent (`.claude/agents/video.md`),
 - your user-level rules, skills and hooks.
 
 The producer is the only role that talks to you. Any building it hands off goes to Sonnet
@@ -465,7 +465,7 @@ the plan, on the same session (`--resume`), opens phase 2.
 | Video pack | Options, routes, formula, folders, health check, time limit | `kun/departments/video/pack.json` |
 | Department folder | Where every run starts; its rules | `~/.kun/machine/video/` (from `departments/video/prompt.md`) |
 | Claude Code | Runs refine and the turn on your own subscription | `claude` on your computer |
-| Producer agent | Plans, asks, routes; never approves | `kun/.claude/agents/producer.md` |
+| Video agent | Plans, asks, routes; never approves | `kun/.claude/agents/video.md` |
 | produce ledger | Projects, stages, gates; `readiness` for the light | `~/.claude/skills/produce/scripts/produce.mjs` |
 | Brand and markets | Identity, price, currency, dialect | `kun/content/media/brand-kit.json`, `markets.json` |
 | Media library | Captures, projects, deliverables | `~/media/`, `~/media/_projects/<ID>/` |

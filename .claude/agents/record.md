@@ -4,7 +4,7 @@ description: "Flow videographer — records demo videos and screenshot sets of r
 model: sonnet
 effort: medium
 version: "databayt v1.0"
-handoff: [quality, growth, media-qa]
+handoff: [quality, marketing, media-qa]
 lane: build
 ---
 

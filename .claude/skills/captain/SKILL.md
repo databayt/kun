@@ -186,7 +186,7 @@ The captain agent's Decision Matrix governs what counts as ACT vs ESCALATE vs DE
 
 - **ACT-tier suggestions**: the captain proceeds (with confirmation prompt for visibility).
 - **ESCALATE-tier suggestions**: the captain proposes a dispatch to Apple Notes Dispatch/Inbox with deadline tag — does NOT act.
-- **DELEGATE-tier suggestions**: the captain identifies the right agent (revenue / growth / support / product / analyst / tech-lead / ops / guardian) and proposes the handoff.
+- **DELEGATE-tier suggestions**: the captain identifies the right agent (sales / marketing / support / product / rnd / tech / ops / guardian) and proposes the handoff.
 
 ## Companion skills
 
@@ -201,8 +201,8 @@ The captain agent's Decision Matrix governs what counts as ACT vs ESCALATE vs DE
 
 ## Reference
 
-- Source agent: `/Users/abdout/kun/.claude/agents/captain.md`
-- Standard of Performance: see captain.md "Captain's Standard of Performance" section (12 principles)
+- Source agent: `/Users/abdout/kun/.claude/agents/business.md`
+- Standard of Performance: see business.md "Captain's Standard of Performance" section (12 principles)
 - Plan: `/Users/abdout/.claude/plans/i-want-you-to-unified-piglet.md`
 
 ## Operating mantra

@@ -107,7 +107,7 @@ Spelled out so the follow-up is turnkey — none of this ships in the docs-only 
 ### Design driver — the repurposing multiplier
 
 The binding constraint is **content capacity, not channel count**: Samia carries 2–3 core pieces
-a week (growth.md), Abdout occasional technical posts. 5 brands × 8 channels is only feasible if
+a week (marketing.md), Abdout occasional technical posts. 5 brands × 8 channels is only feasible if
 the pipeline treats a post as **one core piece → N platform-native variants** (Claude adapts
 hook, length, caption, hashtags, ratio, AR/EN per platform; `/higgs` re-ratios the media). So the
 `/social` skill and the eventual `SocialPost` model must be **variant-aware from day one**: a
@@ -118,7 +118,7 @@ parent `piece` with per-platform child `variants`, not 8 disconnected posts. ~3 
 ### Engine config (`/social` capability) — ✅ done 2026-07-10
 
 - `.claude/skills/social/SKILL.md` — the workflow skill (resolve → draft → media → stage → publish).
-- Extend `.claude/agents/growth.md` — add a Social Automation section + `hermes`/`posthog` tool
+- Extend `.claude/agents/marketing.md` — add a Social Automation section + `hermes`/`posthog` tool
   rows + a decision-matrix row (auto-publish → human gate + `/decide`). (Don't add a new agent —
   growth already owns "social media.")
 - `.claude/vocabulary.json` — a `social` spell in the Pensieve school:

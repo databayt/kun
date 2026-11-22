@@ -13,13 +13,13 @@
 ## Company Hierarchy
 
 ```
-                         captain (CEO brain)
+                         business (CEO brain)
                         /       |        \
-                   revenue   growth    support        (Business)
+                   sales     marketing   support        (Business)
                       \       /
-                   product  analyst                   (Product)
+                   product  rnd                       (Product)
                       |
-                tech-lead — ops — guardian             (Tech Leadership)
+                tech — ops — guardian             (Tech Leadership)
                       |
                  orchestration                        (Coordination)
                     /    \
@@ -32,14 +32,14 @@
 
 | Agent       | Purpose                                         | Scope                        |
 | ----------- | ----------------------------------------------- | ---------------------------- |
-| **captain** | CEO brain — weekly allocation, revenue strategy | All products, all 7 humans |
+| **business** | CEO brain — weekly allocation, revenue strategy | All products, all 7 humans |
 
 ### Tier 1 — Business (3)
 
 | Agent       | Purpose                                      | Primary Human |
 | ----------- | -------------------------------------------- | ------------- |
-| **revenue** | Pricing, proposals, contracts, cost analysis | Ali + Sedon   |
-| **growth**  | Content, SEO, social, developer relations    | Samia + Ali   |
+| **sales** | Pricing, proposals, contracts, cost analysis | Ali + Sedon   |
+| **marketing**  | Content, SEO, social, developer relations    | Samia + Ali   |
 | **support** | Onboarding, issue triage, knowledge base     | Sedon + Ali   |
 
 ### Tier 2 — Product (2)
@@ -47,13 +47,13 @@
 | Agent       | Purpose                                                | Primary Human |
 | ----------- | ------------------------------------------------------ | ------------- |
 | **product** | Roadmap across all 5 products, stories, prioritization | All team      |
-| **analyst** | Market intelligence, competitors, analytics            | Ali + Samia   |
+| **rnd** | Market intelligence, competitors, analytics            | Ali + Samia   |
 
 ### Tier 3 — Tech Leadership (3)
 
 | Agent         | Purpose                                       | Primary Human  |
 | ------------- | --------------------------------------------- | -------------- |
-| **tech-lead** | Architecture across 14 repos, shared patterns | Abdout         |
+| **tech** | Architecture across 14 repos, shared patterns | Abdout         |
 | **ops**       | CI/CD, costs, monitoring, infrastructure      | Sedon + Abdout |
 | **guardian**  | Security, performance budgets, compliance     | Abdout         |
 
@@ -98,7 +98,7 @@
 | **build**   | Turbopack, TypeScript validation, bundles        | deploy           |
 | **deploy**  | Vercel, monitoring, rollback, staging            | -                |
 | **test**    | Vitest, Playwright, 95% coverage target          | -                |
-| **package** | Cross-repo dependency audit, upgrades, alignment | tech-lead, build |
+| **package** | Cross-repo dependency audit, upgrades, alignment | tech, build |
 
 ### VCS (2)
 
@@ -123,8 +123,8 @@
 
 | Agent       | Purpose                                                                             | Handoff                     |
 | ----------- | ----------------------------------------------------------------------------------- | --------------------------- |
-| **learn**   | Org intelligence — extract patterns, conventions, team dynamics from git history    | captain, tech-lead, analyze |
-| **analyze** | Repo config generator — analyze patterns, generate CLAUDE.md + agents + rules as PR | learn, tech-lead, github    |
+| **learn**   | Org intelligence — extract patterns, conventions, team dynamics from git history    | business, tech, analyze |
+| **analyze** | Repo config generator — analyze patterns, generate CLAUDE.md + agents + rules as PR | learn, tech, github    |
 
 ---
 
@@ -151,19 +151,19 @@ Handing off to `react` agent:
 ## Inter-Agent Relationships
 
 ```
-captain (company brain)
+business (company brain)
     │
     ├── Business Layer
-    │   ├── revenue (deals, pricing, Ali + Sedon)
-    │   ├── growth (content, SEO, Samia + Ali)
+    │   ├── sales (deals, pricing, Ali + Sedon)
+    │   ├── marketing (content, SEO, Samia + Ali)
     │   └── support (customers, onboarding, Sedon + Ali)
     │
     ├── Product Layer
     │   ├── product (roadmap, stories, all team)
-    │   └── analyst (market intel, Ali + Samia)
+    │   └── rnd (market intel, Ali + Samia)
     │
     └── Tech Leadership
-        ├── tech-lead (cross-repo architecture, Abdout)
+        ├── tech (cross-repo architecture, Abdout)
         ├── ops (delivery, costs, Sedon + Abdout)
         └── guardian (security, quality, Abdout)
             │
@@ -179,7 +179,7 @@ captain (company brain)
                 │   └── shadcn → atom → template → block
                 │
                 ├── DevOps Chain
-                │   └── build → deploy, package → tech-lead
+                │   └── build → deploy, package → tech
                 │
                 ├── Learning Chain
                 │   └── learn → analyze → github (PR)
@@ -195,12 +195,12 @@ Cross-references:
   authjs → middleware (auth flow)
   optimize → architecture + prisma (feature analysis)
   performance → nextjs + react + prisma + build (runtime optimization)
-  revenue ↔ analyst ↔ product (pricing feedback loop)
-  growth ↔ product (content aligned with releases)
-  support → tech-lead (bug escalation)
+  sales ↔ rnd ↔ product (pricing feedback loop)
+  marketing ↔ product (content aligned with releases)
+  support → tech (bug escalation)
   ops → guardian (security review of infra)
   learn → analyze (intelligence feeds config generation)
-  learn → captain (org insights inform strategy)
+  learn → business (org insights inform strategy)
   analyze → github (config PRs follow workflow cycle)
 ```
 

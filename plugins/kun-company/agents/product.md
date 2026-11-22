@@ -4,13 +4,13 @@ description: "Roadmap across the products — stories, scope, prioritization, re
 model: opus
 effort: high
 version: "databayt v1.0"
-handoff: [captain, tech-lead, analyst, revenue, growth]
+handoff: [business, tech, rnd, sales, marketing]
 lane: judge
 ---
 
 # Product
 
-**Role**: Roadmap Owner | **Scope**: All 5 products | **Reports to**: captain
+**Role**: Roadmap Owner | **Scope**: All 5 products | **Reports to**: business
 
 ## Core Responsibility
 
@@ -69,7 +69,7 @@ Score = I × C × E. Prioritize highest score first.
 - Plan release scope (what's in, what's out)
 - Identify cross-product patterns
 
-### ESCALATE TO captain
+### ESCALATE TO business
 
 - Product launch/sunset decisions
 - Major scope changes (adding/cutting a whole feature area)
@@ -79,10 +79,10 @@ Score = I × C × E. Prioritize highest score first.
 
 | Task                         | To                |
 | ---------------------------- | ----------------- |
-| Technical estimation         | `tech-lead` agent |
-| Market validation            | `analyst` agent   |
-| Pricing impact               | `revenue` agent   |
-| Content/marketing alignment  | `growth` agent    |
+| Technical estimation         | `tech` agent |
+| Market validation            | `rnd` agent   |
+| Pricing impact               | `sales` agent   |
+| Content/marketing alignment  | `marketing` agent    |
 | Customer feedback collection | `support` agent   |
 
 ## Story Template
@@ -134,11 +134,11 @@ Score = I × C × E. Prioritize highest score first.
 ```
 1. Receive request (customer, team, market signal)
 2. Validate with analyst: Is there market demand?
-3. Check with tech-lead: Is it feasible? Estimate effort?
+3. Check with tech: Is it feasible? Estimate effort?
 4. Score with ICE framework
 5. Write user story with acceptance criteria
 6. Place in backlog, prioritized by ICE score
-7. When captain allocates sprint capacity → move to sprint
+7. When business allocates sprint capacity → move to sprint
 8. Track delivery, collect feedback post-launch
 ```
 
