@@ -1,83 +1,84 @@
 ---
 title: Connectors
-description: GitHub, Figma, Slack, Linear and service integrations
+description: The connectors, plugins and local MCP servers the team works with, and where each one lives
 ---
 
 # Connectors
 
-Service integrations that connect Kun to external platforms. Each connector is backed by an MCP server and triggered by keywords.
+Claude reaches outside services in three ways. The Machine app lists all three on one page,
+**Connectors** in the mega menu, laid out like the
+[claude.com marketplace](https://claude.com/marketplace/connectors-plugins): a logo, a name, a
+badge and one line per card, filtered by category.
 
-## Configured Services
+| Kind | What it is | Where it is added |
+|---|---|---|
+| **Connector** | A remote MCP server signed in through claude.ai | Claude desktop → Settings → Connectors. It then reaches Claude Code too, as `claude.ai <Name>` |
+| **Plugin** | A Claude Code bundle: skills, agents, and usually an MCP server | `/plugin` in Claude Code, from a marketplace such as `claude-plugins-official` |
+| **Local MCP** | A server kun registers on the machine | `.claude/mcp.json` is the catalog. `setup.sh` runs `claude mcp add` for each one, and the Machine app switches them on and off under `.claude → mcp` |
 
-| Service | Account | MCP Server | Trigger |
-|---------|---------|-----------|---------|
-| **GitHub** | abdout (databayt org) | github | `push`, `pr`, `issue` |
-| **Figma** | databayt designs | figma | `figma`, design URLs |
-| **Vercel** | osman-abdouts-projects | vercel | `deploy`, `ship` |
-| **Neon** | databayt databases | neon | `prisma`, `migration` |
-| **Stripe** | databayt payments | stripe | `payment`, `billing` |
-| **Sentry** | databayt monitoring | sentry | `error`, `debug` |
-| **Linear** | databayt workspace | linear | `linear`, `task` |
-| **PostHog** | databayt analytics | posthog | `analytics` |
+The list in the app lives in `machine/src/components/connectors/registry.ts`. Edit it there and
+update this page with it. "Installed" on a card means one of its names shows up in `claude mcp list`.
 
-## Planned Connectors
+## Creative
 
-| Service | Account | Status |
-|---------|---------|--------|
-| **Slack** | hogwarts workspace | MCP configured |
-| **Notion** | databayt workspace | Needs API key |
-| **Discord** | databayt server | Planned |
+| | Kind | For | Keywords |
+|---|---|---|---|
+| **Blender** | Local MCP (`blender`) | Builds and renders 3D scenes in the live Blender: flythroughs, product shots | `blender`, `3d`, `بلندر` |
+| **Blender Lab** | Local MCP (`blender-lab`) | Blender's official server: `.blend` summaries, API and manual search, thumbnails | `blend file` |
+| **FilmCraft** | Local MCP (`filmcraft`, `filmcraft-desktop`) | The free command-driven video editor that replaced Adobe: cuts, captions, timeline | `filmcraft`, `rough cut`, `مونتاج` |
+| **Figma** | Connector (+ `figma-desktop`) | Turns frames into code, sends pages back into Figma, makes FigJam diagrams. The free plan allows 20 calls a month | `figma` |
+| **Canva** | Plugin | Searches, creates, fills and exports designs, with brand checks and social resizes | `canva` |
+| **Adobe for creativity** | Plugin | Adobe's creative skills | `adobe` |
+| **After Effects** / **Premiere Pro** | Local MCP | Controls the Adobe apps through a bridge panel, for when a client file needs them | `after effects`, `premiere` |
+| **Claude Design** | Connector | Anthropic Labs canvas: design-system sync and handoff to code. Sign in with `/design-login` | `claude design` |
 
-## Job-hunting connectors (measured 2026-10-04)
+## Developer tools
+
+| | Kind | For | Keywords |
+|---|---|---|---|
+| **GitHub** | Plugin (`github`) | Repos, issues, Actions and releases across databayt (main only, no PRs) | `github`, `issue`, `push` |
+| **Cloudflare** | Local MCP (`cloudflare-docs`) | Workers, Containers, DNS and crons: the production platform | `cloudflare`, `wrangler`, `deploy` |
+| **Neon** | Connector (`Neon`) | Postgres projects, branches, migrations and slow queries | `neon`, `prisma`, `migration` |
+| **Vercel** | Plugin | Previews and logs for the projects still on Vercel | `vercel` |
+| **Supabase** | Connector | Client projects hosted on Supabase | `supabase` |
+| **Sentry** | Local MCP | Production errors and traces | `sentry`, `incident` |
+| **shadcn/ui** | Local MCP | Browses and installs components from the registries | `shadcn` |
+| **Context7** · **Ref** | Plugin · Local MCP | Docs matched to the installed version of each library | `docs` |
+| **Chrome DevTools** | Plugin (`chrome-devtools`) | The signed-in session Chrome, without stealing focus | `chrome`, `lighthouse` |
+| **Playwright** | Plugin (`browser`) | A headless browser for QA and screenshots | `e2e`, `qa` |
+| **MarkItDown** | Local MCP | Turns PDFs, Office files, audio and pages into Markdown | `convert` |
+
+## Productivity
+
+| | Kind | For | Keywords |
+|---|---|---|---|
+| **Slack** | Connector | Team channels, threads and canvases | `slack` |
+| **Gmail** · **Google Drive** · **Google Calendar** | Connector | Inbox, files (recordings are copied here) and calendar | `email`, `drive`, `calendar` |
+| **Notion** · **Linear** · **Atlassian** | Connector | Workspaces and trackers, for clients who use them | `notion`, `linear`, `jira` |
+| **Airtable** | Local MCP | Airtable bases | `airtable` |
+
+## Sales & business
+
+| | Kind | For | Keywords |
+|---|---|---|---|
+| **Stripe** | Local MCP | Payments, subscriptions and invoices | `stripe`, `billing` |
+| **HubSpot** · **Intercom** | Connector | Client CRMs and support history. [Twenty](/docs/crm) stays our own CRM | `crm`, `support` |
+| **PostHog** | Local MCP | Product analytics and feature flags | `analytics` |
+| **Upwork** · **Indeed** | Connector | Hiring freelancers, and searching job postings | `upwork`, `jobs` |
+
+### Limits measured on the job-hunting connectors (2026-10-04)
 
 | Connector | Works for | Limits |
 |---|---|---|
-| Indeed (claude.ai) | Searching postings + full details from Code | No RW/KE country codes; rate-limited after ~40 calls; "remote" often means US-only, so read the details |
-| Upwork (claude.ai) | Hiring freelancers (client side) | Cannot search jobs for a freelancer; Upwork job hunting stays a Cowork browser routine |
-| LinkedIn | — | No connector available |
-| WhatsApp (Hermes Baileys bridge) | Sending applications and briefs from Abdout's own number | Personal-number ban risk → 5 cold applications/day; see [Hermes](/docs/hermes) |
-
-## GitHub Integration
-
-The deepest integration. Used for:
-
-- **Code**: Push, pull, branch management
-- **Issues**: 22 labels (priority/type/scope/assign), 3 milestones
-- **PRs**: Create, review, merge
-- **Actions**: CI/CD pipeline triggers
-
-### Labels
-
-| Category | Labels |
-|----------|--------|
-| Priority | P0-critical, P1-high, P2-medium, P3-low |
-| Type | agent, skill, mcp, hook, rule, memory, docs, infra |
-| Scope | captain, business, product, tech, specialist, cross-repo |
-| Assign | abdout, ibrahim, ali, mutaz, samia, sedon, captain |
-
-## Figma Integration
-
-Design-to-code workflow:
-
-```
-"figma https://figma.com/design/abc/..."
-  → Figma MCP: get_design_context
-  → Map to existing shadcn/ui + atoms
-  → Generate components with Tailwind (RTL-aware)
-```
-
-## Vercel Integration
-
-Deployment automation:
-
-```
-"deploy" → build verification → Vercel MCP → poll status → report URL
-"ship" → production deployment with retry (max 5)
-```
+| Indeed | Searching postings and reading the full details from Code | No RW or KE country codes. Rate-limited after about 40 calls. "Remote" often means US-only |
+| Upwork | Hiring, from the client side | Cannot search jobs as a freelancer |
+| LinkedIn | — | There is no connector |
+| WhatsApp (the [Hermes](/docs/hermes) bridge) | Sending from Abdout's own number | Ban risk on a personal number, so at most 5 cold messages a day |
 
 ## Authentication
 
-Most connectors authenticate via:
-- **Environment variables** in `~/.claude/.env`
-- **macOS Keychain** via the keychain MCP
-- **OAuth** for remote MCP servers (Stripe, Linear, Sentry)
+- **Connectors and plugin servers** sign in with OAuth. A server that shows `Needs authentication` in `claude mcp list` needs `/mcp` in Claude Code, or one click in Claude desktop.
+- **Local servers** read keys from the Keychain through the [credentials](/docs/credentials) lane and the central `.env`. Keys are never written into `mcp.json`.
+- **Remove a server you don't use; don't just disable it.** An unused server still costs context on every session.
+
+See [MCP](/docs/mcp) for how servers load, and [Interconnection](/docs/interconnection) for how a keyword reaches the right one.
