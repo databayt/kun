@@ -1,0 +1,43 @@
+{
+  "$comment": "The shell launchers, one letter per agent lane. The single source: onboarding-mac.sh / onboarding-windows.ps1 (lib/agents.sh) write the managed block `# BEGIN databayt agents … # END databayt agents` from this file, `kun-ready --fix-launchers` rewrites it, readiness steps launcher.<id> probe it, and Machine -> Settings -> Agents edits it. `agent` is the onboarding selection token; `needs` is the readiness step that installs the CLI. A machine profile (machines/<login>.json) may narrow the set with `launchers: [\"c\",\"a\"]`.",
+  "version": 1,
+  "launchers": [
+    {
+      "id": "c",
+      "name": "Claude Code (primary)",
+      "bin": "claude",
+      "args": ["--dangerously-skip-permissions"],
+      "bypass": true,
+      "agent": "code",
+      "needs": "claude.cli"
+    },
+    {
+      "id": "a",
+      "name": "Antigravity (secondary)",
+      "bin": "agy",
+      "args": ["--dangerously-skip-permissions"],
+      "bypass": true,
+      "agent": "agy",
+      "needs": "agy.cli"
+    },
+    {
+      "id": "o",
+      "name": "opencode (tertiary)",
+      "bin": "opencode",
+      "args": [],
+      "bypass": true,
+      "bypassNote": "config-level: no flag exists; the step opencode.allow sets \"permission\": \"allow\" in ~/.config/opencode/opencode.json",
+      "agent": "opencode",
+      "needs": "opencode.cli"
+    },
+    {
+      "id": "h",
+      "name": "Hermes gateway (optional)",
+      "bin": "hermes",
+      "args": [],
+      "bypass": false,
+      "agent": "hermes",
+      "needs": "hermes.cli"
+    }
+  ]
+}

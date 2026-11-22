@@ -5,6 +5,7 @@ import {
   POOL_LOG_MAX,
   POOL_MAX_CLAIMS,
   POOL_STALE_MS,
+  POOL_UPLOAD_STALE_MS,
   poolParamsSchemas,
 } from "./contract";
 import type {
@@ -19,7 +20,7 @@ import type {
   Resources,
   Share,
 } from "./contract";
-import { sanitizeFileName } from "./tasks";
+import { doctorRefusal, sanitizeFileName } from "./tasks";
 import { defaultGetSigner, defaultSigner } from "./upload";
 import type { GetSigner, Signer } from "./upload";
 
@@ -47,6 +48,11 @@ export interface JobRow {
 export interface PoolStore {
   updateMany(args: { where: Record<string, unknown>; data: Record<string, unknown> }): Promise<{ count: number }>;
   findUnique(args: { where: { id: string } }): Promise<JobRow | null>;
+}
+
+/** The slice of the Prisma `machineMessage` delegate `finishJob` writes through. */
+export interface MessageStore {
+  create(args: { data: { toLogin: string; fromLogin: string; kind: string; body: { text: string } } }): Promise<unknown>;
 }
 
 const keyBase = (id: string, dir: "in" | "out") => `pool/${id}/${dir}/`;
@@ -82,8 +88,59 @@ export function toJob(r: JobRow, outputs?: PoolJob["outputs"]): PoolJob {
   };
 }
 
-/** Running jobs silent for POOL_STALE_MS go back to the queue (claims are kept, so the cap still holds). */
+/** An `uploading` job whose requester never called /pool/ready within 24 h is cancelled. */
+export async function cancelStaleUploads(store: PoolStore, now = new Date()): Promise<number> {
+  const { count } = await store.updateMany({
+    where: { status: "uploading", createdAt: { lt: new Date(now.getTime() - POOL_UPLOAD_STALE_MS) } },
+    data: { status: "cancelled", finishedAt: now },
+  });
+  return count;
+}
+
+/** Requester: every input is PUT, so uploading → queued. Only the requester, only from `uploading`. */
+export async function markReady(store: PoolStore, id: string, login: string): Promise<boolean> {
+  const { count } = await store.updateMany({
+    where: { id, requester: login, status: "uploading" },
+    data: { status: "queued" },
+  });
+  return count === 1;
+}
+
+/**
+ * Donor: every output is uploaded, so running → done, and the requester gets a note through the existing
+ * MachineMessage / `unread` flow. The message is best-effort: a failed write never un-finishes the job.
+ */
+export async function finishJob(
+  store: PoolStore,
+  messages: MessageStore,
+  id: string,
+  donor: string,
+  now = new Date(),
+): Promise<boolean> {
+  const row = await store.findUnique({ where: { id } });
+  if (!row || row.donor !== donor || row.status !== "running" || !Array.isArray(row.outputs)) return false;
+  const r = await store.updateMany({
+    where: { id, donor, status: "running" },
+    data: { status: "done", progress: 1, finishedAt: now },
+  });
+  if (r.count !== 1) return false;
+  await messages
+    .create({
+      data: {
+        toLogin: row.requester,
+        fromLogin: donor,
+        kind: "note",
+        body: { text: `Pool job ${row.kind} ${row.id} is done on ${donor}'s machine.` },
+      },
+    })
+    .catch(() => undefined);
+  return true;
+}
+
+/** Running jobs silent for POOL_STALE_MS go back to the queue (claims are kept, so the cap still holds).
+ *  Also sweeps stale `uploading` jobs, so list and claim keep the table tidy. */
 export async function requeueStale(store: PoolStore, now = new Date()): Promise<number> {
+  await cancelStaleUploads(store, now);
   const cutoff = new Date(now.getTime() - POOL_STALE_MS);
   const { count } = await store.updateMany({
     where: { status: "running", OR: [{ lastProgressAt: { lt: cutoff } }, { lastProgressAt: null, updatedAt: { lt: cutoff } }] },
@@ -106,6 +163,8 @@ export interface ClaimInput {
   login: string;
   share: Share | null;
   resources: Resources | null;
+  /** The donor's stored readiness (for the doctor); omit to skip the check. */
+  readiness?: unknown;
 }
 
 /** Atomic claim: exactly one concurrent caller flips queued → running. */
@@ -117,6 +176,7 @@ export async function claimJob(
 ): Promise<PoolClaimResponse> {
   const refuse = (error: PoolClaimError): PoolClaimResponse => ({ ok: false, error });
   if (!input.share?.enabled) return refuse("share");
+  if (doctorRefusal(input.readiness, now)) return refuse("doctor");
   await requeueStale(store, now);
   const row = await store.findUnique({ where: { id: input.id } });
   if (!row) return refuse("not-found");

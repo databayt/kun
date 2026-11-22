@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { heartbeatSchema, poolCreateSchema, shareSchema } from "./contract";
-import { claimJob, meetsNeeds, poolKey, requeueStale, recordProgress } from "./pool";
-import type { JobRow, PoolStore } from "./pool";
+import { cancelStaleUploads, claimJob, finishJob, markReady, meetsNeeds, poolKey, requeueStale, recordProgress } from "./pool";
+import type { JobRow, MessageStore, PoolStore } from "./pool";
 
 const row = (o: Partial<JobRow> = {}): JobRow => ({
   id: "j1", kind: "encode", params: { preset: "proxy" }, requester: "ali", target: null, donor: null,
@@ -24,6 +24,9 @@ function memStore(initial: JobRow): PoolStore & { row: JobRow } {
       if (where.id !== undefined && where.id !== r.id) return { count: 0 };
       if (where.status !== undefined && where.status !== r.status) return { count: 0 };
       if (where.donor !== undefined && where.donor !== r.donor) return { count: 0 };
+      if (where.requester !== undefined && where.requester !== r.requester) return { count: 0 };
+      const created = (where.createdAt as { lt?: Date } | undefined)?.lt;
+      if (created !== undefined && !(s.row.createdAt < created)) return { count: 0 };
       const lt = (where.claims as { lt?: number } | undefined)?.lt;
       if (lt !== undefined && !((r.claims as number) < lt)) return { count: 0 };
       if (where.OR) {
@@ -140,5 +143,77 @@ describe("heartbeat additions", () => {
   });
   it("rejects a bad share kind", () => {
     expect(shareSchema.safeParse({ enabled: true, kinds: ["claude"], idleMinutes: 10 }).success).toBe(false);
+  });
+});
+
+describe("uploading and ready", () => {
+  const ready = { enabled: true, kinds: ["encode" as const], idleMinutes: 10 };
+  it("a job still uploading cannot be claimed", async () => {
+    const st = memStore(row({ status: "uploading", createdAt: new Date() }));
+    expect(await claim(st, "moed", ready)).toEqual({ ok: false, error: "taken" });
+    expect(st.row.status).toBe("uploading");
+  });
+  it("only the requester moves uploading to queued, then a donor can claim", async () => {
+    const st = memStore(row({ status: "uploading", createdAt: new Date() }));
+    expect(await markReady(st, "j1", "moed")).toBe(false);
+    expect(st.row.status).toBe("uploading");
+    expect(await markReady(st, "j1", "ali")).toBe(true);
+    expect(st.row.status).toBe("queued");
+    expect(await markReady(st, "j1", "ali")).toBe(false);
+    expect((await claim(st, "moed", ready)).ok).toBe(true);
+  });
+  it("cancels an uploading job older than 24 h, lazily on requeueStale", async () => {
+    const now = new Date("2026-11-22T12:00:00Z");
+    const st = memStore(row({ status: "uploading", createdAt: new Date(now.getTime() - 25 * 3600_000) }));
+    await requeueStale(st, now);
+    expect(st.row.status).toBe("cancelled");
+    const fresh = memStore(row({ status: "uploading", createdAt: new Date(now.getTime() - 3600_000) }));
+    expect(await cancelStaleUploads(fresh, now)).toBe(0);
+    expect(fresh.row.status).toBe("uploading");
+  });
+});
+
+describe("pool doctor gate", () => {
+  const sh = { enabled: true, kinds: ["encode" as const], idleMinutes: 10 };
+  const now = new Date("2026-11-22T12:00:00Z");
+  const gate = (pass: boolean, at: string) => ({ percent: 50, failing: [], catalogVersion: 5, gate: { pass, failing: ["engine.rules"], at } });
+  it("refuses a donor whose gate fails or is stale, allows fresh and absent", async () => {
+    const go = (readiness: unknown) =>
+      claimJob(memStore(row()), { id: "j1", login: "moed", share: sh, resources: null, readiness }, sign, now);
+    expect(await go(gate(false, "2026-11-22T11:00:00Z"))).toEqual({ ok: false, error: "doctor" });
+    expect(await go(gate(true, "2026-11-19T11:00:00Z"))).toEqual({ ok: false, error: "doctor" });
+    expect((await go(gate(true, "2026-11-22T11:00:00Z"))).ok).toBe(true);
+    expect((await go(undefined)).ok).toBe(true);
+  });
+});
+
+describe("finish", () => {
+  const messages = () => {
+    const sent: unknown[] = [];
+    const m: MessageStore & { sent: unknown[] } = { sent, async create(a) { sent.push(a.data); return a.data; } };
+    return m;
+  };
+  const running = (o: Partial<JobRow> = {}) =>
+    row({ status: "running", donor: "moed", outputs: [{ name: "o.mp4", key: "pool/j1/out/0-o.mp4", size: 1, contentType: "video/mp4" }], ...o });
+  it("marks done and writes a note to the requester", async () => {
+    const st = memStore(running());
+    const m = messages();
+    expect(await finishJob(st, m, "j1", "moed")).toBe(true);
+    expect(st.row.status).toBe("done");
+    expect(m.sent).toEqual([
+      { toLogin: "ali", fromLogin: "moed", kind: "note", body: { text: "Pool job encode j1 is done on moed's machine." } },
+    ]);
+  });
+  it("refuses a non-donor, a job without recorded outputs, and writes no message", async () => {
+    const m = messages();
+    expect(await finishJob(memStore(running()), m, "j1", "sara")).toBe(false);
+    expect(await finishJob(memStore(running({ outputs: null })), m, "j1", "moed")).toBe(false);
+    expect(m.sent).toEqual([]);
+  });
+  it("a failing message write never un-finishes the job", async () => {
+    const st = memStore(running());
+    const bad: MessageStore = { create: () => Promise.reject(new Error("db down")) };
+    expect(await finishJob(st, bad, "j1", "moed")).toBe(true);
+    expect(st.row.status).toBe("done");
   });
 });

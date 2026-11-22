@@ -11,7 +11,7 @@ export async function POST(request: Request): Promise<Response> {
   if (isResponse(auth)) return auth;
   const body = await readBody(request, poolIdSchema);
   if (isResponse(body)) return body;
-  const me = await db.machine.findUnique({ where: { id: auth.machineId }, select: { share: true, resources: true } });
+  const me = await db.machine.findUnique({ where: { id: auth.machineId }, select: { share: true, resources: true, readiness: true } });
   const share = shareSchema.safeParse(me?.share);
   const resources = resourcesSchema.safeParse(me?.resources);
   try {
@@ -20,6 +20,7 @@ export async function POST(request: Request): Promise<Response> {
       login: auth.login,
       share: share.success ? share.data : null,
       resources: resources.success ? resources.data : null,
+      readiness: me?.readiness,
     });
     return json(r, r.ok ? 200 : 409);
   } catch {

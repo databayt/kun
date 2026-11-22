@@ -19,6 +19,7 @@ which is how the founder's own Mac behaves.
 | `access.catalog` | `profile`: the catalog lists, installs and uninstalls only the profile's packs and what they need. `all`: everything. |
 | `access.engine` | Whether the Engine section is shown. |
 | `secrets` | Names the person may store in the OS credential store (Keychain / Credential Manager). Passed to a run as environment variables, never shown to the UI. |
+| `launchers` | Optional list of launcher letters (`c`, `a`, `o`, `h`; see `.claude/machine/launchers.json`) written to the shell's managed block. Omit for every launcher whose agent is installed. |
 | `hidden` | Catalog ids (`skill:edit`) this machine never gets, even inside its packs: not in the menu, not installable, not linked into the workspace. Use it for lanes that need someone else's credentials or another OS (see `moed.md`). |
 
 The registry (`pnpm kun:registry`) publishes each file as a `kun:machine` item that depends on

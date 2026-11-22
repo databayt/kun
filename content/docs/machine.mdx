@@ -186,7 +186,7 @@ Settings has a **Model** page with four routes: **Claude** (the default, on your
 
 ## Machines
 
-The **Machines** page lists every machine on the network: name, OS, department, an online dot (seen in the last 15 minutes) and one line of resources, for example "M4 Pro · 48 GB · 20-core GPU · 120 GB free · on power". Open one for every row: CPU, RAM, GPU, free disk, Google Drive (read locally from Drive for desktop, no Google sign-in), internet, power, last seen, current task and readiness.
+The **Machines** page lists every machine on the network: name, OS, department, an online dot (seen in the last 15 minutes) and one line of resources, for example "M4 Pro · 48 GB · 20-core GPU · 120 GB free · on power". Open one for every row: CPU, RAM, GPU, free disk, Google Drive (read locally from Drive for desktop, no Google sign-in), internet, power, last seen, current task, readiness percent and the doctor verdict.
 
 Each heartbeat carries these as optional fields, so an older app or a failed read still reports. kun keeps the last values on the machine's row and serves them in `GET /api/machine/team`.
 
@@ -196,11 +196,12 @@ Heavy jobs can run on a teammate's idle machine. It is opt-in on both ends.
 
 - **Donor.** Turn on **Share when idle** on your machine card and pick the kinds you accept. A job is claimed only when you are on mains power, idle for at least 10 minutes (configurable), have the RAM and disk the job needs and the tool installed. If you come back, the run stops and the job goes back to the queue.
 - **Kinds are fixed templates:** `transcribe` (whisper to `.srt` or `.txt`), `render` (Blender, frame range and engine) and `encode` (ffmpeg presets `h264-web`, `hevc`, `proxy`). Parameters are validated on both ends and never reach a shell. **Claude runs are not a pool kind.**
-- **Requester.** On the Machines page choose **Send a job**, pick a kind and files, optionally target one machine, and send. Jobs show status and progress, with **Download** when done.
+- **Requester.** On the Machines page choose **Send a job**, pick a kind and files, optionally target one machine, and send. The job starts as `uploading`; when every input is uploaded the app calls `POST /pool/ready` and it becomes `queued`, which is the only state a donor can claim (an `uploading` job older than 24 hours is cancelled). Jobs show status and progress, with **Download** when done, and when a donor finishes you get a note in your messages ("Pool job … is done on … machine").
+- **Doctor.** A donor whose doctor verdict fails or is older than 48 hours is refused with `doctor`, like a task claim (see [Onboarding](/docs/onboarding#doctor)).
 - **Files** go through presigned links under `pool/<jobId>/` (2 GB each; downloads expire in 10 minutes). The donor deletes its local copy when the job ends, and the bucket expires `pool/` after 7 days.
 - **Reliability.** Claiming is an atomic compare-and-swap, a job is claimed at most twice, and a running job silent for 15 minutes returns to the queue.
 
-API (bearer token): `POST /api/machine/pool` (create), `GET /api/machine/pool` (mine + queue), `POST /pool/claim`, `/pool/progress`, `/pool/done` (returns output upload links), `/pool/finish`, `/pool/cancel`. The shapes are in `src/lib/machine/contract.ts`.
+API (bearer token): `POST /api/machine/pool` (create), `GET /api/machine/pool` (mine + queue), `POST /pool/claim`, `/pool/progress`, `/pool/ready` (requester: inputs uploaded), `/pool/done` (returns output upload links; up to 50 files, or one archive), `/pool/finish` (marks done and notifies the requester), `/pool/cancel`. The shapes are in `src/lib/machine/contract.ts`.
 
 ## Tasks and the gate
 
@@ -214,6 +215,7 @@ What a person sees:
 
 - **The queue.** First come your department's tasks that you hold or that nobody holds, in queue order: priority, then sprint, then age. Then come the work orders made for you in other departments, so an order reaches you even when its department is not yours. Tasks that other people hold come last. The menu shows six at most.
 - **Readiness** on the top task: the repos it needs are local and fresh, its catalog items are installed, your profile allows them, every task it waits for is closed, and nobody else holds it. Anything missing is listed with a one-tap fix (clone the repo, install the items).
+- **The doctor.** Start is refused with `doctor` while your last doctor verdict fails or is older than 48 hours: the Setup page shows what is left and **Fix automatically** runs the safe fixes ([Onboarding → Doctor](/docs/onboarding#doctor)). The team list (`GET /api/machine/team`) carries each machine's `readinessPercent` and `gate`.
 - **Start**, once ready. It claims the task (it shows as in progress, with a comment saying which machine) and opens a chat seeded with the issue, its kun block and the repos. A work order can be started only by the person it was made for.
 - **One task at a time.** Start is refused while you hold another in-progress task, unless the CEO has granted `wip:2`. Release hands a task back.
 - **Done** moves it to review with a summary comment. It is not finished yet.

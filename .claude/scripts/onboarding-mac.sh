@@ -580,7 +580,7 @@ for RC in "$HOME/.zshrc" "$HOME/.bashrc"; do
     grep -q "function cc " "$RC" 2>/dev/null && sed -i '' '/function cc /d' "$RC"
 done
 agents_write_alias_block "$AGENTS_SEL"
-pass "Shell launchers (managed block: c, a, o, claw per selection)"
+pass "Shell launchers (managed block from launchers.json: c, a, o, h per selection)"
 
 # Wire Claude Desktop MCP config to the same servers Claude Code uses
 # So Desktop's Chat/Cowork/Code tabs see the kun MCP fleet (shadcn, neon, github, etc.)

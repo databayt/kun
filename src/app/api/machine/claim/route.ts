@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import { authenticate, isResponse, json, readBody } from "@/lib/machine/auth";
 import { claimSchema } from "@/lib/machine/contract";
 import type { ClaimResponse } from "@/lib/machine/contract";
@@ -7,7 +8,7 @@ import { claimRefusal, parseLabels, splitId } from "@/lib/machine/tasks";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const refuse = (error: "held" | "wip" | "blocked" | "not-found" | "department", detail?: string) =>
+const refuse = (error: "held" | "wip" | "blocked" | "not-found" | "department" | "doctor", detail?: string) =>
   json({ ok: false, error, detail } satisfies ClaimResponse, 409);
 
 export async function POST(request: Request): Promise<Response> {
@@ -21,12 +22,14 @@ export async function POST(request: Request): Promise<Response> {
     const read = await readTask(body.id);
     if (!read) return refuse("not-found");
     const held = await holdings(auth.login);
+    const me = await db.machine.findUnique({ where: { id: auth.machineId }, select: { readiness: true } });
     const refusal = claimRefusal({
       task: read.task,
       login: auth.login,
       departments: auth.profile.departments,
       inProgress: held.inProgress.filter((t) => t.id !== body.id).length,
       wipLimit: held.wipLimit,
+      readiness: me?.readiness,
     });
     if (refusal) return refuse(refusal.error, refusal.detail);
 

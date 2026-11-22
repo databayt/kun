@@ -181,7 +181,7 @@ export interface TaskDetailResponse {
 
 /** Claim refusals (HTTP 409 `{ error }`). */
 export type ClaimError =
-  "held" | "wip" | "blocked" | "not-found" | "department";
+  "held" | "wip" | "blocked" | "not-found" | "department" | "doctor";
 
 export type ClaimResponse =
   { ok: true; task: Task } | { ok: false; error: ClaimError; detail?: string };
@@ -211,6 +211,22 @@ export interface LocalRepo {
   dirty: boolean;
 }
 
+/**
+ * The doctor's verdict (`kun-ready --gate`): the catalog steps flagged `gate` that apply to the machine's
+ * departments. `at` is when the machine computed it; a verdict older than {@link GATE_STALE_MS} no longer counts.
+ */
+export const gateSchema = z.object({
+  pass: z.boolean(),
+  /** Ids of the gate steps that fail. */
+  failing: z.array(z.string().max(80)).max(200),
+  /** ISO time the machine evaluated the gate. */
+  at: z.string().max(40),
+});
+export type Gate = z.infer<typeof gateSchema>;
+
+/** A gate verdict older than this is refused like a failing one: the machine must re-run the doctor. */
+export const GATE_STALE_MS = 48 * 60 * 60 * 1000;
+
 /** The readiness summary a machine computes from the catalog (`kun-ready --all`). */
 export const readinessSchema = z.object({
   /** 0–100: passing steps over applicable steps. */
@@ -219,6 +235,11 @@ export const readinessSchema = z.object({
   failing: z.array(z.string().max(80)).max(200),
   /** `version` of the readiness.json the machine evaluated. */
   catalogVersion: z.number().int().min(0),
+  /**
+   * The doctor verdict. Optional: apps from before the doctor omit it, and are allowed to claim for now
+   * (so an old app is not locked out); a present-and-failing or stale gate refuses claims with `doctor`.
+   */
+  gate: gateSchema.optional(),
 });
 export type Readiness = z.infer<typeof readinessSchema>;
 
@@ -377,6 +398,10 @@ export interface MachineStatus {
   share: Share | null;
   /** Seen within the last {@link ONLINE_WINDOW_MS}. */
   online: boolean;
+  /** Last reported readiness percent (0–100); null until the machine has sent one. */
+  readinessPercent: number | null;
+  /** The last reported doctor verdict; null for machines on an app without the doctor. */
+  gate: Gate | null;
 }
 
 /** A machine counts as online when its last heartbeat is newer than this (heartbeats run every 10 min). */
@@ -395,13 +420,17 @@ export interface TeamResponse {
 // `pool/<jobId>/in/<name>` and `pool/<jobId>/out/<name>` (keys are always built by the server; the
 // 7-day expiry is a bucket lifecycle rule on the `pool/` prefix). All routes need the bearer token.
 //
-//   POST /api/machine/pool          create (requester)  -> PoolCreateResponse (presigned PUTs for inputs)
+//   POST /api/machine/pool          create (requester)  -> PoolCreateResponse (job is `uploading`; presigned PUTs for inputs)
+//   POST /api/machine/pool/ready    requester PUT its inputs -> { ok } uploading -> queued (requester only)
 //   GET  /api/machine/pool          list                -> PoolListResponse   (mine + the donor queue)
 //   POST /api/machine/pool/claim    donor takes a job   -> PoolClaimResponse  (compare-and-swap, 2 claims max)
 //   POST /api/machine/pool/progress donor heartbeat     -> PoolProgressResponse (cancelled=true: stop now)
 //   POST /api/machine/pool/done     donor finished run  -> PoolDoneResponse   (ok: presigned PUTs for outputs)
-//   POST /api/machine/pool/finish   donor uploaded      -> { ok } marks the job done
-//   POST /api/machine/pool/cancel   requester cancels (queued|running); donor releases a running job to the queue
+//   POST /api/machine/pool/finish   donor uploaded      -> { ok } marks the job done; the requester gets a MachineMessage
+//   POST /api/machine/pool/cancel   requester cancels (uploading|queued|running); donor releases a running job to the queue
+//
+// Only `queued` jobs can be claimed, so a donor never starts on inputs that are still uploading. An `uploading`
+// job older than POOL_UPLOAD_STALE_MS is cancelled lazily. A donor whose gate fails or is stale gets `doctor`.
 //
 // A running job with no progress for POOL_STALE_MS goes back to the queue (lazily, on list and claim).
 
@@ -409,6 +438,10 @@ export const POOL_STALE_MS = 15 * 60 * 1000;
 export const POOL_MAX_CLAIMS = 2;
 export const POOL_GET_SECONDS = 600;
 export const POOL_LOG_MAX = 4096;
+/** An `uploading` job that never reached /pool/ready within this is cancelled. */
+export const POOL_UPLOAD_STALE_MS = 24 * 60 * 60 * 1000;
+/** A donor may return up to this many output files (or one archive). */
+export const POOL_MAX_OUTPUTS = 50;
 
 const fileSchema = z.object({
   name: z.string().trim().min(1).max(200),
@@ -459,7 +492,7 @@ export const poolCreateSchema = z
   });
 export type PoolCreate = z.infer<typeof poolCreateSchema>;
 
-export type PoolStatus = "queued" | "running" | "done" | "failed" | "cancelled";
+export type PoolStatus = "uploading" | "queued" | "running" | "done" | "failed" | "cancelled";
 
 export interface PoolFile {
   name: string;
@@ -509,7 +542,7 @@ export interface PoolListResponse {
 
 export const poolIdSchema = z.object({ id: z.string().min(1).max(40) });
 
-export type PoolClaimError = "not-found" | "taken" | "kind" | "target" | "share" | "needs" | "own";
+export type PoolClaimError = "not-found" | "taken" | "kind" | "target" | "share" | "needs" | "own" | "doctor";
 export type PoolClaimResponse =
   | { ok: true; job: PoolJob; inputs: (PoolFile & { getUrl: string })[] }
   | { ok: false; error: PoolClaimError };
@@ -529,9 +562,12 @@ export const poolDoneSchema = z.object({
   id: z.string().min(1).max(40),
   ok: z.boolean(),
   error: z.string().max(1000).optional(),
-  outputs: z.array(fileSchema).max(10).default([]),
+  outputs: z.array(fileSchema).max(POOL_MAX_OUTPUTS).default([]),
 });
 export type PoolDone = z.infer<typeof poolDoneSchema>;
 export type PoolDoneResponse = { ok: true; uploads: PoolUpload[] } | { ok: false; error: string };
 
 export const poolCancelSchema = poolIdSchema;
+export const poolReadySchema = poolIdSchema;
+/** POST /pool/ready: the requester says every input is PUT. 409 `{ok:false}` when it is not yours or not `uploading`. */
+export type PoolReadyResponse = { ok: true } | { ok: false; error: string };

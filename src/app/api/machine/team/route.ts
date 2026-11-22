@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { authenticate, isResponse, json } from "@/lib/machine/auth";
-import { DEPARTMENTS, ONLINE_WINDOW_MS, resourcesSchema, shareSchema } from "@/lib/machine/contract";
+import { DEPARTMENTS, ONLINE_WINDOW_MS, readinessSchema, resourcesSchema, shareSchema } from "@/lib/machine/contract";
 import type { MachineStatus, TeamResponse } from "@/lib/machine/contract";
 import { allProfiles } from "@/lib/machine/profiles";
 import { healthOk } from "@/lib/machine/tasks";
@@ -15,7 +15,7 @@ export async function GET(request: Request): Promise<Response> {
   if (dept && !(DEPARTMENTS as readonly string[]).includes(dept))
     return json({ error: "bad_department" }, 400);
   const rows = await db.machine.findMany({
-    select: { login: true, os: true, lastSeenAt: true, health: true, currentTask: true, resources: true, share: true },
+    select: { login: true, os: true, lastSeenAt: true, health: true, currentTask: true, resources: true, share: true, readiness: true },
   });
   const byLogin = new Map(rows.map((r) => [r.login, r]));
   const machines: MachineStatus[] = allProfiles()
@@ -24,6 +24,7 @@ export async function GET(request: Request): Promise<Response> {
       const r = byLogin.get(p.login);
       const resources = resourcesSchema.safeParse(r?.resources);
       const share = shareSchema.safeParse(r?.share);
+      const readiness = readinessSchema.safeParse(r?.readiness);
       return {
         login: p.login,
         name: p.name,
@@ -34,6 +35,8 @@ export async function GET(request: Request): Promise<Response> {
         currentTask: r?.currentTask ?? null,
         resources: (resources.success ? resources.data : null) ?? null,
         share: (share.success ? share.data : null) ?? null,
+        readinessPercent: readiness.success ? readiness.data.percent : null,
+        gate: (readiness.success ? readiness.data.gate : undefined) ?? null,
         online: !!r?.lastSeenAt && Date.now() - r.lastSeenAt.getTime() < ONLINE_WINDOW_MS,
       };
     });

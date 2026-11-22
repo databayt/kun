@@ -128,6 +128,40 @@ describe("claimRefusal", () => {
   });
 });
 
+describe("claimRefusal doctor", () => {
+  const base = {
+    task: { holder: null, status: "todo" as const, afterOpen: [], department: "sales" as const },
+    login: "moed", departments: ["sales"] as "sales"[], inProgress: 0, wipLimit: 1,
+    now: new Date("2026-11-22T12:00:00Z"),
+  };
+  const readiness = (gate?: { pass: boolean; failing: string[]; at: string }) => ({
+    percent: 80, failing: [], catalogVersion: 5, ...(gate ? { gate } : {}),
+  });
+  it("refuses a failing gate and names the steps", () => {
+    const r = claimRefusal({ ...base, readiness: readiness({ pass: false, failing: ["launcher.c", "pack.sales"], at: "2026-11-22T11:00:00Z" }) });
+    expect(r?.error).toBe("doctor");
+    expect(r?.detail).toContain("launcher.c");
+    expect(r?.detail).toContain("pack.sales");
+  });
+  it("refuses a stale verdict even when it passed", () => {
+    const r = claimRefusal({ ...base, readiness: readiness({ pass: true, failing: [], at: "2026-11-20T11:00:00Z" }) });
+    expect(r?.error).toBe("doctor");
+    expect(r?.detail).toContain("48 h");
+  });
+  it("allows a fresh passing gate", () =>
+    expect(claimRefusal({ ...base, readiness: readiness({ pass: true, failing: [], at: "2026-11-22T11:00:00Z" }) })).toBeNull());
+  it("allows an absent gate, an absent readiness or a garbled one (old apps are not locked out)", () => {
+    expect(claimRefusal({ ...base, readiness: readiness() })).toBeNull();
+    expect(claimRefusal({ ...base, readiness: null })).toBeNull();
+    expect(claimRefusal({ ...base })).toBeNull();
+    expect(claimRefusal({ ...base, readiness: { nope: 1 } })).toBeNull();
+  });
+  it("still reports a department refusal before the doctor", () => {
+    const r = claimRefusal({ ...base, task: { ...base.task, department: "tech" }, readiness: readiness({ pass: false, failing: ["x"], at: "2026-11-22T11:00:00Z" }) });
+    expect(r?.error).toBe("department");
+  });
+});
+
 describe("work orders", () => {
   it("reads film, formula and weight from the kun block", () => {
     const b = parseKunBlock("<!-- kun: repos=hogwarts; items=skill:blender; after=#4; film=hogwarts-intro-introduction-v001; formula=video.order.blender; weight=5 -->", "hogwarts");

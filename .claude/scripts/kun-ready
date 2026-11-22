@@ -11,6 +11,14 @@
 #                                  text table, or [{id, exit, detail}]
 #   kun-ready --repos-dir          the repos directory (installer state, else $HOME)
 #   kun-ready --repo-path <repo>   where <repo> lives (or should be cloned)
+#   kun-ready --gate [--json] [--fix] [--departments a,b]
+#                                  THE DOCTOR: only the `gate` steps for this machine's departments.
+#                                  Prints READY TO CONTRIBUTE, or each failing step + its fix. exit 0 ready · 1 not.
+#                                  Departments: --departments, else $KUN_DEPARTMENTS, else the profile
+#                                  machines/<login>.json (login from Machine settings or $KUN_LOGIN), else all.
+#                                  --fix runs the auto fixes, then re-checks. --json: {pass, failing[], at, ...}
+#   kun-ready --fix-launchers      rewrite the c/a/o/h block in ~/.zshrc and ~/.bashrc from
+#                                  .claude/machine/launchers.json (lines outside the markers kept, backup *.kun-backup)
 #
 # Env: KUN_ROLE=engineer|business|content|ops overrides role detection.
 # Each probe runs under its own timeout (catalog check.timeoutS) and, for --all, in parallel.
@@ -160,7 +168,28 @@ p_env_souq() { env_probe souq; }
 p_env_shifa() { env_probe shifa; }
 # agents
 p_claude_cli() { has claude && ok "$(claude --version 2>/dev/null | head -1)" || bad "claude not installed"; }
-p_claude_launcher() { _ag_alias_present c claude && ok "alias c" || bad "no c launcher in ~/.zshrc"; }
+# launchers — each checks the EXACT command (bypass flag included) inside the managed block
+launcher_probe() {
+    local id="$1" want bin rc
+    declare -F agents_launcher_line >/dev/null || { bad "lib/agents.sh missing"; return; }
+    agents_launcher_allowed "$id" || { skip "not in this profile's launchers"; return; }
+    want="$(agents_launcher_line "$id")" || { bad "no $id in launchers.json"; return; }
+    bin="$(echo "$want" | sed -E "s/^alias $id='([^ ']*).*/\1/")"
+    if [ "$id" != c ] && ! has "$bin"; then skip "$bin not installed"; return; fi
+    for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
+        [ -f "$rc" ] || continue
+        awk -v w="$want" '
+            /^# BEGIN databayt agents/ { b=1; next }
+            /^# END databayt agents/   { b=0; next }
+            b && substr($0,1,length(w))==w && (length($0)==length(w) || substr($0,length(w)+1,1)==" ") { f=1 }
+            END { exit !f }' "$rc" && { ok "$want"; return; }
+    done
+    bad "missing or wrong in the managed block: $want"
+}
+p_launcher_c() { launcher_probe c; }
+p_launcher_a() { launcher_probe a; }
+p_launcher_o() { launcher_probe o; }
+p_launcher_h() { launcher_probe h; }
 p_claude_desktop() { app "Claude.app" && ok "installed" || bad "Claude Desktop not installed"; }
 p_claude_desktop_mcp() {
     local f="$HOME/Library/Application Support/Claude/claude_desktop_config.json" n
@@ -213,6 +242,57 @@ p_engine_maintain() {
     local fresh; fresh="$(find "$CLAUDE_DIR/logs" -name 'maintain-*.log' -mmin -2880 2>/dev/null | head -1)"
     [ -n "$fresh" ] && ok "armed, ran in the last 48h" || bad "armed but no run in 48h"
 }
+# engine fresh: the manifest is under 7 days old and kun has not moved 50+ commits since it
+p_engine_fresh() {
+    local m="$CLAUDE_DIR/.kun-manifest.json" ts ep now days kdir n
+    has jq && [ -f "$m" ] || { bad "no manifest"; return; }
+    ts="$(jq -r '.ts // empty' "$m")"
+    ep="$(date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$ts" +%s 2>/dev/null || date -u -d "$ts" +%s 2>/dev/null)"
+    [ -n "$ep" ] || { bad "manifest has no readable ts"; return; }
+    now="$(date +%s)"; days=$(( (now - ep) / 86400 ))
+    [ "$days" -le 7 ] || { bad "manifest $days days old (limit 7)"; return; }
+    if kdir="$(repo_found kun)"; then
+        n="$(git -C "$kdir" rev-list --count --since="$ts" HEAD 2>/dev/null)"
+        [ "${n:-0}" -le 50 ] || { bad "kun moved $n commits since the manifest (limit 50)"; return; }
+    fi
+    ok "manifest ${days}d old"
+}
+p_engine_hooks() {
+    local f="$CLAUDE_DIR/settings.json" h missing=""
+    [ -f "$f" ] || { bad "no ~/.claude/settings.json"; return; }
+    for h in session-start-reports block-context block-guard block-destructive-bash route-guard; do
+        grep -q "$h.sh" "$f" 2>/dev/null || missing="$missing $h"
+    done
+    [ -z "$missing" ] && ok "5 hooks wired" || bad "settings.json lacks:$missing"
+}
+p_engine_rules() {
+    local r missing=""
+    for r in github-workflow block-protocol patterns delegation; do
+        [ -f "$CLAUDE_DIR/rules/$r.md" ] || missing="$missing $r"
+    done
+    [ -z "$missing" ] && ok "4 global rules present" || bad "missing rules:$missing"
+}
+# department pack: every skill and agent in departments/<dept>/pack.json is installed in ~/.claude
+pack_probe() {
+    local d="$1" f="$KUN_ROOT/departments/$1/pack.json" item name missing="" n=0
+    has jq && [ -f "$f" ] || { skip "no pack.json for $d"; return; }
+    for item in $(jq -r '.items[]' "$f"); do
+        name="${item#*:}"; n=$((n+1))
+        case "$item" in
+            skill:*) [ -f "$CLAUDE_DIR/skills/$name/SKILL.md" ] || missing="$missing $item" ;;
+            agent:*) [ -f "$CLAUDE_DIR/agents/$name.md" ] || missing="$missing $item" ;;
+        esac
+    done
+    [ -z "$missing" ] && ok "$n items installed" || bad "not installed:$missing"
+}
+p_pack_tech() { pack_probe tech; }
+p_pack_business() { pack_probe business; }
+p_pack_sales() { pack_probe sales; }
+p_pack_marketing() { pack_probe marketing; }
+p_pack_video() { pack_probe video; }
+p_pack_image() { pack_probe image; }
+p_pack_support() { pack_probe support; }
+p_pack_rnd() { pack_probe rnd; }
 p_engine_devices() {
     launchctl list 2>/dev/null | grep -q "com.databayt.claude-rc" && ok "Remote Control armed" || bad "devices lane not armed"
 }
@@ -265,9 +345,11 @@ catalog_probes() {
         | .check.probe' "$CATALOG"
 }
 
-all_run() {
+# run_many: probe ids on stdin, in parallel → JSON [{id, exit, detail}]
+run_many() {
     local tmp id i=0 j=0 arr="[]"; tmp="$(mktemp -d)"
-    for id in $(catalog_probes); do
+    while read -r id; do
+        [ -n "$id" ] || continue
         ( out="$(run_probe "$id")"; rc=$?; printf '%s' "$out" > "$tmp/$i.d"; echo "$rc" > "$tmp/$i.r"; echo "$id" > "$tmp/$i.i" ) &
         i=$((i+1))
     done
@@ -280,12 +362,99 @@ all_run() {
     rm -rf "$tmp"
     echo "$arr"
 }
+all_run() { run_many < <(catalog_probes); }
+
+# ── The doctor ──────────────────────────────────────────────────────────────
+gate_departments() { # csv: --departments, $KUN_DEPARTMENTS, the profile, else every department
+    local csv="${GATE_DEPTS:-${KUN_DEPARTMENTS:-}}" pf
+    if [ -z "$csv" ] && declare -F agents_profile_file >/dev/null; then
+        pf="$(agents_profile_file)"
+        [ -n "$pf" ] && csv="$(jq -r '(.departments // [.department]) | map(select(.)) | join(",")' "$pf" 2>/dev/null)"
+    fi
+    [ -n "$csv" ] || csv="$(for f in "$KUN_ROOT"/departments/*/pack.json; do basename "$(dirname "$f")"; done | paste -sd, -)"
+    echo "$csv"
+}
+gate_probes() { # probe ids of the gate steps that apply to the departments csv ($1)
+    jq -r --arg os "$OS_KEY" --argjson depts "$(jq -cn --arg c "$1" '$c|split(",")')" '.steps[]
+        | select(.gate == true)
+        | select((.os|index($os)) != null)
+        | select((.gateFor // .departments) as $g | ($g|index("*")) != null or any($g[]; . as $x | $depts|index($x)))
+        | .check.probe' "$CATALOG"
+}
+gate_json() { # → {pass, departments, failing[], details[], steps[], at}
+    local depts res
+    depts="$(gate_departments)"
+    res="$(run_many < <(gate_probes "$depts"))"
+    jq -c --arg depts "$depts" --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --slurpfile cat "$CATALOG" '
+        ([.[] | select(.exit == 1)]) as $f
+        | {pass: (($f|length) == 0),
+           departments: ($depts|split(",")),
+           failing: [$f[].id],
+           details: [$f[] | . as $r | ($cat[0].steps[] | select(.check.probe == $r.id)) as $s
+                     | {id: $r.id, detail: $r.detail, kind: ($s.fix.kind // "human"), fix: ($s.fix.cmd // ""), title: $s.title.en}],
+           steps: .,
+           at: $at}' <<<"$res"
+}
+gate_print() { # human face of gate_json ($1)
+    local pass; pass="$(jq -r '.pass' <<<"$1")"
+    if [ "$pass" = true ]; then
+        jq -r '"READY TO CONTRIBUTE  (departments: \(.departments|join(", ")) · \(.steps|length) gate steps)"' <<<"$1"
+    else
+        jq -r '"NOT READY — \(.failing|length) step(s) to fix  (departments: \(.departments|join(", ")))",
+               (.details[] | "  ✗ \(.id)  \(.detail)\n      fix: " + (if .kind=="auto" and .fix != "" then .fix else "(\(.kind) step — see the Setup page in Machine)" end))' <<<"$1"
+    fi
+}
+gate_fix() { # run the auto fixes of the failing steps ($1 = gate json), each distinct command once
+    local cmd
+    while IFS= read -r cmd; do
+        [ -n "$cmd" ] || continue
+        echo "  → $cmd" >&2
+        ( cd "$KUN_ROOT" && bash -c "$cmd" >/dev/null 2>&1 ) || echo "    (exit non-zero)" >&2
+    done < <(jq -r '[.details[] | select(.kind=="auto" and .fix != "") | .fix] | unique[]' <<<"$1")
+}
+gate_main() {
+    local json=0 fix=0
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --json) json=1 ;;
+            --fix) fix=1 ;;
+            --departments) GATE_DEPTS="$2"; shift ;;
+            --departments=*) GATE_DEPTS="${1#*=}" ;;
+        esac
+        shift
+    done
+    has jq || { echo "kun-ready: jq required" >&2; exit 1; }
+    local g; g="$(gate_json)"
+    if [ "$fix" = 1 ] && [ "$(jq -r '.pass' <<<"$g")" != true ]; then
+        gate_fix "$g"
+        g="$(gate_json)"
+    fi
+    if [ "$json" = 1 ]; then echo "$g"; else gate_print "$g"; fi
+    [ "$(jq -r '.pass' <<<"$g")" = true ]
+}
+
+# ── Launchers ───────────────────────────────────────────────────────────────
+fix_launchers() {
+    declare -F agents_write_alias_block >/dev/null || { echo "kun-ready: lib/agents.sh missing" >&2; return 1; }
+    local rc
+    [ -f "$HOME/.zshrc" ] || [ -f "$HOME/.bashrc" ] || : > "$HOME/.zshrc"
+    for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
+        [ -f "$rc" ] && cp -p "$rc" "$rc.kun-backup"
+    done
+    agents_write_alias_block all installed
+    for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
+        [ -f "$rc" ] || continue
+        echo "$rc: $(awk '/^# BEGIN databayt agents/{b=1;next} /^# END databayt agents/{b=0} b && /^alias /{printf "%s ", substr($2,1,1)}' "$rc")(backup $rc.kun-backup)"
+    done
+}
 
 case "${1:-}" in
     --raw) run_raw "$2"; exit $? ;;
     --list) jq -r '.steps[].check.probe' "$CATALOG"; exit 0 ;;
     --repos-dir) repos_dir; exit 0 ;;
     --repo-path) repo_path "$2"; exit 0 ;;
+    --gate) shift; gate_main "$@"; exit $? ;;
+    --fix-launchers) fix_launchers; exit $? ;;
     --all)
         has jq || { echo "kun-ready: jq required" >&2; exit 1; }
         res="$(all_run)"

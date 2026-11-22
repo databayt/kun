@@ -136,11 +136,65 @@ agents_delta() { # agents_delta <sel> — list what a run WOULD install (dry-run
     _ag_alias_present c claude && _ag_alias_present a agy && _ag_alias_present o opencode && _ag_alias_present h hermes || echo "alias-block"
 }
 
+# ── Launchers — one source: .claude/machine/launchers.json ───────
+# Without jq or the file (a bare curl|bash install), the built-in copy below is
+# used, so behavior never depends on the catalog being present.
+_AG_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+_AG_LAUNCHERS_FILE="${KUN_LAUNCHERS_FILE:-$_AG_LIB_DIR/../../machine/launchers.json}"
+_AG_MACHINES_DIR="${KUN_MACHINES_DIR:-$_AG_LIB_DIR/../../../machines}"
+
+agents_launchers_tsv() { # id|bin|args|agent|name|bypass — catalog order
+    local q='.launchers[] | [.id, .bin, (.args|join(" ")), .agent, .name, (.bypass|tostring)] | join("|")' out
+    if _ag_has jq && [ -f "$_AG_LAUNCHERS_FILE" ]; then
+        out="$(jq -r "$q" "$_AG_LAUNCHERS_FILE" 2>/dev/null)"
+        [ -n "$out" ] && { printf '%s\n' "$out"; return; }
+    fi
+    printf '%s|%s|%s|%s|%s|%s\n' \
+        c claude "--dangerously-skip-permissions" code "Claude Code (primary)" true \
+        a agy    "--dangerously-skip-permissions" agy  "Antigravity (secondary)" true \
+        o opencode "" opencode "opencode (tertiary)" true \
+        h hermes "" hermes "Hermes gateway (optional)" false
+}
+
+agents_machine_login() { # the login Machine saved, else $KUN_LOGIN, else empty (full-access default)
+    [ -n "${KUN_LOGIN:-}" ] && { echo "$KUN_LOGIN"; return; }
+    local f="${KUN_HOME:+$KUN_HOME/machine}"; f="${f:-$HOME/.kun/machine}/settings.json"
+    if _ag_has jq && [ -f "$f" ]; then jq -r '.login // empty' "$f" 2>/dev/null; fi
+    return 0
+}
+
+agents_profile_file() { # machines/<login>.json of this machine, when there is one
+    local l; l="$(agents_machine_login)"
+    if [ -n "$l" ] && [ -f "$_AG_MACHINES_DIR/$l.json" ]; then echo "$_AG_MACHINES_DIR/$l.json"; fi
+    return 0
+}
+
+agents_launcher_allowed() { # agents_launcher_allowed <id> — the profile's optional `launchers` list (default: all)
+    local id="$1" csv="${KUN_LAUNCHERS:-}" pf
+    if [ -z "$csv" ]; then
+        pf="$(agents_profile_file)"
+        if [ -n "$pf" ] && _ag_has jq; then csv="$(jq -r '(.launchers // []) | join(",")' "$pf" 2>/dev/null)"; fi
+    fi
+    [ -z "$csv" ] && return 0
+    case ",$csv," in *",$id,"*) return 0 ;; *) return 1 ;; esac
+}
+
+agents_launcher_line() { # agents_launcher_line <id> → the exact alias line, no comment (probe + writer share it)
+    local id="$1" lid bin args agent name bypass
+    while IFS='|' read -r lid bin args agent name bypass; do
+        [ "$lid" = "$id" ] || continue
+        echo "alias $lid='${bin}${args:+ $args}'"; return 0
+    done < <(agents_launchers_tsv)
+    return 1
+}
+
 # ── Aliases ──────────────────────────────────────────────────────
 # One marked, idempotent block per rc file. Migrates the legacy single-line
 # `alias c=` / `function c {` forms (and the env-sourcing line) into the block.
+# `agents_write_alias_block <sel> [installed-only]` — the second arg keeps only
+# launchers whose binary is installed or already linked (used by --fix-launchers).
 agents_write_alias_block() {
-    local sel="${1:-all}" rc tmp
+    local sel="${1:-all}" only_installed="${2:-}" rc tmp lid bin args agent name bypass line cmt
     for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
         [ -f "$rc" ] || continue
         tmp=$(mktemp)
@@ -157,23 +211,20 @@ agents_write_alias_block() {
             /^# Antigravity \(secondary\)$/ { next }
             /^\[ -f "\$HOME\/.claude\/.env" \] && set -a && \. "\$HOME\/.claude\/.env" && set \+a$/ { next }
             { print }
-        ' "$rc" > "$tmp"
+        ' "$rc" | awk '{ a[NR]=$0 } END { n=NR; while (n>0 && a[n]=="") n--; for (i=1;i<=n;i++) print a[i] }' > "$tmp"
         {
             echo ""
             echo "# BEGIN databayt agents — managed by kun onboarding (lib/agents.sh); edits inside are overwritten"
             echo "[ -f \"\$HOME/.claude/.env\" ] && set -a && . \"\$HOME/.claude/.env\" && set +a"
-            if agents_selected_contains "$sel" code; then
-                echo "alias c='claude --dangerously-skip-permissions'   # Claude Code (primary)"
-            fi
-            if agents_selected_contains "$sel" agy; then
-                echo "alias a='agy --dangerously-skip-permissions'      # Antigravity (secondary)"
-            fi
-            if agents_selected_contains "$sel" opencode; then
-                echo "alias o='opencode'                                # opencode (bypass lives in ~/.config/opencode/opencode.json)"
-            fi
-            if agents_selected_contains "$sel" hermes; then
-                echo "alias h='hermes'                                  # Hermes gateway (optional)"
-            fi
+            while IFS='|' read -r lid bin args agent name bypass; do
+                agents_selected_contains "$sel" "$agent" || continue
+                agents_launcher_allowed "$lid" || continue
+                if [ -n "$only_installed" ] && ! _ag_has "$bin" && ! _ag_alias_present "$lid" "$bin"; then continue; fi
+                line="alias $lid='${bin}${args:+ $args}'"
+                cmt="$name"
+                if [ -z "$args" ] && [ "$bypass" = true ]; then cmt="$name — bypass lives in ~/.config/opencode/opencode.json"; fi
+                printf '%-52s # %s\n' "$line" "$cmt"
+            done < <(agents_launchers_tsv)
             echo "# END databayt agents"
         } >> "$tmp"
         # preserve original file perms via cat-over (mv would drop them)

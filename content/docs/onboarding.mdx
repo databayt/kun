@@ -79,7 +79,35 @@ Five lanes, one launcher letter each — pick which to install in the wizard's m
 
 **Optional free-model keys.** Machine's Settings → Model can route Claude Code through free models. None is required, and Claude on your own sign-in stays the default. If you want them, bring your own: an NVIDIA key (build.nvidia.com/settings/api-keys), an OpenRouter key (openrouter.ai/keys; the free tier is 50 requests a day, and a $10 top-up you pay yourself lifts it) or an OmniRoute key. They are stored in the keychain; the company pays nothing. Keep client code on Claude. See [Machine](/docs/machine#free-models).
 
-The launchers live in one managed block in `~/.zshrc` / `~/.bashrc` (`# BEGIN databayt agents … # END databayt agents`) — idempotent across re-runs; legacy `function c` lines migrate in automatically.
+The launchers live in one managed block in `~/.zshrc` / `~/.bashrc` (`# BEGIN databayt agents … # END databayt agents`) — idempotent across re-runs; legacy `function c` lines migrate in automatically. On Windows the same block goes into `$PROFILE` as functions.
+
+**Where the letters come from.** One file, `.claude/machine/launchers.json`, lists every launcher: its letter, the binary, its arguments, whether it bypasses permissions and the readiness step that installs the agent. `onboarding-mac.sh`, `onboarding-windows.ps1` and `kun-ready --fix-launchers` all write the block from it, and readiness probes check the exact command (the bypass flag included) inside the block, one step per letter (`launcher.c`, `launcher.a`, `launcher.o`, `launcher.h`). A machine profile (`machines/<login>.json`) can narrow the set with `"launchers": ["c","a"]`. You can also change them in Machine → Settings → Agents, which edits the same block and keeps a backup. Lines outside the markers are never touched.
+
+## Doctor
+
+Before a machine contributes, it must hold the shared intelligence: at least its **department's**, not necessarily everything. The doctor proves that minimum. Each readiness step carries a `gate` flag, and the gate is the flagged steps that apply to the machine's departments.
+
+| Area | Steps | Gate for |
+|---|---|---|
+| Identity | `gh.auth`, `github.org`, `github.ssh`, `git.identity` | everyone |
+| Agent | `claude.cli`, `anthropic.login`, `launcher.c` (with the bypass flag) | everyone |
+| Engine | `engine.manifest`, `engine.fresh` (manifest under 7 days old, kun under 50 commits ahead of it), `engine.hooks` (session-start, block-context, block-guard, block-destructive-bash and route-guard wired in `settings.json`), `engine.rules` (github-workflow, block-protocol, patterns, delegation), `engine.maintain` | everyone |
+| Repos | `repos.dir`, `repo.kun` | everyone |
+| Department pack | `pack.<department>`: every skill and agent in `departments/<department>/pack.json` is installed in `~/.claude` | that department |
+| Extras | `engine.mcp`, `engine.browser-mcp`, `env.hogwarts`, `env.mkan` · `crm.*` and `crm.api` · `tool.blender`, `tool.filmcraft`, `tool.whisper-cli`, `tool.whisper-model` | tech · sales and support · video |
+
+Run it from a terminal:
+
+```bash
+bash .claude/scripts/kun-ready --gate            # READY TO CONTRIBUTE, or each failing step with its fix
+bash .claude/scripts/kun-ready --gate --fix      # runs the automatic fixes, then checks again
+bash .claude/scripts/kun-ready --gate --json     # { pass, failing[], at, ... } — what Machine reports
+```
+
+Exit code 0 means ready, 1 means not. The departments come from `--departments a,b`, then `$KUN_DEPARTMENTS`, then the machine's profile (the login saved in Machine settings), and default to all of them.
+
+**What it blocks.** Task claims. Machine sends the verdict with every heartbeat (`readiness.gate`: `pass`, `failing`, `at`); kun refuses a task claim or a pool claim with `doctor` when the last verdict fails or is older than 48 hours, and Machine shows "Run the doctor first" on every task. An app too old to send a verdict is allowed for now. **Git pushes are not blocked**, only warned about at session start.
+
 
 ---
 

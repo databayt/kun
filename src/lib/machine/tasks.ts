@@ -1,6 +1,6 @@
 // Pure task logic for the machine API: the kun-block parser, label parsing, queue ordering and
 // the claim gate. No I/O here — github.ts feeds it, the routes call it, tasks.test.ts pins it.
-import { DEPARTMENTS, DRIVERS, RECEIPT_MARKER } from "./contract";
+import { DEPARTMENTS, DRIVERS, GATE_STALE_MS, RECEIPT_MARKER, readinessSchema } from "./contract";
 import type { ClaimError, Department, Driver, KunBlock, Receipt, Task, TaskStatus } from "./contract";
 
 export const ORG = "databayt";
@@ -121,6 +121,27 @@ export interface ClaimInput {
   /** Tasks this login already holds in-progress (excluding this one). */
   inProgress: number;
   wipLimit: number;
+  /** The machine's stored readiness (the heartbeat's `readiness`), for the doctor check. Omit to skip it. */
+  readiness?: unknown;
+  now?: Date;
+}
+
+/**
+ * The doctor check shared by task claims and pool claims: a detail string when the machine's last doctor
+ * verdict fails or is older than 48 h, null when it may contribute.
+ *
+ * A machine that never sent a gate (an app from before the doctor, or no readiness yet) is allowed for now,
+ * so old app versions are not locked out; tighten this to a refusal once every app reports a gate.
+ */
+export function doctorRefusal(readiness: unknown, now = new Date()): string | null {
+  const parsed = readinessSchema.safeParse(readiness);
+  const gate = parsed.success ? parsed.data.gate : undefined;
+  if (!gate) return null;
+  const at = Date.parse(gate.at);
+  if (!Number.isFinite(at) || now.getTime() - at > GATE_STALE_MS)
+    return "the doctor has not run in 48 h — open Kun and run the doctor";
+  if (!gate.pass) return `doctor failing: ${gate.failing.join(", ") || "unknown"} — run the doctor`;
+  return null;
 }
 
 /** The claim gate, in the order a person would explain it. null = allowed. */
@@ -136,6 +157,8 @@ export function claimRefusal(i: ClaimInput): { error: ClaimError; detail: string
     return { error: "held", detail: "you already hold it" };
   if (i.task.status === "review")
     return { error: "held", detail: "already in review" };
+  const doctor = doctorRefusal(i.readiness, i.now);
+  if (doctor) return { error: "doctor", detail: doctor };
   if (i.task.afterOpen.length > 0)
     return { error: "blocked", detail: `waiting on ${i.task.afterOpen.join(", ")}` };
   if (i.inProgress >= i.wipLimit)

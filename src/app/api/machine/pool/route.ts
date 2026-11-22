@@ -20,6 +20,8 @@ export async function POST(request: Request): Promise<Response> {
       kind: body.kind,
       params: body.params as never,
       requester: auth.login,
+      // Not claimable until the requester has PUT every input and calls /pool/ready.
+      status: "uploading",
       target: body.target ?? null,
       inputs: [],
       needs: body.needs ?? undefined,

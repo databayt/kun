@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "note": "Readiness catalog. Probes: .claude/scripts/kun-ready <probe>. Shared by onboarding-mac.sh --doctor and the Machine app.",
+  "version": 5,
+  "note": "Readiness catalog. Probes: .claude/scripts/kun-ready <probe>. Shared by onboarding-mac.sh --doctor and the Machine app. `gate: true` marks a step the doctor requires before contributing (kun-ready --gate); it applies when the machine's departments match the step's `departments`, or `gateFor` when present.",
   "stages": [
     "identity",
     "accounts",
@@ -27,6 +27,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -63,6 +64,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [
         "gh.installed"
       ],
@@ -97,6 +99,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [
         "gh.auth"
       ],
@@ -127,6 +130,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [
         "gh.auth"
       ],
@@ -156,6 +160,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [],
       "human": false,
       "check": {
@@ -184,6 +189,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [],
       "human": true,
       "check": {
@@ -216,6 +222,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": true,
       "check": {
@@ -244,6 +251,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": true,
       "check": {
@@ -271,6 +279,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": true,
       "check": {
@@ -301,6 +310,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": true,
       "check": {
@@ -329,6 +339,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "gh.auth"
       ],
@@ -359,6 +370,11 @@
       "roles": [
         "*"
       ],
+      "gate": true,
+      "gateFor": [
+        "sales",
+        "support"
+      ],
       "after": [],
       "human": true,
       "check": {
@@ -385,6 +401,11 @@
       ],
       "roles": [
         "*"
+      ],
+      "gate": true,
+      "gateFor": [
+        "sales",
+        "support"
       ],
       "after": [],
       "human": true,
@@ -413,6 +434,11 @@
       "roles": [
         "*"
       ],
+      "gate": true,
+      "gateFor": [
+        "sales",
+        "support"
+      ],
       "after": [],
       "human": true,
       "check": {
@@ -439,6 +465,11 @@
       ],
       "roles": [
         "*"
+      ],
+      "gate": true,
+      "gateFor": [
+        "sales",
+        "support"
       ],
       "after": [],
       "human": true,
@@ -467,6 +498,11 @@
       "roles": [
         "*"
       ],
+      "gate": true,
+      "gateFor": [
+        "sales",
+        "support"
+      ],
       "after": [],
       "human": true,
       "check": {
@@ -493,6 +529,11 @@
       ],
       "roles": [
         "*"
+      ],
+      "gate": true,
+      "gateFor": [
+        "sales",
+        "support"
       ],
       "after": [],
       "human": false,
@@ -521,6 +562,7 @@
       "roles": [
         "engineer"
       ],
+      "gate": false,
       "after": [],
       "human": true,
       "check": {
@@ -552,6 +594,7 @@
       "roles": [
         "engineer"
       ],
+      "gate": false,
       "after": [],
       "human": true,
       "check": {
@@ -583,6 +626,7 @@
       "roles": [
         "engineer"
       ],
+      "gate": false,
       "after": [],
       "human": true,
       "check": {
@@ -610,6 +654,7 @@
       "roles": [
         "engineer"
       ],
+      "gate": false,
       "after": [],
       "human": true,
       "check": {
@@ -637,6 +682,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -675,6 +721,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -713,6 +760,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -751,6 +799,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -789,6 +838,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -827,6 +877,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -865,6 +916,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -903,6 +955,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -942,6 +995,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "node"
       ],
@@ -980,6 +1034,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -1018,6 +1073,7 @@
       "roles": [
         "engineer"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -1056,6 +1112,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [],
       "human": false,
       "check": {
@@ -1083,6 +1140,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [
         "github.org",
         "repos.dir"
@@ -1123,6 +1181,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "github.org",
         "repos.dir"
@@ -1162,6 +1221,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "github.org",
         "repos.dir"
@@ -1201,6 +1261,10 @@
       "roles": [
         "*"
       ],
+      "gate": true,
+      "gateFor": [
+        "tech"
+      ],
       "after": [
         "repo.hogwarts"
       ],
@@ -1233,6 +1297,10 @@
       ],
       "roles": [
         "*"
+      ],
+      "gate": true,
+      "gateFor": [
+        "tech"
       ],
       "after": [
         "repos.dir"
@@ -1267,6 +1335,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "repos.dir"
       ],
@@ -1300,6 +1369,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "repos.dir"
       ],
@@ -1333,6 +1403,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [],
       "human": false,
       "check": {
@@ -1355,11 +1426,11 @@
       }
     },
     {
-      "id": "claude.launcher",
+      "id": "launcher.c",
       "stage": "agents",
       "title": {
-        "ar": "اختصار c",
-        "en": "`c` launcher alias"
+        "ar": "اختصار c — Claude Code بلا أذونات",
+        "en": "`c` launcher — claude --dangerously-skip-permissions"
       },
       "os": [
         "mac"
@@ -1370,17 +1441,108 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [
         "claude.cli"
       ],
       "human": false,
       "check": {
-        "probe": "claude.launcher",
+        "probe": "launcher.c",
         "timeoutS": 10
       },
       "fix": {
         "kind": "auto",
-        "cmd": "bash .claude/scripts/onboarding-mac.sh --quiet --agents=code"
+        "cmd": "bash .claude/scripts/kun-ready --fix-launchers"
+      }
+    },
+    {
+      "id": "launcher.a",
+      "stage": "agents",
+      "title": {
+        "ar": "اختصار a — Antigravity بلا أذونات",
+        "en": "`a` launcher — agy --dangerously-skip-permissions"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "agy.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "launcher.a",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-ready --fix-launchers"
+      }
+    },
+    {
+      "id": "launcher.o",
+      "stage": "agents",
+      "title": {
+        "ar": "اختصار o — opencode",
+        "en": "`o` launcher — opencode"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "opencode.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "launcher.o",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-ready --fix-launchers"
+      }
+    },
+    {
+      "id": "launcher.h",
+      "stage": "agents",
+      "title": {
+        "ar": "اختصار h — Hermes",
+        "en": "`h` launcher — hermes"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "hermes.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "launcher.h",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-ready --fix-launchers"
       }
     },
     {
@@ -1399,6 +1561,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -1435,6 +1598,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "claude.desktop"
       ],
@@ -1468,6 +1632,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -1499,6 +1664,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "agy.cli"
       ],
@@ -1528,6 +1694,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -1564,6 +1731,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "opencode.cli"
       ],
@@ -1597,6 +1765,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -1633,6 +1802,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -1664,6 +1834,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "hermes.cli"
       ],
@@ -1693,6 +1864,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "uv"
       ],
@@ -1726,6 +1898,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "node"
       ],
@@ -1759,6 +1932,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [
         "repo.kun"
       ],
@@ -1792,6 +1966,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "engine.manifest"
       ],
@@ -1820,6 +1995,10 @@
       ],
       "roles": [
         "*"
+      ],
+      "gate": true,
+      "gateFor": [
+        "tech"
       ],
       "after": [
         "claude.cli",
@@ -1855,6 +2034,10 @@
       "roles": [
         "*"
       ],
+      "gate": true,
+      "gateFor": [
+        "tech"
+      ],
       "after": [
         "claude.cli"
       ],
@@ -1884,6 +2067,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "repo.kun"
       ],
@@ -1913,6 +2097,7 @@
       "roles": [
         "*"
       ],
+      "gate": true,
       "after": [
         "engine.manifest"
       ],
@@ -1946,6 +2131,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "engine.manifest"
       ],
@@ -1964,6 +2150,336 @@
       }
     },
     {
+      "id": "engine.fresh",
+      "stage": "engine",
+      "title": {
+        "ar": "المحرك محدّث (البيان أحدث من 7 أيام)",
+        "en": "Engine fresh (manifest under 7 days, under 50 kun commits behind)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.fresh",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "engine.hooks",
+      "stage": "engine",
+      "title": {
+        "ar": "خطافات المحرك موصولة في settings.json",
+        "en": "Engine hooks wired in settings.json (session-start, block-context, block-guard, block-destructive-bash, route-guard)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.hooks",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "engine.rules",
+      "stage": "engine",
+      "title": {
+        "ar": "القواعد العامة مثبّتة",
+        "en": "Global rules installed (github-workflow, block-protocol, patterns, delegation)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.rules",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "pack.tech",
+      "stage": "engine",
+      "title": {
+        "ar": "حزمة التقنية مثبّتة (مهاراتها ووكلاؤها في ~/.claude)",
+        "en": "Technology pack installed (its skills and agents in ~/.claude)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "tech"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pack.tech",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "pack.business",
+      "stage": "engine",
+      "title": {
+        "ar": "حزمة الأعمال مثبّتة (مهاراتها ووكلاؤها في ~/.claude)",
+        "en": "Business pack installed (its skills and agents in ~/.claude)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "business"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pack.business",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "pack.sales",
+      "stage": "engine",
+      "title": {
+        "ar": "حزمة المبيعات مثبّتة (مهاراتها ووكلاؤها في ~/.claude)",
+        "en": "Sales pack installed (its skills and agents in ~/.claude)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "sales"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pack.sales",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "pack.marketing",
+      "stage": "engine",
+      "title": {
+        "ar": "حزمة التسويق مثبّتة (مهاراتها ووكلاؤها في ~/.claude)",
+        "en": "Marketing pack installed (its skills and agents in ~/.claude)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "marketing"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pack.marketing",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "pack.video",
+      "stage": "engine",
+      "title": {
+        "ar": "حزمة الفيديو مثبّتة (مهاراتها ووكلاؤها في ~/.claude)",
+        "en": "Video pack installed (its skills and agents in ~/.claude)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "video"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pack.video",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "pack.image",
+      "stage": "engine",
+      "title": {
+        "ar": "حزمة الصور مثبّتة (مهاراتها ووكلاؤها في ~/.claude)",
+        "en": "Image pack installed (its skills and agents in ~/.claude)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "image"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pack.image",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "pack.support",
+      "stage": "engine",
+      "title": {
+        "ar": "حزمة الدعم مثبّتة (مهاراتها ووكلاؤها في ~/.claude)",
+        "en": "Support pack installed (its skills and agents in ~/.claude)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "support"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pack.support",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
+      "id": "pack.rnd",
+      "stage": "engine",
+      "title": {
+        "ar": "حزمة البحث والتطوير مثبّتة (مهاراتها ووكلاؤها في ~/.claude)",
+        "en": "R&D pack installed (its skills and agents in ~/.claude)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "rnd"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": true,
+      "after": [
+        "engine.manifest"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pack.rnd",
+        "timeoutS": 15
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/setup.sh --quiet"
+      }
+    },
+    {
       "id": "tool.blender",
       "stage": "tools",
       "title": {
@@ -1978,6 +2494,10 @@
       ],
       "roles": [
         "*"
+      ],
+      "gate": true,
+      "gateFor": [
+        "video"
       ],
       "after": [],
       "human": false,
@@ -2009,6 +2529,10 @@
       ],
       "roles": [
         "*"
+      ],
+      "gate": true,
+      "gateFor": [
+        "video"
       ],
       "after": [],
       "human": false,
@@ -2045,6 +2569,10 @@
       ],
       "roles": [
         "*"
+      ],
+      "gate": true,
+      "gateFor": [
+        "video"
       ],
       "after": [
         "brew"
@@ -2084,6 +2612,10 @@
       "roles": [
         "*"
       ],
+      "gate": true,
+      "gateFor": [
+        "video"
+      ],
       "after": [
         "tool.whisper-cli"
       ],
@@ -2117,6 +2649,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -2155,6 +2688,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -2186,6 +2720,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [],
       "human": false,
       "check": {
@@ -2213,6 +2748,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],
@@ -2246,6 +2782,7 @@
       "roles": [
         "*"
       ],
+      "gate": false,
       "after": [
         "brew"
       ],

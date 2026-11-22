@@ -413,6 +413,66 @@ if (-not (Get-Command agy -EA SilentlyContinue)) {
 # Claude Desktop via Winget-Smart (install/upgrade/skip)
 Winget-Smart "Anthropic.Claude"
 
+# ── Launchers: one managed block in $PROFILE, from .claude/machine/launchers.json ──
+# Markers match the shell-rc block (# BEGIN/END databayt agents). Idempotent; strips the
+# legacy single functions. A machine profile's optional `launchers` list narrows the set.
+function Get-Launchers {
+    $file = "$KUN_DIR\.claude\machine\launchers.json"
+    if (Test-Path $file) {
+        try { return @((Get-Content $file -Raw | ConvertFrom-Json).launchers) } catch { }
+    }
+    return @(
+        [pscustomobject]@{ id='c'; name='Claude Code (primary)';      bin='claude';   args=@('--dangerously-skip-permissions'); bypass=$true;  agent='code' },
+        [pscustomobject]@{ id='a'; name='Antigravity (secondary)';    bin='agy';      args=@('--dangerously-skip-permissions'); bypass=$true;  agent='agy' },
+        [pscustomobject]@{ id='o'; name='opencode (tertiary)';        bin='opencode'; args=@();                                 bypass=$true;  agent='opencode' },
+        [pscustomobject]@{ id='h'; name='Hermes gateway (optional)';  bin='hermes';   args=@();                                 bypass=$false; agent='hermes' }
+    )
+}
+function Get-ProfileLaunchers {
+    $login = $env:KUN_LOGIN
+    if (-not $login) {
+        $base = if ($env:KUN_HOME) { "$env:KUN_HOME\machine" } else { "$HOME_DIR\.kun\machine" }
+        $st = "$base\settings.json"
+        if (Test-Path $st) { try { $login = (Get-Content $st -Raw | ConvertFrom-Json).login } catch { } }
+    }
+    if ($login) {
+        $pf = "$KUN_DIR\machines\$login.json"
+        if (Test-Path $pf) {
+            try { $l = (Get-Content $pf -Raw | ConvertFrom-Json).launchers; if ($l) { return @($l) } } catch { }
+        }
+    }
+    return $null
+}
+function Write-LauncherBlock {
+    $allowed = Get-ProfileLaunchers
+    $lines = @()
+    foreach ($l in (Get-Launchers)) {
+        if ($allowed -and ($allowed -notcontains $l.id)) { continue }
+        # c and a keep their historical always-on behavior; o and h only when installed
+        if (($l.id -in @('o','h')) -and -not (Get-Command $l.bin -EA SilentlyContinue)) { continue }
+        $cmd = (@($l.bin) + @($l.args)) -join ' '
+        $lines += "function $($l.id) { $cmd `$args }   # $($l.name)"
+    }
+    if (-not (Test-Path $PROFILE)) { New-Item -ItemType File -Force -Path $PROFILE | Out-Null }
+    $kept = New-Object System.Collections.Generic.List[string]
+    $inBlock = $false
+    foreach ($ln in @(Get-Content $PROFILE -EA SilentlyContinue)) {
+        if ($ln -match '^# BEGIN databayt agents') { $inBlock = $true; continue }
+        if ($ln -match '^# END databayt agents')   { $inBlock = $false; continue }
+        if ($inBlock) { continue }
+        # legacy single functions + their comments + the deprecated cc and OpenClaw claw helpers
+        if ($ln -match '^function (c|a|o|h|cc|claw) ' ) { continue }
+        if ($ln -match '^# (Claude Code \(primary\)|Antigravity \(secondary\)|opencode \(tertiary|Hermes gateway \(optional\)|OpenClaw gateway)') { continue }
+        $kept.Add($ln)
+    }
+    $kept.Add('')
+    $kept.Add('# BEGIN databayt agents — managed by kun onboarding (launchers.json); edits inside are overwritten')
+    foreach ($x in $lines) { $kept.Add($x) }
+    $kept.Add('# END databayt agents')
+    $kept | Set-Content $PROFILE
+    return ($lines | ForEach-Object { ($_ -split ' ')[1] }) -join ', '
+}
+
 # Launcher functions in PowerShell $PROFILE:
 #   c -> Claude Code (primary)   ·   a -> Antigravity (secondary)
 if (-not (Test-Path $PROFILE)) { New-Item -ItemType File -Force -Path $PROFILE | Out-Null }
@@ -422,20 +482,8 @@ if ($profileText -match 'function cc ') {
     (Get-Content $PROFILE) | Where-Object { $_ -notmatch 'function cc ' } | Set-Content $PROFILE
     $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
 }
-if ($profileText -notmatch 'function c ') {
-    Add-Content $PROFILE @'
-
-# Claude Code (primary)
-function c { claude --dangerously-skip-permissions $args }
-'@
-}
-if ($profileText -notmatch 'function a ') {
-    Add-Content $PROFILE @'
-
-# Antigravity (secondary)
-function a { agy --dangerously-skip-permissions $args }
-'@
-}
+# The c / a / o / h functions are written once, below, as one managed block from
+# .claude/machine/launchers.json (Write-LauncherBlock).
 
 # opencode — tertiary agent. Bypass is CONFIG-LEVEL (no flag exists): write
 # "permission": "allow" into ~/.config/opencode/opencode.json (merged).
@@ -455,14 +503,6 @@ if (Agent-Selected "opencode") {
         $oc['permission'] = "allow"
         $oc | ConvertTo-Json -Depth 8 | Set-Content $ocCfg
         Pass "opencode ($((opencode --version 2>$null | Select-Object -First 1))) · bypass = permission:allow"
-        $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
-        if ($profileText -notmatch 'function o ') {
-            Add-Content $PROFILE @'
-
-# opencode (tertiary — bypass lives in ~/.config/opencode/opencode.json)
-function o { opencode $args }
-'@
-        }
     }
 }
 
@@ -476,22 +516,10 @@ if (Agent-Selected "hermes") {
     }
     if (Get-Command hermes -EA SilentlyContinue) {
         Pass "Hermes ($((hermes --version 2>$null | Select-Object -First 1))) — gateway setup stays manual (interactive)"
-        $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
-        # Migrate the legacy OpenClaw launcher, then write the Hermes one
-        if ($profileText -match 'function claw ') {
-            (Get-Content $PROFILE) | Where-Object { $_ -notmatch 'function claw |# OpenClaw gateway' } | Set-Content $PROFILE
-            $profileText = Get-Content $PROFILE -Raw -EA SilentlyContinue
-        }
-        if ($profileText -notmatch 'function h ') {
-            Add-Content $PROFILE @'
-
-# Hermes gateway (optional)
-function h { hermes $args }
-'@
-        }
     }
 }
-Pass "Shell helpers (c, a, o, h per selection)"
+$launcherIds = Write-LauncherBlock
+Pass "Shell helpers (managed block: $launcherIds)"
 
 # Wire Claude Desktop MCP config to the same servers Claude Code uses
 $desktopCfgDir = "$env:APPDATA\Claude"
