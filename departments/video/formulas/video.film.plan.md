@@ -364,7 +364,7 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}) in two turns: first ask the q
 - Brand kit (identity): {{brand_kit_url}}
 - Markets (price, currency, dialect): {{markets_url}}
 - Real captures: look in ~/media/{{repo}}/ before proposing any new capture.
-- Reference film: the latest video the team approved in the WhatsApp group «المدرسة 2.0», raised to a cinematic level with 3D characters. A WhatsApp video is pulled with `wa-pull.py` and seeded with `produce from-reference <ID> <video>`; both are actions that need the person's yes first.
+- Reference film (only when no source video is given): the latest video the team approved in the WhatsApp group «المدرسة 2.0», raised to a cinematic level with 3D characters. A WhatsApp video is pulled with `wa-pull.py` and seeded with `produce from-reference <ID> <video>`; both are actions that need the person's yes first.
 
 ## Constraints
 - Gather read-only first and say in one line what you read. Do not create a project, render, or call any tool that writes.
