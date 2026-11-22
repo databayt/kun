@@ -33,6 +33,9 @@ $P ship <ID> [--variant v|--all] --dry-run        # CDN keys + plan; real run on
 $P index                        # rebuild the local video index
 $P readiness [--fix] [--json]   # ffmpeg, blender, filmcraft-cli, mlx_whisper, uv, Playwright browsers, disk >= 15 GB, power, Kun.app, MCPs, GEMINI key; exit 1 if a critical row fails (--fix installs webkit + chromium)
 $P init … --from-reference clip.mp4   # | from-reference <ID> clip.mp4: copy to 02-research/reference/, whisper transcript.srt, contact.png, seed 03-script/script.md; research = "seeded"
+$P from-reference <ID> clip.mp4 --voiceover [--variant sd-ar|--all]   # + the video's audio as 48 kHz mono wav in 07-audio/voiceover/<variant>.wav; recorded in project.json voice.<variant>
+$P status <ID> --json           # stage_list, variants grid, gates, next, urls, paths (shot-list, asset-manifest), voice: what the Kun app's production strip reads
+$P list --json [--repo hogwarts]   # every project with next stage, focus, variants
 ```
 
 **Focus** — `project.json → focus` (e.g. `["sd-ar"]`) is the build order: Machine's starter and `build` work those versions first.

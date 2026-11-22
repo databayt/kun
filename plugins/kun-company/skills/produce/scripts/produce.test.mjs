@@ -216,3 +216,104 @@ test("a missing aws or gh gives one friendly line", () => {
   assert.match(r.stderr, /produce: the AWS CLI \(aws\) is not installed or not on PATH/)
   assert.equal(r.stderr.trim().split("\n").length, 1, r.stderr)
 })
+
+// ---- source video: from-reference --voiceover, status --json, list --json -------------------------------------
+const hasFfmpeg = spawnSync("ffmpeg", ["-version"], { encoding: "utf8" }).status === 0 && spawnSync("ffprobe", ["-version"], { encoding: "utf8" }).status === 0
+test("from-reference --voiceover: 48 kHz mono wav per variant, voice source in the ledger, transcript kept", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
+  const home = join(root, "src-projects"), bin = join(root, "src-bin")
+  mkdirSync(bin, { recursive: true })
+  // a stand-in for mlx_whisper: writes a one-line transcript.srt into --output-dir
+  writeFileSync(join(bin, "mlx_whisper"), "#!/bin/sh\nwhile [ $# -gt 0 ]; do [ \"$1\" = \"--output-dir\" ] && d=\"$2\"; shift; done\nprintf '1\\n00:00:00,000 --> 00:00:01,500\\nhello there\\n\\n' > \"$d/transcript.srt\"\n", { mode: 0o755 })
+  const e = { ...env, PRODUCE_HOME: home, PATH: `${bin}:${process.env.PATH}` }
+  const sp = (...a) => spawnSync(process.execPath, [PRODUCE, ...a], { encoding: "utf8", env: e })
+  const video = join(root, "source.mp4")
+  const mk = spawnSync("ffmpeg", ["-y", "-v", "error", "-f", "lavfi", "-i", "sine=frequency=440:duration=3", "-f", "lavfi", "-i", "color=c=black:s=64x64:d=3", "-shortest", "-pix_fmt", "yuv420p", video], { encoding: "utf8" })
+  assert.equal(mk.status, 0, mk.stderr)
+
+  // one variant: no --variant needed
+  const one = JSON.parse(sp("init", "--brand", "hogwarts", "--category", "intro", "--subject", "one", "--lang", "ar", "--markets", "sd").stdout).id
+  const r = sp("from-reference", one, video, "--voiceover")
+  assert.equal(r.status, 0, r.stderr)
+  const out = JSON.parse(r.stdout)
+  assert.deepEqual(out.voiceover.map((v) => [v.variant, v.file]), [["sd-ar", "07-audio/voiceover/sd-ar.wav"]])
+  assert.ok(Math.abs(out.voiceover[0].durationSec - 3) < 0.2, String(out.voiceover[0].durationSec))
+  const wav = join(home, one, "07-audio/voiceover/sd-ar.wav")
+  const pr = spawnSync("ffprobe", ["-v", "error", "-show_entries", "stream=sample_rate,channels", "-of", "csv=p=0", wav], { encoding: "utf8" })
+  assert.equal(pr.stdout.trim(), "48000,1")
+  const p = JSON.parse(readFileSync(join(home, one, "project.json"), "utf8"))
+  assert.equal(p.voice["sd-ar"].kind, "source-video")
+  assert.equal(p.voice["sd-ar"].source, "02-research/reference/video.mp4")
+  assert.equal(p.voice["sd-ar"].sampleRate, 48000)
+  assert.equal(p.stages.research.status, "seeded")
+  assert.ok(readFileSync(join(home, one, "03-script/script.md"), "utf8").includes("hello there"), "the transcript still seeds the script")
+  assert.ok(readFileSync(join(home, one, "03-script/script.md"), "utf8").includes("07-audio/voiceover/sd-ar.wav"), "the script names its voice source")
+
+  // without the flag nothing is extracted
+  const plain = JSON.parse(sp("init", "--brand", "hogwarts", "--category", "intro", "--subject", "plain", "--lang", "ar").stdout).id
+  const q = sp("from-reference", plain, video)
+  assert.equal(q.status, 0, q.stderr)
+  assert.equal(JSON.parse(q.stdout).voiceover, undefined)
+  assert.equal(existsSync(join(home, plain, "07-audio/voiceover/ar.wav")), false)
+
+  // two variants: --variant picks one, --all writes both, neither is an error that names them
+  const two = JSON.parse(sp("init", "--brand", "hogwarts", "--category", "intro", "--subject", "two", "--lang", "ar", "--markets", "sd,sa").stdout).id
+  const amb = sp("from-reference", two, video, "--voiceover")
+  assert.notEqual(amb.status, 0)
+  assert.match(amb.stderr, /--variant <v> or --all/)
+  assert.equal(existsSync(join(home, two, "02-research/reference/video.mp4")), false, "nothing is copied before the variant is known")
+  const pick = sp("from-reference", two, video, "--voiceover", "--variant", "sa-ar")
+  assert.equal(pick.status, 0, pick.stderr)
+  assert.equal(existsSync(join(home, two, "07-audio/voiceover/sa-ar.wav")), true)
+  assert.equal(existsSync(join(home, two, "07-audio/voiceover/sd-ar.wav")), false)
+  const all = sp("from-reference", two, video, "--voiceover", "--all")
+  assert.equal(all.status, 0, all.stderr)
+  assert.equal(existsSync(join(home, two, "07-audio/voiceover/sd-ar.wav")), true)
+
+  // a file with no audio is refused, not recorded
+  const silent = join(root, "silent.mp4")
+  spawnSync("ffmpeg", ["-y", "-v", "error", "-f", "lavfi", "-i", "color=c=black:s=64x64:d=1", "-pix_fmt", "yuv420p", silent])
+  const none = sp("from-reference", plain, silent, "--voiceover")
+  assert.notEqual(none.status, 0)
+})
+
+test("status --json: stage list, variant grid, gates, next, urls, and the shot-list and asset-manifest paths", () => {
+  const home = join(root, "st-projects")
+  const e = { ...env, PRODUCE_HOME: home }
+  const sp = (...a) => spawnSync(process.execPath, [PRODUCE, ...a], { encoding: "utf8", env: e })
+  const id = JSON.parse(sp("init", "--brand", "hogwarts", "--identity", "balqalam", "--category", "intro", "--subject", "strip", "--lang", "ar", "--markets", "sd").stdout).id
+  const j = JSON.parse(sp("status", id, "--json").stdout)
+  // the original keys survive
+  for (const k of ["id", "title", "status", "version", "issue", "orders", "stages", "gates", "contributors"]) assert.ok(k in j, k)
+  assert.equal(j.stage_list.length, 14)
+  assert.deepEqual(j.stage_list.map((s) => s.key), ["request", "research", "brief", "script", "storyboard", "assets", "visual", "audio", "edit", "render", "qa", "approval", "cdn", "publish"])
+  assert.deepEqual([j.stage_list[0].status, j.stage_list[1].status], ["done", "todo"])
+  assert.equal(j.stage_list.find((s) => s.key === "render").per_variant, true)
+  assert.equal(j.identity, "balqalam")
+  assert.deepEqual(j.variants.map((v) => [v.id, v.market, v.lang]), [["sd-ar", "sd", "ar"]])
+  assert.deepEqual(Object.keys(j.variants[0].stages), ["audio", "edit", "render", "qa", "approval", "cdn", "publish"])
+  assert.equal(j.variants[0].stages.render, "todo")
+  assert.equal(j.next, "research")
+  assert.deepEqual(Object.keys(j.gates), ["script", "look", "version", "publish"])
+  assert.equal(j.urls.length, 1)
+  assert.match(j.urls[0].url, /^https:\/\/cdn\.databayt\.org\/video\/hogwarts\/intro\/sd-ar\/fb-9x16\.mp4/)
+  assert.equal(j.paths.shot_list, join(home, id, "04-storyboard/shot-list.json"))
+  assert.equal(j.paths.asset_manifest, join(home, id, "05-assets/asset-manifest.json"))
+  assert.deepEqual([j.files.shot_list, j.files.asset_manifest, j.files.script], [true, false, false])
+  // advancing a variant stage shows in the grid
+  const f = join(home, id, "02-research/product-research.md")
+  writeFileSync(f, "r")
+  assert.equal(sp("advance", id, "research", "--file", f).status, 0)
+  assert.equal(JSON.parse(sp("status", id, "--json").stdout).next, "brief")
+})
+
+test("list --json: an array, newest first, filtered by --repo, empty when there are none", () => {
+  const empty = JSON.parse(spawnSync(process.execPath, [PRODUCE, "list", "--json"], { encoding: "utf8", env: { ...env, PRODUCE_HOME: join(root, "nothing-here") } }).stdout)
+  assert.deepEqual(empty, [])
+  const home = join(root, "st-projects")
+  const sp = (...a) => spawnSync(process.execPath, [PRODUCE, ...a], { encoding: "utf8", env: { ...env, PRODUCE_HOME: home } })
+  const all = JSON.parse(sp("list", "--json").stdout)
+  assert.ok(all.length >= 1)
+  for (const k of ["id", "title", "brand", "category", "version", "status", "next", "focus", "variants", "identity", "dir"]) assert.ok(k in all[0], k)
+  assert.equal(JSON.parse(sp("list", "--json", "--repo", "hogwarts").stdout).length, all.length)
+  assert.deepEqual(JSON.parse(sp("list", "--json", "--repo", "mkan").stdout), [])
+})

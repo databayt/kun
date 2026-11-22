@@ -23,6 +23,10 @@
 //   produce validate <project.json|shot-list.json>
 //   produce init … --from-reference <video>        also copy the video to 02-research/reference/, transcribe it (mlx_whisper), cut a contact sheet, seed 03-script/script.md
 //   produce from-reference <ID> <video>            the same seeding on an existing project (no init)
+//        --voiceover [--variant <v>|--all]          also extract the video's audio as 48 kHz mono wav to 07-audio/voiceover/<variant>.wav and
+//                                                   record it in project.json `voice` as the voice source (a single-variant project needs no --variant)
+//   produce status <ID> --json                     shared stages, variant grid, gates, next, predicted URLs, and the shot-list / asset-manifest paths
+//   produce list [--json] [--repo <line>]          every project, newest first, with its next stage
 //   produce readiness [--fix] [--json]             tool/runtime/disk/power/MCP/key check; exit 0 when every critical row passes
 //
 // Projects live in ~/media/_projects/<ID>/ (outside every repo; override with PRODUCE_HOME).
@@ -317,18 +321,44 @@ function contributors(p) {
   return rows.sort((a, b) => String(a.at).localeCompare(String(b.at)))
 }
 
+// `status --json`: everything the Kun app's production strip draws, in one read. Additive: the first keys
+// (id … contributors) are the original shape; `stage_list`, `variants`, `next`, `urls`, `paths`, `files` and
+// `voice` are for the strip.
+function statusJson(p) {
+  const vm = variantMode(p)
+  const dir = dirOf(p.id)
+  const cellOf = (v, k) => (vm ? (vst(p, v, k)?.status ?? "todo") : (p.stages[k]?.status ?? "todo"))
+  const stageList = STAGES.map((s) => {
+    const per = PER_VARIANT.includes(s.key)
+    const st = p.stages[s.key]
+    let status = st?.status ?? "todo"
+    if (vm && per) {
+      const cells = variantsOf(p).map((v) => cellOf(v.id, s.key))
+      status = cells.every((c) => ["done", "passed"].includes(c)) ? "done" : cells.some((c) => c !== "todo") ? "partial" : "todo"
+    }
+    return { key: s.key, n: s.n, file: s.file, per_variant: per, status, done: stageDone(p, s), at: vm && per ? null : st?.at ?? null }
+  })
+  const shared = STAGES.filter((s) => !(vm && PER_VARIANT.includes(s.key)))
+  const nextShared = shared.find((s) => !p.stages[s.key])
+  const next = nextShared ? nextShared.key : vm ? (variantsOf(p).some((v) => !vst(p, v.id, "render")) ? "build" : "done") : "done"
+  const variants = variantsOf(p).map((v) => ({ id: v.id, market: v.market ?? null, lang: v.lang, stages: Object.fromEntries(PER_VARIANT.map((k) => [k, cellOf(v.id, k)])) }))
+  const paths = { dir, project: join(dir, "project.json"), request: join(dir, "01-brief/request.json"), script: join(dir, "03-script/script.md"), shot_list: join(dir, "04-storyboard/shot-list.json"), asset_manifest: join(dir, "05-assets/asset-manifest.json"), voiceover_dir: join(dir, "07-audio/voiceover") }
+  const files = Object.fromEntries(["script", "shot_list", "asset_manifest"].map((k) => [k, existsSync(paths[k])]))
+  return {
+    id: p.id, title: p.title, status: p.status, version: p.version, issue: p.issue ?? null, orders: p.orders ?? [],
+    stages: Object.fromEntries(STAGES.map((s) => [s.key, stageDone(p, s)])),
+    gates: Object.fromEntries(GATE_NAMES.map((g) => [g, gateRec(p, g) ? { by: gateRec(p, g).by, at: gateRec(p, g).at } : null])),
+    contributors: contributors(p),
+    brand: p.brand, identity: p.identity ?? p.brand, category: p.category, subject: p.subject, langs: p.langs, markets: p.markets ?? [], focus: p.focus ?? [],
+    stage_list: stageList, variants, next, urls: filmUrls(p), paths, files, voice: p.voice ?? {},
+  }
+}
+
 // ---- status ----------------------------------------------------------------------------------
 function status(id) {
   const p = load(id)
   const vm = variantMode(p)
-  if (has("json")) {
-    return console.log(JSON.stringify({
-      id: p.id, title: p.title, status: p.status, version: p.version, issue: p.issue ?? null, orders: p.orders ?? [],
-      stages: Object.fromEntries(STAGES.map((s) => [s.key, stageDone(p, s)])),
-      gates: Object.fromEntries(GATE_NAMES.map((g) => [g, gateRec(p, g) ? { by: gateRec(p, g).by, at: gateRec(p, g).at } : null])),
-      contributors: contributors(p),
-    }, null, 2))
-  }
+  if (has("json")) return console.log(JSON.stringify(statusJson(p), null, 2))
   console.log(`${p.id}  [${p.status}]  ${p.title}\n  brand ${p.brand}  identity ${p.identity ?? p.brand}  version ${p.version}  langs ${p.langs.join(",")}  owner ${p.owner}  issue ${p.issue ?? "—"}`)
   if (vm) console.log(`  slug ${slugOf(p)}  markets ${p.markets.join(",")}  variants ${variantList(p)}`)
   let next = null
@@ -644,7 +674,7 @@ function formulaHeader(fid) {
   }
   return {}
 }
-const FORMULA_ITEMS = { blender: "skill:blender", capture: "skill:record", voice: "skill:edit", script: "skill:draft", pickup: "skill:produce", review: "skill:produce" }
+const FORMULA_ITEMS = { blender: "skill:blender", filmcraft: "mcp:filmcraft", image: "skill:higgs", capture: "skill:record", voice: "skill:edit", script: "skill:draft", pickup: "skill:produce", review: "skill:produce" }
 function itemsFor(fid, header) {
   const needs = [].concat(header.needs ?? []).filter((x) => /^(skill|mcp|agent):/.test(x))
   if (needs.length) return needs
@@ -1085,16 +1115,39 @@ function parseSrt(text) {
     return { time: `${fmtTime(a)}–${fmtTime(b)}`, line: l.slice(i + 1).join(" ").replace(/\|/g, "\\|").trim() }
   }).filter((x) => x && x.line)
 }
+// The reference's own audio becomes the voiceover: 48 kHz mono wav per variant, recorded as the voice source.
+function extractVoiceover(p, src, ext, variants) {
+  const dir = dirOf(p.id), outDir = join(dir, "07-audio", "voiceover")
+  mkdirSync(outDir, { recursive: true })
+  const first = join(outDir, `${variants[0].id}.wav`)
+  const ex = spawnSync("ffmpeg", ["-y", "-v", "error", "-i", src, "-vn", "-ac", "1", "-ar", "48000", "-c:a", "pcm_s16le", first], { encoding: "utf8" })
+  if (ex.status !== 0) die(`voiceover extract failed: ${(ex.stderr || ex.error?.message || "").trim().split("\n").pop()}`)
+  const pr = spawnSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", first], { encoding: "utf8" })
+  const durationSec = Math.round(Number.parseFloat((pr.stdout || "").trim()) * 100) / 100
+  if (!Number.isFinite(durationSec) || durationSec <= 0) die(`voiceover has no audio: ${first}`)
+  const sha = sha256(first)
+  p.voice ??= {}
+  for (const v of variants) {
+    const f = join(outDir, `${v.id}.wav`)
+    if (f !== first) copyFileSync(first, f)
+    p.voice[v.id] = { source: `02-research/reference/video${ext}`, file: `07-audio/voiceover/${v.id}.wav`, kind: "source-video", sampleRate: 48000, channels: 1, durationSec, sha, at: now(), by: actor() }
+  }
+  save(p)
+  console.error(`produce: voiceover -> ${variants.map((v) => `07-audio/voiceover/${v.id}.wav`).join(", ")} (${durationSec}s, 48 kHz mono)`)
+  return variants.map((v) => ({ variant: v.id, file: `07-audio/voiceover/${v.id}.wav`, durationSec }))
+}
 function fromReferenceSeed(id, video, fresh = false) {
   const p = load(id)
   const src = resolve(video)
   if (!existsSync(src)) die(`reference video not found: ${src}`)
+  const voiceVariants = has("voiceover") ? selectVariants(p) : null // a project with several variants needs --variant <v> or --all
   const dir = dirOf(id), refDir = join(dir, "02-research", "reference")
   mkdirSync(refDir, { recursive: true })
   mkdirSync(join(dir, "03-script"), { recursive: true })
   const ext = (src.match(/\.[^.\/]+$/)?.[0] ?? ".mp4").toLowerCase()
   copyFileSync(src, join(refDir, `video${ext}`))
   console.error(`produce: copied reference -> 02-research/reference/video${ext}`)
+  const voiceover = voiceVariants ? extractVoiceover(p, src, ext, voiceVariants) : null
   const fail = (m) => { console.error(`produce: reference transcription failed: ${m}\n  (the copy is kept at ${join(refDir, "video" + ext)})`); process.exit(1) }
   // contact sheet (best effort, never blocks the transcript)
   const cs = spawnSync("ffmpeg", ["-y", "-v", "error", "-i", src, "-vf", "fps=1/8,scale=180:-1,tile=8x2", "-frames:v", "1", join(refDir, "contact.png")], { encoding: "utf8" })
@@ -1111,12 +1164,12 @@ function fromReferenceSeed(id, video, fresh = false) {
   const srtFile = join(refDir, "transcript.srt")
   if (!existsSync(srtFile)) fail("no transcript.srt was written")
   const rows = parseSrt(readFileSync(srtFile, "utf8"))
-  const md = [`# Reference script — transcribed from ${basename(src)}`, "", `Source: 02-research/reference/video${ext} · transcript: 02-research/reference/transcript.srt · whisper-large-v3-turbo (${p.langs?.[0] || "ar"}) · a machine draft, check it against the audio.`, "", "| # | time | line |", "| --- | --- | --- |", ...rows.map((r, i) => `| ${i + 1} | ${r.time} | ${r.line} |`), ""].join("\n")
+  const md = [`# Reference script — transcribed from ${basename(src)}`, "", ...(voiceover ? [`Voiceover: the video's own audio, ${voiceover.map((v) => v.file).join(", ")} (${voiceover[0].durationSec}s). The picture is planned over this timing.`, ""] : []), `Source: 02-research/reference/video${ext} · transcript: 02-research/reference/transcript.srt · whisper-large-v3-turbo (${p.langs?.[0] || "ar"}) · a machine draft, check it against the audio.`, "", "| # | time | line |", "| --- | --- | --- |", ...rows.map((r, i) => `| ${i + 1} | ${r.time} | ${r.line} |`), ""].join("\n")
   writeFileSync(join(dir, "03-script", "script.md"), md)
   p.stages.research = { status: "seeded", file: "02-research/reference/transcript.srt", at: now() }
   save(p)
   console.error(`produce: seeded 03-script/script.md (${rows.length} lines), research marked "seeded"`)
-  if (!fresh) console.log(JSON.stringify({ id, reference: `02-research/reference/video${ext}`, transcript: "02-research/reference/transcript.srt", contact: "02-research/reference/contact.png", lines: rows.length }, null, 2))
+  if (!fresh) console.log(JSON.stringify({ id, reference: `02-research/reference/video${ext}`, transcript: "02-research/reference/transcript.srt", contact: "02-research/reference/contact.png", lines: rows.length, ...(voiceover ? { voiceover } : {}) }, null, 2))
 }
 
 // ---- readiness ---------------------------------------------------------------------------------
@@ -1222,7 +1275,8 @@ function listCmd() {
     const vm = !!p.markets?.length
     const next = (vm ? STAGES.filter((x) => !PER_VARIANT.includes(x.key)) : STAGES).find((s) => !p.stages?.[s.key])
     out.push({ id: p.id, title: p.title, brand: p.brand, category: p.category, subject: p.subject, version: p.version, status: p.status,
-      createdAt: p.createdAt, next: next ? next.key : vm ? "build" : "done", focus: p.focus ?? [], variants: vm ? variantsOf(p).map((v) => v.id) : p.langs ?? [] })
+      createdAt: p.createdAt, next: next ? next.key : vm ? "build" : "done", focus: p.focus ?? [], variants: vm ? variantsOf(p).map((v) => v.id) : p.langs ?? [],
+      identity: p.identity ?? p.brand, markets: p.markets ?? [], langs: p.langs ?? [], dir: join(HOME, d) })
   }
   out.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
   if (has("json")) console.log(JSON.stringify(out, null, 2))
