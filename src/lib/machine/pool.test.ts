@@ -185,6 +185,13 @@ describe("pool doctor gate", () => {
     expect((await go(gate(true, "2026-11-22T11:00:00Z"))).ok).toBe(true);
     expect((await go(undefined)).ok).toBe(true);
   });
+  it("allows orange, refuses red", async () => {
+    const go = (readiness: unknown) =>
+      claimJob(memStore(row()), { id: "j1", login: "moed", share: sh, resources: null, readiness }, sign, now);
+    const lv = (level: "orange" | "red", pass: boolean) => ({ percent: 50, failing: [], catalogVersion: 5, gate: { pass, level, failing: ["x"], at: "2026-11-22T11:00:00Z" } });
+    expect((await go(lv("orange", true))).ok).toBe(true);
+    expect(await go(lv("red", false))).toEqual({ ok: false, error: "doctor" });
+  });
 });
 
 describe("finish", () => {

@@ -216,8 +216,14 @@ export interface LocalRepo {
  * departments. `at` is when the machine computed it; a verdict older than {@link GATE_STALE_MS} no longer counts.
  */
 export const gateSchema = z.object({
+  /**
+   * May contribute: no core step fails (level is not "red"). Orange (only extras missing) is still `pass: true`.
+   * Old Machine builds send only this, with `pass: false` meaning any gate step failed.
+   */
   pass: z.boolean(),
-  /** Ids of the gate steps that fail. */
+  /** green = all pass · orange = only extras fail (contribute, warned) · red = a core step fails (blocked). */
+  level: z.enum(["green", "orange", "red"]).optional(),
+  /** Ids of the gate steps that fail (core and extra). */
   failing: z.array(z.string().max(80)).max(200),
   /** ISO time the machine evaluated the gate. */
   at: z.string().max(40),

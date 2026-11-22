@@ -127,8 +127,10 @@ export interface ClaimInput {
 }
 
 /**
- * The doctor check shared by task claims and pool claims: a detail string when the machine's last doctor
- * verdict fails or is older than 48 h, null when it may contribute.
+ * The doctor check shared by task claims and pool claims: a detail string when the machine may not contribute,
+ * null when it may. Refused when the last verdict is red (a core step fails; for old Machine builds that send
+ * no `level`, any failing verdict), or when a non-green verdict is older than 48 h. An explicit green verdict never
+ * goes stale (nothing is missing; the app re-runs the doctor on its own); a legacy verdict without `level` does. Orange (extras missing) is allowed.
  *
  * A machine that never sent a gate (an app from before the doctor, or no readiness yet) is allowed for now,
  * so old app versions are not locked out; tighten this to a refusal once every app reports a gate.
@@ -137,10 +139,13 @@ export function doctorRefusal(readiness: unknown, now = new Date()): string | nu
   const parsed = readinessSchema.safeParse(readiness);
   const gate = parsed.success ? parsed.data.gate : undefined;
   if (!gate) return null;
+  const red = gate.level ? gate.level === "red" : !gate.pass;
+  if (red)
+    return `doctor: core steps missing (${gate.failing.join(", ") || "unknown"}) — the minimum shared intelligence is not installed; run the doctor`;
+  if (gate.level === "green") return null;
   const at = Date.parse(gate.at);
   if (!Number.isFinite(at) || now.getTime() - at > GATE_STALE_MS)
     return "the doctor has not run in 48 h — open Kun and run the doctor";
-  if (!gate.pass) return `doctor failing: ${gate.failing.join(", ") || "unknown"} — run the doctor`;
   return null;
 }
 

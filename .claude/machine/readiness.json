@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "note": "Readiness catalog. Probes: .claude/scripts/kun-ready <probe>. Shared by onboarding-mac.sh --doctor and the Machine app. `gate: true` marks a step the doctor requires before contributing (kun-ready --gate); it applies when the machine's departments match the step's `departments`, or `gateFor` when present.",
+  "version": 6,
+  "note": "Readiness catalog. Probes: .claude/scripts/kun-ready <probe>. Shared by onboarding-mac.sh --doctor and the Machine app. `gate` is a tier: \"core\" = the minimum shared intelligence, a missing core step is RED and blocks contributing; \"extra\" = nice to have, a missing extra is ORANGE and only warns; false = not part of the doctor (kun-ready --gate). A gated step applies when the machine's departments match the step's `departments`, or `gateFor` when present.",
   "stages": [
     "identity",
     "accounts",
@@ -64,7 +64,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "gh.installed"
       ],
@@ -99,7 +99,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "gh.auth"
       ],
@@ -130,7 +130,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "after": [
         "gh.auth"
       ],
@@ -160,7 +160,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [],
       "human": false,
       "check": {
@@ -189,7 +189,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [],
       "human": true,
       "check": {
@@ -370,7 +370,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "sales",
         "support"
@@ -402,7 +402,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "sales",
         "support"
@@ -434,7 +434,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "sales",
         "support"
@@ -466,7 +466,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "sales",
         "support"
@@ -498,7 +498,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "sales",
         "support"
@@ -530,7 +530,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "sales",
         "support"
@@ -1112,7 +1112,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [],
       "human": false,
       "check": {
@@ -1140,7 +1140,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "github.org",
         "repos.dir"
@@ -1261,7 +1261,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "tech"
       ],
@@ -1298,7 +1298,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "tech"
       ],
@@ -1403,7 +1403,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [],
       "human": false,
       "check": {
@@ -1441,7 +1441,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "claude.cli"
       ],
@@ -1932,7 +1932,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "repo.kun"
       ],
@@ -1996,7 +1996,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "tech"
       ],
@@ -2034,7 +2034,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "tech"
       ],
@@ -2097,7 +2097,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "after": [
         "engine.manifest"
       ],
@@ -2165,7 +2165,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2195,7 +2195,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2225,7 +2225,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2255,7 +2255,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2285,7 +2285,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2315,7 +2315,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2345,7 +2345,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2375,7 +2375,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2405,7 +2405,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2435,7 +2435,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2465,7 +2465,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "core",
       "after": [
         "engine.manifest"
       ],
@@ -2495,7 +2495,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "video"
       ],
@@ -2530,7 +2530,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "video"
       ],
@@ -2570,7 +2570,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "video"
       ],
@@ -2612,7 +2612,7 @@
       "roles": [
         "*"
       ],
-      "gate": true,
+      "gate": "extra",
       "gateFor": [
         "video"
       ],

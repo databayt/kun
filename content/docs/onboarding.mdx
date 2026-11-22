@@ -85,28 +85,36 @@ The launchers live in one managed block in `~/.zshrc` / `~/.bashrc` (`# BEGIN da
 
 ## Doctor
 
-Before a machine contributes, it must hold the shared intelligence: at least its **department's**, not necessarily everything. The doctor proves that minimum. Each readiness step carries a `gate` flag, and the gate is the flagged steps that apply to the machine's departments.
+Before a machine contributes, it must hold the shared intelligence: at least its **department's**, not necessarily everything. The doctor proves that minimum. Each readiness step carries a `gate` tier, `core` or `extra`, and the gate is the tiered steps that apply to the machine's departments. The result is one of three levels:
 
-| Area | Steps | Gate for |
+| Level | Meaning | Contributing |
 |---|---|---|
-| Identity | `gh.auth`, `github.org`, `github.ssh`, `git.identity` | everyone |
-| Agent | `claude.cli`, `anthropic.login`, `launcher.c` (with the bypass flag) | everyone |
-| Engine | `engine.manifest`, `engine.fresh` (manifest under 7 days old, kun under 50 commits ahead of it), `engine.hooks` (session-start, block-context, block-guard, block-destructive-bash and route-guard wired in `settings.json`), `engine.rules` (github-workflow, block-protocol, patterns, delegation), `engine.maintain` | everyone |
-| Repos | `repos.dir`, `repo.kun` | everyone |
-| Department pack | `pack.<department>`: every skill and agent in `departments/<department>/pack.json` is installed in `~/.claude` | that department |
-| Extras | `engine.mcp`, `engine.browser-mcp`, `env.hogwarts`, `env.mkan` · `crm.*` and `crm.api` · `tool.blender`, `tool.filmcraft`, `tool.whisper-cli`, `tool.whisper-model` | tech · sales and support · video |
+| **Red** | a core step is missing: the minimum shared intelligence is not there | blocked until fixed |
+| **Orange** | core is complete, only extras are missing | allowed, with a warning |
+| **Green** | every step passes | allowed |
+
+**Chat with the shared intelligence, the org and every repo is never blocked.** Red stops contributing only: task claims and pool claims. The doctor runs on its own at the first launch of Machine and after every update, so a new machine reaches green without anyone asking.
+
+| Area | Steps | Tier |
+|---|---|---|
+| Identity | `gh.auth`, `github.org`, `git.identity` | core, everyone |
+| Agent | `claude.cli`, `anthropic.login`, `launcher.c` (with the bypass flag) | core, everyone |
+| Engine | `engine.manifest`, `engine.fresh` (manifest under 7 days old, kun under 50 commits ahead of it), `engine.hooks` (session-start, block-context, block-guard, block-destructive-bash and route-guard wired in `settings.json`), `engine.rules` (github-workflow, block-protocol, patterns, delegation) | core, everyone |
+| Repos | `repos.dir`, `repo.kun` | core, everyone |
+| Department pack | `pack.<department>`: every skill and agent in `departments/<department>/pack.json` is installed in `~/.claude` | core, that department |
+| Extras | `github.ssh`, `engine.maintain`, `engine.mcp`, `engine.browser-mcp` · `env.hogwarts`, `env.mkan` · `crm.*` · `tool.blender`, `tool.filmcraft`, `tool.whisper-cli`, `tool.whisper-model` | extra: everyone · tech · sales and support · video |
 
 Run it from a terminal:
 
 ```bash
-bash .claude/scripts/kun-ready --gate            # READY TO CONTRIBUTE, or each failing step with its fix
+bash .claude/scripts/kun-ready --gate            # GREEN, ORANGE (n extras) or RED (n core), each failing step with its fix
 bash .claude/scripts/kun-ready --gate --fix      # runs the automatic fixes, then checks again
-bash .claude/scripts/kun-ready --gate --json     # { pass, failing[], at, ... } — what Machine reports
+bash .claude/scripts/kun-ready --gate --json     # { pass, level, failing[], core[], extra[], at, ... } — what Machine reports
 ```
 
-Exit code 0 means ready, 1 means not. The departments come from `--departments a,b`, then `$KUN_DEPARTMENTS`, then the machine's profile (the login saved in Machine settings), and default to all of them.
+Exit code 0 means green or orange, 1 means red. The departments come from `--departments a,b`, then `$KUN_DEPARTMENTS`, then the machine's profile (the login saved in Machine settings), and default to all of them.
 
-**What it blocks.** Task claims. Machine sends the verdict with every heartbeat (`readiness.gate`: `pass`, `failing`, `at`); kun refuses a task claim or a pool claim with `doctor` when the last verdict fails or is older than 48 hours, and Machine shows "Run the doctor first" on every task. An app too old to send a verdict is allowed for now. **Git pushes are not blocked**, only warned about at session start.
+**What it blocks.** Task claims and pool claims, only when the level is red. Machine sends the verdict with every heartbeat (`readiness.gate`: `pass`, `level`, `failing`, `at`); kun refuses a claim with `doctor` when the last verdict is red (the detail names the core steps), or when a non-green verdict is older than 48 hours. Orange claims go through, with a warning in Machine. An app too old to send a verdict is allowed for now, and one that sends only `pass` is treated as red when `pass` is false. **Git pushes are not blocked**, only warned about at session start.
 
 
 ---

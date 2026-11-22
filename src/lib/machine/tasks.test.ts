@@ -134,7 +134,7 @@ describe("claimRefusal doctor", () => {
     login: "moed", departments: ["sales"] as "sales"[], inProgress: 0, wipLimit: 1,
     now: new Date("2026-11-22T12:00:00Z"),
   };
-  const readiness = (gate?: { pass: boolean; failing: string[]; at: string }) => ({
+  const readiness = (gate?: { pass: boolean; level?: "green" | "orange" | "red"; failing: string[]; at: string }) => ({
     percent: 80, failing: [], catalogVersion: 5, ...(gate ? { gate } : {}),
   });
   it("refuses a failing gate and names the steps", () => {
@@ -150,6 +150,19 @@ describe("claimRefusal doctor", () => {
   });
   it("allows a fresh passing gate", () =>
     expect(claimRefusal({ ...base, readiness: readiness({ pass: true, failing: [], at: "2026-11-22T11:00:00Z" }) })).toBeNull());
+  it("refuses a red level and names the core steps", () => {
+    const r = claimRefusal({ ...base, readiness: readiness({ pass: false, level: "red", failing: ["engine.rules"], at: "2026-11-22T11:00:00Z" }) });
+    expect(r?.error).toBe("doctor");
+    expect(r?.detail).toContain("core");
+    expect(r?.detail).toContain("engine.rules");
+  });
+  it("allows orange (extras missing) while fresh, refuses it once stale", () => {
+    expect(claimRefusal({ ...base, readiness: readiness({ pass: true, level: "orange", failing: ["github.ssh"], at: "2026-11-22T11:00:00Z" }) })).toBeNull();
+    const r = claimRefusal({ ...base, readiness: readiness({ pass: true, level: "orange", failing: ["github.ssh"], at: "2026-11-20T11:00:00Z" }) });
+    expect(r?.detail).toContain("48 h");
+  });
+  it("allows a green level", () =>
+    expect(claimRefusal({ ...base, readiness: readiness({ pass: true, level: "green", failing: [], at: "2026-11-22T11:00:00Z" }) })).toBeNull());
   it("allows an absent gate, an absent readiness or a garbled one (old apps are not locked out)", () => {
     expect(claimRefusal({ ...base, readiness: readiness() })).toBeNull();
     expect(claimRefusal({ ...base, readiness: null })).toBeNull();

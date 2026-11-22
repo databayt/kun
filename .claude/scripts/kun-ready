@@ -12,7 +12,7 @@
 #   kun-ready --repos-dir          the repos directory (installer state, else $HOME)
 #   kun-ready --repo-path <repo>   where <repo> lives (or should be cloned)
 #   kun-ready --gate [--json] [--fix] [--departments a,b]
-#                                  THE DOCTOR: only the `gate` steps for this machine's departments.
+#                                  THE DOCTOR: GREEN (all pass) · ORANGE (only extras fail; exit 0) · RED (a core step fails; exit 1).
 #                                  Prints READY TO CONTRIBUTE, or each failing step + its fix. exit 0 ready · 1 not.
 #                                  Departments: --departments, else $KUN_DEPARTMENTS, else the profile
 #                                  machines/<login>.json (login from Machine settings or $KUN_LOGIN), else all.
@@ -376,33 +376,41 @@ gate_departments() { # csv: --departments, $KUN_DEPARTMENTS, the profile, else e
 }
 gate_probes() { # probe ids of the gate steps that apply to the departments csv ($1)
     jq -r --arg os "$OS_KEY" --argjson depts "$(jq -cn --arg c "$1" '$c|split(",")')" '.steps[]
-        | select(.gate == true)
+        | select(.gate != null and .gate != false)
         | select((.os|index($os)) != null)
         | select((.gateFor // .departments) as $g | ($g|index("*")) != null or any($g[]; . as $x | $depts|index($x)))
         | .check.probe' "$CATALOG"
 }
-gate_json() { # → {pass, departments, failing[], details[], steps[], at}
-    local depts res
+gate_json() { # → {pass, level, departments, failing[], core[], extra[], details[], steps[], at}
+    local depts res tiers
     depts="$(gate_departments)"
     res="$(run_many < <(gate_probes "$depts"))"
-    jq -c --arg depts "$depts" --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --slurpfile cat "$CATALOG" '
+    # probe id → tier ("core" | "extra"; a legacy `gate: true` counts as core)
+    tiers="$(jq -c '[.steps[] | select(.gate != null and .gate != false) | {key: .check.probe, value: (if .gate == "extra" then "extra" else "core" end)}] | from_entries' "$CATALOG")"
+    jq -c --arg depts "$depts" --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --slurpfile cat "$CATALOG" --argjson tiers "$tiers" '
         ([.[] | select(.exit == 1)]) as $f
-        | {pass: (($f|length) == 0),
+        | ([$f[] | select(($tiers[.id] // "core") == "core") | .id]) as $core
+        | ([$f[] | select(($tiers[.id] // "core") == "extra") | .id]) as $extra
+        | {pass: (($core|length) == 0),
+           level: (if ($core|length) > 0 then "red" elif ($extra|length) > 0 then "orange" else "green" end),
            departments: ($depts|split(",")),
            failing: [$f[].id],
+           core: $core,
+           extra: $extra,
            details: [$f[] | . as $r | ($cat[0].steps[] | select(.check.probe == $r.id)) as $s
-                     | {id: $r.id, detail: $r.detail, kind: ($s.fix.kind // "human"), fix: ($s.fix.cmd // ""), title: $s.title.en}],
+                     | {id: $r.id, tier: ($tiers[$r.id] // "core"), detail: $r.detail, kind: ($s.fix.kind // "human"), fix: ($s.fix.cmd // ""), title: $s.title.en}],
            steps: .,
            at: $at}' <<<"$res"
 }
-gate_print() { # human face of gate_json ($1)
-    local pass; pass="$(jq -r '.pass' <<<"$1")"
-    if [ "$pass" = true ]; then
-        jq -r '"READY TO CONTRIBUTE  (departments: \(.departments|join(", ")) · \(.steps|length) gate steps)"' <<<"$1"
-    else
-        jq -r '"NOT READY — \(.failing|length) step(s) to fix  (departments: \(.departments|join(", ")))",
-               (.details[] | "  ✗ \(.id)  \(.detail)\n      fix: " + (if .kind=="auto" and .fix != "" then .fix else "(\(.kind) step — see the Setup page in Machine)" end))' <<<"$1"
-    fi
+gate_print() { # human face of gate_json ($1): GREEN | ORANGE (n extras) | RED (n core)
+    local level; level="$(jq -r '.level' <<<"$1")"
+    local rows='(.details[] | select(.tier == $t) | "  ✗ \(.id)  \(.detail)\n      fix: " + (if .kind=="auto" and .fix != "" then .fix else "(\(.kind) step — see the Setup page in Machine)" end))'
+    case "$level" in
+        green) jq -r '"GREEN  (departments: \(.departments|join(", ")) · \(.steps|length) gate steps)"' <<<"$1" ;;
+        orange) jq -r --arg t extra "\"ORANGE (\(.extra|length) extras) — contribute, with a warning\", $rows" <<<"$1" ;;
+        *) jq -r --arg t core "\"RED (\(.core|length) core) — contribution blocked until fixed\", $rows" <<<"$1"
+           jq -r --arg t extra "(if (.extra|length) > 0 then \"also missing (extras):\" else empty end), $rows" <<<"$1" ;;
+    esac
 }
 gate_fix() { # run the auto fixes of the failing steps ($1 = gate json), each distinct command once
     local cmd
@@ -425,7 +433,7 @@ gate_main() {
     done
     has jq || { echo "kun-ready: jq required" >&2; exit 1; }
     local g; g="$(gate_json)"
-    if [ "$fix" = 1 ] && [ "$(jq -r '.pass' <<<"$g")" != true ]; then
+    if [ "$fix" = 1 ] && [ "$(jq -r '.level' <<<"$g")" != green ]; then
         gate_fix "$g"
         g="$(gate_json)"
     fi
