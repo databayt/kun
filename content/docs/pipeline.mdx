@@ -3,7 +3,112 @@ title: Video pipeline
 description: How a film starts in the Kun app, step by step. Phase 1 covers everything from the home input to the first plan, including the refine run that writes the prompt
 ---
 
-# Video pipeline
+## Phase 1 — the flow
+
+From opening Kun to the producer's first plan, in four parts. Gold is what you do, teal is a Claude
+run, red is a failure path, blue hands over to the next part.
+
+### 1 · Open and choose
+
+```mermaid
+%%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
+flowchart TD
+    A(["You open Kun"]):::you
+    A --> B["Home screen<br/>input box · Department ▾ · Repo ▾<br/>health light · 3 options"]
+    B --> P1[["Load the pack<br/>departments/video/pack.json"]]
+    B --> H1[["Health check<br/>produce.mjs readiness"]]
+    H1 --> HG["Green: all pass"]:::ok
+    H1 --> HR["Orange or red<br/>tap: rows · Fix · Ask"]:::bad
+    P1 --> D(["You choose<br/>Department: Video"]):::you
+    D --> D1["Folder ~/.kun/machine/video<br/>--add-dir ~/media<br/>2-hour limit · route = plan"]
+    D1 --> R(["You choose<br/>Repo: Hogwarts"]):::you
+    R --> R1["Hogwarts options only, 3 at most<br/>--add-dir ~/hogwarts"]
+    R1 --> O{"How does the<br/>prompt start?"}
+    O -- "tap" --> O1(["You tap an option<br/>Intro film · Continue · Tools check"]):::you
+    O -- "type" --> T1(["You type in any language<br/>and press ✨"]):::you
+    O1 --> O2["Its English brief fills the box<br/>its route is set silently<br/>nothing is sent"]
+    O2 --> N(["→ Refine"]):::done
+    T1 --> N
+
+    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
+    classDef claude fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+    classDef ok fill:#16301c,stroke:#3c8a4f,color:#cfeed7;
+    classDef bad fill:#2e1a16,stroke:#a6432f,color:#f0d2c9;
+    classDef done fill:#1d2540,stroke:#4a63b5,color:#d4dcf5;
+```
+
+### 2 · Refine: the prompt is written
+
+```mermaid
+%%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
+flowchart TD
+    R0(["Refine starts: ✨ spins"]):::done
+    R0 --> RF["The refine run<br/>claude -p in plan mode<br/>read-only · sonnet · medium<br/>240 s at most · no session"]:::claude
+    RF --> G1["Gather, read-only<br/>department CLAUDE.md<br/>produce list · status · project folder"]:::claude
+    G1 --> G1b["brand-kit.json · markets.json<br/>captures in ~/media/hogwarts"]:::claude
+    G1b --> G2["Fill formula.en in English<br/>Task · Context · References<br/>Constraints · Deliverable"]:::claude
+    G2 --> G3["Last line<br/>route: plan / do / workflow / quick"]:::claude
+    G3 --> F{"Text came back?"}
+    F -- "no" --> FX["✨ turns red<br/>your text stays"]:::bad
+    F -- "yes" --> F1["Prompt replaces the box<br/>route line removed, applied<br/>⌘Z = earlier text"]
+    FX --> E(["You edit, attach with +<br/>and press Enter"]):::you
+    F1 --> E
+    E --> N(["→ Send"]):::done
+
+    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
+    classDef claude fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+    classDef ok fill:#16301c,stroke:#3c8a4f,color:#cfeed7;
+    classDef bad fill:#2e1a16,stroke:#a6432f,color:#f0d2c9;
+    classDef done fill:#1d2540,stroke:#4a63b5,color:#d4dcf5;
+```
+
+### 3 · Send: the run is built
+
+```mermaid
+%%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
+flowchart TD
+    S0(["Send"]):::done
+    S0 --> S1["Your bubble<br/>an agent turn with the working line"]
+    S1 --> S2{"Route was plan?"}
+    S2 -- "yes" --> S3["Next turn is set to do"]
+    S2 -- "no" --> S4
+    S3 --> S4["Rust: chat::ask<br/>settings · profile · department<br/>repo allowed?"]
+    S4 --> S5["Build the run<br/>folder · --add-dir · route flags<br/>preface · suffix · 2-hour limit"]
+    S5 --> C["claude -p stream-json<br/>--permission-mode plan<br/>--model opus --effort high<br/>--agent producer"]:::claude
+    C --> N(["→ Producer"]):::done
+
+    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
+    classDef claude fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+    classDef ok fill:#16301c,stroke:#3c8a4f,color:#cfeed7;
+    classDef bad fill:#2e1a16,stroke:#a6432f,color:#f0d2c9;
+    classDef done fill:#1d2540,stroke:#4a63b5,color:#d4dcf5;
+```
+
+### 4 · The producer's plan turn: nothing is written
+
+```mermaid
+%%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
+flowchart TD
+    L0(["Producer starts"]):::done
+    L0 --> L["Loads department CLAUDE.md<br/>producer.md · your rules,<br/>skills and hooks"]:::claude
+    L --> PR1["Gathers: project · brand<br/>markets · captures · references"]:::claude
+    PR1 --> PR2["Lists actions that need your OK<br/>each with its command"]:::claude
+    PR2 --> PR3["Writes the plan in your language<br/>brief · 2–3 questions · journey<br/>first step"]:::claude
+    PR3 --> END(["Plan on screen:<br/>Shall I start with …?"]):::done
+    END --> NEXT["Your reply runs on do<br/>with --resume → phase 2"]
+    C1[["started → sessions.json<br/>→ Sessions"]]
+    C2[["tool → folded steps<br/>text → the answer live"]]
+    L -.-> C1
+    PR1 -.-> C2
+
+    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
+    classDef claude fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+    classDef ok fill:#16301c,stroke:#3c8a4f,color:#cfeed7;
+    classDef bad fill:#2e1a16,stroke:#a6432f,color:#f0d2c9;
+    classDef done fill:#1d2540,stroke:#4a63b5,color:#d4dcf5;
+```
+
+---
 
 A film on the databayt video line is made in the **Kun desktop app** ([Machine](/docs/machine)).
 The terminal does not render it. The app drives [produce](/docs/produce), the ledger that keeps
@@ -30,80 +135,6 @@ as they settle.
   length.
 - **A decision on where it runs.** That means the agent, the model, the effort and the permission
   mode. The app makes this choice silently: you never see a selector.
-
-### The flow
-
-What you do is in gold. Everything else happens without you. The dashed lines are where the app reads
-files.
-
-```mermaid
-flowchart TD
-    A(["You open Kun"]):::you
-    A --> B["Home screen<br/>greeting · input box · Department ▾ · Repo ▾ · health light · 3 options"]
-    B --> P1[["Load the pack<br/>departments/video/pack.json<br/>options · routes · formula"]]
-    B --> H1[["Health check<br/>produce.mjs readiness --json<br/>120 s at most"]]
-    H1 --> H2{"Every check passes?"}
-    H2 -- "yes" --> HG["Green light"]:::ok
-    H2 -- "warning or failure" --> HR["Orange or red light<br/>tap: see rows · Fix · Ask on the do route"]:::bad
-
-    B --> D(["You choose Department: Video"]):::you
-    D --> D1["Pack reloads · route back to the default plan<br/>folder ~/.kun/machine/video · --add-dir ~/media · 2-hour limit"]
-    D1 --> R(["You choose Repo: Hogwarts"]):::you
-    R --> R1["Only the Hogwarts options show, 3 at most<br/>--add-dir /Users/abdout/hogwarts"]
-    R1 --> O{"How does the prompt start?"}
-    O -- "tap an option" --> O1(["Intro film · Continue production · Tools check"]):::you
-    O1 --> O2["The option's English brief fills the box<br/>its route is chosen silently<br/>nothing is sent"]
-    O2 --> RF
-    O -- "type your own, any language" --> T1(["You type, then press ✨"]):::you
-    T1 --> RF
-
-    subgraph REFINE["Refine: the spinner on ✨"]
-        RF["claude -p · plan mode, read-only<br/>sonnet · medium · no agent · no session<br/>240 s at most"]:::claude
-        RF --> G1["Gather first<br/>department CLAUDE.md · produce list and status<br/>project folder · brand-kit.json · markets.json · captures"]:::claude
-        G1 --> G2["Fill formula.en in English<br/>Task · Context · References · Constraints · Deliverable<br/>every path, URL, ID, stage, price, dialect, length"]:::claude
-        G2 --> G3["Last line: route: plan / do / workflow / quick"]:::claude
-    end
-
-    G3 --> F{"Did refine return text?"}
-    F -- "no: time limit or empty" --> FX["✨ turns red<br/>your text stays · send as it is or retry"]:::bad
-    F -- "yes" --> F1["The prompt replaces the box text<br/>the route line is removed and applied silently<br/>⌘Z brings back the earlier text"]
-    FX --> E
-    F1 --> E(["You edit, attach files with +, press Enter"]):::you
-
-    E --> S1["Your bubble · an empty agent turn with the working line"]
-    S1 --> S2{"Was the route plan?"}
-    S2 -- "yes" --> S3["The next turn is set to do"]
-    S2 -- "no" --> S4
-    S3 --> S4["Rust: chat::ask<br/>settings · profile · department · repo allowed?<br/>folder · --add-dir · route flags · preface · suffix"]
-
-    S4 --> C["claude -p --output-format stream-json --verbose<br/>--permission-mode plan --add-dir hogwarts --add-dir media<br/>--model opus --effort high --agent producer -- prompt"]:::claude
-
-    subgraph PRODUCER["The producer's plan turn: writes nothing"]
-        C --> L["Loads the department CLAUDE.md · producer.md · your rules, skills and hooks"]:::claude
-        L --> PR1["Gathers: project · brand · markets · captures · references · product docs"]:::claude
-        PR1 --> PR2["Lists the actions that need your OK, each with its command"]:::claude
-        PR2 --> PR3["Writes the plan in your language<br/>brief · 2 or 3 questions with answers · journey · first step"]:::claude
-    end
-
-    C -. "started: session id" .-> SS[["sessions.json → Sessions"]]
-    C -. "tool events" .-> ST["Folded steps on screen"]
-    C -. "text events" .-> SX["The answer as it arrives"]
-    PR3 --> END(["The plan is on screen: Shall I start with …?"]):::done
-    END --> NEXT["Your reply runs on do, with --resume: phase 2"]
-
-    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
-    classDef claude fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
-    classDef ok fill:#16301c,stroke:#3c8a4f,color:#cfeed7;
-    classDef bad fill:#2e1a16,stroke:#a6432f,color:#f0d2c9;
-    classDef done fill:#1d2540,stroke:#4a63b5,color:#d4dcf5;
-```
-
-| Colour | Meaning |
-| --- | --- |
-| Gold | What you do |
-| Teal | A Claude run (refine or the producer) |
-| Red | A failure path |
-| Blue | Where phase 1 ends |
 
 ### Step 0 — You open Kun
 
