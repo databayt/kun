@@ -122,7 +122,9 @@ test("guardrail refuses forbidden fixes and terminal fixes never run", () => {
 test("NDJSON shape and secret redaction", () => {
   const d = setup(["git-identity"]);
   const fake = join(d, "fake-ready");
-  writeFileSync(fake, `#!/bin/bash\necho "GITHUB_TOKEN=ghp_abcdefghijklmnopqrstuvwxyz0123 leaked"\nexit 1\n`);
+  // Built from two parts: the plugin build's secret scan reads a whole literal as a real token.
+  const token = "ghp_" + "abcdefghijklmnopqrstuvwxyz0123";
+  writeFileSync(fake, `#!/bin/bash\necho "GITHUB_TOKEN=${token} leaked"\nexit 1\n`);
   const { ev, done } = runP(d, ["--check", "--only", "git-identity"]);
   assert.deepEqual(Object.keys(ev[0]), ["type", "mode", "catalogVersion", "total"]);
   assert.equal(ev[1].type, "pass");
