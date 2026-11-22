@@ -316,7 +316,7 @@
 ---
 
 ## Task
-Plan a new {{film_label}} for {{brand}} ({{repo}}): the brief in one line, the questions that change the film, the journey and the first step. Plan only; change nothing.
+Plan a new {{film_label}} for {{brand}} ({{repo}}) in two turns: first ask the questions that change the film, then, once the answers come back, write the plan. Plan only; change nothing.
 
 ## Context
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
@@ -340,7 +340,10 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}): the brief in one line, the q
 - Answer the person in their own language; this prompt stays English.
 
 ## Deliverable
+**Turn 1: questions only.** After the read-only gathering, write one line saying what you read and what you found (an existing project, the reference status), then end the turn with a `kun-questions` block (the protocol in CLAUDE.md): up to three questions that change the film, each option a real choice, the recommended option first with "(Recommended)" at the end of its label. No brief, no journey and no plan in this turn. Never write the questions as prose.
+
+**Turn 2, after the answers:** if an answer opens a new question that changes the film, ask it the same way. Otherwise write the plan:
 - The brief in one line: what · for whom · which version · the goal · the destination.
-- Three questions that change the film, each with a recommended answer the person can accept with "yes".
 - The journey as a numbered list: stage → tool → lane → gate → what is reused. Stages run request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish; gates are script · look · version · publish.
+- The actions that need the person's yes, each with its exact command.
 - The first step and what it produces, ending with the question "Shall I start with …?".
