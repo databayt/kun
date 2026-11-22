@@ -60,6 +60,7 @@
     "record",
     "edit",
     "produce",
+    "pipeline",
     "slack",
     "voice",
     "connectors",
