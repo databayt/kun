@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "note": "Readiness catalog. Probes: .claude/scripts/kun-ready <probe>. Shared by onboarding-mac.sh --doctor and the Machine app.",
   "stages": [
     "identity",
@@ -256,6 +256,64 @@
       }
     },
     {
+      "id": "mail.company",
+      "stage": "accounts",
+      "title": {
+        "ar": "البريد المؤسسي (<login>@databayt.org)",
+        "en": "Company mailbox (<login>@databayt.org)"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "mail.company",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "link",
+        "url": "https://privateemail.com",
+        "message": "Sign in to your @databayt.org mailbox; ask Abdout if you have none"
+      }
+    },
+    {
+      "id": "figma.login",
+      "stage": "accounts",
+      "title": {
+        "ar": "تسجيل الدخول إلى Figma",
+        "en": "Figma signed in"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "tech",
+        "image",
+        "marketing"
+      ],
+      "roles": [
+        "*"
+      ],
+      "after": [],
+      "human": true,
+      "check": {
+        "probe": "figma.login",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "link",
+        "url": "https://www.figma.com/login",
+        "message": "Sign in to Figma with your databayt account"
+      }
+    },
+    {
       "id": "secrets.gist",
       "stage": "accounts",
       "title": {
@@ -458,7 +516,7 @@
         "mac"
       ],
       "departments": [
-        "*"
+        "tech"
       ],
       "roles": [
         "engineer"
@@ -489,7 +547,7 @@
         "mac"
       ],
       "departments": [
-        "*"
+        "tech"
       ],
       "roles": [
         "engineer"
@@ -520,7 +578,7 @@
         "mac"
       ],
       "departments": [
-        "*"
+        "tech"
       ],
       "roles": [
         "engineer"
@@ -547,7 +605,7 @@
         "mac"
       ],
       "departments": [
-        "*"
+        "tech"
       ],
       "roles": [
         "engineer"

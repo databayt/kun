@@ -86,6 +86,8 @@ p_anthropic_login() {
 }
 p_mobile_app() { skip "human step — confirm on the phone"; }
 p_slack_joined() { skip "human step — confirm in Slack"; }
+p_mail_company() { skip "human step — sign in to the company mailbox (privateemail.com)"; }
+p_figma_login() { skip "human step — confirm Figma is signed in"; }
 p_secrets_gist() {
     local f="$CLAUDE_DIR/.env" n
     [ -f "$f" ] || { bad "~/.claude/.env missing"; return; }

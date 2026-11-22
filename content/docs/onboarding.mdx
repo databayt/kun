@@ -241,12 +241,14 @@ What the inviter must grant or hand over before paste-time:
 - [ ] **Anthropic account** — Pro/Max sub for the full Desktop + CLI experience, or an API key if not on Pro/Max
 - [ ] **Anthropic mobile app** — installed + signed in with the same account (native `PushNotification` from Claude Code)
 - [ ] **Secrets Gist ID** — handed out-of-band; powers `~/.claude/.env` (MCP keys + cross-cutting tokens). See [Secrets](/docs/secrets).
-- [ ] **Cloudflare** — account access for anyone who deploys (production runs on Cloudflare Workers/Containers; deploys go through the `deploy` skill, not on push)
-- [ ] **Vercel** *(legacy)* — team invite to `databayt` — still how `vercel env pull` fills per-product `.env`
-- [ ] **Neon** — project access for any product whose `DATABASE_URL_*` you'll touch (engineer)
+- [ ] **Cloudflare** *(tech only)* — account access for anyone who deploys (production runs on Cloudflare Workers/Containers; deploys go through the `deploy` skill, not on push)
+- [ ] **Vercel** *(legacy, tech only)* — team invite to `databayt` — still how `vercel env pull` fills per-product `.env`
+- [ ] **Neon** *(tech only)* — project access for any product whose `DATABASE_URL_*` you'll touch (engineer)
+- [ ] **Company mailbox** — `<login>@databayt.org` on Namecheap Private Email ([webmail](https://privateemail.com)); everyone
+- [ ] **Figma** — sign in at [figma.com/login](https://www.figma.com/login) (tech, image, marketing)
 - [ ] **Slack** — invite to `databayt-sh` ([invite link](https://join.slack.com/t/databayt-sh/shared_invite/zt-42mt16sb7-urQm0MDGtPMEsdrd0Uf3fw))
 - [ ] **CRM** — login `<name>@databayt.org` works on all 4 workspaces (see [CRM](/docs/crm))
-- [ ] **AWS IAM** — `hogwarts-s3-uploader` keys (engineer only)
+- [ ] **AWS IAM** — `hogwarts-s3-uploader` keys (tech only)
 
 If something's missing the wizard skips that step and lists it under "things to do later" at the end.
 
