@@ -277,11 +277,11 @@ link and every upload then comes from that film. An id that is not a known film 
 `missing: ["project"]`; the script never falls back to another film. The board pins for you:
 Continue production carries the film's id, and `produce order` always pins its own film.
 
-### Questions before Send
+### The formula's question fields
 
-The first prompt starts the chat. The reply says the formula's intro line and asks its questions inline;
-the answers fill the brief with no model, the brief shows folded with **Start** and **Edit**, and nothing
-runs until Start. The questions come from a second zero-token command:
+The app no longer asks these questions locally. A tap fills the box, **Send** starts the chat, and the plan
+run asks its own questions (see [pipeline](/docs/pipeline)). The fields below stay in the formulas as data,
+and the zero-token command still answers them:
 
 ```bash
 node .claude/scripts/station.mjs questions video.film.plan --dept video --repo hogwarts --json
@@ -304,7 +304,7 @@ nothing), `q: {en, ar}` on a slot (the question; without it the slot name is hum
 `fill --json` carries `model` and `effort` when the formula sets them. Lint rejects anything else;
 the escalate model is never allowed.
 
-In the app the answers re-fill the prompt with `fill --set slot=value`. No model runs.
+The app does not call `questions`; `intro`, `q`, `order` and `choice_ar` are unused by it for now.
 
 ## Routes and lanes
 
@@ -670,8 +670,8 @@ These are understood and not built.
 
 - **The operations room.** One list of everything that waits for a yes, across all departments.
 - **The share calculation.** Turning the points on closed issues into each member's share.
-- **The plan's questions as option cards.** The Agent SDK's `canUseTool` receives `AskUserQuestion`
-  and `ExitPlanMode`, so the lead's questions could become cards to tap.
+- **Native AskUserQuestion.** The plan run asks through a `kun-questions` block today. An Agent SDK
+  helper could receive `AskUserQuestion` and `ExitPlanMode` directly and drop the block.
 - **free-claude-code as a local engine.** It could run the cheaper lanes on a teammate's machine,
   under three conditions. It is licensed AGPL-3.0, so it runs as its own program and its code is
   never copied into Kun. Prompts leave to third-party providers, so no CRM, student or customer data

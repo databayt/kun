@@ -527,10 +527,8 @@ What comes back, where it goes and the gate it stops at. A plan turn returns the
 - **If refine fails** (time limit, no answer), the sparkle button turns red and your text stays as
   it was. You can send it as it is or press the button again.
 
-**Questions before Send.** The first prompt starts the chat. The reply says the formula's intro line and
-asks its questions inline (`station.mjs questions`): pick an option, type free text, or keep the defaults.
-The answers fill the brief (`fill --set`, a combined "cut" answer sets platform, shape and length at once)
-with no model. The brief then shows folded, with **Start** and **Edit**; nothing runs until you press Start.
+**Send starts the chat.** A tap on a formula only fills the box; nothing asks locally. The plan run then
+asks its own questions, which change from film to film (Step 6b).
 
 ### Step 5 — Edit, attach, send
 
@@ -566,6 +564,28 @@ claude -p --output-format stream-json --verbose --permission-mode plan \
 ## Task
 …the filled prompt…"
 ```
+
+### Step 6b — The run asks, you answer
+
+Before it plans, the plan run asks the questions that would change the result. It ends its turn with a
+`kun-questions` block (the text is `departments/_shared/ask.md`, which Machine appends to the workspace
+`CLAUDE.md`). The app removes the block from the text and shows a wizard that looks like the Claude Code
+terminal's question wizard:
+
+- a header chip (`☐ Audience`), then the question in bold;
+- options as `❱ 1. Label`, each with its description under it; the first is the recommended one;
+- **Type something** (your own words) and **Chat about this** (closes the wizard and puts you in the box);
+- keys: **Enter** selects, **↑/↓** moves, **Tab** switches questions, **Esc** cancels; with several
+  questions, a review screen comes before the answers go.
+
+The answers return to the **same session** as a message starting "User has answered your questions:". The
+run may ask again, and then it writes the plan. If you decline, it picks defaults and says which. Only the
+finished plan can be accepted (Step 7); **Accept** turns it into the prompt for the next phase.
+
+**The model is chosen silently.** The formula or route decides it, and the run starts on its own.
+**Settings → Model** sets it to Automatic (the default), always Opus or always Sonnet; the fallback is
+Automatic, Ask or Off. The `intro`, `q`, `order` and `cut` fields of a formula stay as data, but the app no
+longer asks them locally.
 
 **The four routes.** They are defined in `pack.json → routes` and never shown in the app. Each route
 names a *lane*: a row in `kun/.claude/engine.json → lanes` that fixes the model and the effort for
@@ -607,7 +627,7 @@ screen:
    reference, transcribing, creating the project.
 3. **Writes the plan**, in your language:
    - the brief in one line,
-   - three questions that change the film, each with a recommended answer,
+   - the answers you gave to its questions (it asked them first, Step 6b),
    - the journey: for each stage, its tool, its lane, its gate and what is reused,
    - the first step, ending with *"Shall I start with …?"*
 
