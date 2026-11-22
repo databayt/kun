@@ -52,6 +52,12 @@ export interface KunBlock {
   after: string[];
   /** `driver=` — null when absent or unknown (the machine profile default applies). */
   driver: Driver | null;
+  /** `film=<produce project id>` — the film a work order belongs to; null when absent. */
+  film: string | null;
+  /** `formula=<station formula id>` — the formula the order was filled from; null when absent. */
+  formula: string | null;
+  /** `weight=<n>` — the formula's weight; null when absent or not a number. */
+  weight: number | null;
 }
 
 export interface Task {
@@ -65,6 +71,8 @@ export interface Task {
   status: TaskStatus;
   /** kun login from the `holder:<login>` label, or null. */
   holder: string | null;
+  /** kun login from the `for:<login>` label (a work order made for one person), or null. */
+  assignee: string | null;
   priority: 0 | 1 | 2 | 3 | null;
   /** Milestone title, or null when the task is not in a sprint. */
   sprint: string | null;
@@ -121,8 +129,41 @@ export const receiptSchema = z.object({
   artifacts: z.array(z.string().trim().min(1).max(500)).max(100),
   summary: z.string().trim().min(1).max(4000),
   next: z.string().trim().min(1).max(1000).optional(),
+  /** The station formula the order came from (kun block `formula=`). */
+  formula: z.string().trim().min(1).max(100).optional(),
+  /** The film stage the deliverable belongs to (e.g. `visual`). */
+  stage: z.string().trim().min(1).max(40).optional(),
+  /** sha256 hex of each artifact, same order and length as `artifacts` when present. */
+  hashes: z.array(z.string().regex(/^[0-9a-f]{64}$/)).max(100).optional(),
+}).refine((r) => !r.hashes || r.hashes.length === r.artifacts.length, {
+  message: "hashes must match artifacts one to one",
+  path: ["hashes"],
 });
 export type Receipt = z.infer<typeof receiptSchema>;
+
+// ---- uploads -------------------------------------------------------------------------------------
+
+export const UPLOAD_MAX_BYTES = 2 * 1024 * 1024 * 1024;
+
+/** POST /api/machine/upload — presigned PUT links for `work/<film>/<issue>/<file>`; only the holder may ask. */
+export const uploadSchema = z.object({
+  id: taskIdSchema,
+  files: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(200),
+        size: z.number().int().min(0).max(UPLOAD_MAX_BYTES),
+        contentType: z.string().trim().min(1).max(120),
+      }),
+    )
+    .min(1)
+    .max(20),
+});
+export type UploadRequest = z.infer<typeof uploadSchema>;
+
+export interface UploadResponse {
+  uploads: { name: string; key: string; putUrl: string; publicUrl: string; contentType: string }[];
+}
 
 export interface TaskComment {
   author: string;

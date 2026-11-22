@@ -20,7 +20,7 @@ const list = (v: string | undefined): string[] =>
  * a missing block are ignored; an unknown `driver` is ignored; `after` entries resolve against `ownRepo` and malformed ones drop.
  */
 export function parseKunBlock(body: string | null | undefined, ownRepo: string): KunBlock {
-  const out: KunBlock = { repos: [], items: [], after: [], driver: null };
+  const out: KunBlock = { repos: [], items: [], after: [], driver: null, film: null, formula: null, weight: null };
   const m = /<!--\s*kun:([\s\S]*?)-->/i.exec(body ?? "");
   if (!m) return out;
   const fields: Record<string, string> = {};
@@ -33,6 +33,10 @@ export function parseKunBlock(body: string | null | undefined, ownRepo: string):
   out.items = list(fields.items);
   const driver = (fields.driver ?? "").toLowerCase();
   out.driver = (DRIVERS as readonly string[]).includes(driver) ? (driver as Driver) : null;
+  out.film = fields.film || null;
+  out.formula = fields.formula || null;
+  const w = Number(fields.weight);
+  out.weight = fields.weight && Number.isFinite(w) ? w : null;
   const seen = new Set<string>();
   for (const r of list(fields.after)) {
     const id = normalizeRef(r, ownRepo);
@@ -48,6 +52,8 @@ export interface ParsedLabels {
   department: Department | null;
   status: TaskStatus;
   holder: string | null;
+  /** `for:<login>` */
+  assignee: string | null;
   priority: 0 | 1 | 2 | 3 | null;
   wip: number | null;
   /** `run:auto` */
@@ -55,7 +61,7 @@ export interface ParsedLabels {
 }
 
 export function parseLabels(names: string[]): ParsedLabels {
-  const r: ParsedLabels = { department: null, status: "todo", holder: null, priority: null, wip: null, auto: false };
+  const r: ParsedLabels = { department: null, status: "todo", holder: null, assignee: null, priority: null, wip: null, auto: false };
   for (const raw of names) {
     const n = raw.trim();
     const lower = n.toLowerCase();
@@ -64,6 +70,8 @@ export function parseLabels(names: string[]): ParsedLabels {
       if ((DEPARTMENTS as readonly string[]).includes(d)) r.department = d;
     } else if (lower.startsWith("holder:")) {
       r.holder = lower.slice(7) || null;
+    } else if (lower.startsWith("for:")) {
+      r.assignee = lower.slice(4) || null;
     } else if (lower === "status:in-progress") {
       r.status = "in-progress";
     } else if (lower === "status:review" && r.status !== "in-progress") {
@@ -107,7 +115,7 @@ export function orderTasks(tasks: RawTask[]): Task[] {
 }
 
 export interface ClaimInput {
-  task: Pick<Task, "holder" | "status" | "afterOpen" | "department">;
+  task: Pick<Task, "holder" | "status" | "afterOpen" | "department"> & { assignee?: string | null };
   login: string;
   departments: readonly Department[];
   /** Tasks this login already holds in-progress (excluding this one). */
@@ -117,7 +125,10 @@ export interface ClaimInput {
 
 /** The claim gate, in the order a person would explain it. null = allowed. */
 export function claimRefusal(i: ClaimInput): { error: ClaimError; detail: string } | null {
-  if (!i.departments.includes(i.task.department))
+  // A work order made for one person (`for:<login>`) is theirs in any department, and nobody else's.
+  if (i.task.assignee && i.task.assignee !== i.login)
+    return { error: "held", detail: `this order is for ${i.task.assignee}` };
+  if (!i.task.assignee && !i.departments.includes(i.task.department))
     return { error: "department", detail: `${i.task.department} is not in your profile` };
   if (i.task.holder && i.task.holder !== i.login)
     return { error: "held", detail: `held by ${i.task.holder}` };
@@ -180,6 +191,7 @@ export function formatReceipt(r: Receipt, login: string): string {
     `### Run receipt — ${login}`,
     "",
     `Driver: ${r.driver} · Model: ${r.model} · Duration: ${fmtDuration(r.durationMs)}`,
+    ...(r.formula || r.stage ? [[r.formula ? `Formula: ${r.formula}` : "", r.stage ? `Stage: ${r.stage}` : ""].filter(Boolean).join(" · ")] : []),
     "",
     "**Summary**",
     r.summary,
@@ -189,8 +201,24 @@ export function formatReceipt(r: Receipt, login: string): string {
     "",
     "**Artifacts**",
     bullets(r.artifacts),
+    ...(r.hashes ? ["", "**Hashes (sha256)**", bullets(r.artifacts.map((a, i) => `${r.hashes![i]}  ${a}`))] : []),
     ...(r.next ? ["", "**Next**", r.next] : []),
     "",
     "Ready for review (`status:review`). Only the CEO closes.",
   ].join("\n");
+}
+
+/** The CDN key for an uploaded file: `work/<film or repo>/<issue number>/<safe name>`; null when the name is empty. */
+export function sanitizeFileName(name: string): string | null {
+  const base = name.split(/[\\/]/).pop() ?? "";
+  // eslint-disable-next-line no-control-regex
+  const clean = base.replace(/[\u0000-\u001f\u007f]/g, "").replace(/^\.+/, "").replace(/\s+/g, " ").trim();
+  return clean && clean !== "." && clean !== ".." ? clean : null;
+}
+
+export function uploadKey(task: Pick<Task, "repo" | "number" | "kun">, name: string): string | null {
+  const file = sanitizeFileName(name);
+  if (!file) return null;
+  const film = (task.kun.film || task.repo).replace(/[^a-zA-Z0-9._-]/g, "-");
+  return `work/${film}/${task.number}/${file}`;
 }

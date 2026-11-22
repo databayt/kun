@@ -311,7 +311,7 @@ function loadLog(ctx, dept) {
       const e = JSON.parse(line)
       if ((e.dept && e.dept !== dept) || !e.id) continue
       if (e.ts && new Date(e.ts).getTime() < cutoff) continue
-      const d = /^(pick|tap|start)/.test(e.action ?? "pick") ? 1 : /^(dismiss|clear|x)/.test(e.action ?? "") ? -1 : 0
+      const d = /^(pick|tap|start)/.test(e.event ?? e.action ?? "pick") ? 1 : /^(dismiss|clear|x)/.test(e.event ?? e.action ?? "") ? -1 : 0
       counts[e.id] = (counts[e.id] ?? 0) + d
     } catch {}
   }

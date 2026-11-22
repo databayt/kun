@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { RECEIPT_MARKER, receiptSchema } from "./contract";
+import { RECEIPT_MARKER, receiptSchema, uploadSchema } from "./contract";
 import {
-  claimRefusal, formatReceipt, normalizeRef, orderTasks, parseKunBlock, parseLabels, receiptRefusal, wipLimitFor,
+  claimRefusal, formatReceipt, normalizeRef, orderTasks, parseKunBlock, parseLabels, receiptRefusal, sanitizeFileName, uploadKey, wipLimitFor,
 } from "./tasks";
+import { presignUploads } from "./upload";
 import type { RawTask } from "./tasks";
 
+const noKun = { repos: [], items: [], after: [], driver: null, film: null, formula: null, weight: null };
 const raw = (o: Partial<RawTask> & { id: string }): RawTask => ({
-  repo: "kun", number: 1, title: "t", url: "", department: "sales", status: "todo", holder: null,
-  priority: null, sprint: null, auto: false, kun: { repos: [], items: [], after: [], driver: null }, afterOpen: [], body: "",
+  repo: "kun", number: 1, title: "t", url: "", department: "sales", status: "todo", holder: null, assignee: null,
+  priority: null, sprint: null, auto: false, kun: { ...noKun }, afterOpen: [], body: "",
   updatedAt: "", createdAt: "2026-01-01", sprintDue: null, ...o,
 });
 
@@ -22,7 +24,7 @@ describe("parseKunBlock", () => {
     expect(b.after).toEqual(["databayt/hogwarts#40", "databayt/mkan#41"]);
   });
   it("returns empty for no block or null body", () => {
-    expect(parseKunBlock(null, "kun")).toEqual({ repos: [], items: [], after: [], driver: null });
+    expect(parseKunBlock(null, "kun")).toEqual(noKun);
     expect(parseKunBlock("nothing", "kun").after).toEqual([]);
   });
   it("normalizes full refs", () => {
@@ -34,7 +36,7 @@ describe("parseKunBlock", () => {
 describe("parseLabels", () => {
   it("reads dept, status, holder, priority and wip", () => {
     expect(parseLabels(["dept:sales", "holder:moed", "status:in-progress", "P1", "wip:2", "bug"])).toEqual({
-      department: "sales", status: "in-progress", holder: "moed", priority: 1, wip: 2, auto: false,
+      department: "sales", status: "in-progress", holder: "moed", assignee: null, priority: 1, wip: 2, auto: false,
     });
   });
   it("reads run:auto", () => {
@@ -123,5 +125,78 @@ describe("claimRefusal", () => {
   it("refuses over the WIP limit, allows under a raised one", () => {
     expect(claimRefusal({ ...base, inProgress: 1 })?.error).toBe("wip");
     expect(claimRefusal({ ...base, inProgress: 1, wipLimit: 2 })).toBeNull();
+  });
+});
+
+describe("work orders", () => {
+  it("reads film, formula and weight from the kun block", () => {
+    const b = parseKunBlock("<!-- kun: repos=hogwarts; items=skill:blender; after=#4; film=hogwarts-intro-introduction-v001; formula=video.order.blender; weight=5 -->", "hogwarts");
+    expect(b.film).toBe("hogwarts-intro-introduction-v001");
+    expect(b.formula).toBe("video.order.blender");
+    expect(b.weight).toBe(5);
+    expect(parseKunBlock("<!-- kun: weight=abc -->", "kun").weight).toBeNull();
+  });
+  it("reads for:<login> as the assignee", () => {
+    expect(parseLabels(["dept:video", "for:Sedon"]).assignee).toBe("sedon");
+  });
+  it("lets the assignee claim outside his departments and refuses everyone else", () => {
+    const base = {
+      task: { holder: null, status: "todo" as const, afterOpen: [], department: "video" as const, assignee: "sedon" },
+      login: "sedon", departments: ["tech", "support"] as ("tech" | "support")[], inProgress: 0, wipLimit: 1,
+    };
+    expect(claimRefusal(base)).toBeNull();
+    const other = claimRefusal({ ...base, login: "ali", departments: ["video"] });
+    expect(other?.error).toBe("held");
+    expect(other?.detail).toContain("sedon");
+  });
+  it("prints the new receipt lines", () => {
+    const hash = "a".repeat(64);
+    const r = receiptSchema.parse({
+      id: "databayt/kun#1", driver: "claude", model: "opus", durationMs: 1000, commits: [],
+      artifacts: ["https://cdn.databayt.org/work/f/1/a.blend"], summary: "ok", formula: "video.order.blender", stage: "visual", hashes: [hash],
+    });
+    const t = formatReceipt(r, "sedon");
+    expect(t).toContain("Formula: video.order.blender · Stage: visual");
+    expect(t).toContain(`${hash}  https://cdn.databayt.org/work/f/1/a.blend`);
+  });
+  it("rejects hashes that do not match artifacts or are not sha256 hex", () => {
+    const ok = { id: "databayt/kun#1", driver: "claude", model: "o", durationMs: 0, commits: [], artifacts: ["a", "b"], summary: "s" };
+    expect(receiptSchema.safeParse({ ...ok, hashes: ["a".repeat(64)] }).success).toBe(false);
+    expect(receiptSchema.safeParse({ ...ok, hashes: ["zz", "zz"] }).success).toBe(false);
+    expect(receiptSchema.safeParse({ ...ok, hashes: ["a".repeat(64), "b".repeat(64)] }).success).toBe(true);
+  });
+});
+
+describe("upload", () => {
+  const task = { repo: "hogwarts", number: 42, kun: { ...noKun, film: "hogwarts-intro-introduction-v001" } };
+  it("sanitises file names", () => {
+    expect(sanitizeFileName("../../etc/passwd")).toBe("passwd");
+    expect(sanitizeFileName("C:\\x\\scene one.blend")).toBe("scene one.blend");
+    expect(sanitizeFileName("a\u0000b\n.mp4")).toBe("ab.mp4");
+    expect(sanitizeFileName("..")).toBeNull();
+    expect(sanitizeFileName("   ")).toBeNull();
+    expect(sanitizeFileName("dir/")).toBeNull();
+  });
+  it("builds work/<film>/<issue>/<file>, falling back to the repo name", () => {
+    expect(uploadKey(task, "a/b/classroom.blend")).toBe("work/hogwarts-intro-introduction-v001/42/classroom.blend");
+    expect(uploadKey({ ...task, kun: noKun }, "x.png")).toBe("work/hogwarts/42/x.png");
+  });
+  it("enforces the schema bounds", () => {
+    const f = { name: "a.mp4", size: 10, contentType: "video/mp4" };
+    const id = "databayt/kun#1";
+    expect(uploadSchema.safeParse({ id, files: [f] }).success).toBe(true);
+    expect(uploadSchema.safeParse({ id, files: [] }).success).toBe(false);
+    expect(uploadSchema.safeParse({ id, files: Array(21).fill(f) }).success).toBe(false);
+    expect(uploadSchema.safeParse({ id, files: [{ ...f, size: 2 * 1024 ** 3 + 1 }] }).success).toBe(false);
+    expect(uploadSchema.safeParse({ id, files: [{ ...f, size: 2 * 1024 ** 3 }] }).success).toBe(true);
+    expect(uploadSchema.safeParse({ id: "kun#1", files: [f] }).success).toBe(false);
+  });
+  it("presigns through an injected signer and builds the public url", async () => {
+    const calls: string[] = [];
+    const out = await presignUploads(task, [{ name: "a.mp4", size: 1, contentType: "video/mp4" }], async (k, ct) => (calls.push(`${k}|${ct}`), `https://signed/${k}`));
+    expect(calls).toEqual(["work/hogwarts-intro-introduction-v001/42/a.mp4|video/mp4"]);
+    expect(out?.[0].publicUrl).toBe("https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/42/a.mp4");
+    expect(out?.[0].putUrl).toContain("https://signed/");
+    expect(await presignUploads(task, [{ name: "..", size: 1, contentType: "x/y" }], async () => "u")).toBeNull();
   });
 });

@@ -88,6 +88,7 @@ async function toRawTasks(issues: Issue[], fallbackRepo?: string): Promise<RawTa
     department: labels.department!,
     status: i.state === "closed" ? "done" : labels.status,
     holder: labels.holder,
+    assignee: labels.assignee,
     auto: labels.auto,
     priority: labels.priority,
     sprint: i.milestone?.title ?? null,
@@ -128,6 +129,12 @@ export async function departmentBoard(department: string): Promise<Board> {
     board,
     sprint: m ? { title: m.title, goal: m.description || null, endsAt: m.due_on } : null,
   };
+}
+
+/** Open work orders made for this login (`for:<login>`) across the org, in any department, in queue order. */
+export async function ordersFor(login: string): Promise<Task[]> {
+  const issues = await search(`org:${ORG} is:issue is:open label:for:${login}`);
+  return orderTasks((await toRawTasks(issues)).filter((t) => t.assignee === login));
 }
 
 /** Open tasks this login holds in-progress across all departments, and the WIP limit. */
