@@ -241,7 +241,7 @@ flowchart TD
     L0 --> L["Loads department CLAUDE.md<br/>video.md · your rules,<br/>skills and hooks"]:::claude
     L --> PR1["Gathers: project · brand<br/>markets · captures · references"]:::claude
     PR1 --> PR2["Lists actions that need your OK<br/>each with its command"]:::claude
-    PR2 --> PR3["Writes the plan in your language<br/>brief · 3 questions · journey<br/>first step"]:::claude
+    PR2 --> PR3["Writes the plan in English<br/>in the reply only, no plan file<br/>brief · journey · first step"]:::claude
     PR3 --> END["Plan on screen:<br/>Shall I start with …?<br/>one button: Accept"]
     END --> RP(["You type a reply"]):::you
     RP --> RP1["Stays on the plan route<br/>read-only, with --resume<br/>answers or changes the plan"]:::claude
@@ -625,7 +625,7 @@ screen:
    transcript and the product docs, then says in one line what it read.
 2. **Lists the actions that need your OK**, each with its exact command: pulling a WhatsApp
    reference, transcribing, creating the project.
-3. **Writes the plan**, in your language:
+3. **Writes the plan**, in English and in the reply only (it never writes a plan file):
    - the brief in one line,
    - the answers you gave to its questions (it asked them first, Step 6b),
    - the journey: for each stage, its tool, its lane, its gate and what is reused,
@@ -660,6 +660,38 @@ A typed sentence can also hand a piece over later: "give the classroom scene to 
 sparkle button, fills the Blender work order for him, and sending it asks the video agent to create
 that issue. The [Station](/docs/station#done-means-an-issue)
 page follows that order from the sentence to the closed issue.
+
+### The two turns, in order
+
+A film plan always takes two turns:
+
+1. **Turn 1 asks.** The run reads what it needs, says in one line what it found, and ends with one `kun-questions` block. The app shows the wizard. No plan is written in this turn.
+2. **Turn 2 plans.** After your answers, the run writes the plan in its reply. If a source video was attached, the first step it proposes is `produce init …` and then `produce from-reference <ID> <source> --voiceover`. Both need your yes.
+
+The video department works in English: the questions, the plan and the replies. A film's version language (`language`, `dialect`) applies only to the film's own words.
+
+### The production strip
+
+Above the chat input, in the video department, a one-line strip shows the open film:
+`▸ intro-cinematic · ●●●●●●○○○○○○○○ 07 visual · script ✔ look ○`. It appears only when a film exists. With several films, a select picks one, and that id fills `{{project}}` in the formulas.
+
+Click the strip and it grows upward. The input does not move. It has three tabs:
+
+- **Stages**: the 14 stages with their gates.
+- **Scenes**: the shot list against the asset manifest, with a thumbnail for each capture, an icon for 3D, image, capture or video, and a mark on what is missing.
+- **Brand**: the logo, the fonts drawn in their own face, the colour swatches and the voice.
+
+The strip has no action buttons. Clicking a stage or a scene fills the box with that stage's or order's formula. The chat is still the only place where anything runs. The strip reads `produce list --json` and `produce status <ID> --json`.
+
+### Why a run is faster now
+
+The first live run took 94 seconds. Three causes are gone:
+
+- **No hunt for the project.** The plan formula runs `produce list --json` at fill time, through a fixed command, and puts a one-line summary in `{{projects}}`. The run no longer spends about eight tool rounds finding it.
+- **One plan, not two.** The run used to write a long plan to a file and again in the reply. It now writes it in the reply only.
+- **The gap before the run starts** is logged per run (`t_tap`, `t_send`, `t_spawn`, `t_first_event`, `t_done` in `station-log.jsonl`), so it is a number and not a guess.
+
+Why a film exists is also in the prompt now. `departments/_shared/company.md` (the Drive, the North Star, the sprint, the pilot and the price) is compiled by `company-brief.mjs`, appended to the workspace `CLAUDE.md`, and the plan formula's "Why this film" line reads from it.
 
 ### Phase 1 ends here
 

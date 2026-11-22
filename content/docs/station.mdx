@@ -306,6 +306,51 @@ the escalate model is never allowed.
 
 The app does not call `questions`; `intro`, `q`, `order` and `choice_ar` are unused by it for now.
 
+### Brand and exec slots
+
+Two slot kinds carry what nobody should retype.
+
+**`brand`** reads `content/media/brand-kit.json → production.<identity>`. The identity is the open film's own (`project.json → identity`), else the slot's brand, lowercased. One slot gives one field:
+
+```json
+"palette": { "brand": "{{brand}}", "field": "palette" }
+```
+
+| `field` | Fills | Example |
+| --- | --- | --- |
+| `logo` | The mark. A link in a work order, an absolute path elsewhere | `https://github.com/databayt/kun/blob/main/public/brands/hogwarts.png` |
+| `fonts` | Names without the file extension | `Arabic headline thmanyah-serif-display-900 · Arabic body thmanyah-sans-500 · Latin Geist` |
+| `palette` | Hex values by role | `canvas #faf9f5 · ink #141413 · accent #d97757 · …` |
+| `voice` | The voice id and its note, never a `TODO` | `house-ar` |
+| `direction` | The look in words | `trustworthy, modern, educational, product-focused` |
+
+A draft identity is never guessed: the slot stays unfilled.
+
+**`exec`** runs one fixed command and puts a short summary in the slot. The formula names an id and fills its parameters. It can never name a command. The ids are in `EXEC` in `station.mjs`; lint rejects any other.
+
+| `exec` | Runs (no shell) | Parameters | Fills |
+| --- | --- | --- | --- |
+| `projects` | `produce.mjs list --json --repo <line>` | `line` | `hogwarts-intro-v001 (intro, in-production, next visual, sd-ar); …` or `none open` |
+| `status` | `produce.mjs status <project> --json` | `project` | `<id>: 5/14 stages done (…); next <stage>` |
+
+A parameter may hold only letters, digits, dot, dash and underscore. Anything else, or a missing one, runs nothing and the slot falls to its `default`.
+
+A context slot can also read the company brief: `{"context": "company.why"}` returns the "Why this film" section of `departments/_shared/company.md`. `company-brief.mjs` writes that file (40 lines or fewer) from the Drive, the North Star, the sprint, the epics and the markets.
+
+### English only
+
+A pack can say `"lang": "en"`. The video pack does. `questions`, `board` and `fill` then return English in every `ar` field, and carry `lang: "en"`. The headers keep their `ar` strings for other departments.
+
+### The video orders that carry the brand
+
+| Formula | For | The brand slots give it |
+| --- | --- | --- |
+| `video.order.blender` | A Blender scene | Look, palette, fonts and logo. Camera, lens and light are set per shot from the shot list; every material takes a palette hex |
+| `video.order.filmcraft` | Assembling the shot list over the source voiceover with the `filmcraft` MCP | The voiceover is the timing master; palette, fonts, logo and voice are filled |
+| `video.order.image` | One picture from the ChatGPT seat | A prompt to paste: scene, style, palette hex, a 1088×1920 size, no text in the image. The seat is human: a person pastes it and saves `05-assets/images/<scene>.png` |
+
+All three are work orders on sonnet at medium effort. The film plan takes an optional `source` slot, the path of a source video, and a `{{projects}}` line.
+
 ## Routes and lanes
 
 A **route** is one way of running a request: plan it first, do it now, fan it out to several agents,
@@ -696,6 +741,8 @@ the command again.
 | `video.gate.version` | Approve a version · اعتماد نسخة | do | waiting | version | none | yes | 2 | 0.9 |
 | `video.order.blender` | Blender scene · مشهد بلندر | do | next | — | issue | — | 5 | 0.6 |
 | `video.order.capture` | Product capture · تصوير المنتج | do | next | — | issue | — | 3 | 0.6 |
+| `video.order.filmcraft` | Assemble in FilmCraft · تجميع في فيلم كرافت | do | next | — | issue | — | 5 | 0.6 |
+| `video.order.image` | Image for ChatGPT · صورة عبر ChatGPT | do | next | — | issue | — | 4 | 0.6 |
 | `video.order.pickup` | Start my work order · ابدأ طلب العمل | do | waiting | — | none | yes | 1 | 0.8 |
 | `video.order.review` | Review of a version · مراجعة نسخة | do | next | — | issue | — | 2 | 0.6 |
 | `video.order.script` | Script writing · كتابة سكربت | do | next | — | issue | — | 3 | 0.6 |

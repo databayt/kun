@@ -196,6 +196,36 @@ Brand tooling, captions and the end card read `brand-kit[identity]`, so a Balqal
 carries the Hogwarts wordmark, and a Hogwarts piece never says بالقلم. The Hogwarts intro film
 is made for school owners under the Balqalam identity.
 
+## From a source video
+
+A film can start from a video that already exists. Its words become the script. Its sound becomes the voiceover. The picture is rebuilt over that timing from 3D scenes, real app captures and generated images.
+
+```bash
+P=~/.claude/skills/produce/scripts/produce.mjs
+node $P init --brand hogwarts --identity balqalam --category intro --subject owners --lang ar --markets sd
+node $P from-reference <ID> ~/Downloads/balqalam-promo-v2.mp4 --voiceover
+```
+
+`from-reference` does four things:
+
+1. Copies the video to `02-research/reference/video.mp4` and cuts a contact sheet.
+2. Transcribes it with `mlx_whisper` into `transcript.srt`.
+3. Seeds `03-script/script.md` from the transcript. The research stage is marked `seeded`.
+4. With `--voiceover`, extracts the audio as a 48 kHz mono wav to `07-audio/voiceover/<variant>.wav`.
+
+The wav is the timing master. Its record sits in `project.json → voice.<variant>`: the source video, the file, the sample rate and the length in seconds. A project with one variant needs no more. A project with several variants needs `--variant <v>` for one, or `--all` for the same sound on every variant. Nothing is copied before the variant is known.
+
+A file with no audio is refused. A failed transcription keeps the copy and the wav.
+
+Two commands feed the app's production strip. Both print JSON.
+
+| Command | Prints |
+| --- | --- |
+| `produce list --json [--repo <line>]` | Every project, newest first: id, title, brand, identity, category, version, status, next stage, focus, variants, markets, langs, dir |
+| `produce status <ID> --json` | The 14 stages (`stage_list`), the variant grid (`variants`), the gates, `next`, the predicted `urls`, `paths` and `files` for the script, `04-storyboard/shot-list.json` and `05-assets/asset-manifest.json`, and `voice` |
+
+The video department works in English. Questions, plans and replies are English. A film's version language (`language`, `dialect`) applies only to the film's own words: the script, the captions and the voiceover.
+
 ## From Machine
 
 In the Machine app, the home of the **Video** department shows at most three options. They are
@@ -232,7 +262,7 @@ app opens and after every update. See [Machine](/docs/machine).
 ### Make a film from the app
 
 1. **Home → Department: Video → Repo: Hogwarts.**
-2. **Say what you want**, for example "intro film for hogwarts" or «فيديو تعريفي لهوغورتس». A chip
+2. **Say what you want**, in English, for example "intro film for hogwarts". Attach a source video from **+ → Videos** if the film starts from one. A chip
    offers the standard formula (`⇥ Tab · Intro film · Balqalam · 9:16`); **Tab** fills it. Tapping
    **New film** on the board does the same.
 3. **Send.** The chat starts and the plan run asks its own questions in a wizard (Enter, ↑/↓, Tab,
