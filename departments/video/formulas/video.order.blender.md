@@ -14,10 +14,18 @@
   "gate": null,
   "slots": {
     "scene": {
-      "ask": "the scene or piece this order covers, e.g. the classroom scene"
+      "ask": "the scene or piece this order covers, e.g. the classroom scene",
+      "q": {
+        "en": "Which scene or piece is this order for?",
+        "ar": "لأي مشهد أو جزء هذا الطلب؟"
+      }
     },
     "to": {
-      "ask": "the login of the person this order is for, e.g. sedon"
+      "ask": "the login of the person this order is for, e.g. sedon",
+      "q": {
+        "en": "Who is it for? (their login)",
+        "ar": "لمن هذا الطلب؟ (اسم الدخول)"
+      }
     },
     "login": {
       "context": "login"
@@ -78,7 +86,11 @@
       "اعط المشهد",
       "ابني المشهد في بلندر"
     ]
-  }
+  },
+  "order": [
+    "scene",
+    "to"
+  ]
 }
 ---
 

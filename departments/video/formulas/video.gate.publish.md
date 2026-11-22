@@ -67,7 +67,16 @@
         "Instagram",
         "WhatsApp"
       ],
-      "default": "Facebook"
+      "default": "Facebook",
+      "q": {
+        "en": "Where will it be posted?",
+        "ar": "أين سيُنشر؟"
+      },
+      "choice_ar": [
+        "فيسبوك",
+        "إنستغرام",
+        "واتساب"
+      ]
     }
   },
   "drive": 0.9,
@@ -84,7 +93,12 @@
       "اعتمد النشر",
       "اعتماد النشر"
     ]
-  }
+  },
+  "order": [
+    "platform"
+  ],
+  "model": "opus",
+  "effort": "high"
 }
 ---
 

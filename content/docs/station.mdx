@@ -277,6 +277,28 @@ link and every upload then comes from that film. An id that is not a known film 
 `missing: ["project"]`; the script never falls back to another film. The board pins for you:
 Continue production carries the film's id, and `produce order` always pins its own film.
 
+### Questions before Send
+
+A fill ends with `questions`, a second zero-token command, so the person can change what matters
+before reading the prompt:
+
+```bash
+node .claude/scripts/station.mjs questions video.film.plan --dept video --repo hogwarts --json
+```
+
+It returns `{ id, questions: [{ slot, kind, q: {en, ar}, options: [{ value, label: {en, ar} }], default, current }] }`.
+`kind` is `choice` (a list), `ask` (free text, `options` empty) or `market` (one question, options from
+`content/media/markets.json`, such as "Sudan · Arabic + English · 6.4 USD per student per year"). Slots
+already in `--set`, and every context, map, json, argv, slug, value, ref and mul slot, are skipped.
+
+A formula tunes this in its header, all optional: `order` (the slots to ask, in order; `[]` asks
+nothing), `q: {en, ar}` on a slot (the question; without it the slot name is humanised), `choice_ar`
+(Arabic labels, one per choice), `model` (`opus`, `sonnet`, `haiku`) and `effort` (`low` to `xhigh`).
+`fill --json` carries `model` and `effort` when the formula sets them. Lint rejects anything else;
+the escalate model is never allowed.
+
+In the app the answers re-fill the prompt with `fill --set slot=value`. No model runs.
+
 ## Routes and lanes
 
 A **route** is one way of running a request: plan it first, do it now, fan it out to several agents,

@@ -36,7 +36,16 @@
         "teachers",
         "parents"
       ],
-      "default": "school owners and principals"
+      "default": "school owners and principals",
+      "q": {
+        "en": "Who is it for?",
+        "ar": "لمن هذا الفيلم؟"
+      },
+      "choice_ar": [
+        "ملاك المدارس ومديروها",
+        "المعلمون",
+        "أولياء الأمور"
+      ]
     },
     "market_name": {
       "json": "content/media/markets.json",
@@ -67,7 +76,16 @@
         "Instagram",
         "WhatsApp"
       ],
-      "default": "Facebook"
+      "default": "Facebook",
+      "q": {
+        "en": "Where will it be posted?",
+        "ar": "أين سيُنشر؟"
+      },
+      "choice_ar": [
+        "فيسبوك",
+        "إنستغرام",
+        "واتساب"
+      ]
     },
     "format": {
       "choice": [
@@ -75,7 +93,16 @@
         "square 1:1, mobile",
         "horizontal 16:9, desktop"
       ],
-      "default": "vertical 9:16, mobile"
+      "default": "vertical 9:16, mobile",
+      "q": {
+        "en": "Which screen shape?",
+        "ar": "ما شكل الشاشة؟"
+      },
+      "choice_ar": [
+        "عمودي 9:16 للجوال",
+        "مربع 1:1 للجوال",
+        "أفقي 16:9 للحاسوب"
+      ]
     },
     "brand_kit_url": {
       "value": "https://github.com/databayt/kun/blob/main/content/media/brand-kit.json"
@@ -95,7 +122,11 @@
         "eg",
         "rw"
       ],
-      "default": "sd"
+      "default": "sd",
+      "q": {
+        "en": "Which market is this film for?",
+        "ar": "لأي سوق هذا الفيلم؟"
+      }
     },
     "lang": {
       "choice": [
@@ -124,7 +155,13 @@
       "سكربت فقط",
       "سكربت ٦٠ ثانية"
     ]
-  }
+  },
+  "order": [
+    "market",
+    "audience",
+    "platform",
+    "format"
+  ]
 }
 ---
 

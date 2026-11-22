@@ -4,6 +4,8 @@
 //   node .claude/scripts/station.mjs board --dept video [--repo hogwarts] [--login abdout] [--health green|orange|red] [--lang ar|en] --json
 //   node .claude/scripts/station.mjs fill <formula-id> --dept video [--repo r] [--login l] [--project <film id>] [--set k=v]… --json
 //        (--project, or --set project=<id>, pins the film for every slot, ref and upload; an unknown id reports missing: ["project"])
+//   node .claude/scripts/station.mjs questions <formula-id> --dept video [--repo r] [--set k=v]… [--lang en|ar] --json
+//        (the slots still worth asking before Send, in the formula's `order`; --set slots are dropped; no model)
 //   node .claude/scripts/station.mjs match "<text in any language>" --dept video [--repo r] --json
 //   node .claude/scripts/station.mjs lint [--dept video]       exit 1 and list every error
 //   node .claude/scripts/station.mjs --test                    golden cases, deterministic, no network
@@ -510,7 +512,52 @@ export function fill(ctx, dept, id, input = {}) {
   body = body.replace(/\{\{(\w+)\}\}/g, (_, n) => r.get(n) ?? `[unfilled: ${n}]`)
   if (state.pinned && !state.project) r.missing.add("project") // a pinned id that is not a known film: say so, never use another
   if (f.header.record !== "issue") body = body.replace(/(^|[\s`(])~\//gm, (_, p) => `${p}${HOME.replace(/\\/g, "/")}/`)
-  return { id: f.id, prompt: body, route: f.header.route, record: f.header.record ?? "none", missing: [...r.missing].sort(), redirected_from: redirected, ...(r.uploads.length ? { uploads: r.uploads } : {}) }
+  return { id: f.id, prompt: body, route: f.header.route, record: f.header.record ?? "none", missing: [...r.missing].sort(), redirected_from: redirected, ...(f.header.model ? { model: f.header.model } : {}), ...(f.header.effort ? { effort: f.header.effort } : {}), ...(r.uploads.length ? { uploads: r.uploads } : {}) }
+}
+
+// ---- questions: what to ask before Send; no model, no network ---------------------------------------
+// One entry per slot the person can still change, in the formula's `order` (header field, a list of slot
+// names; when present it is also the whole list: slots it leaves out keep their defaults), else in
+// header slot order. choice -> "choice", ask -> "ask", the `market` choice that market-derived slots
+// read ({{market}}) -> "market" with options from content/media/markets.json. Everything else
+// (context, map, json, argv, slug, value, ref, mul) and anything already in --set is skipped.
+const humanise = (n) => n.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase())
+const LANG_NAME = { ar: { en: "Arabic", ar: "العربية" }, en: { en: "English", ar: "الإنجليزية" } }
+export function marketOptions(ctx) {
+  const data = (ctx.fixtures ? fxJson(ctx, "markets.json") : null) ?? readJson(path.join(ROOT, "content", "media", "markets.json")) ?? {}
+  return Object.entries(data)
+    .filter(([, v]) => v && typeof v === "object" && v.name)
+    .map(([value, v]) => {
+      const langs = asList(v.langs)
+      const price = v.price != null && v.currency ? `${v.price} ${v.currency}` : null
+      const l = (lang) => [v.name?.[lang] ?? v.name?.en ?? value, langs.map((x) => LANG_NAME[x]?.[lang] ?? x).join(" + ") || null, price ? (lang === "ar" ? `${price} للطالب سنويًا` : `${price} per student per year`) : null].filter(Boolean).join(" · ")
+      return { value, label: { en: l("en"), ar: l("ar") } }
+    })
+}
+export function questions(ctx, dept, id, input = {}) {
+  const inputs = { repo: input.repo || "", login: input.login || (ctx.fixtures ? "" : process.env.KUN_LOGIN || savedLogin()), set: input.set || {}, project: input.project || "" }
+  const { formulas } = loadFormulas(dept)
+  const f = formulas.find((x) => x.id === id)
+  if (!f) return { id, questions: [], error: `formula ${id}` }
+  const slots = f.header.slots ?? {}
+  const r = makeResolver(ctx, f, inputs, loadState(ctx, dept, inputs))
+  const marketRead = Object.values(slots).some((s) => slotRefs(s).has("market"))
+  const names = Array.isArray(f.header.order) ? f.header.order : Object.keys(slots)
+  const list = []
+  for (const name of names) {
+    const s = slots[name]
+    if (!s || (inputs.set[name] !== undefined && inputs.set[name] !== "")) continue
+    const kind = "choice" in s ? (name === "market" && marketRead ? "market" : "choice") : "ask" in s ? "ask" : null
+    if (!kind) continue
+    const q = s.q && s.q.en && s.q.ar ? { en: s.q.en, ar: s.q.ar } : kind === "ask" ? { en: humanise(String(s.ask)), ar: humanise(String(s.ask)) } : { en: `${humanise(name)}?`, ar: `${humanise(name)}؟` }
+    let options = []
+    let def = null
+    if (kind === "market") options = marketOptions(ctx)
+    else if (kind === "choice") options = s.choice.map((v, i) => ({ value: v, label: { en: v, ar: asList(s.choice_ar)[i] ?? v } }))
+    if (kind !== "ask") def = s.default_by_repo?.[inputs.repo] ?? s.default ?? s.choice[0]
+    list.push({ slot: name, kind, q, options, default: def, current: r.get(name) })
+  }
+  return { id: f.id, questions: list }
 }
 
 // ---- match ---------------------------------------------------------------------------------------
@@ -733,6 +780,24 @@ const slotRefs = (spec) => {
   return out
 }
 const slotKind = (s) => ["context", "choice", "json", "argv", "map", "slug", "value", "ask", "ref", "mul"].find((k) => k in s) ?? null
+export const MODELS = ["opus", "sonnet", "haiku"]
+export const EFFORTS = ["low", "medium", "high", "xhigh"]
+// Optional question/model header fields: q (per slot, en + ar), choice_ar (per choice slot), order, model, effort.
+export function lintExtras(h) {
+  const errs = []
+  const declared = h.slots ?? {}
+  for (const [n, s] of Object.entries(declared)) {
+    if (s.q !== undefined && !(s.q && typeof s.q.en === "string" && s.q.en.trim() && typeof s.q.ar === "string" && s.q.ar.trim())) errs.push(`slot "${n}": q needs en and ar strings`)
+    if (s.choice_ar !== undefined && !(Array.isArray(s.choice) && Array.isArray(s.choice_ar) && s.choice_ar.length === s.choice.length && s.choice_ar.every((x) => typeof x === "string"))) errs.push(`slot "${n}": choice_ar must match the choice list one to one`)
+  }
+  if (h.order !== undefined) {
+    if (!Array.isArray(h.order)) errs.push("order must be a list of slot names")
+    else for (const n of h.order) if (!declared[n]) errs.push(`order: unknown slot "${n}"`)
+  }
+  if (h.model !== undefined && !MODELS.includes(h.model)) errs.push(`model must be one of ${MODELS.join(", ")}`)
+  if (h.effort !== undefined && !EFFORTS.includes(h.effort)) errs.push(`effort must be one of ${EFFORTS.join(", ")}`)
+  return errs
+}
 export function lint(dept) {
   const errors = []
   const pack = loadPack(dept)
@@ -781,6 +846,7 @@ export function lint(dept) {
       if (k === "choice" && s.default != null && !s.choice.includes(s.default)) e(`slot "${n}": default is not in the choice list`)
       if (h.record === "issue" && k === "context" && /^(project\.dir|media\.)/.test(s.context)) e(`record issue: slot "${n}" is a local path`)
     }
+    for (const m of lintExtras(h)) e(m)
     if (h.record === "issue" && LOCAL_PATH.test(f.body)) e("record issue: the body names a local path; use links")
     if (h.record === "issue") {
       // submit: "cdn" (default) = files go to work/<project>/<issue>/<file>; "comment" = the result is a reply on the issue
@@ -864,6 +930,35 @@ function runTests() {
   const sd = JSON.parse(fs.readFileSync(path.join(FX, "none", "markets.json"), "utf8")).sd
 
   t("lint: every formula is valid", () => eq(lint("video"), []))
+  t("lint: q, order, model, effort are validated (no escalate model)", () => {
+    eq(lintExtras({ slots: { a: { ask: "x", q: { en: "A?", ar: "أ؟" } } }, order: ["a"], model: "opus", effort: "high" }), [])
+    ok(lintExtras({ slots: { a: { ask: "x", q: { en: "A?" } } } }).length === 1, "q needs ar")
+    ok(lintExtras({ slots: { a: { ask: "x" } }, order: ["b"] }).length === 1, "order names a known slot")
+    ok(lintExtras({ slots: {}, model: "fa" + "ble" }).length === 1, "that model is refused")
+    ok(lintExtras({ slots: {}, effort: "max" }).length === 1, "effort is low to xhigh")
+  })
+  t("questions: film.plan asks market, audience, goal, platform, format, length in order", () => {
+    const r = questions(mk("none"), "video", "video.film.plan", { repo: "hogwarts" })
+    eq(r.questions.map((x) => x.slot), ["market", "audience", "goal", "platform", "format", "length"])
+    eq(r.questions[0].kind, "market")
+    ok(r.questions.every((x) => x.q.en && x.q.ar), "q in both languages")
+    eq(r.questions[1].default, "school owners and principals")
+  })
+  t("questions: market options carry sd and sa with price; --set drops a slot", () => {
+    const m = questions(mk("none"), "video", "video.film.plan", { repo: "hogwarts" }).questions[0]
+    ok(m.options.some((o) => o.value === "sd") && m.options.some((o) => o.value === "sa"), "sd and sa")
+    ok(/Saudi/.test(m.options.find((o) => o.value === "sa").label.en) && /SAR/.test(m.options.find((o) => o.value === "sa").label.en), "Saudi label")
+    eq(m.current, "sd")
+    const r = questions(mk("none"), "video", "video.film.plan", { repo: "hogwarts", set: { audience: "teachers", market: "sa" } })
+    ok(!r.questions.some((x) => x.slot === "audience" || x.slot === "market"), "set slots are dropped")
+  })
+  t("questions: ask slots are free text; --set market re-fills price and currency", () => {
+    const o = questions(mk("none"), "video", "video.order.blender", { repo: "hogwarts" }).questions
+    eq(o.map((x) => [x.slot, x.kind, x.options.length]), [["scene", "ask", 0], ["to", "ask", 0]])
+    const f = fill(mk("none"), "video", "video.film.plan", { repo: "hogwarts", set: { market: "sa" } })
+    ok(/24 SAR/.test(f.prompt), "SAR price")
+    eq([f.model, f.effort], ["opus", "high"])
+  })
   t("board, no project: start is the new film; at most three options in role order", () => {
     const b = board(mk("none"), "video", { repo: "hogwarts", login: "abdout" })
     eq(b.options.find((o) => o.role === "start")?.id, "video.film.plan")
@@ -1189,7 +1284,7 @@ function main() {
   const cmd = a._[0]
   const ctx = makeCtx()
   const dept = a.dept || "video"
-  if (a.test) process.exit(runTests() ? 0 : 1)
+  if (a.test || cmd === "selftest") process.exit(runTests() ? 0 : 1)
   if (a.page) return void page()
   if (cmd === "refresh-issues") {
     const data = fetchIssues(dept, a.repo || "", a.login || "")
@@ -1212,13 +1307,14 @@ function main() {
   try {
     if (cmd === "board") return out(a, board(ctx, dept, { repo: a.repo, login: a.login, health: a.health, lang: a.lang }), (r) => r.options.map((o) => `${o.role.padEnd(8)}${o.id.padEnd(26)}${o.score}  ${o.why.join(", ")}`).join("\n"))
     if (cmd === "fill") return out(a, fill(ctx, dept, a._[1], { repo: a.repo, login: a.login, set: a.set, project: a.project }), (r) => r.prompt + (r.missing.length ? `\n\n(missing: ${r.missing.join(", ")})` : ""))
+    if (cmd === "questions") return out(a, questions(ctx, dept, a._[1], { repo: a.repo, login: a.login, set: a.set, project: a.project }), (r) => r.questions.map((x) => `${x.slot} [${x.kind}] ${x.q.en} (current: ${x.current ?? "-"})`).join("\n"))
     if (cmd === "match") return out(a, match(ctx, dept, a._.slice(1).join(" "), a.repo), (r) => `${r.id ?? "none"} (${r.confidence})${r.dept ? ` dept=${r.dept}` : ""}`)
   } catch (e) {
     // never fail loudly: the app reads JSON and treats an empty answer as "nothing to show"
     console.log(JSON.stringify({ error: String(e?.message ?? e), department: dept, options: [] }))
     return
   }
-  console.error("usage: station.mjs board|fill|match|lint|--test|--page  (see the header of this file)")
+  console.error("usage: station.mjs board|fill|questions|match|lint|selftest|--page  (see the header of this file)")
   process.exit(2)
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === SELF) main()

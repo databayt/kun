@@ -18,7 +18,16 @@
         "45 seconds",
         "60 seconds"
       ],
-      "default": "45 seconds"
+      "default": "45 seconds",
+      "q": {
+        "en": "How long should the reel be?",
+        "ar": "ما مدة المقطع؟"
+      },
+      "choice_ar": [
+        "30 ثانية",
+        "45 ثانية",
+        "60 ثانية"
+      ]
     },
     "repo": {
       "context": "repo",
@@ -47,7 +56,16 @@
         "Instagram",
         "WhatsApp"
       ],
-      "default": "Facebook"
+      "default": "Facebook",
+      "q": {
+        "en": "Where will it be posted?",
+        "ar": "أين سيُنشر؟"
+      },
+      "choice_ar": [
+        "فيسبوك",
+        "إنستغرام",
+        "واتساب"
+      ]
     },
     "format": {
       "choice": [
@@ -55,7 +73,16 @@
         "square 1:1, mobile",
         "horizontal 16:9, desktop"
       ],
-      "default": "vertical 9:16, mobile"
+      "default": "vertical 9:16, mobile",
+      "q": {
+        "en": "Which screen shape?",
+        "ar": "ما شكل الشاشة؟"
+      },
+      "choice_ar": [
+        "عمودي 9:16 للجوال",
+        "مربع 1:1 للجوال",
+        "أفقي 16:9 للحاسوب"
+      ]
     },
     "today": {
       "context": "today"
@@ -87,7 +114,12 @@
       "مقطع قصير",
       "ترجمة الفيديو"
     ]
-  }
+  },
+  "order": [
+    "reel_length",
+    "platform",
+    "format"
+  ]
 }
 ---
 

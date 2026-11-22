@@ -527,6 +527,11 @@ What comes back, where it goes and the gate it stops at. A plan turn returns the
 - **If refine fails** (time limit, no answer), the sparkle button turns red and your text stays as
   it was. You can send it as it is or press the button again.
 
+**Questions before Send.** After a tap, Tab or a `/` pick fills the box, the app asks the formula's
+questions (`station.mjs questions`): arrows move, Enter or a number key picks, "Type something" takes
+free text, Esc keeps the defaults. The answers re-fill the prompt (`fill --set`). No model runs, and
+nothing is sent until you press Send.
+
 ### Step 5 — Edit, attach, send
 
 - Change the prompt as much as you like. It is just text now.

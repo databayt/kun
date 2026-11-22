@@ -47,7 +47,16 @@
         "teachers",
         "parents"
       ],
-      "default": "school owners and principals"
+      "default": "school owners and principals",
+      "q": {
+        "en": "Who is it for?",
+        "ar": "لمن هذا الفيلم؟"
+      },
+      "choice_ar": [
+        "ملاك المدارس ومديروها",
+        "المعلمون",
+        "أولياء الأمور"
+      ]
     },
     "goal": {
       "choice": [
@@ -55,7 +64,16 @@
         "the viewer asks for a demo",
         "the viewer understands one feature"
       ],
-      "default": "the viewer books the free first month"
+      "default": "the viewer books the free first month",
+      "q": {
+        "en": "What should the viewer do after watching?",
+        "ar": "ماذا نريد من المشاهد بعد المشاهدة؟"
+      },
+      "choice_ar": [
+        "يحجز الشهر الأول المجاني",
+        "يطلب عرضًا تجريبيًا",
+        "يفهم ميزة واحدة"
+      ]
     },
     "platform": {
       "choice": [
@@ -63,7 +81,16 @@
         "Instagram",
         "WhatsApp"
       ],
-      "default": "Facebook"
+      "default": "Facebook",
+      "q": {
+        "en": "Where will it be posted?",
+        "ar": "أين سيُنشر؟"
+      },
+      "choice_ar": [
+        "فيسبوك",
+        "إنستغرام",
+        "واتساب"
+      ]
     },
     "format": {
       "choice": [
@@ -71,7 +98,16 @@
         "square 1:1, mobile",
         "horizontal 16:9, desktop"
       ],
-      "default": "vertical 9:16, mobile"
+      "default": "vertical 9:16, mobile",
+      "q": {
+        "en": "Which screen shape?",
+        "ar": "ما شكل الشاشة؟"
+      },
+      "choice_ar": [
+        "عمودي 9:16 للجوال",
+        "مربع 1:1 للجوال",
+        "أفقي 16:9 للحاسوب"
+      ]
     },
     "length": {
       "choice": [
@@ -79,7 +115,16 @@
         "about 1:00",
         "about 0:30"
       ],
-      "default": "about 2:00"
+      "default": "about 2:00",
+      "q": {
+        "en": "How long should it be?",
+        "ar": "ما مدة الفيلم؟"
+      },
+      "choice_ar": [
+        "نحو دقيقتين",
+        "نحو دقيقة",
+        "نحو نصف دقيقة"
+      ]
     },
     "project_dir": {
       "context": "project.dir"
@@ -105,7 +150,14 @@
       "مرحلة الملخص",
       "الملخص الإبداعي"
     ]
-  }
+  },
+  "order": [
+    "audience",
+    "goal",
+    "platform",
+    "format",
+    "length"
+  ]
 }
 ---
 
