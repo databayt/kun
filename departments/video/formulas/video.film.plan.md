@@ -37,6 +37,15 @@
       },
       "default": "Balqalam"
     },
+    "brand_ar": {
+      "map": {
+        "Balqalam": "بالقلم",
+        "Hogwarts": "هوغورتس",
+        "Mkan": "مكان",
+        "Databayt": "داتابايت"
+      },
+      "of": "brand"
+    },
     "repo": {
       "context": "repo",
       "default": "hogwarts"
@@ -102,7 +111,8 @@
       "choice": [
         "Facebook",
         "Instagram",
-        "WhatsApp"
+        "WhatsApp",
+        "YouTube"
       ],
       "default": "Facebook",
       "q": {
@@ -112,7 +122,8 @@
       "choice_ar": [
         "فيسبوك",
         "إنستغرام",
-        "واتساب"
+        "واتساب",
+        "يوتيوب"
       ]
     },
     "format": {
@@ -191,8 +202,8 @@
       ],
       "default": "sd",
       "q": {
-        "en": "Which market is this film for?",
-        "ar": "لأي سوق هذا الفيلم؟"
+        "en": "Which market?",
+        "ar": "لأي سوق؟"
       }
     },
     "lang": {
@@ -201,6 +212,62 @@
         "en"
       ],
       "default": "ar"
+    },
+    "cut": {
+      "options": [
+        {
+          "value": "film-2min-facebook",
+          "label": {
+            "en": "2-minute film · Facebook · 9:16",
+            "ar": "فيلم دقيقتين · فيسبوك · 9:16"
+          },
+          "sets": {
+            "platform": "Facebook",
+            "format": "vertical 9:16, mobile",
+            "length": "about 2:00"
+          }
+        },
+        {
+          "value": "reel-1min-instagram",
+          "label": {
+            "en": "1-minute reel · Instagram/Facebook · 9:16",
+            "ar": "مقطع دقيقة · إنستغرام/فيسبوك · 9:16"
+          },
+          "sets": {
+            "platform": "Instagram",
+            "format": "vertical 9:16, mobile",
+            "length": "about 1:00"
+          }
+        },
+        {
+          "value": "ad-30s-facebook",
+          "label": {
+            "en": "30-second ad · Facebook · 9:16",
+            "ar": "إعلان نصف دقيقة · فيسبوك · 9:16"
+          },
+          "sets": {
+            "platform": "Facebook",
+            "format": "vertical 9:16, mobile",
+            "length": "about 0:30"
+          }
+        },
+        {
+          "value": "film-2min-youtube",
+          "label": {
+            "en": "2-minute film · YouTube · 16:9",
+            "ar": "فيلم دقيقتين · يوتيوب · 16:9"
+          },
+          "sets": {
+            "platform": "YouTube",
+            "format": "horizontal 16:9, desktop",
+            "length": "about 2:00"
+          }
+        }
+      ],
+      "q": {
+        "en": "What kind of cut?",
+        "ar": "ما نوع النسخة؟"
+      }
     }
   },
   "drive": 1,
@@ -235,15 +302,16 @@
     ]
   },
   "order": [
-    "market",
     "audience",
-    "goal",
-    "platform",
-    "format",
-    "length"
+    "market",
+    "cut"
   ],
   "model": "opus",
-  "effort": "high"
+  "effort": "high",
+  "intro": {
+    "en": "An intro film for {{brand}}, made from real app screens. Three quick questions to shape it.",
+    "ar": "فيلم تعريفي ل{{brand_ar}} من شاشات حقيقية للتطبيق. ثلاثة أسئلة سريعة لنضبطه."
+  }
 }
 ---
 

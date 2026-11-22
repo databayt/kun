@@ -32,6 +32,15 @@
       },
       "default": "Balqalam"
     },
+    "brand_ar": {
+      "map": {
+        "Balqalam": "بالقلم",
+        "Hogwarts": "هوغورتس",
+        "Mkan": "مكان",
+        "Databayt": "داتابايت"
+      },
+      "of": "brand"
+    },
     "project": {
       "context": "project.id"
     },
@@ -79,7 +88,8 @@
       "choice": [
         "Facebook",
         "Instagram",
-        "WhatsApp"
+        "WhatsApp",
+        "YouTube"
       ],
       "default": "Facebook",
       "q": {
@@ -89,7 +99,8 @@
       "choice_ar": [
         "فيسبوك",
         "إنستغرام",
-        "واتساب"
+        "واتساب",
+        "يوتيوب"
       ]
     },
     "format": {
@@ -134,6 +145,62 @@
     },
     "markets_url": {
       "value": "https://github.com/databayt/kun/blob/main/content/media/markets.json"
+    },
+    "cut": {
+      "options": [
+        {
+          "value": "film-2min-facebook",
+          "label": {
+            "en": "2-minute film · Facebook · 9:16",
+            "ar": "فيلم دقيقتين · فيسبوك · 9:16"
+          },
+          "sets": {
+            "platform": "Facebook",
+            "format": "vertical 9:16, mobile",
+            "length": "about 2:00"
+          }
+        },
+        {
+          "value": "reel-1min-instagram",
+          "label": {
+            "en": "1-minute reel · Instagram/Facebook · 9:16",
+            "ar": "مقطع دقيقة · إنستغرام/فيسبوك · 9:16"
+          },
+          "sets": {
+            "platform": "Instagram",
+            "format": "vertical 9:16, mobile",
+            "length": "about 1:00"
+          }
+        },
+        {
+          "value": "ad-30s-facebook",
+          "label": {
+            "en": "30-second ad · Facebook · 9:16",
+            "ar": "إعلان نصف دقيقة · فيسبوك · 9:16"
+          },
+          "sets": {
+            "platform": "Facebook",
+            "format": "vertical 9:16, mobile",
+            "length": "about 0:30"
+          }
+        },
+        {
+          "value": "film-2min-youtube",
+          "label": {
+            "en": "2-minute film · YouTube · 16:9",
+            "ar": "فيلم دقيقتين · يوتيوب · 16:9"
+          },
+          "sets": {
+            "platform": "YouTube",
+            "format": "horizontal 16:9, desktop",
+            "length": "about 2:00"
+          }
+        }
+      ],
+      "q": {
+        "en": "What kind of cut?",
+        "ar": "ما نوع النسخة؟"
+      }
     }
   },
   "drive": 0.8,
@@ -154,10 +221,12 @@
   "order": [
     "audience",
     "goal",
-    "platform",
-    "format",
-    "length"
-  ]
+    "cut"
+  ],
+  "intro": {
+    "en": "The creative brief for the {{brand}} film: one message, one call to action. Three quick questions to shape it.",
+    "ar": "الملخص الإبداعي لفيلم {{brand_ar}}: رسالة واحدة ودعوة واحدة. ثلاثة أسئلة سريعة لنضبطه."
+  }
 }
 ---
 

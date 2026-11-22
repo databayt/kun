@@ -377,6 +377,22 @@ const getPath = (obj, p) => {
 }
 const scalar = (v) => (v == null || typeof v === "object" ? (Array.isArray(v) ? v.join(", ") : null) : String(v))
 
+// A choice slot may carry `options: [{ value, label?, sets }]`: picking an option sets other slots.
+// matchOption: the option whose sets all equal what `read(slot)` gives, else the first.
+function matchOption(options, read) {
+  const hit = options.find((o) => o.sets && Object.entries(o.sets).every(([k, v]) => read(k) === String(v)))
+  return hit ?? options[0] ?? null
+}
+// expandSets: apply the chosen option's sets to the other slots; an explicit --set of those slots wins.
+function expandSets(f, set) {
+  const out = { ...set }
+  for (const [n, s] of Object.entries(f.header.slots ?? {})) {
+    if (!Array.isArray(s.options) || set[n] === undefined || set[n] === "") continue
+    const hit = s.options.find((o) => o.value === String(set[n]))
+    for (const [k, v] of Object.entries(hit?.sets ?? {})) if (set[k] === undefined || set[k] === "") out[k] = String(v)
+  }
+  return out
+}
 function makeResolver(ctx, f, inputs, state) {
   const memo = new Map()
   const missing = new Set()
@@ -410,6 +426,7 @@ function makeResolver(ctx, f, inputs, state) {
     let v = null
     if (spec.context) v = context(spec.context, spec)
     else if (spec.choice) v = spec.default_by_repo?.[inputs.repo] ?? spec.default ?? spec.choice[0]
+    else if (Array.isArray(spec.options)) v = matchOption(spec.options, (k) => get(k, stack))?.value ?? null
     else if (spec.json) {
       const fixture = ctx.fixtures ? fxJson(ctx, path.basename(spec.json)) : null
       const data = fixture ?? readJson(path.join(ROOT, spec.json))
@@ -507,6 +524,7 @@ export function fill(ctx, dept, id, input = {}) {
       f = target
     }
   }
+  inputs.set = expandSets(f, inputs.set)
   const r = makeResolver(ctx, f, inputs, state)
   let body = addConstraints(f.body, asList(pack.constraints))
   body = body.replace(/\{\{(\w+)\}\}/g, (_, n) => r.get(n) ?? `[unfilled: ${n}]`)
@@ -540,6 +558,7 @@ export function questions(ctx, dept, id, input = {}) {
   const f = formulas.find((x) => x.id === id)
   if (!f) return { id, questions: [], error: `formula ${id}` }
   const slots = f.header.slots ?? {}
+  inputs.set = expandSets(f, inputs.set)
   const r = makeResolver(ctx, f, inputs, loadState(ctx, dept, inputs))
   const marketRead = Object.values(slots).some((s) => slotRefs(s).has("market"))
   const names = Array.isArray(f.header.order) ? f.header.order : Object.keys(slots)
@@ -547,17 +566,21 @@ export function questions(ctx, dept, id, input = {}) {
   for (const name of names) {
     const s = slots[name]
     if (!s || (inputs.set[name] !== undefined && inputs.set[name] !== "")) continue
-    const kind = "choice" in s ? (name === "market" && marketRead ? "market" : "choice") : "ask" in s ? "ask" : null
+    const kind = "choice" in s || Array.isArray(s.options) ? (name === "market" && marketRead ? "market" : "choice") : "ask" in s ? "ask" : null
     if (!kind) continue
     const q = s.q && s.q.en && s.q.ar ? { en: s.q.en, ar: s.q.ar } : kind === "ask" ? { en: humanise(String(s.ask)), ar: humanise(String(s.ask)) } : { en: `${humanise(name)}?`, ar: `${humanise(name)}؟` }
     let options = []
     let def = null
     if (kind === "market") options = marketOptions(ctx)
+    else if (Array.isArray(s.options)) options = s.options.map((o) => ({ value: o.value, label: { en: o.label?.en ?? o.value, ar: o.label?.ar ?? o.value }, ...(o.sets ? { sets: o.sets } : {}) }))
     else if (kind === "choice") options = s.choice.map((v, i) => ({ value: v, label: { en: v, ar: asList(s.choice_ar)[i] ?? v } }))
-    if (kind !== "ask") def = s.default_by_repo?.[inputs.repo] ?? s.default ?? s.choice[0]
+    if (Array.isArray(s.options)) def = matchOption(s.options, (k) => { const t = slots[k]; return t?.default_by_repo?.[inputs.repo] ?? t?.default ?? t?.choice?.[0] })?.value ?? null
+    else if (kind !== "ask") def = s.default_by_repo?.[inputs.repo] ?? s.default ?? s.choice[0]
     list.push({ slot: name, kind, q, options, default: def, current: r.get(name) })
   }
-  return { id: f.id, questions: list }
+  const fillText = (t) => String(t).replace(/\{\{(\w+)\}\}/g, (_, n) => r.get(n) ?? `[unfilled: ${n}]`)
+  const intro = f.header.intro ? { en: fillText(f.header.intro.en), ar: fillText(f.header.intro.ar) } : null
+  return { id: f.id, intro, questions: list }
 }
 
 // ---- match ---------------------------------------------------------------------------------------
@@ -779,7 +802,7 @@ const slotRefs = (spec) => {
   for (const x of asList(spec.mul)) if (!/^-?\d+(\.\d+)?$/.test(String(x))) out.add(String(x))
   return out
 }
-const slotKind = (s) => ["context", "choice", "json", "argv", "map", "slug", "value", "ask", "ref", "mul"].find((k) => k in s) ?? null
+const slotKind = (s) => ["context", "choice", "options", "json", "argv", "map", "slug", "value", "ask", "ref", "mul"].find((k) => k in s) ?? null
 export const MODELS = ["opus", "sonnet", "haiku"]
 export const EFFORTS = ["low", "medium", "high", "xhigh"]
 // Optional question/model header fields: q (per slot, en + ar), choice_ar (per choice slot), order, model, effort.
@@ -788,8 +811,29 @@ export function lintExtras(h) {
   const declared = h.slots ?? {}
   for (const [n, s] of Object.entries(declared)) {
     if (s.q !== undefined && !(s.q && typeof s.q.en === "string" && s.q.en.trim() && typeof s.q.ar === "string" && s.q.ar.trim())) errs.push(`slot "${n}": q needs en and ar strings`)
+    if (s.options !== undefined) {
+      const o = s.options
+      if (!Array.isArray(o) || !o.length) errs.push(`slot "${n}": options must be a non-empty list`)
+      else {
+        const vals = new Set()
+        for (const x of o) {
+          if (!x || typeof x.value !== "string" || !x.value.trim()) errs.push(`slot "${n}": every option needs a string value`)
+          else if (vals.has(x.value)) errs.push(`slot "${n}": duplicate option value "${x.value}"`)
+          else vals.add(x.value)
+          if (x?.label !== undefined && !(typeof x.label?.en === "string" && x.label.en.trim() && typeof x.label?.ar === "string" && x.label.ar.trim())) errs.push(`slot "${n}": option "${x.value}" label needs en and ar strings`)
+          if (x?.sets !== undefined) {
+            if (!x.sets || typeof x.sets !== "object" || Array.isArray(x.sets)) errs.push(`slot "${n}": option "${x.value}" sets must be an object`)
+            else for (const [k, v] of Object.entries(x.sets)) {
+              if (!declared[k] || k === n) errs.push(`slot "${n}": option "${x.value}" sets unknown slot "${k}"`)
+              else if (Array.isArray(declared[k].choice) && !declared[k].choice.includes(String(v))) errs.push(`slot "${n}": option "${x.value}" sets ${k} to "${v}", not in its choice list`)
+            }
+          }
+        }
+      }
+    }
     if (s.choice_ar !== undefined && !(Array.isArray(s.choice) && Array.isArray(s.choice_ar) && s.choice_ar.length === s.choice.length && s.choice_ar.every((x) => typeof x === "string"))) errs.push(`slot "${n}": choice_ar must match the choice list one to one`)
   }
+  if (h.intro !== undefined && !(h.intro && typeof h.intro.en === "string" && h.intro.en.trim() && typeof h.intro.ar === "string" && h.intro.ar.trim())) errs.push("intro needs en and ar strings")
   if (h.order !== undefined) {
     if (!Array.isArray(h.order)) errs.push("order must be a list of slot names")
     else for (const n of h.order) if (!declared[n]) errs.push(`order: unknown slot "${n}"`)
@@ -832,14 +876,14 @@ export function lint(dept) {
     const heads = [...f.body.matchAll(/^## (.+?)\s*$/gm)].map((m) => m[1])
     if (heads.join("|") !== HEADINGS.join("|")) e(`headings must be ${HEADINGS.join(" · ")} in that order (found: ${heads.join(" · ") || "none"})`)
     const declared = h.slots ?? {}
-    const used = new Set([...f.body.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]))
+    const used = new Set([...(f.body + " " + JSON.stringify(h.intro ?? {})).matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]))
     for (const u of used) if (!declared[u]) e(`slot {{${u}}} is used but not declared`)
     const refd = new Set(used)
     for (const [n, s] of Object.entries(declared)) for (const r of slotRefs(s)) if (r !== n) refd.add(r)
     for (const [n, s] of Object.entries(declared)) {
-      if (!refd.has(n)) e(`slot "${n}" is declared but never used`)
+      if (!refd.has(n) && !(Array.isArray(s.options) && s.options.some((o) => o.sets))) e(`slot "${n}" is declared but never used`)
       const k = slotKind(s)
-      if (!k) e(`slot "${n}" has no known source (context, choice, json, argv, map, slug, value, ask, ref, mul)`)
+      if (!k) e(`slot "${n}" has no known source (context, choice, options, json, argv, map, slug, value, ask, ref, mul)`)
       for (const r of slotRefs(s)) if (!declared[r]) e(`slot "${n}" refers to undeclared slot {{${r}}}`)
       if (k === "argv" && !argvAllowed(s.argv.map((a) => (/\{\{\w+\}\}/.test(a) ? "x" : a)))) e(`slot "${n}": argv must be node + a script under the kun repo or ~/.claude`)
       if (k === "json" && !fs.existsSync(path.join(ROOT, s.json))) e(`slot "${n}": ${s.json} does not exist`)
@@ -937,15 +981,40 @@ function runTests() {
     ok(lintExtras({ slots: {}, model: "fa" + "ble" }).length === 1, "that model is refused")
     ok(lintExtras({ slots: {}, effort: "max" }).length === 1, "effort is low to xhigh")
   })
-  t("questions: film.plan asks market, audience, goal, platform, format, length in order", () => {
+  t("questions: film.plan asks audience, market, cut in order, with the intro", () => {
     const r = questions(mk("none"), "video", "video.film.plan", { repo: "hogwarts" })
-    eq(r.questions.map((x) => x.slot), ["market", "audience", "goal", "platform", "format", "length"])
-    eq(r.questions[0].kind, "market")
+    eq(r.questions.map((x) => x.slot), ["audience", "market", "cut"])
+    eq(r.questions[1].kind, "market")
     ok(r.questions.every((x) => x.q.en && x.q.ar), "q in both languages")
-    eq(r.questions[1].default, "school owners and principals")
+    eq(r.questions[0].default, "school owners and principals")
+    eq(r.intro.en, "An intro film for Balqalam, made from real app screens. Three quick questions to shape it.")
+    ok(/بالقلم/.test(r.intro.ar), "arabic intro names the brand")
+    eq(questions(mk("none"), "video", "video.order.blender", { repo: "hogwarts" }).intro, null)
+  })
+  t("questions: cut options carry sets; default is the one matching the slot defaults", () => {
+    const c = questions(mk("none"), "video", "video.film.plan", { repo: "hogwarts" }).questions[2]
+    eq(c.options.length, 4)
+    eq(c.options[1].sets, { platform: "Instagram", format: "vertical 9:16, mobile", length: "about 1:00" })
+    ok(c.options.every((o) => o.label.en && o.label.ar), "labels")
+    eq([c.default, c.current], ["film-2min-facebook", "film-2min-facebook"])
+  })
+  t("fill: cut sets expand; an explicit --set beats them", () => {
+    const f = fill(mk("none"), "video", "video.film.plan", { repo: "hogwarts", set: { new: "1", cut: "reel-1min-instagram" } })
+    ok(/Instagram · vertical 9:16, mobile · about 1:00/.test(f.prompt), "reel sets")
+    eq(f.missing.includes("cut"), false)
+    const g = fill(mk("none"), "video", "video.film.plan", { repo: "hogwarts", set: { new: "1", cut: "reel-1min-instagram", length: "about 0:30" } })
+    ok(/Instagram · vertical 9:16, mobile · about 0:30/.test(g.prompt), "explicit length wins")
+    const q = questions(mk("none"), "video", "video.film.plan", { repo: "hogwarts", set: { cut: "film-2min-youtube" } })
+    ok(!q.questions.some((x) => x.slot === "cut"), "answered cut is dropped")
+  })
+  t("lint: options, sets and intro are validated; a selector with sets may be unused in the body", () => {
+    eq(lintExtras({ slots: { p: { choice: ["a", "b"] }, c: { options: [{ value: "x", label: { en: "X", ar: "س" }, sets: { p: "b" } }] } }, intro: { en: "i", ar: "ا" } }), [])
+    ok(lintExtras({ slots: { c: { options: [{ value: "x", sets: { nope: "1" } }] } } }).length === 1, "unknown set slot")
+    ok(lintExtras({ slots: { p: { choice: ["a"] }, c: { options: [{ value: "x", sets: { p: "z" } }] } } }).length === 1, "set value not in choice")
+    ok(lintExtras({ slots: {}, intro: { en: "i" } }).length === 1, "intro needs ar")
   })
   t("questions: market options carry sd and sa with price; --set drops a slot", () => {
-    const m = questions(mk("none"), "video", "video.film.plan", { repo: "hogwarts" }).questions[0]
+    const m = questions(mk("none"), "video", "video.film.plan", { repo: "hogwarts" }).questions[1]
     ok(m.options.some((o) => o.value === "sd") && m.options.some((o) => o.value === "sa"), "sd and sa")
     ok(/Saudi/.test(m.options.find((o) => o.value === "sa").label.en) && /SAR/.test(m.options.find((o) => o.value === "sa").label.en), "Saudi label")
     eq(m.current, "sd")

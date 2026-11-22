@@ -30,6 +30,15 @@
       },
       "default": "Balqalam"
     },
+    "brand_ar": {
+      "map": {
+        "Balqalam": "بالقلم",
+        "Hogwarts": "هوغورتس",
+        "Mkan": "مكان",
+        "Databayt": "داتابايت"
+      },
+      "of": "brand"
+    },
     "audience": {
       "choice": [
         "school owners and principals",
@@ -74,7 +83,8 @@
       "choice": [
         "Facebook",
         "Instagram",
-        "WhatsApp"
+        "WhatsApp",
+        "YouTube"
       ],
       "default": "Facebook",
       "q": {
@@ -84,7 +94,8 @@
       "choice_ar": [
         "فيسبوك",
         "إنستغرام",
-        "واتساب"
+        "واتساب",
+        "يوتيوب"
       ]
     },
     "format": {
@@ -124,8 +135,8 @@
       ],
       "default": "sd",
       "q": {
-        "en": "Which market is this film for?",
-        "ar": "لأي سوق هذا الفيلم؟"
+        "en": "Which market?",
+        "ar": "لأي سوق؟"
       }
     },
     "lang": {
@@ -134,6 +145,58 @@
         "en"
       ],
       "default": "ar"
+    },
+    "destination": {
+      "options": [
+        {
+          "value": "facebook-vertical",
+          "label": {
+            "en": "Facebook · vertical 9:16",
+            "ar": "فيسبوك · عمودي 9:16"
+          },
+          "sets": {
+            "platform": "Facebook",
+            "format": "vertical 9:16, mobile"
+          }
+        },
+        {
+          "value": "instagram-vertical",
+          "label": {
+            "en": "Instagram · vertical 9:16",
+            "ar": "إنستغرام · عمودي 9:16"
+          },
+          "sets": {
+            "platform": "Instagram",
+            "format": "vertical 9:16, mobile"
+          }
+        },
+        {
+          "value": "youtube-horizontal",
+          "label": {
+            "en": "YouTube · horizontal 16:9",
+            "ar": "يوتيوب · أفقي 16:9"
+          },
+          "sets": {
+            "platform": "YouTube",
+            "format": "horizontal 16:9, desktop"
+          }
+        },
+        {
+          "value": "whatsapp-square",
+          "label": {
+            "en": "WhatsApp · square 1:1",
+            "ar": "واتساب · مربع 1:1"
+          },
+          "sets": {
+            "platform": "WhatsApp",
+            "format": "square 1:1, mobile"
+          }
+        }
+      ],
+      "q": {
+        "en": "Where will it play?",
+        "ar": "أين سيُعرض؟"
+      }
     }
   },
   "drive": 0.5,
@@ -157,11 +220,14 @@
     ]
   },
   "order": [
-    "market",
     "audience",
-    "platform",
-    "format"
-  ]
+    "market",
+    "destination"
+  ],
+  "intro": {
+    "en": "A 60-second script for one {{brand}} feature, built from what the product really has. Three quick questions to shape it.",
+    "ar": "نص فيديو من ٦٠ ثانية لميزة واحدة في {{brand_ar}}، من واقع ما يقدمه المنتج. ثلاثة أسئلة سريعة لنضبطه."
+  }
 }
 ---
 

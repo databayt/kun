@@ -279,17 +279,24 @@ Continue production carries the film's id, and `produce order` always pins its o
 
 ### Questions before Send
 
-A fill ends with `questions`, a second zero-token command, so the person can change what matters
-before reading the prompt:
+The first prompt starts the chat. The reply says the formula's intro line and asks its questions inline;
+the answers fill the brief with no model, the brief shows folded with **Start** and **Edit**, and nothing
+runs until Start. The questions come from a second zero-token command:
 
 ```bash
 node .claude/scripts/station.mjs questions video.film.plan --dept video --repo hogwarts --json
 ```
 
-It returns `{ id, questions: [{ slot, kind, q: {en, ar}, options: [{ value, label: {en, ar} }], default, current }] }`.
+It returns `{ id, intro: {en, ar} | null, questions: [{ slot, kind, q: {en, ar}, options: [{ value, label: {en, ar}, sets? }], default, current }] }`.
+`intro` is the optional header line (`{{slot}}` placeholders filled like the body, so it names the brand).
 `kind` is `choice` (a list), `ask` (free text, `options` empty) or `market` (one question, options from
 `content/media/markets.json`, such as "Sudan · Arabic + English · 6.4 USD per student per year"). Slots
 already in `--set`, and every context, map, json, argv, slug, value, ref and mul slot, are skipped.
+
+A choice slot can be a combined question: `options: [{ value, label: {en, ar}, sets: { platform, format, length } }]`.
+Picking one (`fill --set cut=<value>`) sets the other slots in `sets`; an explicit `--set` of one of those
+slots still wins. Such a slot is only a selector, so it need not appear in the body. `intro` and `options`
+are linted, and `order` lists the questions asked (for `video.film.plan`: audience, market, cut).
 
 A formula tunes this in its header, all optional: `order` (the slots to ask, in order; `[]` asks
 nothing), `q: {en, ar}` on a slot (the question; without it the slot name is humanised), `choice_ar`

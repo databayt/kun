@@ -47,6 +47,15 @@
       },
       "default": "Balqalam"
     },
+    "brand_ar": {
+      "map": {
+        "Balqalam": "بالقلم",
+        "Hogwarts": "هوغورتس",
+        "Mkan": "مكان",
+        "Databayt": "داتابايت"
+      },
+      "of": "brand"
+    },
     "latest_video": {
       "context": "media.latest_video"
     },
@@ -54,7 +63,8 @@
       "choice": [
         "Facebook",
         "Instagram",
-        "WhatsApp"
+        "WhatsApp",
+        "YouTube"
       ],
       "default": "Facebook",
       "q": {
@@ -64,7 +74,8 @@
       "choice_ar": [
         "فيسبوك",
         "إنستغرام",
-        "واتساب"
+        "واتساب",
+        "يوتيوب"
       ]
     },
     "format": {
@@ -89,6 +100,79 @@
     },
     "brand_kit_url": {
       "value": "https://github.com/databayt/kun/blob/main/content/media/brand-kit.json"
+    },
+    "cut": {
+      "options": [
+        {
+          "value": "reel-45s-instagram",
+          "label": {
+            "en": "45-second reel · Instagram · 9:16",
+            "ar": "مقطع ٤٥ ثانية · إنستغرام · 9:16"
+          },
+          "sets": {
+            "reel_length": "45 seconds",
+            "platform": "Instagram",
+            "format": "vertical 9:16, mobile"
+          }
+        },
+        {
+          "value": "reel-30s-facebook",
+          "label": {
+            "en": "30-second reel · Facebook · 9:16",
+            "ar": "مقطع ٣٠ ثانية · فيسبوك · 9:16"
+          },
+          "sets": {
+            "reel_length": "30 seconds",
+            "platform": "Facebook",
+            "format": "vertical 9:16, mobile"
+          }
+        },
+        {
+          "value": "reel-60s-facebook",
+          "label": {
+            "en": "60-second reel · Facebook · 9:16",
+            "ar": "مقطع دقيقة · فيسبوك · 9:16"
+          },
+          "sets": {
+            "reel_length": "60 seconds",
+            "platform": "Facebook",
+            "format": "vertical 9:16, mobile"
+          }
+        },
+        {
+          "value": "cut-60s-youtube",
+          "label": {
+            "en": "60-second cut · YouTube · 16:9",
+            "ar": "مقطع دقيقة · يوتيوب · 16:9"
+          },
+          "sets": {
+            "reel_length": "60 seconds",
+            "platform": "YouTube",
+            "format": "horizontal 16:9, desktop"
+          }
+        }
+      ],
+      "q": {
+        "en": "What kind of reel?",
+        "ar": "ما نوع المقطع؟"
+      }
+    },
+    "moment": {
+      "choice": [
+        "the strongest self-contained moment",
+        "the product in use, step by step",
+        "the call to action"
+      ],
+      "default": "the strongest self-contained moment",
+      "q": {
+        "en": "What should the reel show?",
+        "ar": "ماذا يعرض المقطع؟"
+      },
+      "choice_ar": [
+        "أقوى لحظة مكتملة بذاتها",
+        "المنتج أثناء الاستخدام خطوة بخطوة",
+        "الدعوة إلى الإجراء"
+      ]
     }
   },
   "drive": 0.4,
@@ -116,10 +200,13 @@
     ]
   },
   "order": [
-    "reel_length",
-    "platform",
-    "format"
-  ]
+    "cut",
+    "moment"
+  ],
+  "intro": {
+    "en": "A short {{brand}} reel cut from your latest video, with Arabic captions. Two quick questions to shape it.",
+    "ar": "مقطع قصير ل{{brand_ar}} من أحدث فيديو لديك مع ترجمة عربية. سؤالان سريعان لنضبطه."
+  }
 }
 ---
 
@@ -138,7 +225,7 @@ Cut a reel of about {{reel_length}} from the latest video in the work folder, wi
 - Tools: the `edit` skill (FilmCraft, `media.sh`, whisper for the transcript)
 
 ## Constraints
-- Transcribe first and choose the cut from the transcript: the strongest self-contained moment, silences removed.
+- Transcribe first and choose the cut from the transcript: {{moment}}, silences removed.
 - Arabic captions, RTL shaping checked; burn them in only at export.
 - No real student or parent faces or names; blur or skip the shot.
 
