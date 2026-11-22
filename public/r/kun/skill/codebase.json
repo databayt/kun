@@ -4,7 +4,12 @@
   "type": "kun:skill",
   "title": "codebase",
   "description": "Access reference codebase at /Users/abdout/codebase or databayt/codebase",
-  "keywords": [],
+  "keywords": [
+    "check the reference repo",
+    "from codebase",
+    "how does codebase do it",
+    "is there an existing pattern for this"
+  ],
   "dependencies": [],
   "files": [
     {

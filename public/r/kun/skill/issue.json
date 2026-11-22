@@ -5,15 +5,17 @@
   "title": "issue",
   "description": "Create a GitHub issue in the appropriate databayt repo",
   "keywords": [
-    "issue"
+    "create a GitHub issue in the right databayt repo",
+    "issue",
+    "open/file an issue"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/issue/SKILL.md",
       "target": "skills/issue/SKILL.md",
-      "sha256": "fd95cbfae4ffc71c956c1c805414cc7a0a13bec4bd53f23a37619a6167bd023a"
+      "sha256": "0b29c2852248582b645297d3c29c9ef841a40a75e19726b565fb4e7553726d11"
     }
   ],
-  "version": "d564422bee29f9fd36e969c0c24f6051315b55781f4f260317703d2706352e6e"
+  "version": "85647e300a7cd383a3b833546a181fee1657ba6108b7cd3538630077e7e05f63"
 }

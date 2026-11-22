@@ -5,7 +5,11 @@
   "title": "health",
   "description": "Check Claude Code config health across the team + engine drift",
   "keywords": [
-    "health"
+    "config health",
+    "drift check",
+    "health",
+    "is the engine healthy",
+    "team config status"
   ],
   "dependencies": [],
   "files": [

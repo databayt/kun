@@ -1,0 +1,19 @@
+{
+  "id": "skill:catalog",
+  "name": "catalog",
+  "type": "kun:skill",
+  "title": "catalog",
+  "description": "The catalog place: its rules, blocks, open issues",
+  "keywords": [
+    "catalog"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/catalog/SKILL.md",
+      "target": "skills/catalog/SKILL.md",
+      "sha256": "f68422cb3c16e7ecf2c8d47e8f03ec0ffab3ce79295ef8270080d32e72bf6cea"
+    }
+  ],
+  "version": "8fa7ec7fbf8035b67848d8bcdf3238a20d1b13eb2beb05030b575a674735176e"
+}

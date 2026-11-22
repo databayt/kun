@@ -137,7 +137,18 @@ function build(): RegistryItem[] {
     const files = walk(path.join(skillsDir, d.name)).map((f) =>
       file(f, `skills/${path.relative(skillsDir, f).split(path.sep).join("/")}`)
     )
-    push(make("skill", d.name, { title: d.name, description: frontmatter(skillMd).description }, files, [], kw))
+    const fm = frontmatter(skillMd)
+    // The skill's own "Triggers on: a, b, c." list (in when_to_use or description) are its keywords too,
+    // so Machine's composer can pick a skill up from prose, not only from vocabulary.json spells.
+    const triggers = `${fm.when_to_use ?? ""} ${fm.description ?? ""}`.match(/Triggers on:\s*([^]*?)(?:\.\s*(?:[A-Z]|$)|$)/)
+    for (const t of triggers?.[1].split(",") ?? []) {
+      const word = t.trim().replace(/\.$/, "")
+      if (word && word.length <= 60) {
+        if (!kw.has(`skill:${d.name}`)) kw.set(`skill:${d.name}`, new Set())
+        kw.get(`skill:${d.name}`)!.add(word)
+      }
+    }
+    push(make("skill", d.name, { title: d.name, description: fm.description }, files, [], kw))
   }
 
   // agents — ~/.claude/agents/<name>.md (_index.md is the roster, not an agent)

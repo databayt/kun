@@ -5,7 +5,11 @@
   "title": "dev",
   "description": "Start dev server on port 3000",
   "keywords": [
-    "dev"
+    "dev",
+    "port 3000 is taken",
+    "run it locally",
+    "spin up localhost",
+    "start the server"
   ],
   "dependencies": [],
   "files": [

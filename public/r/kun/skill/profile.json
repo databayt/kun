@@ -5,15 +5,18 @@
   "title": "profile",
   "description": "Load a selective config profile by role (engineer/business/content/ops)",
   "keywords": [
-    "profile"
+    "load the business profile",
+    "profile",
+    "profile <role>",
+    "switch to content mode"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/profile/SKILL.md",
       "target": "skills/profile/SKILL.md",
-      "sha256": "972d82926950b52654ca6273ab28781ce6e1711800990407a7b39d3bca67bbbb"
+      "sha256": "d89f905c9f49bb8850e46ef1a782614c025c4205e0d0b5bf0c14ed49e0fb42e9"
     }
   ],
-  "version": "4ad1974bb22ab6c75d7e1da3b957fb9f5d3411b5784a5b34a7160fc26f20758a"
+  "version": "8fa88092437c3344b05b1c7d7e63667b3a861096a3a012ff7d0d0bab4783279f"
 }

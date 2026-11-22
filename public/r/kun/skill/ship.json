@@ -5,6 +5,8 @@
   "title": "ship",
   "description": "Promote a checked build to production (Vercel --prod)",
   "keywords": [
+    "deploy to production",
+    "promote checked build (Vercel --prod)",
     "ship"
   ],
   "dependencies": [],

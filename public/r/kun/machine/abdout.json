@@ -3,7 +3,7 @@
   "name": "abdout",
   "type": "kun:machine",
   "title": "Abdout",
-  "description": "macos machine · tech, business, sales, marketing, video, support, rnd · code write",
+  "description": "macos machine · tech, business, sales, marketing, video, image, support, rnd · code write",
   "keywords": [],
   "dependencies": [
     "pack:tech",
@@ -11,6 +11,7 @@
     "pack:sales",
     "pack:marketing",
     "pack:video",
+    "pack:image",
     "pack:support",
     "pack:rnd"
   ],
@@ -18,8 +19,8 @@
     {
       "path": "machines/abdout.json",
       "target": "machines/abdout.json",
-      "sha256": "e9f232a27aed3870ce8900d3ec353abf83fda15da024d2206c97714b9a9870fa"
+      "sha256": "2838d4a31beb73d7a674bff929d475505b2e0f13141319b22dd782654923eb25"
     }
   ],
-  "version": "a33f4e947813bec38e6f8a17441e2fed0b9f28b1a8a8e69e145cc9f797f90e3e"
+  "version": "7c11ff21d39ef7c07a47386abb9110be3c6121690c862cbbc3f440f7b3f850d1"
 }

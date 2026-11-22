@@ -13,13 +13,13 @@
     "skill:sync",
     "skill:textbook",
     "skill:convert",
-    "agent:analyst"
+    "agent:rnd"
   ],
   "files": [
     {
       "path": "departments/rnd/pack.json",
       "target": "departments/rnd/pack.json",
-      "sha256": "eb66c09d974a48f0c489076ac1ee1452c0dce49b99ab72bf1256c09441bde0cc"
+      "sha256": "13c2db5f841600e0ec51ee0110e249a17e18fa18ae7f0558d4a4ec4c0c91020f"
     },
     {
       "path": "departments/rnd/prompt.md",
@@ -27,5 +27,5 @@
       "sha256": "3c199fa7704f3bcea32ed87afab09fcab7023a3974c0a7de8276f27fca375731"
     }
   ],
-  "version": "62ceb00111668592cb366740ed6da3607243a28c991600d9390f95468260546c"
+  "version": "4e74a10159e194f9bacc05ab91a8241b07935356e1281e4301b61a7a3c122c64"
 }

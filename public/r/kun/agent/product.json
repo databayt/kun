@@ -15,8 +15,8 @@
     {
       "path": ".claude/agents/product.md",
       "target": "agents/product.md",
-      "sha256": "c823646c649461583ff14c5e33d65d4799f86e0d3fde4cff070c3a2969418a05"
+      "sha256": "18f1282f821c58fef1d7c4654761b34fc09d0597be3de8e8d39b18913ea2cffe"
     }
   ],
-  "version": "9aa0802208a7cfd5668d7539dcbab9362dcc94074c461130c2d271512a85ff4c"
+  "version": "e3eb7394ed2128931fae98e46b90705d77bd2e016ff386c09f8cf8e01e0f3b51"
 }

@@ -9,7 +9,18 @@
       "type": "kun:skill",
       "title": "airbnb-copy",
       "description": "Airbnb-voice rental listing titles, descriptions and marketing copy — Arabic-first, English mirrored",
-      "keywords": [],
+      "keywords": [
+        "homes copywriting",
+        "listing description",
+        "listing title",
+        "sound like airbnb",
+        "write airbnb listing",
+        "أسلوب إير بي إن بي",
+        "صياغة إعلان عقار",
+        "كتابة إعلان شقة",
+        "كتابة وصف مكان",
+        "وصف شقة"
+      ],
       "dependencies": [],
       "files": [
         {
@@ -27,7 +38,10 @@
       "title": "analyze",
       "description": "Analyze a repo's patterns and generate a tailored Claude Code config",
       "keywords": [
-        "analyze"
+        "analyze",
+        "analyze <repo>",
+        "generate config for this repo",
+        "repo config generator"
       ],
       "dependencies": [],
       "files": [
@@ -46,7 +60,17 @@
       "title": "approve",
       "description": "The human gate — the /social/publish review queue, or a signed link for a remote approver",
       "keywords": [
-        "approve"
+        "approve",
+        "approve the next draft",
+        "get sign-off",
+        "ready for review",
+        "review the queue",
+        "send for approval",
+        "stage for review",
+        "أرسل للمراجعة",
+        "اعتماد",
+        "اعتمد المسودة",
+        "راجع الطابور"
       ],
       "dependencies": [],
       "files": [
@@ -84,7 +108,11 @@
       "title": "auth",
       "description": "Sign in to any web service or CLI with the Keychain-stored databayt identities and reach what sits behind the login wall",
       "keywords": [
-        "auth"
+        "auth",
+        "log into X",
+        "not authenticated",
+        "session expired",
+        "sign me in"
       ],
       "dependencies": [],
       "files": [
@@ -103,7 +131,12 @@
       "title": "behalf",
       "description": "Web errands as Abdout — sign up, confirm, get keys",
       "keywords": [
-        "behalf"
+        "behalf",
+        "create an account",
+        "like cowork",
+        "on my behalf",
+        "sign up for",
+        "نيابة عني"
       ],
       "dependencies": [],
       "files": [
@@ -122,7 +155,13 @@
       "title": "bench",
       "description": "Score the engine's own config on its labeled cases, and propose holdout-gated fixes",
       "keywords": [
-        "bench"
+        "are any skills dead",
+        "bench",
+        "benchmark the skills",
+        "dispatch accuracy",
+        "is the routing accurate",
+        "measure the engine",
+        "which skills collide"
       ],
       "dependencies": [],
       "files": [
@@ -141,7 +180,16 @@
       "title": "blender",
       "description": "3D as code in Blender 5.x — flythroughs, product shots, rendered headless",
       "keywords": [
-        "blender"
+        "3d film",
+        "blender",
+        "eevee",
+        "flythrough",
+        "glb",
+        "product shots",
+        "render the scene",
+        "rendered headless",
+        "بلندر",
+        "ثلاثي الأبعاد. 3D as code in Blender 5.x — flythroughs"
       ],
       "dependencies": [],
       "files": [
@@ -260,7 +308,10 @@
       "title": "block",
       "description": "Create blocks - UI components with integrated business logic",
       "keywords": [
-        "block"
+        "block",
+        "create a block",
+        "dashboard component",
+        "data table with logic"
       ],
       "dependencies": [],
       "files": [
@@ -279,7 +330,13 @@
       "title": "blur",
       "description": "Blur-up images — photos arrive blurred and sharpen into focus as they load",
       "keywords": [
-        "blur"
+        "blur",
+        "blur while loading",
+        "blur-up",
+        "fade in images",
+        "images pop in",
+        "lqip",
+        "صور ضبابية"
       ],
       "dependencies": [],
       "files": [
@@ -311,23 +368,49 @@
       "version": "99b91aa1729eec84feadc309dd4dc0d0d62246e743b6f17ef19c9e7cf8ed1e56"
     },
     {
+      "id": "skill:business",
+      "name": "business",
+      "type": "kun:skill",
+      "title": "business",
+      "description": "The business department: board, formulas, the lead",
+      "keywords": [
+        "business"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/business/SKILL.md",
+          "target": "skills/business/SKILL.md",
+          "sha256": "8dcfb76a159745b074c851aa9e418199432c037e0c683acb8c45c4313f925892"
+        }
+      ],
+      "version": "67bff88f50d5ea12b27c296db3268e628b9753f0f9afaa5e078dc2a3191be331"
+    },
+    {
       "id": "skill:calendar",
       "name": "calendar",
       "type": "kun:skill",
       "title": "calendar",
       "description": "The content calendar — which brand publishes what, on which day",
       "keywords": [
-        "calendar"
+        "calendar",
+        "content calendar",
+        "plan the content",
+        "what are we publishing",
+        "what slipped this week",
+        "which brand is due",
+        "التقويم",
+        "خطة المحتوى"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/calendar/SKILL.md",
           "target": "skills/calendar/SKILL.md",
-          "sha256": "66008e46903107c5e04897ba9d50a685bc37fb4c464812487939533e4367735d"
+          "sha256": "6c809f0e3eadbb7061ded628b1cbd5d78a4c063570f38d0ba134a58e34359e77"
         }
       ],
-      "version": "910d9e56b0dee4fd2b898b672c7adb439fcc199d930c68eb0fd341c4916450ed"
+      "version": "276daafe3589ef1cb2474f322ed0b46bdbfb70c2a6a2fe8ea555a93752cc9c4f"
     },
     {
       "id": "skill:canon",
@@ -336,7 +419,12 @@
       "title": "canon",
       "description": "The right CEO book + operating move for a business or leadership decision; /canon lists all 10",
       "keywords": [
-        "canon"
+        "are we running out of runway",
+        "canon",
+        "how should I price",
+        "is it time to hire",
+        "should we build",
+        "what do I do about"
       ],
       "dependencies": [],
       "files": [
@@ -355,17 +443,21 @@
       "title": "captain",
       "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
       "keywords": [
-        "captain"
+        "brief me",
+        "captain",
+        "company status",
+        "what should I do next",
+        "where do I spend this week"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/captain/SKILL.md",
           "target": "skills/captain/SKILL.md",
-          "sha256": "91fe269c0da80cb0be00eb9932a7a123d0e7215d7797f9491bc4ba0ed7a192c3"
+          "sha256": "f530d6d61667b8dc1edce4f031833ba2a021f07d9c4cb23a3d9f8fc76798fd01"
         }
       ],
-      "version": "4efc30c439f982342e8aed89af0e7d72df95b743334fb50676d34f3f15f90a4a"
+      "version": "57120fed12c3d8fd397f108e154b8f98e54d74ab02adeecf46d110610fc04277"
     },
     {
       "id": "skill:carousel",
@@ -374,7 +466,14 @@
       "title": "carousel",
       "description": "Multi-slide bilingual brand carousels — deck written, slides rendered at exact platform sizes, human-approved",
       "keywords": [
-        "carousel"
+        "carousel",
+        "carousel for <brand|block>",
+        "multi-slide post",
+        "slides for instagram",
+        "swipe post",
+        "سلايدات",
+        "كاروسيل",
+        "منشور متعدد الشرائح"
       ],
       "dependencies": [],
       "files": [
@@ -387,13 +486,35 @@
       "version": "42057c9980a0a233f295abe377b1b6be41ca35777f0e0caf99462d8d8013ed46"
     },
     {
+      "id": "skill:catalog",
+      "name": "catalog",
+      "type": "kun:skill",
+      "title": "catalog",
+      "description": "The catalog place: its rules, blocks, open issues",
+      "keywords": [
+        "catalog"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/catalog/SKILL.md",
+          "target": "skills/catalog/SKILL.md",
+          "sha256": "f68422cb3c16e7ecf2c8d47e8f03ec0ffab3ce79295ef8270080d32e72bf6cea"
+        }
+      ],
+      "version": "8fa7ec7fbf8035b67848d8bcdf3238a20d1b13eb2beb05030b575a674735176e"
+    },
+    {
       "id": "skill:check",
       "name": "check",
       "type": "kun:skill",
       "title": "check",
       "description": "Quality gate — typecheck + build + visual verify before shipping",
       "keywords": [
-        "check"
+        "\\\"is it green\\\"",
+        "check",
+        "pre-ship quality gate",
+        "typecheck + build + visual verify"
       ],
       "dependencies": [],
       "files": [
@@ -412,7 +533,13 @@
       "title": "clone",
       "description": "Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact",
       "keywords": [
-        "clone"
+        "clone",
+        "clone <url>",
+        "clone shadcn:<component>",
+        "clone the figma design",
+        "clone this section",
+        "make ours look like <site>",
+        "pattern:<keyword>"
       ],
       "dependencies": [],
       "files": [
@@ -461,7 +588,18 @@
       "title": "cloudflare",
       "description": "Cloudflare platform operator — Workers + Containers deploys, DNS cutover, crons and logs",
       "keywords": [
-        "cloudflare"
+        "ERR_CONNECTION_RESET",
+        "cloudflare",
+        "container",
+        "cron not firing",
+        "cutover",
+        "deploy to cloudflare",
+        "is it live on cloudflare",
+        "orange cloud",
+        "proxied",
+        "worker",
+        "worker logs",
+        "wrangler"
       ],
       "dependencies": [],
       "files": [
@@ -480,7 +618,10 @@
       "title": "code",
       "description": "Logic layer — server actions with auth, validation, tenant isolation",
       "keywords": [
-        "code"
+        "code",
+        "logic layer with auth+validation+tenant isolation",
+        "pipeline Logic stage",
+        "server actions"
       ],
       "dependencies": [],
       "files": [
@@ -498,7 +639,12 @@
       "type": "kun:skill",
       "title": "codebase",
       "description": "Access reference codebase at /Users/abdout/codebase or databayt/codebase",
-      "keywords": [],
+      "keywords": [
+        "check the reference repo",
+        "from codebase",
+        "how does codebase do it",
+        "is there an existing pattern for this"
+      ],
       "dependencies": [],
       "files": [
         {
@@ -516,7 +662,12 @@
       "title": "convert",
       "description": "Convert a file or URL to Markdown via MarkItDown",
       "keywords": [
-        "convert"
+        "convert",
+        "convert <file|url>",
+        "markdown this PDF",
+        "markitdown",
+        "pull this page into docs",
+        "transcribe this video"
       ],
       "dependencies": [],
       "files": [
@@ -534,16 +685,22 @@
       "type": "kun:skill",
       "title": "costs",
       "description": "API spend breakdown and cost-optimization analysis",
-      "keywords": [],
+      "keywords": [
+        "budget check",
+        "cost optimization",
+        "costs",
+        "how much are we paying",
+        "spend"
+      ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/costs/SKILL.md",
           "target": "skills/costs/SKILL.md",
-          "sha256": "0339ad98b87f5952c54641755e38a776c1a52768403fe40b6dd5b35706daf2bb"
+          "sha256": "ce7db1c8b242e13b6ef8abaa5b984ef1d08d7afc387ecb66150eaa3d356d67d7"
         }
       ],
-      "version": "cfdfefb63c998619110d58b140d383e0d8b725fb3ca81a6f56b3cba683ec2035"
+      "version": "21609872715849ab77fc8917c95bcf2c0f80118d07c72ee4d122bb13d01daca7"
     },
     {
       "id": "skill:crawl-anthropic",
@@ -551,7 +708,11 @@
       "type": "kun:skill",
       "title": "crawl-anthropic",
       "description": "Crawl and snapshot Anthropic docs/assets",
-      "keywords": [],
+      "keywords": [
+        "crawl anthropic",
+        "refresh the anthropic mirror",
+        "snapshot the docs"
+      ],
       "dependencies": [],
       "files": [
         {
@@ -569,7 +730,10 @@
       "title": "credentials",
       "description": "Databayt API keys in the macOS Keychain — store, read, export",
       "keywords": [
-        "credentials"
+        "api key",
+        "credentials",
+        "store the key",
+        "which keys do we have"
       ],
       "dependencies": [],
       "files": [
@@ -588,7 +752,10 @@
       "title": "decide",
       "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
       "keywords": [
-        "decide"
+        "decide",
+        "log this decision",
+        "record the call",
+        "we decided to"
       ],
       "dependencies": [],
       "files": [
@@ -607,7 +774,14 @@
       "title": "deploy",
       "description": "Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane",
       "keywords": [
-        "deploy"
+        "deploy",
+        "deploy everything",
+        "deploy to staging",
+        "push to production",
+        "redeploy",
+        "ship to cloudflare",
+        "vercel preview",
+        "why is the deploy stuck"
       ],
       "dependencies": [],
       "files": [
@@ -626,7 +800,11 @@
       "title": "dev",
       "description": "Start dev server on port 3000",
       "keywords": [
-        "dev"
+        "dev",
+        "port 3000 is taken",
+        "run it locally",
+        "spin up localhost",
+        "start the server"
       ],
       "dependencies": [],
       "files": [
@@ -645,7 +823,11 @@
       "title": "docs",
       "description": "Generate documentation - component MDX, API docs, Storybook stories",
       "keywords": [
-        "docs"
+        "add a storybook story",
+        "docs",
+        "document this component",
+        "generate the MDX",
+        "write the API docs"
       ],
       "dependencies": [],
       "files": [
@@ -664,7 +846,12 @@
       "title": "domains",
       "description": "Domain + mail health — expiry, renewal, DNS, inboxes",
       "keywords": [
-        "domains"
+        "auto-renew",
+        "dmarc",
+        "domains",
+        "mail bouncing",
+        "renew",
+        "spf"
       ],
       "dependencies": [],
       "files": [
@@ -683,7 +870,19 @@
       "title": "draft",
       "description": "Full brand draft — Arabic-first copy, English mirrored, plus media",
       "keywords": [
-        "draft"
+        "answer the social asks",
+        "any drafts waiting",
+        "attach media to the draft",
+        "draft",
+        "draft a post",
+        "drain the draft queue",
+        "post about <topic>",
+        "write the caption",
+        "write the copy",
+        "أرفق وسائط للمسودة",
+        "اكتب منشور",
+        "صياغة المنشور",
+        "طابور الصياغة"
       ],
       "dependencies": [],
       "files": [
@@ -712,7 +911,16 @@
       "title": "economy",
       "description": "Token economy — audit consumption and delegate across model × effort × product lane",
       "keywords": [
-        "economy"
+        "economy",
+        "hit the limit",
+        "optimize tokens",
+        "plan limit",
+        "token usage",
+        "tokens per outcome",
+        "usage window",
+        "we're burning tokens",
+        "استهلاك",
+        "توكن"
       ],
       "dependencies": [],
       "files": [
@@ -731,7 +939,21 @@
       "title": "edit",
       "description": "Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels",
       "keywords": [
-        "edit"
+        "add captions",
+        "cut the silences",
+        "edit",
+        "edit video",
+        "filmcraft",
+        "intro outro",
+        "make a reel",
+        "motion graphic",
+        "rough cut",
+        "timeline",
+        "title card",
+        "ريلز",
+        "فيلم كرافت",
+        "قص الفيديو",
+        "مونتاج"
       ],
       "dependencies": [],
       "files": [
@@ -753,7 +975,7 @@
         {
           "path": ".claude/skills/edit/scripts/fc/assemble.mjs",
           "target": "skills/edit/scripts/fc/assemble.mjs",
-          "sha256": "21ea805ec9680393d9446d9b2eb234b863efb1d6dbd6580ce71dbe92c933cdf0"
+          "sha256": "93306e405a5a2d7e1a94582e2ecfea9f7f73c7d5151819c06fa6705c31de4283"
         },
         {
           "path": ".claude/skills/edit/scripts/fc/lesson.mjs",
@@ -823,7 +1045,7 @@
         {
           "path": ".claude/skills/edit/scripts/media/voice.mjs",
           "target": "skills/edit/scripts/media/voice.mjs",
-          "sha256": "4a18650b1bce2dc26edab8d5ad8d34e57b736540a6144ae1df295b4ddf05241c"
+          "sha256": "fafa4ecc388aa3cef24e08d19e21c8bf559d84743ecdc356bc58c3801a85cfa7"
         },
         {
           "path": ".claude/skills/edit/scripts/media/vtt.mjs",
@@ -861,7 +1083,7 @@
           "sha256": "89ad07dccac4418842264e02b0ed24f14d67d09ccd561dd3e0935cf4488fd6e4"
         }
       ],
-      "version": "b3feb5a584e70474a001cf6978f6261f5243a36a7d7d634aa972cda0553a8772"
+      "version": "3ba9c0cbe5f526ad3149dd07dbaf9aa5302ba830ab47cf6097c0e3ec1c6428e8"
     },
     {
       "id": "skill:facebook",
@@ -870,7 +1092,14 @@
       "title": "facebook",
       "description": "Connect a brand's Facebook Page to the publishing pipeline",
       "keywords": [
-        "facebook"
+        "add my brand page",
+        "connect a facebook page",
+        "facebook",
+        "facebook token expired",
+        "invalid scopes",
+        "new brand page",
+        "wire up facebook",
+        "اربط صفحة فيسبوك"
       ],
       "dependencies": [],
       "files": [
@@ -889,17 +1118,20 @@
       "title": "feature",
       "description": "Full pipeline — idea to production (chains every stage)",
       "keywords": [
-        "feature"
+        "build <feature> end to end",
+        "feature",
+        "feature <name> [product]",
+        "full pipeline idea→production"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/feature/SKILL.md",
           "target": "skills/feature/SKILL.md",
-          "sha256": "0e743d331e73e8c87c9f8656265b222a2a0cbb818f1610b31b3483d84f8c849f"
+          "sha256": "345748f6a7969543aff93ea412dafb9af75edea941993ed08989e9673c0cc94c"
         }
       ],
-      "version": "58fa00920fde21a08cc630a0fb90f3f4939f79c50a9db68d881196295be150a3"
+      "version": "ed157a71ae434cf84c52646aec9ec715d0d82c2addf49cd10a5183d5399e5a62"
     },
     {
       "id": "skill:fix",
@@ -908,7 +1140,11 @@
       "title": "fix",
       "description": "Auto-fix all detected issues - TypeScript, lint, build errors",
       "keywords": [
-        "fix"
+        "clear the type errors",
+        "fix",
+        "fix the errors",
+        "lint is failing",
+        "make it compile"
       ],
       "dependencies": [],
       "files": [
@@ -927,17 +1163,31 @@
       "title": "funnel",
       "description": "Conversation to conversion — gates, segments, assets, the stall clock",
       "keywords": [
-        "funnel"
+        "chatbot",
+        "follow up",
+        "funnel",
+        "nurture",
+        "qualify",
+        "segment",
+        "stalled",
+        "تأهيل",
+        "قمع",
+        "متابعة"
       ],
       "dependencies": [],
       "files": [
         {
+          "path": ".claude/skills/funnel/scripts/crm-health.mjs",
+          "target": "skills/funnel/scripts/crm-health.mjs",
+          "sha256": "6a066ceaa13b83ac9c319800cd030e8f4058125a758b79ff1324ae2b8d9d255f"
+        },
+        {
           "path": ".claude/skills/funnel/SKILL.md",
           "target": "skills/funnel/SKILL.md",
-          "sha256": "74113e1760ad0289e637aaf17cebcde5f420e5f2faa88fc1dc579ff1ddc7f0d5"
+          "sha256": "2d096f901db67bc2cdee376480a928d8c762107052a9869612f0bca2be231e47"
         }
       ],
-      "version": "d5d8f67ca16f0fcdfa3ff26d7a7d540f499273c4760398e5ce8b44a1bb6ed0a9"
+      "version": "5b411503188e574c2bce17cec525789d38087768f64525209e1873c94bdf7524"
     },
     {
       "id": "skill:handover",
@@ -946,7 +1196,12 @@
       "title": "handover",
       "description": "UI verification — runs niche quality keywords on a URL or block",
       "keywords": [
-        "handover"
+        "\"is the whole block ready to show\"",
+        "\"is this URL clean\"",
+        "handover",
+        "handover <url|block>",
+        "pre-demo quality pass",
+        "run the niche quality keywords"
       ],
       "dependencies": [],
       "files": [
@@ -965,7 +1220,11 @@
       "title": "health",
       "description": "Check Claude Code config health across the team + engine drift",
       "keywords": [
-        "health"
+        "config health",
+        "drift check",
+        "health",
+        "is the engine healthy",
+        "team config status"
       ],
       "dependencies": [],
       "files": [
@@ -984,7 +1243,26 @@
       "title": "higgs",
       "description": "Marketing photos and video — Google (Nano Banana, Veo, Omni) direct, or Higgsfield",
       "keywords": [
-        "higgs"
+        "brand kit",
+        "gemini image",
+        "generate image",
+        "generate video",
+        "hero image",
+        "higgs",
+        "lifestyle scene",
+        "make an ad",
+        "make the pictures",
+        "mockup",
+        "moodboard",
+        "nano banana",
+        "omni",
+        "product shot",
+        "promo video",
+        "run the pack",
+        "showroom asset",
+        "veo",
+        "صورة تسويقية",
+        "وسائط"
       ],
       "dependencies": [],
       "files": [
@@ -995,6 +1273,23 @@
         }
       ],
       "version": "ca32424db8c5237593137dbee763e9f96cd4a1c93d6f62d057ea3d336df754e0"
+    },
+    {
+      "id": "skill:hogwarts",
+      "name": "hogwarts",
+      "type": "kun:skill",
+      "title": "hogwarts",
+      "description": "The hogwarts place: its rules, blocks, open issues",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/hogwarts/SKILL.md",
+          "target": "skills/hogwarts/SKILL.md",
+          "sha256": "f924227be05fd05dc1957c692ac325afb300f18aa7144b1e03eb6e629509f2fa"
+        }
+      ],
+      "version": "330986f35528a7c33f97db9b0472e6ff053c8474759834b4b1bf8f89cc5d4944"
     },
     {
       "id": "skill:idea",
@@ -1016,23 +1311,46 @@
       "version": "6813531773a00bd32dfa39511dfcb42c75981503b6af9c350eaa9c6d2ecb38f2"
     },
     {
+      "id": "skill:image",
+      "name": "image",
+      "type": "kun:skill",
+      "title": "image",
+      "description": "The image department: board, formulas, the lead",
+      "keywords": [
+        "image"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/image/SKILL.md",
+          "target": "skills/image/SKILL.md",
+          "sha256": "6d8cd4db813fc84b0e69d75be8b8aaf57f91bead4c9173746dd197406657fe91"
+        }
+      ],
+      "version": "b731db7b5095a28fedb6ad471ca30600b7155118796a82bacaa342fc8c4ccb96"
+    },
+    {
       "id": "skill:incident",
       "name": "incident",
       "type": "kun:skill",
       "title": "incident",
       "description": "Incident response workflow for production issues",
       "keywords": [
-        "incident"
+        "P0",
+        "incident",
+        "outage",
+        "production is down",
+        "users can't log in"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/incident/SKILL.md",
           "target": "skills/incident/SKILL.md",
-          "sha256": "9f3b7cbfb774f2cf56f2240ab5e6749b2cc999b029bd1789ff8f4076247968f8"
+          "sha256": "0b09d151cd3d94b822886ca279b740c6816df368f23d71e50d332c839c87d945"
         }
       ],
-      "version": "5cd12aeac157d9290e0c2ef06245bcb95c251b08212de3b02150bc8e52e61ec2"
+      "version": "3dc5882835a50f186fa1a13f6c7d8803fb5529dacb47e35915192e1fd3382200"
     },
     {
       "id": "skill:issue",
@@ -1041,17 +1359,19 @@
       "title": "issue",
       "description": "Create a GitHub issue in the appropriate databayt repo",
       "keywords": [
-        "issue"
+        "create a GitHub issue in the right databayt repo",
+        "issue",
+        "open/file an issue"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/issue/SKILL.md",
           "target": "skills/issue/SKILL.md",
-          "sha256": "fd95cbfae4ffc71c956c1c805414cc7a0a13bec4bd53f23a37619a6167bd023a"
+          "sha256": "0b29c2852248582b645297d3c29c9ef841a40a75e19726b565fb4e7553726d11"
         }
       ],
-      "version": "d564422bee29f9fd36e969c0c24f6051315b55781f4f260317703d2706352e6e"
+      "version": "85647e300a7cd383a3b833546a181fee1657ba6108b7cd3538630077e7e05f63"
     },
     {
       "id": "skill:jobs",
@@ -1060,7 +1380,30 @@
       "title": "jobs",
       "description": "Abdout's instance of seek — his + Databayt's income lane (jobs, gigs, tenders, client requests, funding) across Rwanda, Kenya, Nigeria, Gulf, Sudan; on sales.databayt.org",
       "keywords": [
-        "jobs"
+        "RFP",
+        "accelerator",
+        "angel",
+        "apply",
+        "client request",
+        "credits",
+        "did anyone reply",
+        "find work",
+        "funding",
+        "fundraising",
+        "gigs",
+        "grant",
+        "incubator",
+        "investor",
+        "jobs",
+        "opportunities",
+        "tenders",
+        "تمويل",
+        "حاضنة",
+        "فرص",
+        "مسرعة",
+        "مناقصات",
+        "منحة",
+        "وظائف"
       ],
       "dependencies": [],
       "files": [
@@ -1073,13 +1416,32 @@
       "version": "06353f0fc2d03283fc2bf2429ad659445b2d8967cdf2e5353c5d2f88b92c1c14"
     },
     {
+      "id": "skill:kun",
+      "name": "kun",
+      "type": "kun:skill",
+      "title": "kun",
+      "description": "The kun place: its rules, blocks, open issues",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/kun/SKILL.md",
+          "target": "skills/kun/SKILL.md",
+          "sha256": "45c69f50bcca14bf6cb2db01d742e4925401c854b464c3c9d51eadb7df0357e4"
+        }
+      ],
+      "version": "2f72191433b929e397448e12bb2ce11f73d60691a424c06e280fa6becd1f6fdf"
+    },
+    {
       "id": "skill:learn",
       "name": "learn",
       "type": "kun:skill",
       "title": "learn",
       "description": "Extract organizational patterns and conventions from repos + history",
       "keywords": [
-        "learn"
+        "extract patterns from history",
+        "learn",
+        "what are our conventions"
       ],
       "dependencies": [],
       "files": [
@@ -1092,12 +1454,36 @@
       "version": "829eb2034f685bca56c86864fcc56f11ca51c1e2285225392758337952d9f66f"
     },
     {
+      "id": "skill:marketing",
+      "name": "marketing",
+      "type": "kun:skill",
+      "title": "marketing",
+      "description": "The marketing department: board, formulas, the lead",
+      "keywords": [
+        "marketing"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/marketing/SKILL.md",
+          "target": "skills/marketing/SKILL.md",
+          "sha256": "ec1d6ae78b193d97c86a324e090fef266e8d841490632eb4172c15655aa3cd4f"
+        }
+      ],
+      "version": "79383d73af34856aa3942b615fbbaecc70d05d521fe929cd94d50e42ffa4c8a0"
+    },
+    {
       "id": "skill:mcp-doctor",
       "name": "mcp-doctor",
       "type": "kun:skill",
       "title": "mcp-doctor",
       "description": "Diagnose and recover the browser/Playwright MCP server",
-      "keywords": [],
+      "keywords": [
+        "browser mcp is not working",
+        "browser tools missing",
+        "playwright mcp is disconnected",
+        "tool not found"
+      ],
       "dependencies": [],
       "files": [
         {
@@ -1120,7 +1506,14 @@
       "title": "md",
       "description": "House standard for machine-produced Markdown — schema, RTL rules, grading by agreement",
       "keywords": [
-        "md"
+        "RTL markdown",
+        "agreement score",
+        "bad conversion",
+        "grade the markdown",
+        "md",
+        "md quality",
+        "mirrored tables",
+        "transcription contract"
       ],
       "dependencies": [],
       "files": [
@@ -1139,7 +1532,14 @@
       "title": "measure",
       "description": "Read the numbers back — reach, engagement and UTM attribution per post and brand",
       "keywords": [
-        "measure"
+        "did anyone see it",
+        "how did the post do",
+        "is social working",
+        "measure",
+        "reach and engagement",
+        "social metrics",
+        "أداء المنشورات",
+        "أرقام المنشور"
       ],
       "dependencies": [],
       "files": [
@@ -1152,13 +1552,33 @@
       "version": "fef5ef74e6021197df22dd1060f49fbbb9fca8c046afbe5b3fa44100cf78d177"
     },
     {
+      "id": "skill:mkan",
+      "name": "mkan",
+      "type": "kun:skill",
+      "title": "mkan",
+      "description": "The mkan place: its rules, blocks, open issues",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/mkan/SKILL.md",
+          "target": "skills/mkan/SKILL.md",
+          "sha256": "c97e0eec968e1f750a2b8b03b855f3486527dc978aa1ed71400413426a0119ca"
+        }
+      ],
+      "version": "df5c46d07e87418a4246437837e7c8ddb625e0f6fb4c98133bd9b0ddad7c9d13"
+    },
+    {
       "id": "skill:monitor",
       "name": "monitor",
       "type": "kun:skill",
       "title": "monitor",
       "description": "Check all deployments, costs, and uptime across databayt products",
       "keywords": [
-        "monitor"
+        "are the deploys green",
+        "monitor",
+        "production status sweep",
+        "uptime check"
       ],
       "dependencies": [],
       "files": [
@@ -1177,7 +1597,12 @@
       "title": "motion",
       "description": "Add Framer Motion animations to components",
       "keywords": [
-        "motion"
+        "add a transition",
+        "animate this",
+        "make it fade in",
+        "motion",
+        "scroll animation",
+        "stagger the list"
       ],
       "dependencies": [],
       "files": [
@@ -1195,7 +1620,12 @@
       "type": "kun:skill",
       "title": "package",
       "description": "Cross-repo dependency audit and upgrade coordination",
-      "keywords": [],
+      "keywords": [
+        "dependency sweep",
+        "package audit",
+        "upgrade deps across repos",
+        "version consistency"
+      ],
       "dependencies": [],
       "files": [
         {
@@ -1213,7 +1643,11 @@
       "title": "pattern",
       "description": "Look up a canonical cross-repo pattern (form, table, auth, ...)",
       "keywords": [
-        "pattern"
+        "canonical pattern",
+        "follow the card",
+        "how do we do forms",
+        "pattern",
+        "pattern <keyword>"
       ],
       "dependencies": [],
       "files": [
@@ -1232,7 +1666,11 @@
       "title": "performance",
       "description": "Performance audit - Core Web Vitals, bundle, database queries",
       "keywords": [
-        "performance"
+        "audit the bundle",
+        "it feels slow",
+        "optimize the queries",
+        "performance",
+        "why is this page slow"
       ],
       "dependencies": [],
       "files": [
@@ -1251,17 +1689,20 @@
       "title": "plan",
       "description": "Architecture plan — tech decisions from an approved spec, before code",
       "keywords": [
-        "plan"
+        "architecture plan for the approved spec",
+        "pipeline Plan stage",
+        "plan",
+        "plan the architecture"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/plan/SKILL.md",
           "target": "skills/plan/SKILL.md",
-          "sha256": "2c01248a83be58df6a17ead8c8ae6bb760bfdee1f1e60b7e9a0b4f6e300d15cb"
+          "sha256": "1367784153b453a50b7f14a7d4658a5a93d64e6e663476391a186d12e4693b41"
         }
       ],
-      "version": "375b1f2ad22f1328c26ef82eeccbc4cb59b569ba569670b07c0112607c75a7cf"
+      "version": "3fbab340100ce7902f95273703ea7b24259b1e7cec8ed6d34852c705f5c6f9d8"
     },
     {
       "id": "skill:premortem",
@@ -1270,7 +1711,11 @@
       "title": "premortem",
       "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
       "keywords": [
-        "premortem"
+        "imagine this failed",
+        "premortem",
+        "stress-test this plan",
+        "what are the risks",
+        "what could go wrong"
       ],
       "dependencies": [],
       "files": [
@@ -1288,16 +1733,72 @@
       "type": "kun:skill",
       "title": "pricing",
       "description": "Calculate and compare pricing tiers for a databayt product",
-      "keywords": [],
+      "keywords": [
+        "price the product",
+        "pricing",
+        "tier comparison",
+        "what should we charge"
+      ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/pricing/SKILL.md",
           "target": "skills/pricing/SKILL.md",
-          "sha256": "8416ff1ab4d73b438d0d86e7e3d3a9522e7953099cf6ee7dfad25676be2c5f7e"
+          "sha256": "f304912c0ec5d546c2fa848c7eaac44d019d9fb1e3c3dbdd36f0b8d3d8965895"
         }
       ],
-      "version": "deae47e5418e2ba2aaff6c5eb84f8d936c0f820e43886d8d4dbc4135d7e2ab36"
+      "version": "39db8c0c2eaaf3be055ae74243b243c59808b5996b0e4e214c9458124aa8ca06"
+    },
+    {
+      "id": "skill:produce",
+      "name": "produce",
+      "type": "kun:skill",
+      "title": "produce",
+      "description": "The video factory — one engine, three lines (hogwarts, mkan, databayt), 14 stages from request to Facebook",
+      "keywords": [
+        "make a video for databayt",
+        "make a video for hogwarts",
+        "make a video for mkan",
+        "produce",
+        "production request",
+        "video production",
+        "إنتاج فيديو",
+        "فيديو تعريفي"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/produce/schema/project.schema.json",
+          "target": "skills/produce/schema/project.schema.json",
+          "sha256": "4af216e53914b1d697ab4aecb157bd56fac2c149e3a46b6ac7c445d576119b15"
+        },
+        {
+          "path": ".claude/skills/produce/schema/shot-list.schema.json",
+          "target": "skills/produce/schema/shot-list.schema.json",
+          "sha256": "3e5831e454d3cd2649c113d7a844efeee1524cd36bdde99a8a16ad5a43b42f57"
+        },
+        {
+          "path": ".claude/skills/produce/scripts/piece.mjs",
+          "target": "skills/produce/scripts/piece.mjs",
+          "sha256": "8e51f95eb81880cc21c940ef46182c12b045c98c7286d70a98eee83e0e9f6e37"
+        },
+        {
+          "path": ".claude/skills/produce/scripts/produce.mjs",
+          "target": "skills/produce/scripts/produce.mjs",
+          "sha256": "f2234c0e9161dc398a55e5f04882b0dcb5326afe8e48d6e60ab6a04a3c8d400b"
+        },
+        {
+          "path": ".claude/skills/produce/scripts/produce.test.mjs",
+          "target": "skills/produce/scripts/produce.test.mjs",
+          "sha256": "e9b59382630bb7ac8a01d2cd73c8f9124db917e2ef33b2d5c8d21597215a1e7b"
+        },
+        {
+          "path": ".claude/skills/produce/SKILL.md",
+          "target": "skills/produce/SKILL.md",
+          "sha256": "547337a0f4ba312e2cf13acbd98e729e7eaf64d277aa5ff2184d2262ca59d232"
+        }
+      ],
+      "version": "5af05e5efab4d349f91a878d6cdd62acd572224347324210134a99bcd7f2e962"
     },
     {
       "id": "skill:profile",
@@ -1306,17 +1807,20 @@
       "title": "profile",
       "description": "Load a selective config profile by role (engineer/business/content/ops)",
       "keywords": [
-        "profile"
+        "load the business profile",
+        "profile",
+        "profile <role>",
+        "switch to content mode"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/profile/SKILL.md",
           "target": "skills/profile/SKILL.md",
-          "sha256": "972d82926950b52654ca6273ab28781ce6e1711800990407a7b39d3bca67bbbb"
+          "sha256": "d89f905c9f49bb8850e46ef1a782614c025c4205e0d0b5bf0c14ed49e0fb42e9"
         }
       ],
-      "version": "4ad1974bb22ab6c75d7e1da3b957fb9f5d3411b5784a5b34a7160fc26f20758a"
+      "version": "8fa88092437c3344b05b1c7d7e63667b3a861096a3a012ff7d0d0bab4783279f"
     },
     {
       "id": "skill:proposal",
@@ -1324,16 +1828,62 @@
       "type": "kun:skill",
       "title": "proposal",
       "description": "Generate a client proposal via the revenue agent",
-      "keywords": [],
+      "keywords": [
+        "client proposal",
+        "draft the offer",
+        "proposal",
+        "send them a quote"
+      ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/proposal/SKILL.md",
           "target": "skills/proposal/SKILL.md",
-          "sha256": "8a01e452062fe1197b9e1ca35f9fd69dab0d1a69cd89d6ec848ce5fe43e44a82"
+          "sha256": "156940093bec924c92f7e9d95ea479dbf732b1a449675d0c85e77f32867919e8"
         }
       ],
-      "version": "f4a1089ad42c37a03260973209d5cec848dab6ed5aba4678894517db0173503a"
+      "version": "1945ff3ffc82807dca40779eba661a7ed5c027118ca30ae4d3b9d35acdc57436"
+    },
+    {
+      "id": "skill:provision",
+      "name": "provision",
+      "type": "kun:skill",
+      "title": "provision",
+      "description": "Take a teammate's computer to 100% readiness and keep it there",
+      "keywords": [
+        "complete setup",
+        "heal my machine",
+        "is my machine ready",
+        "provision",
+        "readiness",
+        "update everything",
+        "جهّز الجهاز",
+        "صحة الجهاز"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/provision/fixtures/readiness.json",
+          "target": "skills/provision/fixtures/readiness.json",
+          "sha256": "f5098be25ebfb4b6f02d5e324d4d4544d00f5b3bf7185d5cf8d04c8f285b42a9"
+        },
+        {
+          "path": ".claude/skills/provision/scripts/provision.mjs",
+          "target": "skills/provision/scripts/provision.mjs",
+          "sha256": "29f183ae0bb913987f8b91c342b8907cd48aaf7bd4fd3128b779bd87c3a1d049"
+        },
+        {
+          "path": ".claude/skills/provision/scripts/provision.test.mjs",
+          "target": "skills/provision/scripts/provision.test.mjs",
+          "sha256": "9de04dea1b86b994bb5f65e2a8e792708b9fc4a4449b242f9cf64c1629baff1c"
+        },
+        {
+          "path": ".claude/skills/provision/SKILL.md",
+          "target": "skills/provision/SKILL.md",
+          "sha256": "f5cd60e31e44320ea0d7bed5491d058e336721450a8efa7a8744629acb1bdd20"
+        }
+      ],
+      "version": "dc3a435a36021eb4bdf39505ceccec62fa5ea477507244616a7a17197013bfb4"
     },
     {
       "id": "skill:publish",
@@ -1342,7 +1892,16 @@
       "title": "publish",
       "description": "Deliver approved full drafts to the brand channels",
       "keywords": [
-        "publish"
+        "broadcast it",
+        "post it now",
+        "publish",
+        "publish the post",
+        "review and publish",
+        "schedule it for tomorrow",
+        "send it out",
+        "ابعت المنشور",
+        "انشر المنشور",
+        "راجع وانشر"
       ],
       "dependencies": [],
       "files": [
@@ -1361,7 +1920,20 @@
       "title": "pwa",
       "description": "Progressive Web App lane — install, offline, Web Push",
       "keywords": [
-        "pwa"
+        "add to home screen",
+        "install prompt",
+        "installable",
+        "manifest",
+        "offline",
+        "progressive web app",
+        "push notification",
+        "pwa",
+        "service worker",
+        "web push",
+        "works offline",
+        "إشعارات",
+        "بدون إنترنت",
+        "تطبيق"
       ],
       "dependencies": [],
       "files": [
@@ -1404,7 +1976,11 @@
       "title": "quick",
       "description": "Fastest commit cycle - lint, fix, commit, push",
       "keywords": [
-        "quick"
+        "commit and push",
+        "just push it",
+        "land it",
+        "quick",
+        "save this work"
       ],
       "dependencies": [],
       "files": [
@@ -1423,7 +1999,13 @@
       "title": "record",
       "description": "Screen-record demo videos of real product flows, mirrored to Google Drive",
       "keywords": [
-        "record"
+        "demo video",
+        "re-record",
+        "record",
+        "record <flow|block>",
+        "screen recording",
+        "walkthrough",
+        "سجل فيديو"
       ],
       "dependencies": [],
       "files": [
@@ -1442,7 +2024,12 @@
       "title": "release",
       "description": "One spell — handover, check, ship, watch, then comment + close the issue",
       "keywords": [
-        "release"
+        "give away to client",
+        "one-spell handoff (handover→check→ship→watch→close issue)",
+        "release",
+        "release <block>",
+        "send to client",
+        "ship it and tell the client"
       ],
       "dependencies": [],
       "files": [
@@ -1461,7 +2048,21 @@
       "title": "report",
       "description": "Triage and fix the open user reports across databayt repos",
       "keywords": [
-        "report"
+        "Ali reported",
+        "fix reports",
+        "list the reports",
+        "open issues from the dialog",
+        "report",
+        "reports",
+        "show the reports",
+        "take/reject the reports",
+        "the team reported",
+        "verified-report queue",
+        "what did the team report",
+        "أصلح البلاغات",
+        "البلاغات",
+        "المشاكل المبلغ عنها",
+        "بلاغات الفريق"
       ],
       "dependencies": [],
       "files": [
@@ -1479,7 +2080,12 @@
       "type": "kun:skill",
       "title": "repos",
       "description": "Explore databayt organization repositories",
-      "keywords": [],
+      "keywords": [
+        "list our repos",
+        "org status",
+        "sync the repos",
+        "which repo has"
+      ],
       "dependencies": [],
       "files": [
         {
@@ -1497,7 +2103,11 @@
       "title": "reverse",
       "description": "Competitor feature teardown, with evidence (REA)",
       "keywords": [
-        "reverse"
+        "how does <app> do <feature>",
+        "inspect this HAR",
+        "reverse",
+        "teardown",
+        "هندسة عكسية"
       ],
       "dependencies": [],
       "files": [
@@ -1515,13 +2125,35 @@
       "version": "164d6cdb625dc02ec53b4e8b417efc8b6afdca77e8a07cacc8cfad1f3be34571"
     },
     {
+      "id": "skill:rnd",
+      "name": "rnd",
+      "type": "kun:skill",
+      "title": "rnd",
+      "description": "The rnd department: board, formulas, the lead",
+      "keywords": [
+        "rnd"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/rnd/SKILL.md",
+          "target": "skills/rnd/SKILL.md",
+          "sha256": "2ad0ff62ac4f4e5c9dedceb3719d8cd8764238d395d701afe1e3f7baeef2f2c7"
+        }
+      ],
+      "version": "f7c1bd595f58f9279654d078f8704c65b445233872b699039bfe3ac3e235357c"
+    },
+    {
       "id": "skill:saas",
       "name": "saas",
       "type": "kun:skill",
       "title": "saas",
       "description": "Generate complete SaaS feature with all layers",
       "keywords": [
-        "saas"
+        "full CRUD for",
+        "generate all layers",
+        "saas",
+        "scaffold the whole feature"
       ],
       "dependencies": [],
       "files": [
@@ -1534,12 +2166,35 @@
       "version": "ba557b597c2915285a8d708def2ce0e934acf5a424c34db468af971cbb2188a6"
     },
     {
+      "id": "skill:sales",
+      "name": "sales",
+      "type": "kun:skill",
+      "title": "sales",
+      "description": "The sales department: board, formulas, the lead",
+      "keywords": [
+        "sales"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/sales/SKILL.md",
+          "target": "skills/sales/SKILL.md",
+          "sha256": "aa56397dc37ec982430eafe0fc2adfeddd74f017af01d0fc8e665ba4e5daf92e"
+        }
+      ],
+      "version": "db94914e72e9fd1e19eade4e10d0071de5e0db9cec416e786eeee1f0b8519a22"
+    },
+    {
       "id": "skill:schema",
       "name": "schema",
       "type": "kun:skill",
       "title": "schema",
       "description": "Data layer — Prisma model, migration, and Zod validation",
       "keywords": [
+        "Prisma model + Zod validation",
+        "add the model/migration",
+        "data layer",
+        "pipeline Data stage",
         "schema"
       ],
       "dependencies": [],
@@ -1559,7 +2214,27 @@
       "title": "scrape",
       "description": "Lead acquisition — contact gap first, discovery last",
       "keywords": [
-        "scrape"
+        "contact gap",
+        "enrich",
+        "find schools",
+        "leads",
+        "old websites",
+        "outreach",
+        "pipeline health",
+        "prospect",
+        "rebrand leads",
+        "scrap",
+        "scrap facebook",
+        "scrap facebook for hogwarts",
+        "scrap for databayt",
+        "scrap for mkan",
+        "scrap whatsapp",
+        "scrape",
+        "website leads",
+        "who should we contact",
+        "اسحب",
+        "جمع بيانات",
+        "عملاء محتملين"
       ],
       "dependencies": [],
       "files": [
@@ -1571,10 +2246,10 @@
         {
           "path": ".claude/skills/scrape/SKILL.md",
           "target": "skills/scrape/SKILL.md",
-          "sha256": "65ee9839e5f65ad70d01a24ec68f920e14d49ddc2ca4c6ccbb543f33c6c76527"
+          "sha256": "f578827ce075b23287b3db3f304581b75d497240526598da2520761f4a69c207"
         }
       ],
-      "version": "964d03bf55c236317b6ee3fb18c9799e1d87b24126cfb02a831964d7b86df107"
+      "version": "353abf1105a41f26f0751c177a4f0f11ef3b83d2904506ec2d51dba75f79983b"
     },
     {
       "id": "skill:screenshot",
@@ -1582,7 +2257,12 @@
       "type": "kun:skill",
       "title": "screenshot",
       "description": "View most recent screenshot from Desktop or Downloads",
-      "keywords": [],
+      "keywords": [
+        "I just took a screenshot",
+        "check the image I saved",
+        "look at my screenshot",
+        "see the screen grab"
+      ],
       "dependencies": [],
       "files": [
         {
@@ -1600,7 +2280,11 @@
       "title": "security",
       "description": "Security audit - OWASP Top 10, dependency scanning",
       "keywords": [
-        "security"
+        "are we vulnerable",
+        "owasp check",
+        "scan the dependencies",
+        "security",
+        "security audit"
       ],
       "dependencies": [],
       "files": [
@@ -1619,7 +2303,14 @@
       "title": "seek",
       "description": "The open opportunity loop anyone runs from their own profile — find, tailor, apply, follow up",
       "keywords": [
-        "seek"
+        "admission",
+        "scholarship",
+        "seek",
+        "set up seek",
+        "visa",
+        "تأشيرة",
+        "قبول جامعي",
+        "منحة دراسية"
       ],
       "dependencies": [],
       "files": [
@@ -1638,7 +2329,17 @@
       "title": "shadcn",
       "description": "shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say \"shadcn\" to load it; \"shadcn docs\" = the docs-block style.",
       "keywords": [
-        "shadcn"
+        "MCP",
+        "add a shadcn component",
+        "and the docs-block pattern",
+        "base ui vs radix. shadcn/ui knowledge pack — CLI",
+        "directory",
+        "how does shadcn do it",
+        "registry",
+        "registry item",
+        "shadcn",
+        "shadcn docs",
+        "skills"
       ],
       "dependencies": [],
       "files": [
@@ -1667,6 +2368,8 @@
       "title": "ship",
       "description": "Promote a checked build to production (Vercel --prod)",
       "keywords": [
+        "deploy to production",
+        "promote checked build (Vercel --prod)",
         "ship"
       ],
       "dependencies": [],
@@ -1686,7 +2389,11 @@
       "title": "shoot",
       "description": "Stills of real product pages and flows, framed like Abdout's MacBook",
       "keywords": [
-        "shoot"
+        "screenshot the <x> flow",
+        "shoot",
+        "shoot <route|flow>",
+        "take a screenshot of <url>",
+        "لقطة شاشة"
       ],
       "dependencies": [],
       "files": [
@@ -2250,7 +2957,13 @@
       "title": "skeleton",
       "description": "Skeleton loading states — layout-matching shimmer while data loads",
       "keywords": [
-        "skeleton"
+        "loading state",
+        "loading.tsx",
+        "page flashes blank",
+        "replace the spinner",
+        "shimmer",
+        "skeleton",
+        "هيكل التحميل"
       ],
       "dependencies": [],
       "files": [
@@ -2269,17 +2982,24 @@
       "title": "social",
       "description": "One spell — calendar, draft, media, approve, publish, measure for a brand post",
       "keywords": [
-        "social"
+        "broadcast the announcement",
+        "post about <topic>",
+        "publish to social",
+        "social",
+        "social automation",
+        "social post",
+        "انشر عن",
+        "منشور تواصل"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/skills/social/SKILL.md",
           "target": "skills/social/SKILL.md",
-          "sha256": "0819734fba46b300cfb0b1181894b9e959a90b8a05e807b4a7d7647f14ec7030"
+          "sha256": "73f9b94501b408df11b3c33181539cbc36c63ed0ce2d68c283a2fb9465989bba"
         }
       ],
-      "version": "6a99e2ab26abd94aa5f7b2bf181b33024f7e212994f5822ab21ecceb5e313dba"
+      "version": "cbf9c088dbc24cb4cf8a0bb657dddd95d2762f2041e099e54aa58b70126bb9ac"
     },
     {
       "id": "skill:spec",
@@ -2288,7 +3008,11 @@
       "title": "spec",
       "description": "Technical spec — data model, file plan, refined acceptance criteria",
       "keywords": [
-        "spec"
+        "pipeline Specify stage (human approval gate)",
+        "spec",
+        "spec the <feature>",
+        "technical specification",
+        "write the spec"
       ],
       "dependencies": [],
       "files": [
@@ -2301,13 +3025,39 @@
       "version": "fd8e546cca5371ecda46271c233a2d60cd7054b7df12f24f9ebebbbc564f523e"
     },
     {
+      "id": "skill:support",
+      "name": "support",
+      "type": "kun:skill",
+      "title": "support",
+      "description": "The support department: board, formulas, the lead",
+      "keywords": [
+        "support"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/support/SKILL.md",
+          "target": "skills/support/SKILL.md",
+          "sha256": "46bfb3d34517608cee78c125762dd5515481f2c4c74e04536fa10fe1586e0db5"
+        }
+      ],
+      "version": "9d9e3c0f9798a50c63b4c97f66cc921c10892566e7ee89fbd4d2fce8cc0eedcd"
+    },
+    {
       "id": "skill:sync",
       "name": "sync",
       "type": "kun:skill",
       "title": "sync",
       "description": "Self-update — diff upstream releases and kun's own run evidence against the engine, adopt or propose",
       "keywords": [
-        "sync"
+        "improve yourself",
+        "refresh the engine",
+        "release sweep",
+        "self-improve",
+        "sync",
+        "sync self",
+        "what should kun improve",
+        "what's new in claude code"
       ],
       "dependencies": [],
       "files": [
@@ -2326,6 +3076,11 @@
       "title": "tasks",
       "description": "Task breakdown — dependency-ordered work list from an approved plan",
       "keywords": [
+        "break it down",
+        "decompose the plan",
+        "ordered task list from an approved plan",
+        "pipeline Tasks stage",
+        "task breakdown",
         "tasks"
       ],
       "dependencies": [],
@@ -2337,6 +3092,25 @@
         }
       ],
       "version": "bb3e156b5300cd8bd1287d160cdaf8be7c63a2046943eb6a4a8d2f51c2ef7d09"
+    },
+    {
+      "id": "skill:tech",
+      "name": "tech",
+      "type": "kun:skill",
+      "title": "tech",
+      "description": "The tech department: board, formulas, the lead",
+      "keywords": [
+        "tech"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/tech/SKILL.md",
+          "target": "skills/tech/SKILL.md",
+          "sha256": "0a1ee35fdede12e28d71ddc47586dc33c5d3547ad18b210a8444a5a61754492c"
+        }
+      ],
+      "version": "d7e47c6fd83a16e36a6b4b04b249dd1c69c888195b915b582ab1d863312c27a1"
     },
     {
       "id": "skill:template",
@@ -2364,7 +3138,11 @@
       "title": "test",
       "description": "Generate and run tests - unit, component, or E2E",
       "keywords": [
-        "test"
+        "add e2e coverage",
+        "run the tests",
+        "test",
+        "test this component",
+        "write tests for"
       ],
       "dependencies": [],
       "files": [
@@ -2383,7 +3161,14 @@
       "title": "textbook",
       "description": "Give every curriculum textbook.pdf a verified Markdown twin — vision transcription, blind re-reads, adjudication, a benchmark",
       "keywords": [
-        "textbook"
+        "convert the textbooks",
+        "fix the textbook twin",
+        "pdf to md for grade N",
+        "re-transcribe the textbooks",
+        "textbook",
+        "textbook bench",
+        "textbook markdown",
+        "textbook.md"
       ],
       "dependencies": [],
       "files": [
@@ -2456,12 +3241,35 @@
       "version": "c417f67fce19f0a0664d25e5a78e9ac4d1958298d646863a5490fcede2e9beb0"
     },
     {
+      "id": "skill:video",
+      "name": "video",
+      "type": "kun:skill",
+      "title": "video",
+      "description": "The video department: board, formulas, the lead",
+      "keywords": [
+        "video"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/skills/video/SKILL.md",
+          "target": "skills/video/SKILL.md",
+          "sha256": "e43df07c1af047655a01227ec30e94a887d05ca8754fa6c330cf38a382c7ee07"
+        }
+      ],
+      "version": "4f00677e73362d96bbbf2f335efc9ca060509dfc941c9e2b83b845765e4a5104"
+    },
+    {
       "id": "skill:watch",
       "name": "watch",
       "type": "kun:skill",
       "title": "watch",
       "description": "Post-deploy verification — visual + console + smoke test",
       "keywords": [
+        "is it live",
+        "pipeline Monitor stage",
+        "post-deploy visual + console + smoke check",
+        "verify the deploy",
         "watch"
       ],
       "dependencies": [],
@@ -2481,6 +3289,9 @@
       "title": "weekly",
       "description": "Run the captain's weekly Sunday-plan / Tuesday-check / Thursday-review cycle",
       "keywords": [
+        "friday review",
+        "monday plan",
+        "plan the week",
         "weekly"
       ],
       "dependencies": [],
@@ -2488,10 +3299,10 @@
         {
           "path": ".claude/skills/weekly/SKILL.md",
           "target": "skills/weekly/SKILL.md",
-          "sha256": "64a0d418cd4027af4549a149fd3fd62b45958638ecd4abcfb7cdf397352d5b03"
+          "sha256": "283ff57de664b4f4106de84f058a8d41a00d7637b051e5c01446e8f769fd3475"
         }
       ],
-      "version": "90ed66341ee22225a4774f67b06710c46203090bd54dab8a9bcb16d118c0f724"
+      "version": "78b3a832002594a7c614241e8b2286ec8db279cc873c20eeeadadf51a53310cb"
     },
     {
       "id": "skill:wire",
@@ -2500,7 +3311,11 @@
       "title": "wire",
       "description": "UI layer — page (mirror pattern), content, form, table columns, i18n",
       "keywords": [
-        "wire"
+        "build the page/form/table for the feature",
+        "i18n wiring",
+        "pipeline UI stage",
+        "wire",
+        "wire the UI"
       ],
       "dependencies": [],
       "files": [
@@ -2535,25 +3350,6 @@
       "version": "aba62fc284b6c8ca742b2292fe5fc06ee6ee48073aa2a32b34c14bae2cab0526"
     },
     {
-      "id": "agent:analyst",
-      "name": "analyst",
-      "type": "kun:agent",
-      "title": "analyst",
-      "description": "Market intelligence per vertical — competitors, usage analytics, churn, pricing research",
-      "keywords": [
-        "reverse"
-      ],
-      "dependencies": [],
-      "files": [
-        {
-          "path": ".claude/agents/analyst.md",
-          "target": "agents/analyst.md",
-          "sha256": "9798200618801ee1629ad16a0f27a552e2ac855525deb9550e80447bf47eb21c"
-        }
-      ],
-      "version": "9d4a0c2939cd24120399e9559e3b194adfac9433a62e340bb2be2dbe47d21e4f"
-    },
-    {
       "id": "agent:analyze",
       "name": "analyze",
       "type": "kun:agent",
@@ -2565,10 +3361,10 @@
         {
           "path": ".claude/agents/analyze.md",
           "target": "agents/analyze.md",
-          "sha256": "1cc7561a3c9fa673dc0d5d60c96550e700e46399c41144143f9372d9ce1f6e8e"
+          "sha256": "0476f08f937da72d21cc9c83b995dde41d8bac996bd79509927d607c3cb9e680"
         }
       ],
-      "version": "202baae263b19e314f558d389aa80c53e8463c9628da17a9e63a847f0906268d"
+      "version": "99a62ab8732d49ac14ec851b4d66f6d3c079457610d974c615786d2453f9e353"
     },
     {
       "id": "agent:architecture",
@@ -2704,12 +3500,13 @@
       "version": "e73ce0fb5b8f877e840692a0a25beb2eef357a65c50e6fba01d0e2732d9b6d6c"
     },
     {
-      "id": "agent:captain",
-      "name": "captain",
+      "id": "agent:business",
+      "name": "business",
       "type": "kun:agent",
-      "title": "captain",
+      "title": "business",
       "description": "CEO brain — weekly allocation, revenue strategy, coordination across products and the 7-person team",
       "keywords": [
+        "business",
         "canon",
         "captain",
         "decide",
@@ -2719,12 +3516,29 @@
       "dependencies": [],
       "files": [
         {
-          "path": ".claude/agents/captain.md",
-          "target": "agents/captain.md",
-          "sha256": "272c4db31e1ebfd335ec7b3aa9c3929b9d9c923bb2d26a55436f7547e7a50e36"
+          "path": ".claude/agents/business.md",
+          "target": "agents/business.md",
+          "sha256": "82374909b04faddf937de0615bdb7e4123c46e03e6d3df652e23ad67156d26bd"
         }
       ],
-      "version": "b70c3a39d301080237eeb273fd3438f77f0963ff5b0558329081f336a3df1356"
+      "version": "59aaa01b98a659c029f2544f3b5c3114458195109682a3ac09a848ada22e9b39"
+    },
+    {
+      "id": "agent:catalog",
+      "name": "catalog",
+      "type": "kun:agent",
+      "title": "catalog",
+      "description": "Catalog reference — curriculum, content, question-bank, textbooks, cdn",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/catalog.md",
+          "target": "agents/catalog.md",
+          "sha256": "a2b3d5c6d5d0e2c047a7287f220eac6c8411f4bf5b203de55766784e04b4650a"
+        }
+      ],
+      "version": "85fa097471ff958c8b7074a06e149b51cd8f83aea9886574e01d77f979213c2e"
     },
     {
       "id": "agent:clone",
@@ -2761,6 +3575,23 @@
         }
       ],
       "version": "4684de2fb06b9942ce23c2a3df95b35197232314fd04a2cc041c3b4abb87be07"
+    },
+    {
+      "id": "agent:codebase",
+      "name": "codebase",
+      "type": "kun:agent",
+      "title": "codebase",
+      "description": "Codebase reference — patterns, agents, templates, blocks, registry",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/codebase.md",
+          "target": "agents/codebase.md",
+          "sha256": "e6aa4e32abbc9f59aad174fc3d3463092ad9797bc98ae228bc1281bbc2f582ae"
+        }
+      ],
+      "version": "3f06be84fb8193cb4a3d6bc1a16f4fe565794079a0a4c8402e8db61628e6a0c1"
     },
     {
       "id": "agent:comment",
@@ -2830,10 +3661,10 @@
         {
           "path": ".claude/agents/funnel.md",
           "target": "agents/funnel.md",
-          "sha256": "a9a057ab3fb23887008b660e8c8a502498dae63478b8564f088dd4371d93ceca"
+          "sha256": "993d62f600ff2a160950ba705d2ffe32d3675896893d900272bd5de0944eb0db"
         }
       ],
-      "version": "e32d26dffcb6720304c11919b361818733a4b91f04c8cc61cd44bb920bbef82d"
+      "version": "ce07fc83e4629e6e7649bca83e82f56d3310e7445a2838ef4d8ba98e5a650c76"
     },
     {
       "id": "agent:git",
@@ -2884,32 +3715,6 @@
       "version": "b8cde1dad630edc524de3173c3d255f5dc1cd2cc6c3458682eef40ae066fa675"
     },
     {
-      "id": "agent:growth",
-      "name": "growth",
-      "type": "kun:agent",
-      "title": "growth",
-      "description": "Content strategy, SEO, social, developer relations, community",
-      "keywords": [
-        "approve",
-        "calendar",
-        "carousel",
-        "draft",
-        "facebook",
-        "measure",
-        "publish",
-        "social"
-      ],
-      "dependencies": [],
-      "files": [
-        {
-          "path": ".claude/agents/growth.md",
-          "target": "agents/growth.md",
-          "sha256": "c95416d0ad3b2df4a418e8cab5a363869dae2e0c268d257e224d1bfaebbffbc4"
-        }
-      ],
-      "version": "6af32947cf8826e658009170b5c08d1242a801f1cfc8e2bccca6873783ae0714"
-    },
-    {
       "id": "agent:guardian",
       "name": "guardian",
       "type": "kun:agent",
@@ -2924,10 +3729,10 @@
         {
           "path": ".claude/agents/guardian.md",
           "target": "agents/guardian.md",
-          "sha256": "a253ebfc51499aab74ec9673f36ba1d46b8a7947fc9bf75747d256d33604bbaf"
+          "sha256": "5254767891835a5b14cdbec605d64716814f3763866431b92defde66efc41590"
         }
       ],
-      "version": "ad3a44758c6ec0d9fa2518875c3cd5a46fb17ec00092bc9d25b70449842abbd3"
+      "version": "e17be1ab88541861d6fd5a3dcd34913eae7af5d4f8c847bc728f9399d050b62b"
     },
     {
       "id": "agent:hogwarts",
@@ -2966,6 +3771,25 @@
       "version": "650af595b3b9f474f8e9a352abbb1248bf9699960d7e71c301178f0d14f0596c"
     },
     {
+      "id": "agent:image",
+      "name": "image",
+      "type": "kun:agent",
+      "title": "image",
+      "description": "Image lead — owns a still or image pack from a one-line brief to an approved set: gathers context, plans, asks the few questions that matter, routes each step to its tool, runs media-qa before anything goes out; never approves",
+      "keywords": [
+        "image"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/image.md",
+          "target": "agents/image.md",
+          "sha256": "f71eefc072da2f1531a953871523144bbf29d8bb2e631a63faae5f1f8a4c151f"
+        }
+      ],
+      "version": "da7a2503135a3cb5d50f9179cd7a55f2669a0499cda9b1e462d187836e1edda8"
+    },
+    {
       "id": "agent:internationalization",
       "name": "internationalization",
       "type": "kun:agent",
@@ -2981,6 +3805,23 @@
         }
       ],
       "version": "f83cb3d767134c11a51366cf45770bb485e0a0d0598b65050c10b3be9b16e35c"
+    },
+    {
+      "id": "agent:kun",
+      "name": "kun",
+      "type": "kun:agent",
+      "title": "kun",
+      "description": "Code Machine reference — claude-code-config, documentation, team-distribution",
+      "keywords": [],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/kun.md",
+          "target": "agents/kun.md",
+          "sha256": "a0fc2acd15737a23be196a92861bc2bd95fde28d50092e8578449e818bb451be"
+        }
+      ],
+      "version": "3e3a3668ed3e2d63bb83d27e9c8277e3097bdd48748c122411ceace34dc1dc32"
     },
     {
       "id": "agent:lead",
@@ -3013,10 +3854,10 @@
         {
           "path": ".claude/agents/lead.md",
           "target": "agents/lead.md",
-          "sha256": "60a5a6b80c2f157ebe605b1e5492e2973887eb62ef20088e9e274ecabfb53099"
+          "sha256": "4fc8d1225959f6ca81559ba3b532d8e97e78074e0ea90ffdf125d8414863a0af"
         }
       ],
-      "version": "582f18b5f7e342679e2171303f7d60c6e3c999efc6488b0efa332244c5b26558"
+      "version": "e5480558d24a90ae6fd6c0a27debdba6650928891ec23b0236f06089ce57bb39"
     },
     {
       "id": "agent:learn",
@@ -3035,10 +3876,38 @@
         {
           "path": ".claude/agents/learn.md",
           "target": "agents/learn.md",
-          "sha256": "0cc84128d09cb55f8b43ed769d59284f10235e3534586dc1659a114abc8164a9"
+          "sha256": "f666c515672fe01bce106eaf05e2dc7d6beaf895dbd4ff64df6184dd121aaab6"
         }
       ],
-      "version": "bebe74b75a5162f6f15ff8e632e22f093c5eaa40fe3a322786e81db8af66489e"
+      "version": "0f74f6ce438e1a9260d614ad22f2e394140c13d5b77b0a2ac17bae2e46bc7545"
+    },
+    {
+      "id": "agent:marketing",
+      "name": "marketing",
+      "type": "kun:agent",
+      "title": "marketing",
+      "description": "Content strategy, SEO, social, developer relations, community",
+      "keywords": [
+        "approve",
+        "calendar",
+        "carousel",
+        "draft",
+        "facebook",
+        "marketing",
+        "measure",
+        "produce",
+        "publish",
+        "social"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/marketing.md",
+          "target": "agents/marketing.md",
+          "sha256": "7de2e37839632ec170dd6aa103c80e1711d01a80ef9df71fdadbaa6115440b19"
+        }
+      ],
+      "version": "860544d0cd98c19b4610e385baa8e7eaa910f8acbc0533b4c7efc0104cec74af"
     },
     {
       "id": "agent:media-qa",
@@ -3052,10 +3921,10 @@
         {
           "path": ".claude/agents/media-qa.md",
           "target": "agents/media-qa.md",
-          "sha256": "cff46f5719ffcf0ae726413935ef26a89de997b8648c88b0151ac224f59ab5e7"
+          "sha256": "0303d32d3de8f3efd57cba8feb23f37724704e83e949051c379f6b6452fb13bd"
         }
       ],
-      "version": "a404ce1a2c1435823fa450575468a6213997da22a3ce096be27f950e19010eb9"
+      "version": "5847bd2c2b29841dcbb1be766c4d8852d88699095439ee6da46b339c7919e656"
     },
     {
       "id": "agent:middleware",
@@ -3150,17 +4019,18 @@
       "keywords": [
         "domains",
         "incident",
-        "monitor"
+        "monitor",
+        "provision"
       ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/agents/ops.md",
           "target": "agents/ops.md",
-          "sha256": "aa65370eb50674d4a9d04bd6889af8764e84f4a6a1473edf44312c624eeef809"
+          "sha256": "1bb2bc6f85a3b2197d5e333bf98dcee0000918eb1968d118a6c437253d1826c3"
         }
       ],
-      "version": "0827ac5285b41a1841e95a16ec560097e20ce7b7c2b1df87c346ff582b38d5f9"
+      "version": "5361cdd33043125e9670130e018c74ee82cae34cd063f2c9201ce112ab42f9dd"
     },
     {
       "id": "agent:optimize",
@@ -3214,10 +4084,10 @@
         {
           "path": ".claude/agents/package.md",
           "target": "agents/package.md",
-          "sha256": "6a078eb4a8ec356d9a4d4e21b3843811017caae316454a63ae5147f59c0ce4b2"
+          "sha256": "d85b4bd3c33b39398b01ecad403f7fe2ca6b609876976c9fccbaf5293e5747bc"
         }
       ],
-      "version": "6bd049fc6454006221d3f98f919c4f3079056e8967feec70c8353b0b5f79d6a8"
+      "version": "ca19c91695cee9ea3e5bec5e2bfdc7c94ce090cd272cd85675baa33a9f19dc5c"
     },
     {
       "id": "agent:pattern",
@@ -3317,10 +4187,10 @@
         {
           "path": ".claude/agents/product.md",
           "target": "agents/product.md",
-          "sha256": "c823646c649461583ff14c5e33d65d4799f86e0d3fde4cff070c3a2969418a05"
+          "sha256": "18f1282f821c58fef1d7c4654761b34fc09d0597be3de8e8d39b18913ea2cffe"
         }
       ],
-      "version": "9aa0802208a7cfd5668d7539dcbab9362dcc94074c461130c2d271512a85ff4c"
+      "version": "e3eb7394ed2128931fae98e46b90705d77bd2e016ff386c09f8cf8e01e0f3b51"
     },
     {
       "id": "agent:pwa",
@@ -3375,10 +4245,10 @@
         {
           "path": ".claude/agents/quality.md",
           "target": "agents/quality.md",
-          "sha256": "cedd4529a41de49a16b72410f49c6736fd69a533110e15db966be8b15b2dd2fc"
+          "sha256": "09a5cc37b74344a4d1a93249ceb49de00bb94c001edbbd9fc4adb0c3ae322589"
         }
       ],
-      "version": "d891633b5d92f299477231b84fe6d5603a6bb38e294728bfdfbe8da97a286e29"
+      "version": "4bfc1ebf955fd443f197d94d1740f53b833ad90db6551fefd9da2296e8dc2109"
     },
     {
       "id": "agent:react",
@@ -3444,10 +4314,10 @@
         {
           "path": ".claude/agents/record.md",
           "target": "agents/record.md",
-          "sha256": "cbb92d00b7e5fdf546ab461d4b58044e197014c7a92ce28e96200720029d4794"
+          "sha256": "251f4feb4a7b0204db6c3edd5682a2a9cabed99b57603a9efa023325ff834971"
         }
       ],
-      "version": "60fdbbb8e4afd4aaff0006443f8c7842da272d2ecfc0488a3f5ff7c34b1d30d7"
+      "version": "222085ba981c84d3cd68c42773de1d3c4b28a2a048a95632352d6d8ac12ff019"
     },
     {
       "id": "agent:report",
@@ -3469,21 +4339,24 @@
       "version": "745b049b060652d3ca9a8513703dd42462e58bfc78aea109e477be56cada3036"
     },
     {
-      "id": "agent:revenue",
-      "name": "revenue",
+      "id": "agent:rnd",
+      "name": "rnd",
       "type": "kun:agent",
-      "title": "revenue",
-      "description": "Deals — pricing, proposals, contracts, cost analysis, revenue tracking",
-      "keywords": [],
+      "title": "rnd",
+      "description": "Market intelligence per vertical — competitors, usage analytics, churn, pricing research",
+      "keywords": [
+        "reverse",
+        "rnd"
+      ],
       "dependencies": [],
       "files": [
         {
-          "path": ".claude/agents/revenue.md",
-          "target": "agents/revenue.md",
-          "sha256": "da4604143cfe490748f6b8bf8a9b72f395085d105aff31aac7e7e8c49c056a7a"
+          "path": ".claude/agents/rnd.md",
+          "target": "agents/rnd.md",
+          "sha256": "6cc0a75ec29a7b000efef851e5063967db459c231ef4ffd335a60328be21c305"
         }
       ],
-      "version": "eda23cba3629aaf031137d1d29f832db42b906672712f6d1563bbc220d042b8b"
+      "version": "46acf665c06f59562fb6e4a85c0fe7005f837cab920871225de16b4f27f6eef5"
     },
     {
       "id": "agent:rust",
@@ -3506,6 +4379,25 @@
         }
       ],
       "version": "d8c0f04077a208cb7c4a74d29fc971744c13b754ac6f9cd0b30fce712e3e580a"
+    },
+    {
+      "id": "agent:sales",
+      "name": "sales",
+      "type": "kun:agent",
+      "title": "sales",
+      "description": "Deals — pricing, proposals, contracts, cost analysis, revenue tracking",
+      "keywords": [
+        "sales"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/sales.md",
+          "target": "agents/sales.md",
+          "sha256": "13cf5d6bdca293c2ffe61035b9001c50da2abfe127d62f972aeb587b87695886"
+        }
+      ],
+      "version": "c72c86751542dde3fed6d3f67bccde16e17c5ae42d767b27c51c3aac8095f740"
     },
     {
       "id": "agent:semantic",
@@ -3642,16 +4534,18 @@
       "type": "kun:agent",
       "title": "support",
       "description": "Customer success — onboarding, issue triage, knowledge base, SLAs",
-      "keywords": [],
+      "keywords": [
+        "support"
+      ],
       "dependencies": [],
       "files": [
         {
           "path": ".claude/agents/support.md",
           "target": "agents/support.md",
-          "sha256": "e527a430343c11b17b964b4d3e5d996735fbf18f98e208beb6d2492029a898d3"
+          "sha256": "ee516275df5c7e09705a9d8db5067301383da43b17f40a00ed12ababff96a716"
         }
       ],
-      "version": "b1674e19bcdbd062f812a387f27fa75f0091c52e70d9cc1f54f1d74bffa8ce44"
+      "version": "45acef5d72a76902c60b39dd1f17c06598cabcc3e0b268648504052a67d87d05"
     },
     {
       "id": "agent:tailwind",
@@ -3681,21 +4575,23 @@
       "version": "0e5758e99a7ecbc33b61804b3838974d22f55794796daa360bb54ab49c963bb4"
     },
     {
-      "id": "agent:tech-lead",
-      "name": "tech-lead",
+      "id": "agent:tech",
+      "name": "tech",
       "type": "kun:agent",
-      "title": "tech-lead",
+      "title": "tech",
       "description": "Cross-repo architecture — shared patterns, breaking changes, upgrades, tech-debt priority",
-      "keywords": [],
+      "keywords": [
+        "tech"
+      ],
       "dependencies": [],
       "files": [
         {
-          "path": ".claude/agents/tech-lead.md",
-          "target": "agents/tech-lead.md",
-          "sha256": "bf22ef8aaa53496c0fea3a29a8c5e620dc16ffe579f8672d47b86017cd4b3a14"
+          "path": ".claude/agents/tech.md",
+          "target": "agents/tech.md",
+          "sha256": "70c3570d1ac9a209cf1963f1c9bbb4f373fe1dc68d39e70e984955c33cf96e38"
         }
       ],
-      "version": "8aa238e67fb6554e013eeaf6329725efedc50ab78e359c399c422a04ff09df86"
+      "version": "cab95e17f7ab48a5274f01bc185255c1b9728f75ec1b339d43cc6beec605eb79"
     },
     {
       "id": "agent:template",
@@ -3806,6 +4702,25 @@
         }
       ],
       "version": "d4e9b2119e59e79cc8fd8d4aff2e6bed353882d3a11f689e986d4d75739cc8f9"
+    },
+    {
+      "id": "agent:video",
+      "name": "video",
+      "type": "kun:agent",
+      "title": "video",
+      "description": "Video producer — owns a film's journey from a one-line brief to an approved master: gathers context, plans, asks the few questions that matter, routes each stage to its tool and lane, and stops at every human gate; never approves",
+      "keywords": [
+        "video"
+      ],
+      "dependencies": [],
+      "files": [
+        {
+          "path": ".claude/agents/video.md",
+          "target": "agents/video.md",
+          "sha256": "4bc60983dcdab440fbbe7eed351b46564064115d13d0c7133d8b35e0ced511f7"
+        }
+      ],
+      "version": "0c45bb00cf480631ceb0dc033832d79080ff30cf105d45f0027238c66cc09343"
     },
     {
       "id": "rule:block-protocol",
@@ -4276,14 +5191,14 @@
         "skill:canon",
         "skill:decide",
         "skill:weekly",
-        "agent:revenue",
-        "agent:analyst"
+        "agent:sales",
+        "agent:rnd"
       ],
       "files": [
         {
           "path": "departments/business/pack.json",
           "target": "departments/business/pack.json",
-          "sha256": "49a0cbc9f23f4167dc39fec88d4901a082f1a4444c391c92395468e35ce99ad9"
+          "sha256": "ee351abc01e11da769ff88d13979af1606a516a7873efaaf7efe2081c3dcae0b"
         },
         {
           "path": "departments/business/prompt.md",
@@ -4291,7 +5206,36 @@
           "sha256": "68c79a429623b9eb907faafd8266c627549bbfaff0ccb14c96916b82a5d021ed"
         }
       ],
-      "version": "244c6b90969e015a5b48e38a597592dfc2fa0cd2ef4900cf42188bbde19b28f4"
+      "version": "6eda91d786e2cc9c6b1fdf3014e0c0dd33fc99db60f0569fc7e8854f223a7e07"
+    },
+    {
+      "id": "pack:image",
+      "name": "image",
+      "type": "kun:pack",
+      "title": "Image",
+      "description": "Shoot screenshots, generate stills and build carousels — with a QA agent before anything goes out.",
+      "title_ar": "الصور",
+      "description_ar": "لقطات الشاشة وتوليد الصور وبناء الكاروسيل — مع وكيل مراجعة قبل أي نشر.",
+      "keywords": [],
+      "dependencies": [
+        "skill:shoot",
+        "skill:higgs",
+        "skill:carousel",
+        "agent:media-qa"
+      ],
+      "files": [
+        {
+          "path": "departments/image/pack.json",
+          "target": "departments/image/pack.json",
+          "sha256": "0ce1bb6f5037b6eb25f63d5387f1912fc22956978904fc5aa7bceb8db1e66914"
+        },
+        {
+          "path": "departments/image/prompt.md",
+          "target": "departments/image/prompt.md",
+          "sha256": "c54502030c4d08ca17036e8093f888fe3f2fe1142e7f484fa6a32615ad5b1f67"
+        }
+      ],
+      "version": "28a4cad607dbcf38e4e2346dda85c4568d9bd0e37ec9376b0ecf90b7142eedc2"
     },
     {
       "id": "pack:marketing",
@@ -4315,7 +5259,7 @@
         {
           "path": "departments/marketing/pack.json",
           "target": "departments/marketing/pack.json",
-          "sha256": "93ab7c0868de36635ad6e95dc7ea6590390e2f3a9e493977abf42c2e6b688bf5"
+          "sha256": "85a02fdb56729108d272a0a51014f259d876ed10aaef5ea3b83776751a0e4fa6"
         },
         {
           "path": "departments/marketing/prompt.md",
@@ -4323,7 +5267,7 @@
           "sha256": "14024ec25b79d596841f7518bd2d69e3293f625dc0e67b3f7c37c9d93a4b6141"
         }
       ],
-      "version": "2ba27952105847b2abb08e87b462058d2da68165baf32ce1d84efb3cf9a8629f"
+      "version": "0a2025ab6edaf02748db6ed4750e9400751e2fd461eadaa4c308a7beec5dedb6"
     },
     {
       "id": "pack:rnd",
@@ -4340,13 +5284,13 @@
         "skill:sync",
         "skill:textbook",
         "skill:convert",
-        "agent:analyst"
+        "agent:rnd"
       ],
       "files": [
         {
           "path": "departments/rnd/pack.json",
           "target": "departments/rnd/pack.json",
-          "sha256": "eb66c09d974a48f0c489076ac1ee1452c0dce49b99ab72bf1256c09441bde0cc"
+          "sha256": "13c2db5f841600e0ec51ee0110e249a17e18fa18ae7f0558d4a4ec4c0c91020f"
         },
         {
           "path": "departments/rnd/prompt.md",
@@ -4354,7 +5298,7 @@
           "sha256": "3c199fa7704f3bcea32ed87afab09fcab7023a3974c0a7de8276f27fca375731"
         }
       ],
-      "version": "62ceb00111668592cb366740ed6da3607243a28c991600d9390f95468260546c"
+      "version": "4e74a10159e194f9bacc05ab91a8241b07935356e1281e4301b61a7a3c122c64"
     },
     {
       "id": "pack:sales",
@@ -4372,13 +5316,13 @@
         "skill:pricing",
         "skill:jobs",
         "agent:lead",
-        "agent:revenue"
+        "agent:sales"
       ],
       "files": [
         {
           "path": "departments/sales/pack.json",
           "target": "departments/sales/pack.json",
-          "sha256": "54a3ebd4234f3c220b69ee151276280e8a2fe7cd43b59542f371f5472f391289"
+          "sha256": "0d1f63055a9ef747b5c72cc66c021ade751ceb97058836d3354a0474a8da53bc"
         },
         {
           "path": "departments/sales/prompt.md",
@@ -4386,7 +5330,7 @@
           "sha256": "849c8755b9cb8f4a5a4183bfe068beb0db73e5fe3c3c49a70770fdf4e0ebe5a6"
         }
       ],
-      "version": "90f1fccfd015fdfa60fbc472391e7593704791c4a2a7deba44ae76305cc1b752"
+      "version": "86e75c7dbfb17533c9212d99c549281029d9f6863a0fccae68afdf387be90f5e"
     },
     {
       "id": "pack:support",
@@ -4408,7 +5352,7 @@
         {
           "path": "departments/support/pack.json",
           "target": "departments/support/pack.json",
-          "sha256": "a6ba794b30b634c7972f2858f813b0d329cee2a33eb166b4720177b70d18d68e"
+          "sha256": "a93a28d7544f31fee3e077cabf8483261e431ac5d36cb0c1e253acf0a360cf55"
         },
         {
           "path": "departments/support/prompt.md",
@@ -4416,7 +5360,7 @@
           "sha256": "d5aa966be852b33e507c3ac04760192b30c86ffdd1229e5372ecfaedf5bdeb0c"
         }
       ],
-      "version": "7a07987cdec93b17c9f6ed677a84b883ba1955aeaa4fe613ec77f72e1e709e69"
+      "version": "f46f580b22486b37703c1b8e45daed842d999068c7005589a92e166aef1e6e93"
     },
     {
       "id": "pack:tech",
@@ -4435,14 +5379,14 @@
         "skill:qa",
         "skill:fix",
         "skill:test",
-        "agent:tech-lead",
+        "agent:tech",
         "agent:guardian"
       ],
       "files": [
         {
           "path": "departments/tech/pack.json",
           "target": "departments/tech/pack.json",
-          "sha256": "2487ae1a6b3e9afca5bd9e68e9f25958f79cbbe6742156a7b8b2d43baea4f692"
+          "sha256": "051557b2c22dbc7c23b191dea746c8b36a2424d78ed62f9a37636a21205e9d91"
         },
         {
           "path": "departments/tech/prompt.md",
@@ -4450,45 +5394,47 @@
           "sha256": "197a67f7db572240337a680111456da8d3126f20771d7e234c623bed96c0901a"
         }
       ],
-      "version": "2a85173247fa868524355a8b9b5458aa13057944f9bd5bc81345ecffdafcb6e9"
+      "version": "1ef9a525512f9c318e83c5a930f4fc918b2b9b04aa9523a8dc2724fa14b2040f"
     },
     {
       "id": "pack:video",
       "name": "video",
       "type": "kun:pack",
-      "title": "Media",
-      "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
-      "title_ar": "الإعلام",
-      "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
+      "title": "Video",
+      "description": "Record, edit and generate video — reels, demos and explainers — with a QA agent before anything goes out.",
+      "title_ar": "الفيديو",
+      "description_ar": "التسجيل والمونتاج وتوليد الفيديو — ريلز وعروض وشروحات — مع وكيل مراجعة قبل أي نشر.",
       "keywords": [],
       "dependencies": [
+        "agent:video",
+        "skill:produce",
         "skill:edit",
-        "skill:shoot",
         "skill:record",
+        "skill:shoot",
+        "skill:blender",
         "skill:higgs",
-        "skill:carousel",
         "agent:media-qa"
       ],
       "files": [
         {
           "path": "departments/video/pack.json",
           "target": "departments/video/pack.json",
-          "sha256": "22d15b88c186114d4f8799c73e6b956a445c09dc91c67222a9c3aee93040a044"
+          "sha256": "799af6e28a50a9483a2033c71024daf5c486bdded5b9de05c8f37b1269ed9960"
         },
         {
           "path": "departments/video/prompt.md",
           "target": "departments/video/prompt.md",
-          "sha256": "79b64693c9e4c5095d8908c38fe65791002b17a83202c656ebef79cad656c7a9"
+          "sha256": "11581c33852bb4a150a7e1f7f7d6b231ac616bb6f1a5d280a4d7b7ab6304262f"
         }
       ],
-      "version": "5e64bcba0fd4d1025c5493870cf35eb27b1dec4342a4657cb3701824658e65e8"
+      "version": "e5f0d0acba2859621751303e0bfb3f996f185126aa58d4afe25c16fc4c361c73"
     },
     {
       "id": "machine:abdout",
       "name": "abdout",
       "type": "kun:machine",
       "title": "Abdout",
-      "description": "macos machine · tech, business, sales, marketing, video, support, rnd · code write",
+      "description": "macos machine · tech, business, sales, marketing, video, image, support, rnd · code write",
       "keywords": [],
       "dependencies": [
         "pack:tech",
@@ -4496,6 +5442,7 @@
         "pack:sales",
         "pack:marketing",
         "pack:video",
+        "pack:image",
         "pack:support",
         "pack:rnd"
       ],
@@ -4503,31 +5450,32 @@
         {
           "path": "machines/abdout.json",
           "target": "machines/abdout.json",
-          "sha256": "e9f232a27aed3870ce8900d3ec353abf83fda15da024d2206c97714b9a9870fa"
+          "sha256": "2838d4a31beb73d7a674bff929d475505b2e0f13141319b22dd782654923eb25"
         }
       ],
-      "version": "a33f4e947813bec38e6f8a17441e2fed0b9f28b1a8a8e69e145cc9f797f90e3e"
+      "version": "7c11ff21d39ef7c07a47386abb9110be3c6121690c862cbbc3f440f7b3f850d1"
     },
     {
       "id": "machine:moed",
       "name": "moed",
       "type": "kun:machine",
       "title": "معد",
-      "description": "windows machine · sales, marketing, video · code read",
+      "description": "windows machine · sales, marketing, video, image · code read",
       "keywords": [],
       "dependencies": [
         "pack:sales",
         "pack:marketing",
-        "pack:video"
+        "pack:video",
+        "pack:image"
       ],
       "files": [
         {
           "path": "machines/moed.json",
           "target": "machines/moed.json",
-          "sha256": "9391c49cc98e1f0a15ad4acffae21753fb2011178d782c35e7408ef0241596de"
+          "sha256": "d8a7c71544557484605b44bad5b61350832663f304847eaf01e8f01cc03ddbc9"
         }
       ],
-      "version": "39f333ce1a35ae077d6bb349aba220ec56600921d86604d4d2ad71ad07140163"
+      "version": "7456e058accfc06edf1908c3c70d8a7bbf8147b0fc3389b9371ed3680a5a7e25"
     }
   ]
 }

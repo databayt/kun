@@ -5,15 +5,18 @@
   "title": "plan",
   "description": "Architecture plan — tech decisions from an approved spec, before code",
   "keywords": [
-    "plan"
+    "architecture plan for the approved spec",
+    "pipeline Plan stage",
+    "plan",
+    "plan the architecture"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/plan/SKILL.md",
       "target": "skills/plan/SKILL.md",
-      "sha256": "2c01248a83be58df6a17ead8c8ae6bb760bfdee1f1e60b7e9a0b4f6e300d15cb"
+      "sha256": "1367784153b453a50b7f14a7d4658a5a93d64e6e663476391a186d12e4693b41"
     }
   ],
-  "version": "375b1f2ad22f1328c26ef82eeccbc4cb59b569ba569670b07c0112607c75a7cf"
+  "version": "3fbab340100ce7902f95273703ea7b24259b1e7cec8ed6d34852c705f5c6f9d8"
 }

@@ -5,7 +5,13 @@
   "title": "clone",
   "description": "Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact",
   "keywords": [
-    "clone"
+    "clone",
+    "clone <url>",
+    "clone shadcn:<component>",
+    "clone the figma design",
+    "clone this section",
+    "make ours look like <site>",
+    "pattern:<keyword>"
   ],
   "dependencies": [],
   "files": [

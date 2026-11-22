@@ -1,0 +1,20 @@
+{
+  "id": "agent:rnd",
+  "name": "rnd",
+  "type": "kun:agent",
+  "title": "rnd",
+  "description": "Market intelligence per vertical — competitors, usage analytics, churn, pricing research",
+  "keywords": [
+    "reverse",
+    "rnd"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/rnd.md",
+      "target": "agents/rnd.md",
+      "sha256": "6cc0a75ec29a7b000efef851e5063967db459c231ef4ffd335a60328be21c305"
+    }
+  ],
+  "version": "46acf665c06f59562fb6e4a85c0fe7005f837cab920871225de16b4f27f6eef5"
+}

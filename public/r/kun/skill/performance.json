@@ -5,7 +5,11 @@
   "title": "performance",
   "description": "Performance audit - Core Web Vitals, bundle, database queries",
   "keywords": [
-    "performance"
+    "audit the bundle",
+    "it feels slow",
+    "optimize the queries",
+    "performance",
+    "why is this page slow"
   ],
   "dependencies": [],
   "files": [

@@ -5,7 +5,11 @@
   "title": "docs",
   "description": "Generate documentation - component MDX, API docs, Storybook stories",
   "keywords": [
-    "docs"
+    "add a storybook story",
+    "docs",
+    "document this component",
+    "generate the MDX",
+    "write the API docs"
   ],
   "dependencies": [],
   "files": [

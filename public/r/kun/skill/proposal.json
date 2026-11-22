@@ -4,14 +4,19 @@
   "type": "kun:skill",
   "title": "proposal",
   "description": "Generate a client proposal via the revenue agent",
-  "keywords": [],
+  "keywords": [
+    "client proposal",
+    "draft the offer",
+    "proposal",
+    "send them a quote"
+  ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/proposal/SKILL.md",
       "target": "skills/proposal/SKILL.md",
-      "sha256": "8a01e452062fe1197b9e1ca35f9fd69dab0d1a69cd89d6ec848ce5fe43e44a82"
+      "sha256": "156940093bec924c92f7e9d95ea479dbf732b1a449675d0c85e77f32867919e8"
     }
   ],
-  "version": "f4a1089ad42c37a03260973209d5cec848dab6ed5aba4678894517db0173503a"
+  "version": "1945ff3ffc82807dca40779eba661a7ed5c027118ca30ae4d3b9d35acdc57436"
 }

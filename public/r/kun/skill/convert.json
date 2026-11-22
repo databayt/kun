@@ -5,7 +5,12 @@
   "title": "convert",
   "description": "Convert a file or URL to Markdown via MarkItDown",
   "keywords": [
-    "convert"
+    "convert",
+    "convert <file|url>",
+    "markdown this PDF",
+    "markitdown",
+    "pull this page into docs",
+    "transcribe this video"
   ],
   "dependencies": [],
   "files": [

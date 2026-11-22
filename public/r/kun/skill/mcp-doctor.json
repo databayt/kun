@@ -4,7 +4,12 @@
   "type": "kun:skill",
   "title": "mcp-doctor",
   "description": "Diagnose and recover the browser/Playwright MCP server",
-  "keywords": [],
+  "keywords": [
+    "browser mcp is not working",
+    "browser tools missing",
+    "playwright mcp is disconnected",
+    "tool not found"
+  ],
   "dependencies": [],
   "files": [
     {

@@ -1,0 +1,19 @@
+{
+  "id": "agent:tech",
+  "name": "tech",
+  "type": "kun:agent",
+  "title": "tech",
+  "description": "Cross-repo architecture — shared patterns, breaking changes, upgrades, tech-debt priority",
+  "keywords": [
+    "tech"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/tech.md",
+      "target": "agents/tech.md",
+      "sha256": "70c3570d1ac9a209cf1963f1c9bbb4f373fe1dc68d39e70e984955c33cf96e38"
+    }
+  ],
+  "version": "cab95e17f7ab48a5274f01bc185255c1b9728f75ec1b339d43cc6beec605eb79"
+}

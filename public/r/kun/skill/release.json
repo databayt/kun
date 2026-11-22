@@ -5,7 +5,12 @@
   "title": "release",
   "description": "One spell — handover, check, ship, watch, then comment + close the issue",
   "keywords": [
-    "release"
+    "give away to client",
+    "one-spell handoff (handover→check→ship→watch→close issue)",
+    "release",
+    "release <block>",
+    "send to client",
+    "ship it and tell the client"
   ],
   "dependencies": [],
   "files": [

@@ -5,7 +5,13 @@
   "title": "bench",
   "description": "Score the engine's own config on its labeled cases, and propose holdout-gated fixes",
   "keywords": [
-    "bench"
+    "are any skills dead",
+    "bench",
+    "benchmark the skills",
+    "dispatch accuracy",
+    "is the routing accurate",
+    "measure the engine",
+    "which skills collide"
   ],
   "dependencies": [],
   "files": [

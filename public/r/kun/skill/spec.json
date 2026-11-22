@@ -5,7 +5,11 @@
   "title": "spec",
   "description": "Technical spec — data model, file plan, refined acceptance criteria",
   "keywords": [
-    "spec"
+    "pipeline Specify stage (human approval gate)",
+    "spec",
+    "spec the <feature>",
+    "technical specification",
+    "write the spec"
   ],
   "dependencies": [],
   "files": [

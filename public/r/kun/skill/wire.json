@@ -5,7 +5,11 @@
   "title": "wire",
   "description": "UI layer — page (mirror pattern), content, form, table columns, i18n",
   "keywords": [
-    "wire"
+    "build the page/form/table for the feature",
+    "i18n wiring",
+    "pipeline UI stage",
+    "wire",
+    "wire the UI"
   ],
   "dependencies": [],
   "files": [

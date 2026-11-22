@@ -5,7 +5,9 @@
   "title": "learn",
   "description": "Extract organizational patterns and conventions from repos + history",
   "keywords": [
-    "learn"
+    "extract patterns from history",
+    "learn",
+    "what are our conventions"
   ],
   "dependencies": [],
   "files": [

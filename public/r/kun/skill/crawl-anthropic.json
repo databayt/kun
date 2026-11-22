@@ -4,7 +4,11 @@
   "type": "kun:skill",
   "title": "crawl-anthropic",
   "description": "Crawl and snapshot Anthropic docs/assets",
-  "keywords": [],
+  "keywords": [
+    "crawl anthropic",
+    "refresh the anthropic mirror",
+    "snapshot the docs"
+  ],
   "dependencies": [],
   "files": [
     {

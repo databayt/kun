@@ -1,0 +1,19 @@
+{
+  "id": "agent:sales",
+  "name": "sales",
+  "type": "kun:agent",
+  "title": "sales",
+  "description": "Deals — pricing, proposals, contracts, cost analysis, revenue tracking",
+  "keywords": [
+    "sales"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/sales.md",
+      "target": "agents/sales.md",
+      "sha256": "13cf5d6bdca293c2ffe61035b9001c50da2abfe127d62f972aeb587b87695886"
+    }
+  ],
+  "version": "c72c86751542dde3fed6d3f67bccde16e17c5ae42d767b27c51c3aac8095f740"
+}

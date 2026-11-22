@@ -4,14 +4,16 @@
   "type": "kun:agent",
   "title": "support",
   "description": "Customer success — onboarding, issue triage, knowledge base, SLAs",
-  "keywords": [],
+  "keywords": [
+    "support"
+  ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/agents/support.md",
       "target": "agents/support.md",
-      "sha256": "e527a430343c11b17b964b4d3e5d996735fbf18f98e208beb6d2492029a898d3"
+      "sha256": "ee516275df5c7e09705a9d8db5067301383da43b17f40a00ed12ababff96a716"
     }
   ],
-  "version": "b1674e19bcdbd062f812a387f27fa75f0091c52e70d9cc1f54f1d74bffa8ce44"
+  "version": "45acef5d72a76902c60b39dd1f17c06598cabcc3e0b268648504052a67d87d05"
 }

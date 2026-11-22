@@ -5,7 +5,11 @@
   "title": "fix",
   "description": "Auto-fix all detected issues - TypeScript, lint, build errors",
   "keywords": [
-    "fix"
+    "clear the type errors",
+    "fix",
+    "fix the errors",
+    "lint is failing",
+    "make it compile"
   ],
   "dependencies": [],
   "files": [

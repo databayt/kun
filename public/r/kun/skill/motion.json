@@ -5,7 +5,12 @@
   "title": "motion",
   "description": "Add Framer Motion animations to components",
   "keywords": [
-    "motion"
+    "add a transition",
+    "animate this",
+    "make it fade in",
+    "motion",
+    "scroll animation",
+    "stagger the list"
   ],
   "dependencies": [],
   "files": [

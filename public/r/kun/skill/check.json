@@ -5,7 +5,10 @@
   "title": "check",
   "description": "Quality gate — typecheck + build + visual verify before shipping",
   "keywords": [
-    "check"
+    "\\\"is it green\\\"",
+    "check",
+    "pre-ship quality gate",
+    "typecheck + build + visual verify"
   ],
   "dependencies": [],
   "files": [

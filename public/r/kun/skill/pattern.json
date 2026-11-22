@@ -5,7 +5,11 @@
   "title": "pattern",
   "description": "Look up a canonical cross-repo pattern (form, table, auth, ...)",
   "keywords": [
-    "pattern"
+    "canonical pattern",
+    "follow the card",
+    "how do we do forms",
+    "pattern",
+    "pattern <keyword>"
   ],
   "dependencies": [],
   "files": [

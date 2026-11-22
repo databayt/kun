@@ -4,7 +4,12 @@
   "type": "kun:skill",
   "title": "screenshot",
   "description": "View most recent screenshot from Desktop or Downloads",
-  "keywords": [],
+  "keywords": [
+    "I just took a screenshot",
+    "check the image I saved",
+    "look at my screenshot",
+    "see the screen grab"
+  ],
   "dependencies": [],
   "files": [
     {

@@ -5,15 +5,22 @@
   "title": "social",
   "description": "One spell — calendar, draft, media, approve, publish, measure for a brand post",
   "keywords": [
-    "social"
+    "broadcast the announcement",
+    "post about <topic>",
+    "publish to social",
+    "social",
+    "social automation",
+    "social post",
+    "انشر عن",
+    "منشور تواصل"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/social/SKILL.md",
       "target": "skills/social/SKILL.md",
-      "sha256": "0819734fba46b300cfb0b1181894b9e959a90b8a05e807b4a7d7647f14ec7030"
+      "sha256": "73f9b94501b408df11b3c33181539cbc36c63ed0ce2d68c283a2fb9465989bba"
     }
   ],
-  "version": "6a99e2ab26abd94aa5f7b2bf181b33024f7e212994f5822ab21ecceb5e313dba"
+  "version": "cbf9c088dbc24cb4cf8a0bb657dddd95d2762f2041e099e54aa58b70126bb9ac"
 }

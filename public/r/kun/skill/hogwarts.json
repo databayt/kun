@@ -1,0 +1,17 @@
+{
+  "id": "skill:hogwarts",
+  "name": "hogwarts",
+  "type": "kun:skill",
+  "title": "hogwarts",
+  "description": "The hogwarts place: its rules, blocks, open issues",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/hogwarts/SKILL.md",
+      "target": "skills/hogwarts/SKILL.md",
+      "sha256": "f924227be05fd05dc1957c692ac325afb300f18aa7144b1e03eb6e629509f2fa"
+    }
+  ],
+  "version": "330986f35528a7c33f97db9b0472e6ff053c8474759834b4b1bf8f89cc5d4944"
+}

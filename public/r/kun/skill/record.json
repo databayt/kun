@@ -5,7 +5,13 @@
   "title": "record",
   "description": "Screen-record demo videos of real product flows, mirrored to Google Drive",
   "keywords": [
-    "record"
+    "demo video",
+    "re-record",
+    "record",
+    "record <flow|block>",
+    "screen recording",
+    "walkthrough",
+    "سجل فيديو"
   ],
   "dependencies": [],
   "files": [

@@ -7,15 +7,16 @@
   "keywords": [
     "domains",
     "incident",
-    "monitor"
+    "monitor",
+    "provision"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/agents/ops.md",
       "target": "agents/ops.md",
-      "sha256": "aa65370eb50674d4a9d04bd6889af8764e84f4a6a1473edf44312c624eeef809"
+      "sha256": "1bb2bc6f85a3b2197d5e333bf98dcee0000918eb1968d118a6c437253d1826c3"
     }
   ],
-  "version": "0827ac5285b41a1841e95a16ec560097e20ce7b7c2b1df87c346ff582b38d5f9"
+  "version": "5361cdd33043125e9670130e018c74ee82cae34cd063f2c9201ce112ab42f9dd"
 }

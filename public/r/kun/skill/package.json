@@ -4,7 +4,12 @@
   "type": "kun:skill",
   "title": "package",
   "description": "Cross-repo dependency audit and upgrade coordination",
-  "keywords": [],
+  "keywords": [
+    "dependency sweep",
+    "package audit",
+    "upgrade deps across repos",
+    "version consistency"
+  ],
   "dependencies": [],
   "files": [
     {

@@ -5,7 +5,12 @@
   "title": "handover",
   "description": "UI verification — runs niche quality keywords on a URL or block",
   "keywords": [
-    "handover"
+    "\"is the whole block ready to show\"",
+    "\"is this URL clean\"",
+    "handover",
+    "handover <url|block>",
+    "pre-demo quality pass",
+    "run the niche quality keywords"
   ],
   "dependencies": [],
   "files": [

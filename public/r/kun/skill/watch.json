@@ -5,6 +5,10 @@
   "title": "watch",
   "description": "Post-deploy verification — visual + console + smoke test",
   "keywords": [
+    "is it live",
+    "pipeline Monitor stage",
+    "post-deploy visual + console + smoke check",
+    "verify the deploy",
     "watch"
   ],
   "dependencies": [],

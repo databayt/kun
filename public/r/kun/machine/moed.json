@@ -3,19 +3,20 @@
   "name": "moed",
   "type": "kun:machine",
   "title": "معد",
-  "description": "windows machine · sales, marketing, video · code read",
+  "description": "windows machine · sales, marketing, video, image · code read",
   "keywords": [],
   "dependencies": [
     "pack:sales",
     "pack:marketing",
-    "pack:video"
+    "pack:video",
+    "pack:image"
   ],
   "files": [
     {
       "path": "machines/moed.json",
       "target": "machines/moed.json",
-      "sha256": "9391c49cc98e1f0a15ad4acffae21753fb2011178d782c35e7408ef0241596de"
+      "sha256": "d8a7c71544557484605b44bad5b61350832663f304847eaf01e8f01cc03ddbc9"
     }
   ],
-  "version": "39f333ce1a35ae077d6bb349aba220ec56600921d86604d4d2ad71ad07140163"
+  "version": "7456e058accfc06edf1908c3c70d8a7bbf8147b0fc3389b9371ed3680a5a7e25"
 }

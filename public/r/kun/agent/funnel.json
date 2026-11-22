@@ -21,8 +21,8 @@
     {
       "path": ".claude/agents/funnel.md",
       "target": "agents/funnel.md",
-      "sha256": "a9a057ab3fb23887008b660e8c8a502498dae63478b8564f088dd4371d93ceca"
+      "sha256": "993d62f600ff2a160950ba705d2ffe32d3675896893d900272bd5de0944eb0db"
     }
   ],
-  "version": "e32d26dffcb6720304c11919b361818733a4b91f04c8cc61cd44bb920bbef82d"
+  "version": "ce07fc83e4629e6e7649bca83e82f56d3310e7445a2838ef4d8ba98e5a650c76"
 }

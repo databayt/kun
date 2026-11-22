@@ -1,0 +1,28 @@
+{
+  "id": "agent:marketing",
+  "name": "marketing",
+  "type": "kun:agent",
+  "title": "marketing",
+  "description": "Content strategy, SEO, social, developer relations, community",
+  "keywords": [
+    "approve",
+    "calendar",
+    "carousel",
+    "draft",
+    "facebook",
+    "marketing",
+    "measure",
+    "produce",
+    "publish",
+    "social"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/marketing.md",
+      "target": "agents/marketing.md",
+      "sha256": "7de2e37839632ec170dd6aa103c80e1711d01a80ef9df71fdadbaa6115440b19"
+    }
+  ],
+  "version": "860544d0cd98c19b4610e385baa8e7eaa910f8acbc0533b4c7efc0104cec74af"
+}

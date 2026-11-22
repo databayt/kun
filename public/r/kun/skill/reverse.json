@@ -5,7 +5,11 @@
   "title": "reverse",
   "description": "Competitor feature teardown, with evidence (REA)",
   "keywords": [
-    "reverse"
+    "how does <app> do <feature>",
+    "inspect this HAR",
+    "reverse",
+    "teardown",
+    "هندسة عكسية"
   ],
   "dependencies": [],
   "files": [

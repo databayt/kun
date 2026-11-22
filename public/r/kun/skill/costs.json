@@ -4,14 +4,20 @@
   "type": "kun:skill",
   "title": "costs",
   "description": "API spend breakdown and cost-optimization analysis",
-  "keywords": [],
+  "keywords": [
+    "budget check",
+    "cost optimization",
+    "costs",
+    "how much are we paying",
+    "spend"
+  ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/costs/SKILL.md",
       "target": "skills/costs/SKILL.md",
-      "sha256": "0339ad98b87f5952c54641755e38a776c1a52768403fe40b6dd5b35706daf2bb"
+      "sha256": "ce7db1c8b242e13b6ef8abaa5b984ef1d08d7afc387ecb66150eaa3d356d67d7"
     }
   ],
-  "version": "cfdfefb63c998619110d58b140d383e0d8b725fb3ca81a6f56b3cba683ec2035"
+  "version": "21609872715849ab77fc8917c95bcf2c0f80118d07c72ee4d122bb13d01daca7"
 }

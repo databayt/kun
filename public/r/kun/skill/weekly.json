@@ -5,6 +5,9 @@
   "title": "weekly",
   "description": "Run the captain's weekly Sunday-plan / Tuesday-check / Thursday-review cycle",
   "keywords": [
+    "friday review",
+    "monday plan",
+    "plan the week",
     "weekly"
   ],
   "dependencies": [],
@@ -12,8 +15,8 @@
     {
       "path": ".claude/skills/weekly/SKILL.md",
       "target": "skills/weekly/SKILL.md",
-      "sha256": "64a0d418cd4027af4549a149fd3fd62b45958638ecd4abcfb7cdf397352d5b03"
+      "sha256": "283ff57de664b4f4106de84f058a8d41a00d7637b051e5c01446e8f769fd3475"
     }
   ],
-  "version": "90ed66341ee22225a4774f67b06710c46203090bd54dab8a9bcb16d118c0f724"
+  "version": "78b3a832002594a7c614241e8b2286ec8db279cc873c20eeeadadf51a53310cb"
 }

@@ -1,0 +1,17 @@
+{
+  "id": "agent:codebase",
+  "name": "codebase",
+  "type": "kun:agent",
+  "title": "codebase",
+  "description": "Codebase reference — patterns, agents, templates, blocks, registry",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/codebase.md",
+      "target": "agents/codebase.md",
+      "sha256": "e6aa4e32abbc9f59aad174fc3d3463092ad9797bc98ae228bc1281bbc2f582ae"
+    }
+  ],
+  "version": "3f06be84fb8193cb4a3d6bc1a16f4fe565794079a0a4c8402e8db61628e6a0c1"
+}

@@ -5,7 +5,16 @@
   "title": "blender",
   "description": "3D as code in Blender 5.x — flythroughs, product shots, rendered headless",
   "keywords": [
-    "blender"
+    "3d film",
+    "blender",
+    "eevee",
+    "flythrough",
+    "glb",
+    "product shots",
+    "render the scene",
+    "rendered headless",
+    "بلندر",
+    "ثلاثي الأبعاد. 3D as code in Blender 5.x — flythroughs"
   ],
   "dependencies": [],
   "files": [

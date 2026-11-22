@@ -2,30 +2,32 @@
   "id": "pack:video",
   "name": "video",
   "type": "kun:pack",
-  "title": "Media",
-  "description": "Shoot, record, edit and generate video and stills — with a QA agent before anything goes out.",
-  "title_ar": "الإعلام",
-  "description_ar": "التصوير والتسجيل والمونتاج وتوليد الفيديو واللقطات — مع وكيل مراجعة قبل أي نشر.",
+  "title": "Video",
+  "description": "Record, edit and generate video — reels, demos and explainers — with a QA agent before anything goes out.",
+  "title_ar": "الفيديو",
+  "description_ar": "التسجيل والمونتاج وتوليد الفيديو — ريلز وعروض وشروحات — مع وكيل مراجعة قبل أي نشر.",
   "keywords": [],
   "dependencies": [
+    "agent:video",
+    "skill:produce",
     "skill:edit",
-    "skill:shoot",
     "skill:record",
+    "skill:shoot",
+    "skill:blender",
     "skill:higgs",
-    "skill:carousel",
     "agent:media-qa"
   ],
   "files": [
     {
       "path": "departments/video/pack.json",
       "target": "departments/video/pack.json",
-      "sha256": "22d15b88c186114d4f8799c73e6b956a445c09dc91c67222a9c3aee93040a044"
+      "sha256": "799af6e28a50a9483a2033c71024daf5c486bdded5b9de05c8f37b1269ed9960"
     },
     {
       "path": "departments/video/prompt.md",
       "target": "departments/video/prompt.md",
-      "sha256": "79b64693c9e4c5095d8908c38fe65791002b17a83202c656ebef79cad656c7a9"
+      "sha256": "11581c33852bb4a150a7e1f7f7d6b231ac616bb6f1a5d280a4d7b7ab6304262f"
     }
   ],
-  "version": "5e64bcba0fd4d1025c5493870cf35eb27b1dec4342a4657cb3701824658e65e8"
+  "version": "e5f0d0acba2859621751303e0bfb3f996f185126aa58d4afe25c16fc4c361c73"
 }

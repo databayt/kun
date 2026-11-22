@@ -1,0 +1,19 @@
+{
+  "id": "skill:support",
+  "name": "support",
+  "type": "kun:skill",
+  "title": "support",
+  "description": "The support department: board, formulas, the lead",
+  "keywords": [
+    "support"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/support/SKILL.md",
+      "target": "skills/support/SKILL.md",
+      "sha256": "46bfb3d34517608cee78c125762dd5515481f2c4c74e04536fa10fe1586e0db5"
+    }
+  ],
+  "version": "9d9e3c0f9798a50c63b4c97f66cc921c10892566e7ee89fbd4d2fce8cc0eedcd"
+}

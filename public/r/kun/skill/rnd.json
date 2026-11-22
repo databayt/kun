@@ -1,0 +1,19 @@
+{
+  "id": "skill:rnd",
+  "name": "rnd",
+  "type": "kun:skill",
+  "title": "rnd",
+  "description": "The rnd department: board, formulas, the lead",
+  "keywords": [
+    "rnd"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/rnd/SKILL.md",
+      "target": "skills/rnd/SKILL.md",
+      "sha256": "2ad0ff62ac4f4e5c9dedceb3719d8cd8764238d395d701afe1e3f7baeef2f2c7"
+    }
+  ],
+  "version": "f7c1bd595f58f9279654d078f8704c65b445233872b699039bfe3ac3e235357c"
+}

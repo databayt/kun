@@ -5,7 +5,17 @@
   "title": "shadcn",
   "description": "shadcn/ui knowledge pack — CLI, MCP, registry, skills, directory, and the docs-block pattern. Say \"shadcn\" to load it; \"shadcn docs\" = the docs-block style.",
   "keywords": [
-    "shadcn"
+    "MCP",
+    "add a shadcn component",
+    "and the docs-block pattern",
+    "base ui vs radix. shadcn/ui knowledge pack — CLI",
+    "directory",
+    "how does shadcn do it",
+    "registry",
+    "registry item",
+    "shadcn",
+    "shadcn docs",
+    "skills"
   ],
   "dependencies": [],
   "files": [

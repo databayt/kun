@@ -1,0 +1,17 @@
+{
+  "id": "agent:kun",
+  "name": "kun",
+  "type": "kun:agent",
+  "title": "kun",
+  "description": "Code Machine reference — claude-code-config, documentation, team-distribution",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/kun.md",
+      "target": "agents/kun.md",
+      "sha256": "a0fc2acd15737a23be196a92861bc2bd95fde28d50092e8578449e818bb451be"
+    }
+  ],
+  "version": "3e3a3668ed3e2d63bb83d27e9c8277e3097bdd48748c122411ceace34dc1dc32"
+}

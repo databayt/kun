@@ -1,0 +1,19 @@
+{
+  "id": "agent:image",
+  "name": "image",
+  "type": "kun:agent",
+  "title": "image",
+  "description": "Image lead — owns a still or image pack from a one-line brief to an approved set: gathers context, plans, asks the few questions that matter, routes each step to its tool, runs media-qa before anything goes out; never approves",
+  "keywords": [
+    "image"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/image.md",
+      "target": "agents/image.md",
+      "sha256": "f71eefc072da2f1531a953871523144bbf29d8bb2e631a63faae5f1f8a4c151f"
+    }
+  ],
+  "version": "da7a2503135a3cb5d50f9179cd7a55f2669a0499cda9b1e462d187836e1edda8"
+}

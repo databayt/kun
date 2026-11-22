@@ -5,7 +5,14 @@
   "title": "deploy",
   "description": "Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane",
   "keywords": [
-    "deploy"
+    "deploy",
+    "deploy everything",
+    "deploy to staging",
+    "push to production",
+    "redeploy",
+    "ship to cloudflare",
+    "vercel preview",
+    "why is the deploy stuck"
   ],
   "dependencies": [],
   "files": [

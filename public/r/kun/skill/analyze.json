@@ -5,7 +5,10 @@
   "title": "analyze",
   "description": "Analyze a repo's patterns and generate a tailored Claude Code config",
   "keywords": [
-    "analyze"
+    "analyze",
+    "analyze <repo>",
+    "generate config for this repo",
+    "repo config generator"
   ],
   "dependencies": [],
   "files": [

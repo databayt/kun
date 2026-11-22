@@ -5,7 +5,20 @@
   "title": "pwa",
   "description": "Progressive Web App lane — install, offline, Web Push",
   "keywords": [
-    "pwa"
+    "add to home screen",
+    "install prompt",
+    "installable",
+    "manifest",
+    "offline",
+    "progressive web app",
+    "push notification",
+    "pwa",
+    "service worker",
+    "web push",
+    "works offline",
+    "إشعارات",
+    "بدون إنترنت",
+    "تطبيق"
   ],
   "dependencies": [],
   "files": [

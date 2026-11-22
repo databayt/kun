@@ -5,15 +5,19 @@
   "title": "captain",
   "description": "Databayt CEO brain - synthesize identity + state + journal, suggest next action",
   "keywords": [
-    "captain"
+    "brief me",
+    "captain",
+    "company status",
+    "what should I do next",
+    "where do I spend this week"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/captain/SKILL.md",
       "target": "skills/captain/SKILL.md",
-      "sha256": "91fe269c0da80cb0be00eb9932a7a123d0e7215d7797f9491bc4ba0ed7a192c3"
+      "sha256": "f530d6d61667b8dc1edce4f031833ba2a021f07d9c4cb23a3d9f8fc76798fd01"
     }
   ],
-  "version": "4efc30c439f982342e8aed89af0e7d72df95b743334fb50676d34f3f15f90a4a"
+  "version": "57120fed12c3d8fd397f108e154b8f98e54d74ab02adeecf46d110610fc04277"
 }

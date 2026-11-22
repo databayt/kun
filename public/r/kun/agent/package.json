@@ -10,8 +10,8 @@
     {
       "path": ".claude/agents/package.md",
       "target": "agents/package.md",
-      "sha256": "6a078eb4a8ec356d9a4d4e21b3843811017caae316454a63ae5147f59c0ce4b2"
+      "sha256": "d85b4bd3c33b39398b01ecad403f7fe2ca6b609876976c9fccbaf5293e5747bc"
     }
   ],
-  "version": "6bd049fc6454006221d3f98f919c4f3079056e8967feec70c8353b0b5f79d6a8"
+  "version": "ca19c91695cee9ea3e5bec5e2bfdc7c94ce090cd272cd85675baa33a9f19dc5c"
 }

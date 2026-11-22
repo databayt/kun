@@ -1,0 +1,19 @@
+{
+  "id": "skill:business",
+  "name": "business",
+  "type": "kun:skill",
+  "title": "business",
+  "description": "The business department: board, formulas, the lead",
+  "keywords": [
+    "business"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/business/SKILL.md",
+      "target": "skills/business/SKILL.md",
+      "sha256": "8dcfb76a159745b074c851aa9e418199432c037e0c683acb8c45c4313f925892"
+    }
+  ],
+  "version": "67bff88f50d5ea12b27c296db3268e628b9753f0f9afaa5e078dc2a3191be331"
+}

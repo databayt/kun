@@ -5,7 +5,10 @@
   "title": "saas",
   "description": "Generate complete SaaS feature with all layers",
   "keywords": [
-    "saas"
+    "full CRUD for",
+    "generate all layers",
+    "saas",
+    "scaffold the whole feature"
   ],
   "dependencies": [],
   "files": [

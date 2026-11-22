@@ -5,7 +5,13 @@
   "title": "blur",
   "description": "Blur-up images — photos arrive blurred and sharpen into focus as they load",
   "keywords": [
-    "blur"
+    "blur",
+    "blur while loading",
+    "blur-up",
+    "fade in images",
+    "images pop in",
+    "lqip",
+    "صور ضبابية"
   ],
   "dependencies": [],
   "files": [

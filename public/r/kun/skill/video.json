@@ -1,0 +1,19 @@
+{
+  "id": "skill:video",
+  "name": "video",
+  "type": "kun:skill",
+  "title": "video",
+  "description": "The video department: board, formulas, the lead",
+  "keywords": [
+    "video"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/video/SKILL.md",
+      "target": "skills/video/SKILL.md",
+      "sha256": "e43df07c1af047655a01227ec30e94a887d05ca8754fa6c330cf38a382c7ee07"
+    }
+  ],
+  "version": "4f00677e73362d96bbbf2f335efc9ca060509dfc941c9e2b83b845765e4a5104"
+}

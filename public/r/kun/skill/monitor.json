@@ -5,7 +5,10 @@
   "title": "monitor",
   "description": "Check all deployments, costs, and uptime across databayt products",
   "keywords": [
-    "monitor"
+    "are the deploys green",
+    "monitor",
+    "production status sweep",
+    "uptime check"
   ],
   "dependencies": [],
   "files": [

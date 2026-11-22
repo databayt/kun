@@ -5,7 +5,27 @@
   "title": "scrape",
   "description": "Lead acquisition — contact gap first, discovery last",
   "keywords": [
-    "scrape"
+    "contact gap",
+    "enrich",
+    "find schools",
+    "leads",
+    "old websites",
+    "outreach",
+    "pipeline health",
+    "prospect",
+    "rebrand leads",
+    "scrap",
+    "scrap facebook",
+    "scrap facebook for hogwarts",
+    "scrap for databayt",
+    "scrap for mkan",
+    "scrap whatsapp",
+    "scrape",
+    "website leads",
+    "who should we contact",
+    "اسحب",
+    "جمع بيانات",
+    "عملاء محتملين"
   ],
   "dependencies": [],
   "files": [
@@ -17,8 +37,8 @@
     {
       "path": ".claude/skills/scrape/SKILL.md",
       "target": "skills/scrape/SKILL.md",
-      "sha256": "65ee9839e5f65ad70d01a24ec68f920e14d49ddc2ca4c6ccbb543f33c6c76527"
+      "sha256": "f578827ce075b23287b3db3f304581b75d497240526598da2520761f4a69c207"
     }
   ],
-  "version": "964d03bf55c236317b6ee3fb18c9799e1d87b24126cfb02a831964d7b86df107"
+  "version": "353abf1105a41f26f0751c177a4f0f11ef3b83d2904506ec2d51dba75f79983b"
 }

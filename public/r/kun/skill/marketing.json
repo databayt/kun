@@ -1,0 +1,19 @@
+{
+  "id": "skill:marketing",
+  "name": "marketing",
+  "type": "kun:skill",
+  "title": "marketing",
+  "description": "The marketing department: board, formulas, the lead",
+  "keywords": [
+    "marketing"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/marketing/SKILL.md",
+      "target": "skills/marketing/SKILL.md",
+      "sha256": "ec1d6ae78b193d97c86a324e090fef266e8d841490632eb4172c15655aa3cd4f"
+    }
+  ],
+  "version": "79383d73af34856aa3942b615fbbaecc70d05d521fe929cd94d50e42ffa4c8a0"
+}

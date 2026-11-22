@@ -5,6 +5,10 @@
   "title": "schema",
   "description": "Data layer — Prisma model, migration, and Zod validation",
   "keywords": [
+    "Prisma model + Zod validation",
+    "add the model/migration",
+    "data layer",
+    "pipeline Data stage",
     "schema"
   ],
   "dependencies": [],

@@ -5,7 +5,12 @@
   "title": "domains",
   "description": "Domain + mail health — expiry, renewal, DNS, inboxes",
   "keywords": [
-    "domains"
+    "auto-renew",
+    "dmarc",
+    "domains",
+    "mail bouncing",
+    "renew",
+    "spf"
   ],
   "dependencies": [],
   "files": [

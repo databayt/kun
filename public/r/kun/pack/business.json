@@ -14,14 +14,14 @@
     "skill:canon",
     "skill:decide",
     "skill:weekly",
-    "agent:revenue",
-    "agent:analyst"
+    "agent:sales",
+    "agent:rnd"
   ],
   "files": [
     {
       "path": "departments/business/pack.json",
       "target": "departments/business/pack.json",
-      "sha256": "49a0cbc9f23f4167dc39fec88d4901a082f1a4444c391c92395468e35ce99ad9"
+      "sha256": "ee351abc01e11da769ff88d13979af1606a516a7873efaaf7efe2081c3dcae0b"
     },
     {
       "path": "departments/business/prompt.md",
@@ -29,5 +29,5 @@
       "sha256": "68c79a429623b9eb907faafd8266c627549bbfaff0ccb14c96916b82a5d021ed"
     }
   ],
-  "version": "244c6b90969e015a5b48e38a597592dfc2fa0cd2ef4900cf42188bbde19b28f4"
+  "version": "6eda91d786e2cc9c6b1fdf3014e0c0dd33fc99db60f0569fc7e8854f223a7e07"
 }

@@ -1,0 +1,29 @@
+{
+  "id": "pack:image",
+  "name": "image",
+  "type": "kun:pack",
+  "title": "Image",
+  "description": "Shoot screenshots, generate stills and build carousels — with a QA agent before anything goes out.",
+  "title_ar": "الصور",
+  "description_ar": "لقطات الشاشة وتوليد الصور وبناء الكاروسيل — مع وكيل مراجعة قبل أي نشر.",
+  "keywords": [],
+  "dependencies": [
+    "skill:shoot",
+    "skill:higgs",
+    "skill:carousel",
+    "agent:media-qa"
+  ],
+  "files": [
+    {
+      "path": "departments/image/pack.json",
+      "target": "departments/image/pack.json",
+      "sha256": "0ce1bb6f5037b6eb25f63d5387f1912fc22956978904fc5aa7bceb8db1e66914"
+    },
+    {
+      "path": "departments/image/prompt.md",
+      "target": "departments/image/prompt.md",
+      "sha256": "c54502030c4d08ca17036e8093f888fe3f2fe1142e7f484fa6a32615ad5b1f67"
+    }
+  ],
+  "version": "28a4cad607dbcf38e4e2346dda85c4568d9bd0e37ec9376b0ecf90b7142eedc2"
+}

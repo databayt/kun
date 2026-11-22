@@ -5,7 +5,14 @@
   "title": "md",
   "description": "House standard for machine-produced Markdown — schema, RTL rules, grading by agreement",
   "keywords": [
-    "md"
+    "RTL markdown",
+    "agreement score",
+    "bad conversion",
+    "grade the markdown",
+    "md",
+    "md quality",
+    "mirrored tables",
+    "transcription contract"
   ],
   "dependencies": [],
   "files": [

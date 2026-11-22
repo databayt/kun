@@ -1,0 +1,17 @@
+{
+  "id": "skill:mkan",
+  "name": "mkan",
+  "type": "kun:skill",
+  "title": "mkan",
+  "description": "The mkan place: its rules, blocks, open issues",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/mkan/SKILL.md",
+      "target": "skills/mkan/SKILL.md",
+      "sha256": "c97e0eec968e1f750a2b8b03b855f3486527dc978aa1ed71400413426a0119ca"
+    }
+  ],
+  "version": "df5c46d07e87418a4246437837e7c8ddb625e0f6fb4c98133bd9b0ddad7c9d13"
+}

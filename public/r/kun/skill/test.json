@@ -5,7 +5,11 @@
   "title": "test",
   "description": "Generate and run tests - unit, component, or E2E",
   "keywords": [
-    "test"
+    "add e2e coverage",
+    "run the tests",
+    "test",
+    "test this component",
+    "write tests for"
   ],
   "dependencies": [],
   "files": [

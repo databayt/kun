@@ -1,0 +1,19 @@
+{
+  "id": "skill:image",
+  "name": "image",
+  "type": "kun:skill",
+  "title": "image",
+  "description": "The image department: board, formulas, the lead",
+  "keywords": [
+    "image"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/image/SKILL.md",
+      "target": "skills/image/SKILL.md",
+      "sha256": "6d8cd4db813fc84b0e69d75be8b8aaf57f91bead4c9173746dd197406657fe91"
+    }
+  ],
+  "version": "b731db7b5095a28fedb6ad471ca30600b7155118796a82bacaa342fc8c4ccb96"
+}

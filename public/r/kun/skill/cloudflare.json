@@ -5,7 +5,18 @@
   "title": "cloudflare",
   "description": "Cloudflare platform operator — Workers + Containers deploys, DNS cutover, crons and logs",
   "keywords": [
-    "cloudflare"
+    "ERR_CONNECTION_RESET",
+    "cloudflare",
+    "container",
+    "cron not firing",
+    "cutover",
+    "deploy to cloudflare",
+    "is it live on cloudflare",
+    "orange cloud",
+    "proxied",
+    "worker",
+    "worker logs",
+    "wrangler"
   ],
   "dependencies": [],
   "files": [

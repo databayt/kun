@@ -1,0 +1,24 @@
+{
+  "id": "agent:business",
+  "name": "business",
+  "type": "kun:agent",
+  "title": "business",
+  "description": "CEO brain — weekly allocation, revenue strategy, coordination across products and the 7-person team",
+  "keywords": [
+    "business",
+    "canon",
+    "captain",
+    "decide",
+    "premortem",
+    "weekly"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/business.md",
+      "target": "agents/business.md",
+      "sha256": "82374909b04faddf937de0615bdb7e4123c46e03e6d3df652e23ad67156d26bd"
+    }
+  ],
+  "version": "59aaa01b98a659c029f2544f3b5c3114458195109682a3ac09a848ada22e9b39"
+}

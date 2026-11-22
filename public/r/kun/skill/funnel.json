@@ -5,15 +5,29 @@
   "title": "funnel",
   "description": "Conversation to conversion — gates, segments, assets, the stall clock",
   "keywords": [
-    "funnel"
+    "chatbot",
+    "follow up",
+    "funnel",
+    "nurture",
+    "qualify",
+    "segment",
+    "stalled",
+    "تأهيل",
+    "قمع",
+    "متابعة"
   ],
   "dependencies": [],
   "files": [
     {
+      "path": ".claude/skills/funnel/scripts/crm-health.mjs",
+      "target": "skills/funnel/scripts/crm-health.mjs",
+      "sha256": "6a066ceaa13b83ac9c319800cd030e8f4058125a758b79ff1324ae2b8d9d255f"
+    },
+    {
       "path": ".claude/skills/funnel/SKILL.md",
       "target": "skills/funnel/SKILL.md",
-      "sha256": "74113e1760ad0289e637aaf17cebcde5f420e5f2faa88fc1dc579ff1ddc7f0d5"
+      "sha256": "2d096f901db67bc2cdee376480a928d8c762107052a9869612f0bca2be231e47"
     }
   ],
-  "version": "d5d8f67ca16f0fcdfa3ff26d7a7d540f499273c4760398e5ce8b44a1bb6ed0a9"
+  "version": "5b411503188e574c2bce17cec525789d38087768f64525209e1873c94bdf7524"
 }

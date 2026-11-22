@@ -5,7 +5,21 @@
   "title": "edit",
   "description": "Edit video locally — footage cuts, Arabic captions, motion graphics, demos, reels",
   "keywords": [
-    "edit"
+    "add captions",
+    "cut the silences",
+    "edit",
+    "edit video",
+    "filmcraft",
+    "intro outro",
+    "make a reel",
+    "motion graphic",
+    "rough cut",
+    "timeline",
+    "title card",
+    "ريلز",
+    "فيلم كرافت",
+    "قص الفيديو",
+    "مونتاج"
   ],
   "dependencies": [],
   "files": [
@@ -27,7 +41,7 @@
     {
       "path": ".claude/skills/edit/scripts/fc/assemble.mjs",
       "target": "skills/edit/scripts/fc/assemble.mjs",
-      "sha256": "21ea805ec9680393d9446d9b2eb234b863efb1d6dbd6580ce71dbe92c933cdf0"
+      "sha256": "93306e405a5a2d7e1a94582e2ecfea9f7f73c7d5151819c06fa6705c31de4283"
     },
     {
       "path": ".claude/skills/edit/scripts/fc/lesson.mjs",
@@ -97,7 +111,7 @@
     {
       "path": ".claude/skills/edit/scripts/media/voice.mjs",
       "target": "skills/edit/scripts/media/voice.mjs",
-      "sha256": "4a18650b1bce2dc26edab8d5ad8d34e57b736540a6144ae1df295b4ddf05241c"
+      "sha256": "fafa4ecc388aa3cef24e08d19e21c8bf559d84743ecdc356bc58c3801a85cfa7"
     },
     {
       "path": ".claude/skills/edit/scripts/media/vtt.mjs",
@@ -135,5 +149,5 @@
       "sha256": "89ad07dccac4418842264e02b0ed24f14d67d09ccd561dd3e0935cf4488fd6e4"
     }
   ],
-  "version": "b3feb5a584e70474a001cf6978f6261f5243a36a7d7d634aa972cda0553a8772"
+  "version": "3ba9c0cbe5f526ad3149dd07dbaf9aa5302ba830ab47cf6097c0e3ec1c6428e8"
 }

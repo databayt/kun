@@ -5,15 +5,18 @@
   "title": "feature",
   "description": "Full pipeline — idea to production (chains every stage)",
   "keywords": [
-    "feature"
+    "build <feature> end to end",
+    "feature",
+    "feature <name> [product]",
+    "full pipeline idea→production"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/feature/SKILL.md",
       "target": "skills/feature/SKILL.md",
-      "sha256": "0e743d331e73e8c87c9f8656265b222a2a0cbb818f1610b31b3483d84f8c849f"
+      "sha256": "345748f6a7969543aff93ea412dafb9af75edea941993ed08989e9673c0cc94c"
     }
   ],
-  "version": "58fa00920fde21a08cc630a0fb90f3f4939f79c50a9db68d881196295be150a3"
+  "version": "ed157a71ae434cf84c52646aec9ec715d0d82c2addf49cd10a5183d5399e5a62"
 }

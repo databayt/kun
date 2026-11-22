@@ -10,8 +10,8 @@
     {
       "path": ".claude/agents/analyze.md",
       "target": "agents/analyze.md",
-      "sha256": "1cc7561a3c9fa673dc0d5d60c96550e700e46399c41144143f9372d9ce1f6e8e"
+      "sha256": "0476f08f937da72d21cc9c83b995dde41d8bac996bd79509927d607c3cb9e680"
     }
   ],
-  "version": "202baae263b19e314f558d389aa80c53e8463c9628da17a9e63a847f0906268d"
+  "version": "99a62ab8732d49ac14ec851b4d66f6d3c079457610d974c615786d2453f9e353"
 }

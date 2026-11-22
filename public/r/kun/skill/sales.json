@@ -1,0 +1,19 @@
+{
+  "id": "skill:sales",
+  "name": "sales",
+  "type": "kun:skill",
+  "title": "sales",
+  "description": "The sales department: board, formulas, the lead",
+  "keywords": [
+    "sales"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/sales/SKILL.md",
+      "target": "skills/sales/SKILL.md",
+      "sha256": "aa56397dc37ec982430eafe0fc2adfeddd74f017af01d0fc8e665ba4e5daf92e"
+    }
+  ],
+  "version": "db94914e72e9fd1e19eade4e10d0071de5e0db9cec416e786eeee1f0b8519a22"
+}

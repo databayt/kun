@@ -1,0 +1,17 @@
+{
+  "id": "skill:kun",
+  "name": "kun",
+  "type": "kun:skill",
+  "title": "kun",
+  "description": "The kun place: its rules, blocks, open issues",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/kun/SKILL.md",
+      "target": "skills/kun/SKILL.md",
+      "sha256": "45c69f50bcca14bf6cb2db01d742e4925401c854b464c3c9d51eadb7df0357e4"
+    }
+  ],
+  "version": "2f72191433b929e397448e12bb2ce11f73d60691a424c06e280fa6becd1f6fdf"
+}

@@ -5,7 +5,17 @@
   "title": "approve",
   "description": "The human gate — the /social/publish review queue, or a signed link for a remote approver",
   "keywords": [
-    "approve"
+    "approve",
+    "approve the next draft",
+    "get sign-off",
+    "ready for review",
+    "review the queue",
+    "send for approval",
+    "stage for review",
+    "أرسل للمراجعة",
+    "اعتماد",
+    "اعتمد المسودة",
+    "راجع الطابور"
   ],
   "dependencies": [],
   "files": [

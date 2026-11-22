@@ -4,7 +4,12 @@
   "type": "kun:skill",
   "title": "repos",
   "description": "Explore databayt organization repositories",
-  "keywords": [],
+  "keywords": [
+    "list our repos",
+    "org status",
+    "sync the repos",
+    "which repo has"
+  ],
   "dependencies": [],
   "files": [
     {

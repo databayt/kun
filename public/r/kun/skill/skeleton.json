@@ -5,7 +5,13 @@
   "title": "skeleton",
   "description": "Skeleton loading states — layout-matching shimmer while data loads",
   "keywords": [
-    "skeleton"
+    "loading state",
+    "loading.tsx",
+    "page flashes blank",
+    "replace the spinner",
+    "shimmer",
+    "skeleton",
+    "هيكل التحميل"
   ],
   "dependencies": [],
   "files": [

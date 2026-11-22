@@ -5,7 +5,11 @@
   "title": "security",
   "description": "Security audit - OWASP Top 10, dependency scanning",
   "keywords": [
-    "security"
+    "are we vulnerable",
+    "owasp check",
+    "scan the dependencies",
+    "security",
+    "security audit"
   ],
   "dependencies": [],
   "files": [

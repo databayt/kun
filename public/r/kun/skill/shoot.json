@@ -5,7 +5,11 @@
   "title": "shoot",
   "description": "Stills of real product pages and flows, framed like Abdout's MacBook",
   "keywords": [
-    "shoot"
+    "screenshot the <x> flow",
+    "shoot",
+    "shoot <route|flow>",
+    "take a screenshot of <url>",
+    "لقطة شاشة"
   ],
   "dependencies": [],
   "files": [

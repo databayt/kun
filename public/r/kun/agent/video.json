@@ -1,0 +1,19 @@
+{
+  "id": "agent:video",
+  "name": "video",
+  "type": "kun:agent",
+  "title": "video",
+  "description": "Video producer — owns a film's journey from a one-line brief to an approved master: gathers context, plans, asks the few questions that matter, routes each stage to its tool and lane, and stops at every human gate; never approves",
+  "keywords": [
+    "video"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/video.md",
+      "target": "agents/video.md",
+      "sha256": "4bc60983dcdab440fbbe7eed351b46564064115d13d0c7133d8b35e0ced511f7"
+    }
+  ],
+  "version": "0c45bb00cf480631ceb0dc033832d79080ff30cf105d45f0027238c66cc09343"
+}

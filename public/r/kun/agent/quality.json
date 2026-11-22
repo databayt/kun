@@ -32,8 +32,8 @@
     {
       "path": ".claude/agents/quality.md",
       "target": "agents/quality.md",
-      "sha256": "cedd4529a41de49a16b72410f49c6736fd69a533110e15db966be8b15b2dd2fc"
+      "sha256": "09a5cc37b74344a4d1a93249ceb49de00bb94c001edbbd9fc4adb0c3ae322589"
     }
   ],
-  "version": "d891633b5d92f299477231b84fe6d5603a6bb38e294728bfdfbe8da97a286e29"
+  "version": "4bfc1ebf955fd443f197d94d1740f53b833ad90db6551fefd9da2296e8dc2109"
 }

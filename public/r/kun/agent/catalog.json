@@ -1,0 +1,17 @@
+{
+  "id": "agent:catalog",
+  "name": "catalog",
+  "type": "kun:agent",
+  "title": "catalog",
+  "description": "Catalog reference — curriculum, content, question-bank, textbooks, cdn",
+  "keywords": [],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/agents/catalog.md",
+      "target": "agents/catalog.md",
+      "sha256": "a2b3d5c6d5d0e2c047a7287f220eac6c8411f4bf5b203de55766784e04b4650a"
+    }
+  ],
+  "version": "85fa097471ff958c8b7074a06e149b51cd8f83aea9886574e01d77f979213c2e"
+}

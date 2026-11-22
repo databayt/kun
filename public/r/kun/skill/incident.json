@@ -5,15 +5,19 @@
   "title": "incident",
   "description": "Incident response workflow for production issues",
   "keywords": [
-    "incident"
+    "P0",
+    "incident",
+    "outage",
+    "production is down",
+    "users can't log in"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/incident/SKILL.md",
       "target": "skills/incident/SKILL.md",
-      "sha256": "9f3b7cbfb774f2cf56f2240ab5e6749b2cc999b029bd1789ff8f4076247968f8"
+      "sha256": "0b09d151cd3d94b822886ca279b740c6816df368f23d71e50d332c839c87d945"
     }
   ],
-  "version": "5cd12aeac157d9290e0c2ef06245bcb95c251b08212de3b02150bc8e52e61ec2"
+  "version": "3dc5882835a50f186fa1a13f6c7d8803fb5529dacb47e35915192e1fd3382200"
 }

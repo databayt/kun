@@ -1,0 +1,19 @@
+{
+  "id": "skill:tech",
+  "name": "tech",
+  "type": "kun:skill",
+  "title": "tech",
+  "description": "The tech department: board, formulas, the lead",
+  "keywords": [
+    "tech"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/tech/SKILL.md",
+      "target": "skills/tech/SKILL.md",
+      "sha256": "0a1ee35fdede12e28d71ddc47586dc33c5d3547ad18b210a8444a5a61754492c"
+    }
+  ],
+  "version": "d7e47c6fd83a16e36a6b4b04b249dd1c69c888195b915b582ab1d863312c27a1"
+}

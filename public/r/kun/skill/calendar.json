@@ -5,15 +5,22 @@
   "title": "calendar",
   "description": "The content calendar — which brand publishes what, on which day",
   "keywords": [
-    "calendar"
+    "calendar",
+    "content calendar",
+    "plan the content",
+    "what are we publishing",
+    "what slipped this week",
+    "which brand is due",
+    "التقويم",
+    "خطة المحتوى"
   ],
   "dependencies": [],
   "files": [
     {
       "path": ".claude/skills/calendar/SKILL.md",
       "target": "skills/calendar/SKILL.md",
-      "sha256": "66008e46903107c5e04897ba9d50a685bc37fb4c464812487939533e4367735d"
+      "sha256": "6c809f0e3eadbb7061ded628b1cbd5d78a4c063570f38d0ba134a58e34359e77"
     }
   ],
-  "version": "910d9e56b0dee4fd2b898b672c7adb439fcc199d930c68eb0fd341c4916450ed"
+  "version": "276daafe3589ef1cb2474f322ed0b46bdbfb70c2a6a2fe8ea555a93752cc9c4f"
 }

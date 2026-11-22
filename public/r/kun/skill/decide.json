@@ -5,7 +5,10 @@
   "title": "decide",
   "description": "Write a decision journal entry — Type 1/2 classification, premortem, expected outcome, reviewed-by date",
   "keywords": [
-    "decide"
+    "decide",
+    "log this decision",
+    "record the call",
+    "we decided to"
   ],
   "dependencies": [],
   "files": [

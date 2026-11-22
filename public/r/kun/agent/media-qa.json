@@ -10,8 +10,8 @@
     {
       "path": ".claude/agents/media-qa.md",
       "target": "agents/media-qa.md",
-      "sha256": "cff46f5719ffcf0ae726413935ef26a89de997b8648c88b0151ac224f59ab5e7"
+      "sha256": "0303d32d3de8f3efd57cba8feb23f37724704e83e949051c379f6b6452fb13bd"
     }
   ],
-  "version": "a404ce1a2c1435823fa450575468a6213997da22a3ce096be27f950e19010eb9"
+  "version": "5847bd2c2b29841dcbb1be766c4d8852d88699095439ee6da46b339c7919e656"
 }

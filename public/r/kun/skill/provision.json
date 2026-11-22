@@ -1,0 +1,41 @@
+{
+  "id": "skill:provision",
+  "name": "provision",
+  "type": "kun:skill",
+  "title": "provision",
+  "description": "Take a teammate's computer to 100% readiness and keep it there",
+  "keywords": [
+    "complete setup",
+    "heal my machine",
+    "is my machine ready",
+    "provision",
+    "readiness",
+    "update everything",
+    "جهّز الجهاز",
+    "صحة الجهاز"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/provision/fixtures/readiness.json",
+      "target": "skills/provision/fixtures/readiness.json",
+      "sha256": "f5098be25ebfb4b6f02d5e324d4d4544d00f5b3bf7185d5cf8d04c8f285b42a9"
+    },
+    {
+      "path": ".claude/skills/provision/scripts/provision.mjs",
+      "target": "skills/provision/scripts/provision.mjs",
+      "sha256": "29f183ae0bb913987f8b91c342b8907cd48aaf7bd4fd3128b779bd87c3a1d049"
+    },
+    {
+      "path": ".claude/skills/provision/scripts/provision.test.mjs",
+      "target": "skills/provision/scripts/provision.test.mjs",
+      "sha256": "9de04dea1b86b994bb5f65e2a8e792708b9fc4a4449b242f9cf64c1629baff1c"
+    },
+    {
+      "path": ".claude/skills/provision/SKILL.md",
+      "target": "skills/provision/SKILL.md",
+      "sha256": "f5cd60e31e44320ea0d7bed5491d058e336721450a8efa7a8744629acb1bdd20"
+    }
+  ],
+  "version": "dc3a435a36021eb4bdf39505ceccec62fa5ea477507244616a7a17197013bfb4"
+}

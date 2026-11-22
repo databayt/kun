@@ -5,7 +5,11 @@
   "title": "premortem",
   "description": "Klein-style premortem — imagine a decision/project failed, write the story, surface risks",
   "keywords": [
-    "premortem"
+    "imagine this failed",
+    "premortem",
+    "stress-test this plan",
+    "what are the risks",
+    "what could go wrong"
   ],
   "dependencies": [],
   "files": [

@@ -5,7 +5,10 @@
   "title": "block",
   "description": "Create blocks - UI components with integrated business logic",
   "keywords": [
-    "block"
+    "block",
+    "create a block",
+    "dashboard component",
+    "data table with logic"
   ],
   "dependencies": [],
   "files": [

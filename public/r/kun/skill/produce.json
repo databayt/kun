@@ -1,0 +1,51 @@
+{
+  "id": "skill:produce",
+  "name": "produce",
+  "type": "kun:skill",
+  "title": "produce",
+  "description": "The video factory — one engine, three lines (hogwarts, mkan, databayt), 14 stages from request to Facebook",
+  "keywords": [
+    "make a video for databayt",
+    "make a video for hogwarts",
+    "make a video for mkan",
+    "produce",
+    "production request",
+    "video production",
+    "إنتاج فيديو",
+    "فيديو تعريفي"
+  ],
+  "dependencies": [],
+  "files": [
+    {
+      "path": ".claude/skills/produce/schema/project.schema.json",
+      "target": "skills/produce/schema/project.schema.json",
+      "sha256": "4af216e53914b1d697ab4aecb157bd56fac2c149e3a46b6ac7c445d576119b15"
+    },
+    {
+      "path": ".claude/skills/produce/schema/shot-list.schema.json",
+      "target": "skills/produce/schema/shot-list.schema.json",
+      "sha256": "3e5831e454d3cd2649c113d7a844efeee1524cd36bdde99a8a16ad5a43b42f57"
+    },
+    {
+      "path": ".claude/skills/produce/scripts/piece.mjs",
+      "target": "skills/produce/scripts/piece.mjs",
+      "sha256": "8e51f95eb81880cc21c940ef46182c12b045c98c7286d70a98eee83e0e9f6e37"
+    },
+    {
+      "path": ".claude/skills/produce/scripts/produce.mjs",
+      "target": "skills/produce/scripts/produce.mjs",
+      "sha256": "f2234c0e9161dc398a55e5f04882b0dcb5326afe8e48d6e60ab6a04a3c8d400b"
+    },
+    {
+      "path": ".claude/skills/produce/scripts/produce.test.mjs",
+      "target": "skills/produce/scripts/produce.test.mjs",
+      "sha256": "e9b59382630bb7ac8a01d2cd73c8f9124db917e2ef33b2d5c8d21597215a1e7b"
+    },
+    {
+      "path": ".claude/skills/produce/SKILL.md",
+      "target": "skills/produce/SKILL.md",
+      "sha256": "547337a0f4ba312e2cf13acbd98e729e7eaf64d277aa5ff2184d2262ca59d232"
+    }
+  ],
+  "version": "5af05e5efab4d349f91a878d6cdd62acd572224347324210134a99bcd7f2e962"
+}

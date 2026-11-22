@@ -5,7 +5,10 @@
   "title": "code",
   "description": "Logic layer — server actions with auth, validation, tenant isolation",
   "keywords": [
-    "code"
+    "code",
+    "logic layer with auth+validation+tenant isolation",
+    "pipeline Logic stage",
+    "server actions"
   ],
   "dependencies": [],
   "files": [
