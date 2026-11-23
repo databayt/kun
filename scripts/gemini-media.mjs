@@ -34,6 +34,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
+import { spawnSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -152,6 +153,11 @@ function apiKey() {
         .find((l) => /^\s*(GEMINI_API_KEY|GOOGLE_GENAI_API_KEY)\s*=/.test(l));
       if (line) key = line.slice(line.indexOf('=') + 1).replace(/^["']|["']$/g, '');
     }
+  }
+  // The person's own key, stored by `video-tools.mjs setup veo-api` (macOS Keychain, service "databayt").
+  if (!key && process.platform === 'darwin') {
+    const r = spawnSync('security', ['find-generic-password', '-s', 'databayt', '-a', 'GEMINI_API_KEY', '-w'], { encoding: 'utf8' });
+    if (r.status === 0) key = r.stdout;
   }
   key = key.trim();
   if (!key) {

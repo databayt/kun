@@ -112,7 +112,7 @@ Make one generated clip for {{scene}} in the Gemini app seat (Veo), from the pro
 - Work order: Generated clip, for {{to}} · ordered by {{login}}
 - Film: {{project}} · {{repo}} / {{brand}} (the name the viewer sees)
 - Piece: {{scene}}
-- Renderer: the Gemini app seat (Veo), human-in-the-loop: a person pastes the prompt and saves the file. The paid routes (Veo by API, fal) are staged and are not to be used.
+- Renderer: the Gemini app seat (Veo), human-in-the-loop: a person pastes the prompt and saves the file. The paid routes (Veo by API, fal) are each person's own choice: use one only when `video-tools.mjs status <tool>` says ready; otherwise stay on the seat and never ask anyone to pay.
 - Format: vertical 9:16, 8 seconds at most.
 - First frame: the approved hero still of this scene, {{still_url}}, attached to the prompt.
 

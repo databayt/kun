@@ -209,7 +209,7 @@ clause: which film, what kind, for whom, where it is shown, how it looks, and wh
 | Tab | Clause | What it holds |
 | --- | --- | --- |
 | **Film** | Which film | A new film, or one card for each open film |
-| **Kind** | What | Intro film, promo, explainer, tutorial, feature, reel from a video, video script, all versions |
+| **Kind** | What | The brand's film types from `types.json` (Hogwarts: introduction, feature, tutorial, support, pitch, promo, testimonial, announcement; mkan has `listing`; databayt has `product` and `case-study`), then reel from a video, video script, all versions |
 | **Audience** | For whom | The audience and the version (market and language, such as `sd-ar`) |
 | **Format** | Where | Platform, ratio, length, resolution, frame rate |
 | **Style** | How | The look, the voice, the captions, the music |
@@ -233,6 +233,13 @@ Video has a Stages tab, because only Video has a ledger.
 Options on the **Kind** tab carry three more: `formula` (the formula the kind starts), `when`
 (`new` for a new film, `film` for an open one) and `workflow` (the keyword workflow it belongs to).
 
+**The film types are generated.** The Kind group is not typed into `settings.json`. `settings` and `compose`
+build it from `departments/video/types.json`, the one catalogue of video types: the brand's types first (the brand
+is `types.json → repos[repo]`, `hogwarts` when there is no repo), then the static options that are not films
+(reel, script, all versions). Picking a type sets `film_type`, and it also applies the type's default length,
+shape and platform, unless the person picked those too. `compose --set kind=feature` gives `film_type=feature`
+and the length `about 1:00`. The type list, names and URLs are in [Produce](/docs/produce#video-types-and-names).
+
 **A choice is defined once, and names the stage that owns it.** The choice `ratio` is written once,
 in `settings.json`, with `"stage": "request"`. The Format tab shows it, and the request stage's
 card shows the same choice. They are two views of one decision. `look` belongs to the visual stage,
@@ -241,11 +248,11 @@ card shows the same choice. They are two views of one decision. `look` belongs t
 **Tap and type are one path.** The menu does not build a prompt on its own. It asks one zero-token
 command, `compose`, which turns the picks into a formula, its slot values and a sentence. The
 sentence is written from the same words the switch (`match`) listens for. It contains the formula's
-own trigger phrase (`Intro film` is a trigger of `video.film.plan`), so typing the sentence by hand
+own trigger phrase (`Introduction film` is a trigger of `video.film.plan`), so typing the sentence by hand
 lands on the same formula. This is the real answer for the default picks:
 
 ```bash
-node .claude/scripts/station.mjs match "Intro film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice" --dept video --repo hogwarts --json
+node .claude/scripts/station.mjs compose --dept video --repo hogwarts --json
 ```
 
 ```json
@@ -299,7 +306,7 @@ node .claude/scripts/station.mjs compose --dept video --repo hogwarts --json
   "route": "plan",
   "record": "film",
   "set": {
-    "film_type": "intro",
+    "film_type": "introduction",
     "audience": "school owners and principals",
     "market": "sd",
     "lang": "ar",
@@ -310,7 +317,7 @@ node .claude/scripts/station.mjs compose --dept video --repo hogwarts --json
     "new": "1"
   },
   "sentence": {
-    "en": "Intro film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice"
+    "en": "Introduction film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice"
   },
   "keywords": ["produce", "shoot", "blender", "edit", "captions"],
   "tools": ["shoot", "blender", "voice", "brand-bed"],
@@ -398,8 +405,10 @@ choices only: no model runs. `agent` means the video agent, read-only, for a sta
 writing or judgement. The four gates are unchanged: script, look, version and publish.
 
 **The tool ladder.** The same file lists every tool and, for each kind of piece, the rungs from the
-cheapest. The plan picks the first rung that is ready. A tool marked `staged` is listed with its price
-and is never used until a `/decide` entry switches it on. The ladder is shown on the
+cheapest. The plan picks the first rung that is ready. Free tools are the default. A tool marked `paid` is listed with
+its price and its setup, and is used only when the person has set it up on this machine
+(`node ~/kun/.claude/scripts/video-tools.mjs status <tool>` says ready); otherwise the plan takes the next free rung and
+never asks anyone to pay. See [Paid tools are opt-in](/docs/pipeline#paid-tools-are-opt-in). The ladder is shown on the
 [Video pipeline](/docs/pipeline#who-makes-what) page.
 
 **Look at one stage.** `station.mjs stage` shows a stage of a film: its lock, its current choices, its

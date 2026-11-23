@@ -23,7 +23,7 @@ rest) — `produce` chains them and re-implements none.
 
 ```bash
 P="node ~/.claude/skills/produce/scripts/produce.mjs"
-$P init --brand hogwarts --identity balqalam --category intro --subject introduction --lang ar,en \
+$P init --brand hogwarts --identity balqalam --category introduction --subject main --lang ar,en \
   --audience "School owners and principals" --objective "Book a 1-month free trial"
 $P status <ID>
 $P advance <ID> <stage> --file <deliverable> [--variant sa-ar]
@@ -122,8 +122,9 @@ hogwarts-intro-introduction-v001/
   09-quality/ 10-publishing/
 ```
 
-The ID is `<brand>-<category>-<subject>-v<NNN>`, for example `hogwarts-intro-introduction-v001`. It
-names the production line (`hogwarts`), never the public brand. `produce validate <file>` checks a
+The ID is `<brand>-<type>-<subject>-v<NNN>`, for example `hogwarts-feature-attendance-v001`. It
+names the production line (`hogwarts`), never the public brand. The type comes from the catalogue in
+[Video types and names](#video-types-and-names). `produce validate <file>` checks a
 `project.json` or a `shot-list.json` against the schemas.
 
 ## Lock the line
@@ -327,9 +328,98 @@ uploaded, then an `index.json` is written in the stage folder and uploaded too:
 | --- | --- | --- |
 | Working files | `work/<film>/ref/<path>` | A film's folder, mirrored. Also the references of a work order |
 | Work-order submissions | `work/<film>/<issue number>/<file>` | What a teammate submits for one order |
-| The shipped master | `video/<brand>/<slug>/<variant>/fb-9x16.mp4`, with an archive in `_v/<Vnnn>/` | The approved film. See [CDN keys and the URL grammar](#cdn-keys-and-the-url-grammar) |
+| The shipped master | `video/<brand>/<type>/<subject>/<variant>/fb-9x16.mp4`, with an archive in `_v/<Vnnn>/` | The approved film. See [CDN keys and the URL grammar](#cdn-keys-and-the-url-grammar) |
 
 The tiers are described on the [CDN](/docs/cdn#work-tier-work) page.
+
+## Video types and names
+
+Every brand has the same small set of film types. The catalogue is one file, `departments/video/types.json`.
+The settings menu, `produce init` and the lint all read it, so a type is defined once.
+
+| Type | What it is | Subject names | Length · shape · where |
+| --- | --- | --- | --- |
+| `introduction` | The product in about two minutes, for a first-time viewer | `main`, an audience (`owners`) or a cut (`long`) | 2:00 · 9:16 · Facebook |
+| `feature` | One feature shown at its best | the product block: `attendance`, `timetable`, `exams`, `finance`, `admission` | 1:00 · 9:16 · Facebook |
+| `tutorial` | Step by step from real screens | the app route or flow: `students-add` | 2:00 · 16:9 · YouTube |
+| `support` | Tech support: fixes one problem a user reported | the problem: `login`, `join-class`, `reset-password` | 0:30 · 9:16 · Facebook |
+| `pitch` | Sells the product to a decision maker | the audience: `owners`, `investors`, `ministry` | 1:00 · 16:9 · YouTube |
+| `promo` | One offer, one call to action | the offer: `free-month` | 0:30 · 9:16 · Instagram |
+| `testimonial` | A real customer speaks (consent recorded) | the customer: `al-ibda` | 1:00 · 9:16 · Facebook |
+| `announcement` | Something new shipped | the release: `live-classes` | 0:30 · 9:16 · Facebook |
+| `listing` | mkan only: one home | the listing code | 0:30 · 9:16 · TikTok |
+| `product` | databayt only: one databayt product | `hogwarts`, `mkan`, `kun` | 1:00 · 16:9 · YouTube |
+| `case-study` | databayt only: a client result | the client | 2:00 · 16:9 · YouTube |
+
+Which brand has which type:
+
+| Brand | Types |
+| --- | --- |
+| `hogwarts` | introduction, feature, tutorial, support, pitch, promo, testimonial, announcement |
+| `mkan` | introduction, listing, tutorial, support, pitch, promo, testimonial, announcement |
+| `databayt` | introduction, product, case-study, pitch, tutorial, announcement |
+
+`--category` is a type. The old words still work: `intro` means `introduction` and `explainer` means `feature`.
+A type the brand does not have is refused, and the brand's types are listed. The subject defaults to `main`.
+
+### One naming rule, everywhere
+
+| Thing | Rule | Example |
+| --- | --- | --- |
+| Film id | `<brand>-<type>-<subject>-v<NNN>` | `hogwarts-feature-attendance-v001` |
+| Film folder | `~/media/_projects/<film id>/` | `~/media/_projects/hogwarts-feature-attendance-v001/` |
+| Stable CDN key | `video/<brand>/<type>/<subject>/<market>-<lang>/fb-9x16.mp4` | `video/hogwarts/feature/attendance/sd-ar/fb-9x16.mp4` |
+| Manifest | `video/<brand>/<type>/<subject>/manifest.json` | `video/hogwarts/feature/attendance/manifest.json` |
+| Archive | `video/<brand>/<type>/<subject>/_v/<Vnnn>/<market>-<lang>/…` | `video/hogwarts/feature/attendance/_v/V001/sd-ar/fb-9x16.mp4` |
+| URL | `https://cdn.databayt.org/` + the key | |
+| Work tier | `work/<film id>/ref/<path>` and `work/<film id>/<issue>/<file>` | |
+
+`<brand>` is the CDN name from the brand kit (`hogwarts`), never the public name (Balqalam).
+
+```bash
+$P types --brand hogwarts
+```
+
+```text
+hogwarts  id hogwarts-<type>-<subject>-v<NNN>
+  url https://cdn.databayt.org/video/hogwarts/<type>/<subject>/<market>-<lang>/fb-9x16.mp4
+  introduction  Introduction  2:00 9:16 Facebook   subject: who it is for or which cut: main, owners, long
+  feature       Feature       1:00 9:16 Facebook   subject: the product block: attendance, timetable, exams, finance, admission
+  tutorial      Tutorial      2:00 16:9 YouTube    subject: the app route or flow: students-add
+  support       Tech support  0:30 9:16 Facebook   subject: the problem: login, join-class, reset-password
+  pitch         Pitch         1:00 16:9 YouTube    subject: the audience: owners, investors, ministry
+  promo         Promo         0:30 9:16 Instagram  subject: the offer: free-month
+  testimonial   Testimonial   1:00 9:16 Facebook   subject: the customer slug: al-ibda
+  announcement  Announcement  0:30 9:16 Facebook   subject: the release: live-classes
+```
+
+`produce types` costs zero tokens. The URL of a film is known before it renders:
+
+```bash
+$P init --brand hogwarts --category feature --subject attendance --lang ar --markets sd,sa
+$P url hogwarts-feature-attendance-v001
+```
+
+```text
+sd-ar  (sd, ar)
+  video    https://cdn.databayt.org/video/hogwarts/feature/attendance/sd-ar/fb-9x16.mp4
+  poster   https://cdn.databayt.org/video/hogwarts/feature/attendance/sd-ar/poster.webp
+  captions https://cdn.databayt.org/video/hogwarts/feature/attendance/sd-ar/ar.vtt
+  archive  https://cdn.databayt.org/video/hogwarts/feature/attendance/_v/V001/sd-ar/fb-9x16.mp4   (V001, immutable)
+sa-ar  (sa, ar)
+  video    https://cdn.databayt.org/video/hogwarts/feature/attendance/sa-ar/fb-9x16.mp4
+  ...
+manifest https://cdn.databayt.org/video/hogwarts/feature/attendance/manifest.json
+```
+
+Asking for a type a brand does not have:
+
+```text
+produce: hogwarts has no film type "dance". Its types: introduction, feature, tutorial, support, pitch, promo, testimonial, announcement (produce types --brand hogwarts)
+```
+
+A film made before the catalogue keeps its id. Give it the new URL with `set`:
+`produce set hogwarts-intro-introduction-v001 slug introduction/main`.
 
 ## Markets & versions
 
@@ -339,9 +429,9 @@ file, `content/media/markets.json` — currency, on-screen price, a currency sym
 
 ```bash
 $P init --brand hogwarts --identity balqalam --category intro --subject introduction \
-  --markets sa,ae,eg,sd --slug intro
+  --markets sa,ae,eg,sd
 $P set <ID> markets sa,ae,eg,sd      # or add them to an existing project
-$P set <ID> slug intro
+$P set <ID> slug introduction/owners  # only to change the default <type>/<subject>
 ```
 
 The film prices follow the pricing decision D-20261117: 24 SAR, 24 AED and 6.40 USD (Egypt, Sudan,
@@ -376,14 +466,15 @@ script and piece and stops; a real build needs the script sign-off.
 ## CDN keys and the URL grammar
 
 ```text
-https://cdn.databayt.org/video/<brand-cdn>/<slug>/<variant>/fb-9x16.mp4     stable: always the approved latest
-                                                  /<variant>/poster.webp, <lang>.vtt
-https://cdn.databayt.org/video/<brand-cdn>/<slug>/manifest.json            every shipped version, sha, approvedAt
-https://cdn.databayt.org/video/<brand-cdn>/<slug>/_v/V001/<variant>/…      immutable archive per version
+https://cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/<variant>/fb-9x16.mp4   stable: always the approved latest
+                                                          /<variant>/poster.webp, <lang>.vtt
+https://cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/manifest.json          every shipped version, sha, approvedAt
+https://cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/_v/V001/<variant>/…    immutable archive per version
 ```
 
-Example: `https://cdn.databayt.org/video/hogwarts/intro/sa-ar/fb-9x16.mp4`. The slug is set at `init --slug` (default: the
-category), so the URL is known before anything renders. `ship <ID> --variant <v>|--all` uploads the `_v/` archive first,
+Example: `https://cdn.databayt.org/video/hogwarts/feature/attendance/sa-ar/fb-9x16.mp4`. The slug is `<type>/<subject>`
+(one slash, lowercase letters, digits and hyphens). It is set by `init` from the type and the subject, or by `init --slug`,
+so the URL is known before anything renders. `ship <ID> --variant <v>|--all` uploads the `_v/` archive first,
 then the stable keys, then the merged manifest, and refuses if another film already owns the brand and slug. `--dry-run`
 prints the key list only. Projects without markets keep the legacy keys:
 
@@ -410,7 +501,7 @@ A film can start from a video that already exists. Its words become the script. 
 
 ```bash
 P=~/.claude/skills/produce/scripts/produce.mjs
-node $P init --brand hogwarts --identity balqalam --category intro --subject owners --lang ar --markets sd
+node $P init --brand hogwarts --identity balqalam --category introduction --subject owners --lang ar --markets sd
 node $P from-reference <ID> ~/Downloads/balqalam-promo-v2.mp4 --voiceover
 ```
 

@@ -34,22 +34,24 @@ update this page with it. "Installed" on a card means one of its names shows up 
 | **video-use** | Skill | Edits real footage by conversation: transcribe, cut, grade, burn subtitles. Free, installed | `video-use`, `rough cut` |
 | **Claude Design** | Connector | Anthropic Labs canvas: design-system sync and handoff to code. Sign in with `/design-login` | `claude design` |
 
-## Staged for the video line
+## Paid, opt in
 
-Listed so the Video department can see what exists. None of these is installed or signed in.
-Each one needs a decision, and a `/decide` entry, before it is switched on.
+Listed so the Video department can see what exists. Free tools are the default. Each paid tool is your own choice:
+none is installed or signed in until you set it up. Set one up with
+`node ~/kun/.claude/scripts/video-tools.mjs setup <tool>` (`list` shows which are ready). Tools without a setup
+command here are listed only; their setup is not verified yet.
 
-| | Kind | Adds | Cost |
-|---|---|---|---|
-| **ElevenLabs** | Hosted MCP (OAuth) + [skills](https://github.com/elevenlabs/skills) | Voice in Arabic and English, dubbing, sound effects, music | Free plan: 10,000 credits a month, non-commercial with attribution only. Starter: $6 a month, carries the commercial licence |
-| **fal** | Hosted MCP (OAuth) | Seedance, Kling, Veo by API and Flux under one account | Pay per run |
-| **Google GenMedia** | [Repo](https://github.com/GoogleCloudPlatform/genmedia-creative-studio) (Apache-2.0) | MCP servers for Veo, Imagen, Lyria and Chirp 3 HD | Needs a Google Cloud project with billing |
-| **Epidemic Sound** | MCP (beta, [docs](https://developers.epidemicsound.com/docs/mcp)) | Licensed music and effects | Needs a subscription |
-| **Runway** | [Skills](https://github.com/runwayml/skills) (MIT) | Generated video | Credits |
-| **MiniMax** | [Repo](https://github.com/MiniMax-AI/MiniMax-MCP) (MIT, official) | Voice, image and video | Pay per use |
-| **DaVinci Resolve** | [Repo](https://github.com/samuelgursky/davinci-resolve-mcp) (MIT) | Grading and finishing | Direct scripting needs DaVinci Resolve Studio ($295 once). Its README says the free edition is reached only through a script that runs inside Resolve, and that this stops at Resolve 21.1 |
+| | Kind | Adds | Cost | Setup |
+|---|---|---|---|---|
+| **ElevenLabs** | Hosted MCP (OAuth) + [skills](https://github.com/elevenlabs/skills) | Voice in Arabic and English, dubbing, sound effects, music | Free plan: 10,000 credits a month, non-commercial with attribution only. Starter: $6 a month, carries the commercial licence | `video-tools.mjs setup elevenlabs` |
+| **fal** | Hosted MCP (OAuth) | Seedance, Kling, Veo by API and Flux under one account | Pay per run | `video-tools.mjs setup fal` |
+| **Google GenMedia** | [Repo](https://github.com/GoogleCloudPlatform/genmedia-creative-studio) (Apache-2.0) | MCP servers for Veo, Imagen, Lyria and Chirp 3 HD | Needs a Google Cloud project with billing | none |
+| **Epidemic Sound** | MCP (beta, [docs](https://developers.epidemicsound.com/docs/mcp)) | Licensed music and effects | Needs a subscription | `video-tools.mjs setup epidemic` (opens signup, records the opt-in; follow the docs for the MCP) |
+| **Runway** | [Skills](https://github.com/runwayml/skills) (MIT) | Generated video | Credits | none |
+| **MiniMax** | [Repo](https://github.com/MiniMax-AI/MiniMax-MCP) (MIT, official) | Voice, image and video | Pay per use | none (key `MINIMAX_API_KEY` in the Keychain) |
+| **DaVinci Resolve** | [Repo](https://github.com/samuelgursky/davinci-resolve-mcp) (MIT) | Grading and finishing | Direct scripting needs DaVinci Resolve Studio ($295 once). Its README says the free edition is reached only through a script that runs inside Resolve, and that this stops at Resolve 21.1 | none |
 
-ElevenLabs, fal and MiniMax are also staged in `.claude/mcp.json`, flagged `$skipRegistration`.
+ElevenLabs, fal and MiniMax are also in `.claude/mcp.json`, flagged `$skipRegistration`, so nobody gets them by default.
 The free ElevenLabs plan may only voice an internal animatic.
 
 ## Developer tools

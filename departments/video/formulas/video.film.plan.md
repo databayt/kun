@@ -15,11 +15,17 @@
   "slots": {
     "film_label": {
       "map": {
-        "intro": "intro film",
-        "promo": "promo film",
-        "explainer": "explainer",
-        "tutorial": "tutorial",
-        "feature": "feature film"
+        "introduction": "introduction film",
+        "feature": "feature film",
+        "tutorial": "tutorial video",
+        "support": "tech support video",
+        "pitch": "pitch video",
+        "promo": "promo video",
+        "testimonial": "testimonial video",
+        "announcement": "announcement video",
+        "listing": "listing video",
+        "product": "product film",
+        "case-study": "case study video"
       },
       "of": "film_type"
     },
@@ -185,13 +191,19 @@
     },
     "film_type": {
       "choice": [
-        "intro",
-        "promo",
-        "explainer",
+        "introduction",
+        "feature",
         "tutorial",
-        "feature"
+        "support",
+        "pitch",
+        "promo",
+        "testimonial",
+        "announcement",
+        "listing",
+        "product",
+        "case-study"
       ],
-      "default": "intro"
+      "default": "introduction"
     },
     "market": {
       "choice": [
@@ -320,7 +332,16 @@
       "feature film",
       "explainer video",
       "plan a film",
-      "plan a video"
+      "plan a video",
+      "introduction film",
+      "tech support video",
+      "support video",
+      "pitch video",
+      "testimonial video",
+      "announcement video",
+      "listing video",
+      "product film",
+      "case study video"
     ],
     "ar": [
       "فيديو تعريفي",
@@ -333,7 +354,16 @@
       "فيلم روائي",
       "انتاج فيديو",
       "فيديو شرح",
-      "خطط فيديو"
+      "خطط فيديو",
+      "فيلم عن ميزة",
+      "فيديو دعم فني",
+      "فيديو عرض",
+      "فيديو شهادة عميل",
+      "فيديو إعلان",
+      "فيديو عقار",
+      "فيلم منتج",
+      "فيديو قصة نجاح",
+      "فيديو دعم"
     ]
   },
   "order": [
@@ -389,7 +419,7 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}) in two turns: first ask the q
 - The journey as a numbered list: stage → tool → lane → gate → what is reused. Stages run request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish; gates are script · look · version · publish.
 - The actions that need the person's yes, each with its exact command. If a source video is given (not `none`), the first step is `node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{line}} --identity {{identity}} --category {{film_type}} --subject <slug> --lang {{lang}} --markets {{market}}`, then `node ~/.claude/skills/produce/scripts/produce.mjs from-reference <ID> {{source}} --voiceover`.
 - The first step and what it produces, ending with the question "Shall I start with …?".
-- After the journey and the first step, the turn ENDS with one fenced block with the info string `kun-plan`: JSON only, the last thing in the turn, nothing after it. List all 14 stages (request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish); a stage with nothing special carries only its tool. Tool ids come from `departments/video/stages.json`, cheapest rung first, never a `staged` one. Accepting the plan locks every stage from this block.
+- After the journey and the first step, the turn ENDS with one fenced block with the info string `kun-plan`: JSON only, the last thing in the turn, nothing after it. List all 14 stages (request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish); a stage with nothing special carries only its tool. Tool ids come from `departments/video/stages.json`, cheapest rung first. Free tools are the default. A paid tool is used only when the person has set it up on this machine (`node ~/kun/.claude/scripts/video-tools.mjs status <tool>` says ready); otherwise take the next free rung and never ask anyone to pay. Accepting the plan locks every stage from this block.
 
 ```kun-plan
 { "film": { "category": "<category>", "subject": "<slug>", "slug": "<slug>", "langs": ["<lang>"], "markets": ["<market>"] },

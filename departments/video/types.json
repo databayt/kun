@@ -1,0 +1,333 @@
+{
+  "$comment": "The one catalogue of a brand's film types. A type is the second segment of a film id and of its CDN path: id <brand>-<type>-<subject>-v<NNN>, stable URL video/<brand>/<type>/<subject>/<market>-<lang>/fb-9x16.mp4. `repos` maps a repo to its brand; `aliases` map old or short words to a type; `brands` lists the types each brand has; each type carries its labels, the sentence a person says (say.en must contain a video.film.plan trigger), what its subject names and its defaults (values of settings.json length, ratio, platform). Read by `produce init|types` and `station.mjs settings|compose|lint` (zero tokens). Docs: content/docs/produce.mdx.",
+  "repos": {
+    "hogwarts": "hogwarts",
+    "mkan": "mkan",
+    "kun": "databayt",
+    "marketing": "databayt"
+  },
+  "aliases": {
+    "intro": "introduction",
+    "explainer": "feature",
+    "support": "support"
+  },
+  "types": {
+    "introduction": {
+      "label": {
+        "en": "Introduction",
+        "ar": "تعريفي"
+      },
+      "say": {
+        "en": "Introduction film",
+        "ar": "فيلم تعريفي"
+      },
+      "hint": {
+        "en": "The product in about two minutes, for a first-time viewer.",
+        "ar": "المنتج في نحو دقيقتين لمن يراه أول مرة."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "who it is for or which cut: main, owners, long"
+      },
+      "defaults": {
+        "length": "2:00",
+        "ratio": "9:16",
+        "platform": "Facebook"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "feature": {
+      "label": {
+        "en": "Feature",
+        "ar": "ميزة"
+      },
+      "say": {
+        "en": "Feature film",
+        "ar": "فيلم عن ميزة"
+      },
+      "hint": {
+        "en": "One feature, shown at its best.",
+        "ar": "ميزة واحدة في أفضل صورة."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the product block: attendance, timetable, exams, finance, admission"
+      },
+      "defaults": {
+        "length": "1:00",
+        "ratio": "9:16",
+        "platform": "Facebook"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "tutorial": {
+      "label": {
+        "en": "Tutorial",
+        "ar": "شرح خطوة بخطوة"
+      },
+      "say": {
+        "en": "Tutorial video",
+        "ar": "فيديو تعليمي"
+      },
+      "hint": {
+        "en": "Step by step, from real screens.",
+        "ar": "خطوة بخطوة من شاشات حقيقية."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the app route or flow: students-add"
+      },
+      "defaults": {
+        "length": "2:00",
+        "ratio": "16:9",
+        "platform": "YouTube"
+      },
+      "keywords": [
+        "produce",
+        "record"
+      ]
+    },
+    "support": {
+      "label": {
+        "en": "Tech support",
+        "ar": "دعم فني"
+      },
+      "say": {
+        "en": "Tech support video",
+        "ar": "فيديو دعم فني"
+      },
+      "hint": {
+        "en": "Fixes one problem a user reported.",
+        "ar": "يحل مشكلة واحدة أبلغ عنها مستخدم."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the problem: login, join-class, reset-password"
+      },
+      "defaults": {
+        "length": "0:30",
+        "ratio": "9:16",
+        "platform": "Facebook"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "pitch": {
+      "label": {
+        "en": "Pitch",
+        "ar": "عرض"
+      },
+      "say": {
+        "en": "Pitch video",
+        "ar": "فيديو عرض"
+      },
+      "hint": {
+        "en": "Sells the product to a decision maker.",
+        "ar": "يبيع المنتج لصاحب قرار."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the audience: owners, investors, ministry"
+      },
+      "defaults": {
+        "length": "1:00",
+        "ratio": "16:9",
+        "platform": "YouTube"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "promo": {
+      "label": {
+        "en": "Promo",
+        "ar": "ترويجي"
+      },
+      "say": {
+        "en": "Promo video",
+        "ar": "فيديو ترويجي"
+      },
+      "hint": {
+        "en": "One offer, one call to action.",
+        "ar": "عرض واحد ودعوة واحدة."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the offer: free-month"
+      },
+      "defaults": {
+        "length": "0:30",
+        "ratio": "9:16",
+        "platform": "Instagram"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "testimonial": {
+      "label": {
+        "en": "Testimonial",
+        "ar": "شهادة عميل"
+      },
+      "say": {
+        "en": "Testimonial video",
+        "ar": "فيديو شهادة عميل"
+      },
+      "hint": {
+        "en": "A real customer speaks (consent recorded).",
+        "ar": "عميل حقيقي يتحدث (الموافقة مسجلة)."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the customer slug: al-ibda"
+      },
+      "defaults": {
+        "length": "1:00",
+        "ratio": "9:16",
+        "platform": "Facebook"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "announcement": {
+      "label": {
+        "en": "Announcement",
+        "ar": "إعلان"
+      },
+      "say": {
+        "en": "Announcement video",
+        "ar": "فيديو إعلان"
+      },
+      "hint": {
+        "en": "Something new shipped.",
+        "ar": "شيء جديد صدر."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the release: live-classes"
+      },
+      "defaults": {
+        "length": "0:30",
+        "ratio": "9:16",
+        "platform": "Facebook"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "listing": {
+      "label": {
+        "en": "Listing",
+        "ar": "عقار"
+      },
+      "say": {
+        "en": "Listing video",
+        "ar": "فيديو عقار"
+      },
+      "hint": {
+        "en": "One home, shown as it is.",
+        "ar": "منزل واحد كما هو."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the listing code"
+      },
+      "defaults": {
+        "length": "0:30",
+        "ratio": "9:16",
+        "platform": "TikTok"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "product": {
+      "label": {
+        "en": "Product",
+        "ar": "منتج"
+      },
+      "say": {
+        "en": "Product film",
+        "ar": "فيلم منتج"
+      },
+      "hint": {
+        "en": "One databayt product.",
+        "ar": "منتج واحد من داتابايت."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the product: hogwarts, mkan, kun"
+      },
+      "defaults": {
+        "length": "1:00",
+        "ratio": "16:9",
+        "platform": "YouTube"
+      },
+      "keywords": [
+        "produce"
+      ]
+    },
+    "case-study": {
+      "label": {
+        "en": "Case study",
+        "ar": "قصة نجاح"
+      },
+      "say": {
+        "en": "Case study video",
+        "ar": "فيديو قصة نجاح"
+      },
+      "hint": {
+        "en": "A client result.",
+        "ar": "نتيجة حققها عميل."
+      },
+      "subject": {
+        "default": "main",
+        "hint": "the client slug"
+      },
+      "defaults": {
+        "length": "2:00",
+        "ratio": "16:9",
+        "platform": "YouTube"
+      },
+      "keywords": [
+        "produce"
+      ]
+    }
+  },
+  "brands": {
+    "hogwarts": [
+      "introduction",
+      "feature",
+      "tutorial",
+      "support",
+      "pitch",
+      "promo",
+      "testimonial",
+      "announcement"
+    ],
+    "mkan": [
+      "introduction",
+      "listing",
+      "tutorial",
+      "support",
+      "pitch",
+      "promo",
+      "testimonial",
+      "announcement"
+    ],
+    "databayt": [
+      "introduction",
+      "product",
+      "case-study",
+      "pitch",
+      "tutorial",
+      "announcement"
+    ]
+  }
+}

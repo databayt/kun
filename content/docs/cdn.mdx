@@ -121,19 +121,19 @@ never hard-code these URLs — they read them from the product's
 
 ## Video tier (`video/`)
 
-Finished films from `/produce` live under `video/`, keyed by a stable **slug** (set at `produce init --slug`) and a
+Finished films from `/produce` live under `video/`, keyed by a stable `<type>/<subject>` slug (the film type and its subject, for example `feature/attendance`; set by `produce init`, or `--slug`) and a
 **variant** `<market>-<lang>`, never by the dated project ID, so the URL is known before the render:
 
 ```
-cdn.databayt.org/video/<brand-cdn>/<slug>/<variant>/fb-9x16.mp4        stable, the approved latest
-cdn.databayt.org/video/<brand-cdn>/<slug>/<variant>/poster.webp
-cdn.databayt.org/video/<brand-cdn>/<slug>/<variant>/<lang>.vtt
-cdn.databayt.org/video/<brand-cdn>/<slug>/manifest.json                every shipped variant (max-age 60)
-cdn.databayt.org/video/<brand-cdn>/<slug>/_v/<Vnnn>/<variant>/…        immutable archive per version
+cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/<variant>/fb-9x16.mp4        stable, the approved latest
+cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/<variant>/poster.webp
+cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/<variant>/<lang>.vtt
+cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/manifest.json                every shipped variant (max-age 60)
+cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/_v/<Vnnn>/<variant>/…        immutable archive per version
 cdn.databayt.org/video/index.json                                      approved videos
 ```
 
-Example: `https://cdn.databayt.org/video/hogwarts/intro/sa-ar/fb-9x16.mp4`. The stable keys are overwritten when a new version is
+Example: `https://cdn.databayt.org/video/hogwarts/feature/attendance/sa-ar/fb-9x16.mp4`. The stable keys are overwritten when a new version is
 approved and are invalidated; the `_v/` archive keys are written once and never overwritten. Projects created without
 markets keep `video/<brand>/<ID>/…`. See [produce](/docs/produce).
 
@@ -165,7 +165,7 @@ prints the link before anything is uploaded. For example, `03-script/script.md` 
 Each of them is a draft until `--create`. `mirror` never sends `08-render`, fonts, or a file over
 50 MB.
 
-**Masters never go here.** The approved film goes to the video tier, `video/<brand>/<slug>/<variant>/…`,
+**Masters never go here.** The approved film goes to the video tier, `video/<brand>/<type>/<subject>/<variant>/…`,
 through `produce ship`. A working file may be replaced as the film changes; a shipped master is
 archived and never overwritten. The commands are on the [produce](/docs/produce#one-path-rule-and-mirror) page.
 
@@ -243,7 +243,7 @@ copies every object (and flattens `anthropic/`), making the bucket move free.
 
 Every object is immutable and served with a one-year `immutable` cache header —
 except two tiers with **stable keys**: product media from `/shoot` and `/record` (above) and
-the stable video keys (`video/<brand-cdn>/<slug>/<variant>/…`, above). Those are overwritten in
+the stable video keys (`video/<brand-cdn>/<type>/<subject>/<variant>/…`, above). Those are overwritten in
 place on re-approval and invalidated by the publisher; the video `_v/<Vnnn>/` archive keys stay
 immutable.
 Everywhere else, **never overwrite an existing key.** When an asset's content changes, write a new

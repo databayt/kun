@@ -94,7 +94,7 @@ Run the locked plan of the open {{repo}} film from the next stage that is not do
 - Each piece (a scene, a still, a clip, a card, a voice track) goes to a Sonnet sub-agent. Its brief is not written by hand: it is the filled order formula, for example `node ~/kun/.claude/scripts/station.mjs fill video.order.<kind> --dept video --project {{project}} --set scene=<scene id>`, with `<kind>` one of blender, capture, still, image, clip, motion, voice, filmcraft, review.
 - Independent pieces run in parallel, each sub-agent writing only inside its own folder.
 - Scripts (voice, encode, mirror, ship) are run directly: they cost nothing and need no sub-agent.
-- A tool marked `staged` in `stages.json` is never used. A piece meant for a person becomes a work order (`produce order …`), not a sub-agent.
+- Free tools are the default. A paid tool is used only when the person has set it up on this machine (`node ~/kun/.claude/scripts/video-tools.mjs status <tool>` says ready); otherwise take the next free rung and never ask anyone to pay. A piece meant for a person becomes a work order (`produce order …`), not a sub-agent.
 - After each stage run `node ~/.claude/skills/produce/scripts/produce.mjs advance {{project}} <stage> --file <its file>`.
 - Never approve a gate (script, look, version, publish). Sub-agents run on sonnet or haiku only.
 - Append anything that slowed you down to `09-quality/friction.md` in the project.

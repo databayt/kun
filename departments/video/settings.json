@@ -1,5 +1,5 @@
 {
-  "$comment": "The Video department's settings menu (the gear in the Kun app's chat box) as data. Each tab is one clause of one sentence; each choice is defined once here and names the stage that owns it (stages.json). Read by `station.mjs settings|compose|stage` (zero tokens), by `produce lock` (which stage a choice belongs to) and, through them, by the app. A Kind option names the formula it starts. `sets` are formula slots; `line` is the phrase a choice adds to the `settings` slot; `say` is the phrase it adds to the sentence the person sees. Keywords must exist in .claude/vocabulary.json or as a skill; `station.mjs lint` checks all of it. Docs: content/docs/station.mdx.",
+  "$comment": "The Video department's settings menu (the gear in the Kun app's chat box) as data. Each tab is one clause of one sentence; each choice is defined once here and names the stage that owns it (stages.json). Read by `station.mjs settings|compose|stage` (zero tokens), by `produce lock` (which stage a choice belongs to) and, through them, by the app. The Kind group is generated: the brand's film types from types.json (the one catalogue of video types), then the static non-film options below (reel, script, versions). A Kind option names the formula it starts. `sets` are formula slots; `line` is the phrase a choice adds to the `settings` slot; `say` is the phrase it adds to the sentence the person sees. Keywords must exist in .claude/vocabulary.json or as a skill; `station.mjs lint` checks all of it. Docs: content/docs/station.mdx.",
   "dept": "video",
   "tabs": [
     {
@@ -54,78 +54,8 @@
       "label": { "en": "Kind", "ar": "النوع" },
       "q": { "en": "What are we making?", "ar": "ماذا نصنع؟" },
       "stage": "request",
-      "default": "intro",
+      "default": "introduction",
       "options": [
-        {
-          "value": "intro",
-          "label": { "en": "Intro film", "ar": "فيلم تعريفي" },
-          "say": { "en": "Intro film", "ar": "فيلم تعريفي" },
-          "hint": {
-            "en": "The product in two minutes, for a first-time viewer.",
-            "ar": "المنتج في دقيقتين لمن يراه أول مرة."
-          },
-          "when": "new",
-          "formula": "video.film.plan",
-          "sets": { "film_type": "intro" },
-          "keywords": ["produce"],
-          "workflow": "film-line"
-        },
-        {
-          "value": "promo",
-          "label": { "en": "Promo video", "ar": "فيديو ترويجي" },
-          "say": { "en": "Promo video", "ar": "فيديو ترويجي" },
-          "hint": {
-            "en": "One offer, one call to action.",
-            "ar": "عرض واحد ودعوة واحدة."
-          },
-          "when": "new",
-          "formula": "video.film.plan",
-          "sets": { "film_type": "promo" },
-          "keywords": ["produce"],
-          "workflow": "film-line"
-        },
-        {
-          "value": "explainer",
-          "label": { "en": "Explainer video", "ar": "فيديو شرح" },
-          "say": { "en": "Explainer video", "ar": "فيديو شرح" },
-          "hint": {
-            "en": "How one part of the product works.",
-            "ar": "كيف يعمل جزء من المنتج."
-          },
-          "when": "new",
-          "formula": "video.film.plan",
-          "sets": { "film_type": "explainer" },
-          "keywords": ["produce"],
-          "workflow": "film-line"
-        },
-        {
-          "value": "tutorial",
-          "label": { "en": "Tutorial video", "ar": "فيديو تعليمي" },
-          "say": { "en": "Tutorial video", "ar": "فيديو تعليمي" },
-          "hint": {
-            "en": "Step by step, from real screens.",
-            "ar": "خطوة بخطوة من شاشات حقيقية."
-          },
-          "when": "new",
-          "formula": "video.film.plan",
-          "sets": { "film_type": "tutorial" },
-          "keywords": ["produce", "record"],
-          "workflow": "film-line"
-        },
-        {
-          "value": "feature",
-          "label": { "en": "Feature film", "ar": "فيلم عن ميزة" },
-          "say": { "en": "Feature film", "ar": "فيلم عن ميزة" },
-          "hint": {
-            "en": "One feature, shown at its best.",
-            "ar": "ميزة واحدة في أفضل صورة."
-          },
-          "when": "new",
-          "formula": "video.film.plan",
-          "sets": { "film_type": "feature" },
-          "keywords": ["produce"],
-          "workflow": "film-line"
-        },
         {
           "value": "reel",
           "label": { "en": "Reel from a video", "ar": "ريلز من فيديو" },

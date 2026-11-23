@@ -295,7 +295,7 @@ test("status --json: stage list, variant grid, gates, next, urls, and the shot-l
   assert.equal(j.next, "research")
   assert.deepEqual(Object.keys(j.gates), ["script", "look", "version", "publish"])
   assert.equal(j.urls.length, 1)
-  assert.match(j.urls[0].url, /^https:\/\/cdn\.databayt\.org\/video\/hogwarts\/intro\/sd-ar\/fb-9x16\.mp4/)
+  assert.match(j.urls[0].url, /^https:\/\/cdn\.databayt\.org\/video\/hogwarts\/introduction\/strip\/sd-ar\/fb-9x16\.mp4/)
   assert.equal(j.paths.shot_list, join(home, id, "04-storyboard/shot-list.json"))
   assert.equal(j.paths.asset_manifest, join(home, id, "05-assets/asset-manifest.json"))
   assert.deepEqual([j.files.shot_list, j.files.asset_manifest, j.files.script], [true, false, false])
@@ -527,4 +527,37 @@ test("issue draft with locks: still 14 stage lines, a Plan section, the kun comm
   assert.match(r.stdout, /^- \[ \] 07 visual → .* · locked by tester$/m)
   assert.ok(r.stdout.indexOf("## Plan") < r.stdout.indexOf("## Work orders"))
   assert.equal(r.stdout.trim().split("\n").at(-1), `<!-- kun: repos=kun; items=skill:produce; film=${id} -->`)
+})
+
+test("types: alias, default subject, slug <type>/<subject>, refusals, predicted URL, the types listing", () => {
+  const home = join(root, "types-projects")
+  const e = { ...env, PRODUCE_HOME: home }
+  const sp = (...a) => spawnSync(process.execPath, [PRODUCE, ...a], { encoding: "utf8", env: e })
+  const a = JSON.parse(sp("init", "--brand", "hogwarts", "--category", "intro", "--subject", "owners", "--lang", "ar").stdout)
+  assert.equal(a.id, "hogwarts-introduction-owners-v001")
+  assert.equal(a.slug, "introduction/owners")
+  assert.equal(JSON.parse(readFileSync(join(home, a.id, "project.json"), "utf8")).category, "introduction")
+  // the subject defaults to the type's default
+  assert.equal(JSON.parse(sp("init", "--brand", "hogwarts", "--category", "feature", "--lang", "ar").stdout).slug, "feature/main")
+  // a type the brand does not have is refused and the brand's types are listed
+  const bad = sp("init", "--brand", "hogwarts", "--category", "listing", "--subject", "x")
+  assert.notEqual(bad.status, 0)
+  assert.match(bad.stderr, /introduction, feature, tutorial, support, pitch/)
+  assert.notEqual(sp("init", "--brand", "mkan", "--category", "product", "--subject", "x").status, 0)
+  // a slug has at most one slash
+  assert.notEqual(sp("init", "--brand", "hogwarts", "--category", "feature", "--subject", "x", "--slug", "a/b/c").status, 0)
+  // the predicted URL follows the rule
+  const f = JSON.parse(sp("init", "--brand", "hogwarts", "--category", "feature", "--subject", "attendance", "--lang", "ar", "--markets", "sd").stdout).id
+  assert.equal(f, "hogwarts-feature-attendance-v001")
+  assert.match(sp("url", f).stdout, /https:\/\/cdn\.databayt\.org\/video\/hogwarts\/feature\/attendance\/sd-ar\/fb-9x16\.mp4/)
+  assert.match(sp("url", f).stdout, /manifest https:\/\/cdn\.databayt\.org\/video\/hogwarts\/feature\/attendance\/manifest\.json/)
+  // set slug accepts the slash form, and a ship dry-run needs only the approval (the slug path is not the blocker)
+  assert.equal(sp("set", f, "slug", "feature/attendance-2").status, 0)
+  assert.match(sp("url", f).stdout, /feature\/attendance-2\/sd-ar/)
+  // the listing
+  const t = JSON.parse(sp("types", "--brand", "mkan", "--json").stdout)
+  assert.equal(t.id, "mkan-<type>-<subject>-v<NNN>")
+  assert.ok(t.types.some((x) => x.id === "listing"))
+  assert.ok(!t.types.some((x) => x.id === "feature"))
+  assert.match(sp("types", "--brand", "hogwarts").stdout, /feature +Feature +1:00 9:16 Facebook/)
 })

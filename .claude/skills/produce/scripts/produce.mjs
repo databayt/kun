@@ -3,9 +3,11 @@
 // 14 stages, holds the human gates, and ships an approved master to the CDN video tier. It does not
 // make video: every stage's work is done by the existing skill named in SKILL.md.
 //
-//   produce init --brand hogwarts|mkan|databayt --category <intro|promo|explainer|tutorial|…> --subject <slug> [--lang ar,en] [--title "…"]
+//   produce init --brand hogwarts|mkan|databayt --category <film type: introduction|feature|tutorial|…> [--subject <slug, default = the type's default>] [--lang ar,en] [--title "…"]
+//        (the category is normalised through types.json aliases and must be a type the brand has; id = <brand>-<type>-<subject>-v<NNN>)
+//   produce types [--brand b] [--json]             the brand's film types, subject hints, defaults and the URL pattern
 //        [--identity <brand-kit key, default = the brand>] [--audience "…"] [--objective "…"]
-//        [--markets sa,ae,eg,sd] [--slug <stable CDN slug, default = the category>]
+//        [--markets sa,ae,eg,sd] [--slug <stable CDN slug, default = <type>/<subject>>]
 //   produce set <ID> identity <brand-kit key>      (change which brand-kit face appears on film)
 //   produce set <ID> slug <slug>  |  set <ID> markets sa,ae,eg,sd   (markets: content/media/markets.json)
 //   produce status <ID>                            shared stages, then a variant x per-variant-stage grid + predicted URLs
@@ -38,6 +40,7 @@
 // A project with markets has variants <market>-<lang> (sa-ar, eg-en). Stages request..visual are shared; audio edit
 // render qa approval cdn publish are per variant (project.json variantStages[<variant>][<stage>]).
 // CDN keys, variant mode (stable slug, not the dated ID):
+//   (slug = <type>/<subject>)
 //   video/<cdn>/<slug>/<variant>/{fb-9x16.mp4,poster.webp,<lang>.vtt}   stable, overwritten on re-approval + invalidated
 //   video/<cdn>/<slug>/manifest.json                                     every shipped variant
 //   video/<cdn>/<slug>/_v/<Vnnn>/<variant>/…                             immutable archive per version
@@ -182,8 +185,9 @@ function deriveVariants(marketIds, langs) {
   if (!out.length) die(`markets ${marketIds.join(",")} have no language in ${langs.join(",")}`, 2)
   return out
 }
-const checkSlug = (s) => (/^[a-z0-9]+(-[a-z0-9]+)*$/.test(s) ? s : die(`slug "${s}" must be lowercase a-z, 0-9 and hyphens`, 2))
-const slugOf = (p) => p.slug ?? p.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+// a slug is `<type>/<subject>`: one or two lowercase segments, joined by a single slash
+const checkSlug = (s) => (/^[a-z0-9]+(-[a-z0-9]+)*(\/[a-z0-9]+(-[a-z0-9]+)*)?$/.test(s) ? s : die(`slug "${s}" must be lowercase a-z, 0-9 and hyphens, with at most one "/" (<type>/<subject>)`, 2))
+const slugOf = (p) => p.slug ?? p.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") // films made before types.json carry no slash
 const variantsOf = (p) => p.variants ?? deriveVariants(null, p.langs)
 const variantMode = (p) => Array.isArray(p.markets) && p.markets.length > 0
 const vst = (p, v, k) => p.variantStages?.[v]?.[k]
@@ -280,12 +284,20 @@ function uploadToCdn(file, key) {
 
 // ---- init ------------------------------------------------------------------------------------
 function init() {
-  const b = opt("brand"), category = opt("category"), subject = opt("subject")
-  if (!BRANDS.has(b) || !category || !subject) die("usage: init --brand hogwarts|mkan|databayt --category <cat> --subject <slug> [--lang ar,en] [--title …] [--markets sa,ae,eg,sd] [--slug <slug>]", 2)
+  const b = opt("brand"), rawCategory = opt("category")
+  if (!BRANDS.has(b) || !rawCategory) die("usage: init --brand hogwarts|mkan|databayt --category <cat> --subject <slug> [--lang ar,en] [--title …] [--markets sa,ae,eg,sd] [--slug <slug>]  (category is a film type: produce types)", 2)
+  const types = typesDoc()
+  const category = types ? (types.aliases?.[rawCategory.toLowerCase()] ?? rawCategory.toLowerCase()) : rawCategory
+  if (types) {
+    const mine = types.brands?.[b] ?? []
+    if (!types.types?.[category] || !mine.includes(category)) die(`${b} has no film type "${rawCategory}". Its types: ${mine.join(", ")} (produce types --brand ${b})`, 2)
+  }
+  const subject = opt("subject") ?? types?.types?.[category]?.subject?.default
+  if (!subject) die("init needs --subject <slug>", 2)
   const langs = (opt("lang", "ar,en")).split(",").map((s) => s.trim()).filter(Boolean)
   const identity = opt("identity") ? checkIdentity(opt("identity")) : b
   const markets = opt("markets") ? parseMarkets(opt("markets")) : null
-  const pslug = checkSlug(opt("slug") ?? slug(category).toLowerCase())
+  const pslug = checkSlug(opt("slug") ?? `${slug(category).toLowerCase()}/${slug(subject).toLowerCase()}`)
   const variants = deriveVariants(markets, langs)
   const kit = loadBrand(b) // throws on a draft / unknown brand: renderers never guess
   // ID = full names, lowercase, no date: hogwarts-intro-owners-v001
@@ -566,6 +578,7 @@ function videoData(name) {
 }
 let _warned = false
 const stagesDoc = () => videoData("stages.json")
+const typesDoc = () => videoData("types.json")
 const settingsDoc = () => videoData("settings.json")
 // the 14 stage definitions: stages.json when found, else the bare ledger list (no owns, no tools)
 function stageDefs() {
@@ -1563,6 +1576,25 @@ function listCmd() {
 }
 
 // ---- dispatch --------------------------------------------------------------------------------
+// `types [--brand b] [--json]` — a brand's film types, what each subject names, the defaults and the URL pattern. Zero tokens.
+function typesCmd() {
+  const doc = typesDoc()
+  if (!doc) die("departments/video/types.json not found", 1)
+  const brands = opt("brand") ? [opt("brand")] : Object.keys(doc.brands)
+  for (const b of brands) if (!doc.brands[b]) die(`unknown brand ${b}; brands: ${Object.keys(doc.brands).join(", ")}`, 2)
+  const out = brands.map((b) => {
+    const cdn = loadBrand(b).cdn
+    return { brand: b, cdn, pattern: `https://${CDN_HOST}/video/${cdn}/<type>/<subject>/<market>-<lang>/fb-9x16.mp4`, id: `${b}-<type>-<subject>-v<NNN>`,
+      types: doc.brands[b].map((t) => ({ id: t, label: doc.types[t].label.en, say: doc.types[t].say.en, what: doc.types[t].hint.en, subject: doc.types[t].subject, defaults: doc.types[t].defaults })) }
+  })
+  if (has("json")) return console.log(JSON.stringify(opt("brand") ? out[0] : out, null, 2))
+  for (const o of out) {
+    console.log(`${o.brand}  id ${o.id}\n  url ${o.pattern}`)
+    const w = Math.max(...o.types.map((t) => t.id.length)) + 2
+    for (const t of o.types) console.log(`  ${t.id.padEnd(w)}${t.label.padEnd(14)}${t.defaults.length} ${t.defaults.ratio} ${t.defaults.platform.padEnd(10)} subject: ${t.subject.hint}`)
+  }
+}
+
 const [cmd, ...rest] = pos()
 const run = {
   init,
@@ -1576,6 +1608,7 @@ const run = {
   submit: () => submitCmd(rest[0], rest.slice(1)),
   ship: () => ship(rest[0]),
   url: () => urlCmd(rest[0]),
+  types: typesCmd,
   lock: () => lockCmd(rest[0], rest[1]),
   unlock: () => unlockCmd(rest[0], rest[1]),
   plan: () => planCmd(rest[0]),
@@ -1587,5 +1620,5 @@ const run = {
   list: listCmd,
   "from-reference": () => fromReferenceSeed(rest[0], rest[1]),
 }[cmd]
-if (!run) die("usage: produce <init|list|set|status|advance|approve|lock|unlock|plan|mirror|cost|issue|order|submit|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
+if (!run) die("usage: produce <init|list|types|set|status|advance|approve|lock|unlock|plan|mirror|cost|issue|order|submit|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
 run()

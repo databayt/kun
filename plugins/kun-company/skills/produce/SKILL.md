@@ -17,7 +17,7 @@ stage belongs to an existing skill (table below). Blueprint: `~/.claude/playwrig
 
 ```bash
 P="node ~/.claude/skills/produce/scripts/produce.mjs"
-$P init --brand hogwarts --category intro --subject introduction --lang ar,en   # → hogwarts-intro-introduction-v001
+$P init --brand hogwarts --category introduction --subject main --lang ar,en   # → hogwarts-introduction-main-v001
 $P issue <ID> [--create|--sync] # the FILM issue (tracker): draft without a flag, create once, then rewrite from state
 $P order <ID> <formula> --to <login> [--set k=v]… [--after refs] [--create]   # a WORK ORDER for one person
 $P submit <issue-ref> <file>… [--summary …] [--next …] [--create]            # upload deliverables + receipt, status:review

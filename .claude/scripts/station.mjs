@@ -609,7 +609,7 @@ export function fill(ctx, dept, id, input = {}) {
   if (rd && !inputs.set.new && state.project && isOpen(state.project)) {
     const type = inputs.set.film_type || f.header.slots?.film_type?.default
     for (const r of Array.isArray(rd) ? rd : [rd]) {
-      const ok = r.if === "open_project" || (r.if === "open_project_same_type" && (!type || state.project.category === type)) || (r.if === "all_locked" && state.project.locked_all === true)
+      const ok = r.if === "open_project" || (r.if === "open_project_same_type" && (!type || sameType(state.project.category, type, dept))) || (r.if === "all_locked" && state.project.locked_all === true)
       const target = formulas.find((x) => x.id === r.to.replace("{stage}", state.project.next_stage))
       if (ok && target && target.id !== f.id) {
         redirected = f.id
@@ -706,11 +706,34 @@ function specFile(ctx, proj, key) {
   return ctx.fixtures ? path.join(ctx.fixtures, "specs", name) : path.join(proj.dir, "00-plan", name)
 }
 const readSpec = (ctx, proj, key) => (proj ? readJson(specFile(ctx, proj, key)) : null)
+// A film made before the types catalogue may carry an alias (intro) of today's type (introduction).
+const sameType = (category, type, dept) => {
+  const al = deptJson(dept, "types.json")?.aliases ?? {}
+  return (al[category] ?? category) === (al[type] ?? type)
+}
 const findOption = (choice, value) => asList(choice?.options).find((o) => o.value === value)
 
+// The Kind group is generated: the brand's film types (departments/<dept>/types.json) first, then the static
+// non-film options of settings.json (reel, script, versions). repo null = every type (the lint).
+export function typeOptions(types, repo) {
+  const brand = repo === null ? null : types.repos?.[repo] ?? "hogwarts"
+  const ids = brand === null ? uniq(Object.values(types.brands ?? {}).flat()) : asList(types.brands?.[brand])
+  return ids.filter((id) => types.types?.[id]).map((id) => {
+    const t = types.types[id]
+    return { value: id, label: t.label, say: t.say, hint: t.hint, when: "new", formula: "video.film.plan", sets: { film_type: id }, defaults: t.defaults, keywords: t.keywords ?? ["produce"], workflow: "film-line" }
+  })
+}
+function withTypes(doc, dept, repo) {
+  const types = deptJson(dept, "types.json")
+  if (!types || !doc.choices?.kind) return doc
+  const kind = doc.choices.kind
+  return { ...doc, choices: { ...doc.choices, kind: { ...kind, options: [...typeOptions(types, repo), ...asList(kind.options)] } } }
+}
+
 export function settings(ctx, dept, input = {}) {
-  const doc = deptJson(dept, "settings.json")
-  if (!doc) return { error: "no settings" }
+  const raw = deptJson(dept, "settings.json")
+  if (!raw) return { error: "no settings" }
+  const doc = withTypes(raw, dept, input.repo)
   const pack = loadPack(dept) || {}
   const L = (o) => bi(pack, o)
   let proj = null
@@ -742,8 +765,9 @@ export function settings(ctx, dept, input = {}) {
 }
 
 export function compose(ctx, dept, input = {}) {
-  const doc = deptJson(dept, "settings.json")
-  if (!doc) return { error: "no settings" }
+  const raw = deptJson(dept, "settings.json")
+  if (!raw) return { error: "no settings" }
+  const doc = withTypes(raw, dept, input.repo)
   const pack = loadPack(dept) || {}
   const choices = doc.choices ?? {}
   const given = input.set || {}
@@ -769,6 +793,15 @@ export function compose(ctx, dept, input = {}) {
     }
   }
   const kindOpt = chosen.kind ?? null
+  // a picked film type also applies its defaults, unless the person picked that setting explicitly
+  for (const [k, v] of Object.entries(kindOpt?.defaults ?? {})) {
+    if (given[k] !== undefined || !choices[k]) continue
+    const o = asList(choices[k].options).find((x) => x.value === String(v))
+    if (o) {
+      picks[k] = o.value
+      chosen[k] = o
+    }
+  }
   const set = {}
   for (const o of Object.values(chosen)) for (const [k, v] of Object.entries(o.sets ?? {})) set[k] = String(v)
   const lineKeys = asList(doc.line?.keys).filter((k) => chosen[k])
@@ -966,8 +999,40 @@ export function lintStages(doc, ctxInfo = {}) {
   for (const [id, tl] of Object.entries(tools)) {
     if (!laneOk(tl.lane)) e(`tool ${id}: lane "${tl.lane}" is not a usable lane (a key of engine.json lanes, never escalate)`)
     if (tl.order !== undefined && ctxInfo.formulaIds && !ctxInfo.formulaIds.has(tl.order)) e(`tool ${id}: order ${tl.order} is not a formula`)
-    if (tl.staged === true && !tl.price) e(`tool ${id}: a staged tool needs a price`)
+    if (tl.staged !== undefined) e(`tool ${id}: "staged" is retired, use "paid": true`)
+    if (tl.paid === true) {
+      if (!tl.price) e(`tool ${id}: a paid tool needs a price`)
+      if (!tl.setup?.signup || !/^https:\/\//.test(tl.setup.signup)) e(`tool ${id}: a paid tool needs setup.signup (an https URL)`)
+    }
   }
+  return errors
+}
+// types.json: every brand type exists, labels and sentences in en + ar, the sentence lands on video.film.plan,
+// defaults are option values of settings.json, aliases point at types.
+//   ctxInfo: { formulas: [{id, header}], settings }
+export function lintTypes(doc, ctxInfo = {}) {
+  const errors = []
+  const e = (m) => errors.push(`types.json: ${m}`)
+  const bil = (o) => o && typeof o.en === "string" && o.en && typeof o.ar === "string" && o.ar
+  const types = doc?.types ?? {}
+  if (new RegExp("fa" + "ble", "i").test(JSON.stringify(doc ?? {}))) e("never name the escalate model")
+  const plan = asList(ctxInfo.formulas).find((f) => f.id === "video.film.plan")
+  const phrases = asList(plan?.header?.triggers?.en).map((x) => String(x).toLowerCase())
+  const choices = ctxInfo.settings?.choices ?? {}
+  for (const [id, t] of Object.entries(types)) {
+    const at = (m) => e(`type ${id}: ${m}`)
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) at("the id must be lowercase a-z, 0-9 and hyphens")
+    for (const k of ["label", "say", "hint"]) if (!bil(t[k])) at(`${k} needs en and ar`)
+    if (plan && !phrases.some((p) => String(t.say?.en ?? "").toLowerCase().includes(p))) at(`say.en must contain a trigger of video.film.plan (${phrases.join(" | ")})`)
+    if (typeof t.subject?.default !== "string" || typeof t.subject?.hint !== "string") at("subject needs default and hint")
+    for (const [k, v] of Object.entries(t.defaults ?? {})) {
+      if (!["length", "ratio", "platform"].includes(k)) at(`defaults.${k} is not length, ratio or platform`)
+      else if (ctxInfo.settings && !asList(choices[k]?.options).some((o) => o.value === v)) at(`defaults.${k} "${v}" is not an option of settings.json`)
+    }
+  }
+  for (const [brand, ids] of Object.entries(doc?.brands ?? {})) for (const id of asList(ids)) if (!types[id]) e(`brand ${brand}: type "${id}" is not defined in types`)
+  for (const [a, to] of Object.entries(doc?.aliases ?? {})) if (!types[to]) e(`alias ${a} points at "${to}", which is no type`)
+  for (const [repo, brand] of Object.entries(doc?.repos ?? {})) if (!doc.brands?.[brand]) e(`repo ${repo} maps to brand "${brand}", which has no type list`)
   return errors
 }
 function lintData(dept) {
@@ -988,7 +1053,9 @@ function lintData(dept) {
     skills = new Set(fs.readdirSync(path.join(ROOT, ".claude", "skills"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name))
   } catch {}
   const lanes = new Set(Object.keys(readJson(path.join(ROOT, ".claude", "engine.json"))?.lanes ?? {}).filter((k) => !k.startsWith("$")))
-  if (settingsDoc) errors.push(...lintSettings(settingsDoc, { formulas, vocab, skills, tools: stagesDoc ? new Set(Object.keys(stagesDoc.tools ?? {})) : null }))
+  const typesDoc = readJson(path.join(ROOT, "departments", dept, "types.json"))
+  if (typesDoc) errors.push(...lintTypes(typesDoc, { formulas, settings: settingsDoc }))
+  if (settingsDoc) errors.push(...lintSettings(typesDoc ? withTypes(settingsDoc, dept, null) : settingsDoc, { formulas, vocab, skills, tools: stagesDoc ? new Set(Object.keys(stagesDoc.tools ?? {})) : null }))
   if (stagesDoc) errors.push(...lintStages(stagesDoc, { settings: settingsDoc, lanes, formulaIds: new Set(formulas.map((f) => f.id)) }))
   return errors
 }
@@ -1875,7 +1942,7 @@ function runTests() {
     const r = compose(mk("none"), "video", { repo: "hogwarts" })
     eq([r.formula, r.route, r.record, r.set.new], ["video.film.plan", "plan", "film", "1"])
     eq(r.set.settings, "1080p · 30 fps · version sd-ar · look mixed · voice stock voice · captions burned in · music brand bed")
-    eq(r.sentence.en, "Intro film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice")
+    eq(r.sentence.en, "Introduction film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice")
     eq(r.sentence.ar, r.sentence.en)
     eq([r.workflow, r.unknown], ["film-line", []])
     eq(r.missing, [])
@@ -1904,6 +1971,33 @@ function runTests() {
     const b = fill(mk("script-gate"), "video", "video.film.plan", { repo: "hogwarts", login: "abdout", set: { new: "1" } })
     eq([b.redirected_from, b.id], [null, "video.film.plan"])
     ok(!b.prompt.includes('"new"') && !b.missing.includes("new"), "new is never a slot")
+  })
+  t("kind: generated from types.json per brand, then reel, script, versions", () => {
+    const kinds = (repo) => settings(mk("none"), "video", { repo }).tabs[1].groups[0].options.map((o) => o.value)
+    eq(kinds("hogwarts").slice(0, 5), ["introduction", "feature", "tutorial", "support", "pitch"])
+    eq(kinds("hogwarts").slice(-3), ["reel", "script", "versions"])
+    ok(kinds("mkan").includes("listing") && !kinds("mkan").includes("feature"), "mkan has listing, not feature")
+    ok(kinds("kun").includes("case-study"), "kun maps to the databayt brand")
+    eq(settings(mk("none"), "video", { repo: "hogwarts" }).tabs[1].groups[0].default, "introduction")
+  })
+  t("compose: a film type sets film_type and applies its defaults unless picked", () => {
+    const r = compose(mk("none"), "video", { repo: "hogwarts", set: { kind: "feature" } })
+    eq([r.formula, r.set.film_type, r.set.length, r.picks.length], ["video.film.plan", "feature", "about 1:00", "1:00"])
+    eq(compose(mk("none"), "video", { repo: "hogwarts", set: { kind: "tutorial" } }).set.format, "horizontal 16:9, desktop")
+    eq(compose(mk("none"), "video", { repo: "hogwarts", set: { kind: "feature", length: "0:30" } }).set.length, "about 0:30")
+    eq(compose(mk("none"), "video", { repo: "hogwarts", set: { kind: "listing" } }).unknown, ["kind=listing"], "a brand's type is not another brand's")
+  })
+  t("lintTypes: the shipped file is clean; each break is caught", () => {
+    const types = readJson(path.join(ROOT, "departments", "video", "types.json"))
+    const settingsDoc = readJson(path.join(ROOT, "departments", "video", "settings.json"))
+    const info = { formulas: loadFormulas("video").formulas, settings: settingsDoc }
+    eq(lintTypes(types, info), [])
+    const d = (fn) => { const x = JSON.parse(JSON.stringify(types)); fn(x); return lintTypes(x, info) }
+    ok(d((x) => x.brands.mkan.push("ghost")).length === 1, "brand type that is undefined")
+    ok(d((x) => delete x.types.pitch.hint.ar).length === 1, "missing ar")
+    ok(d((x) => (x.types.pitch.say.en = "Make something")).length === 1, "say misses a trigger")
+    ok(d((x) => (x.types.pitch.defaults.length = "9:99")).length === 1, "default is no option")
+    ok(d((x) => (x.aliases.old = "ghost")).length === 1, "alias to nothing")
   })
   t("stage: a locked stage shows current decisions, questions and a summary", () => {
     const r = stage(mk("locked"), "video", "visual", { project: "hogwarts-locked-v001" })
@@ -1972,13 +2066,16 @@ function runTests() {
     tools: { produce: { lane: "script" } },
   })
   const stageInfo = { settings: miniSettings(), lanes: new Set(["script", "build", "escalate"]), formulaIds: new Set(["video.a"]) }
-  t("lintStages: a clean doc passes; missing stage, escalate lane, staged tool without price are caught", () => {
+  t("lintStages: a clean doc passes; missing stage, escalate lane, paid tool without price or signup are caught", () => {
     eq(lintStages(miniStages(), stageInfo), [])
     const d = (fn) => { const x = miniStages(); fn(x); return lintStages(x, stageInfo) }
     ok(d((x) => x.stages.pop()).length >= 1, "missing stage key")
     ok(d((x) => (x.stages[1].lane = "escalate")).length === 1, "escalate lane")
     ok(d((x) => (x.tools.produce.lane = "escalate")).length === 1, "escalate tool lane")
-    ok(d((x) => (x.tools.produce.staged = true)).length === 1, "staged without price")
+    ok(d((x) => (x.tools.produce.paid = true)).length === 2, "paid without price and without setup.signup")
+    ok(d((x) => Object.assign(x.tools.produce, { paid: true, price: "$1" })).length === 1, "paid without setup.signup")
+    eq(d((x) => Object.assign(x.tools.produce, { paid: true, price: "$1", setup: { signup: "https://example.com" } })), [])
+    ok(d((x) => (x.tools.produce.staged = true)).length === 1, "staged is retired")
     ok(d((x) => (x.tools.produce.order = "video.nope")).length === 1, "order is no formula")
     ok(d((x) => (x.stages[0].owns = [])).length === 1, "a choice nobody owns")
     ok(d((x) => (x.stages[2].tool = "ghost")).length === 1, "unknown tool")

@@ -104,7 +104,7 @@ Discuss or revise the spec of ONE stage ({{stage}}) of the {{repo}} film {{proje
 ## Constraints
 - Read-only: write no file, run no command that writes.
 - Ask with a `kun-questions` block only when an answer would change the spec: one to three questions, and never what the spec already states.
-- Pick tools only from this stage's ladder in `stages.json`, never a `staged` one.
+- Pick tools only from this stage's ladder in `stages.json`. Free tools are the default. A paid tool is used only when the person has set it up on this machine (`node ~/kun/.claude/scripts/video-tools.mjs status <tool>` says ready); otherwise take the next free rung and never ask anyone to pay.
 - Keep the reply short.
 
 ## Deliverable

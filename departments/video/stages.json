@@ -1,5 +1,5 @@
 {
-  "$comment": "The Video production line as data: the 14 stages (the same keys, order and files as STAGES in .claude/skills/produce/scripts/produce.mjs; `station.mjs lint` fails when they drift) and the tool ladder. `owns` names the choices in settings.json that belong to a stage; `ask` says who drafts the stage's spec when it is opened in the app (`script`: the standard choices only, no model; `agent`: the video agent on the read-only plan route); `pieces` is the ladder per kind of piece, cheapest first, each rung an id in `tools`. A tool with `staged: true` is listed and never used until a /decide entry switches it on. `lane` is a row of .claude/engine.json → lanes and is never `escalate`. Read by `station.mjs stage`, `produce lock|plan` and the formulas. Docs: content/docs/station.mdx, content/docs/produce.mdx.",
+  "$comment": "The Video production line as data: the 14 stages (the same keys, order and files as STAGES in .claude/skills/produce/scripts/produce.mjs; `station.mjs lint` fails when they drift) and the tool ladder. `owns` names the choices in settings.json that belong to a stage; `ask` says who drafts the stage's spec when it is opened in the app (`script`: the standard choices only, no model; `agent`: the video agent on the read-only plan route); `pieces` is the ladder per kind of piece, cheapest first, each rung an id in `tools`. Free tools are the default. A tool with `paid: true` (it carries a `price` and a `setup`) is used only when the person has set it up on this machine (`node ~/kun/.claude/scripts/video-tools.mjs status <tool>` says ready); otherwise take the next free rung and never ask anyone to pay. `lane` is a row of .claude/engine.json → lanes and is never `escalate`. Read by `station.mjs stage`, `produce lock|plan` and the formulas. Docs: content/docs/station.mdx, content/docs/produce.mdx.",
   "dept": "video",
   "stages": [
     {
@@ -308,7 +308,10 @@
       "cost": {
         "unit": "credit",
         "cap": "credits on the account (drained on 2026-11-23)"
-      }
+      },
+      "paid": true,
+      "price": "credits on the account",
+      "setup": { "signup": "https://higgsfield.ai", "cli": { "login": ["higgsfield", "auth", "login"], "status": ["higgsfield", "account", "status"] } }
     },
     "gemini-seat-video": {
       "label": "Veo in the Gemini app seat (a person pastes the prompt)",
@@ -322,16 +325,18 @@
       "kind": "script",
       "order": "video.order.clip",
       "lane": "build",
-      "staged": true,
-      "price": "$0.40 per 8 s clip (veo-lite)"
+      "paid": true,
+      "price": "$0.40 per 8 s clip (veo-lite)",
+      "setup": { "signup": "https://aistudio.google.com/apikey", "key": "GEMINI_API_KEY" }
     },
     "fal": {
       "label": "fal: Seedance, Kling, Veo by API",
       "kind": "mcp",
       "order": "video.order.clip",
       "lane": "build",
-      "staged": true,
-      "price": "pay per run"
+      "paid": true,
+      "price": "pay per run",
+      "setup": { "signup": "https://fal.ai/dashboard/billing", "mcp": { "transport": "http", "scope": "user", "url": "https://mcp.fal.ai/mcp-relay", "auth": "oauth" } }
     },
     "hyperframes": {
       "label": "HyperFrames motion graphics (hf.sh)",
@@ -370,8 +375,9 @@
       "kind": "mcp",
       "order": "video.order.voice",
       "lane": "script",
-      "staged": true,
-      "price": "$6 a month, Starter (the free plan is non-commercial)"
+      "paid": true,
+      "price": "$6 a month, Starter (the free plan is non-commercial)",
+      "setup": { "signup": "https://elevenlabs.io/pricing", "mcp": { "transport": "http", "url": "https://api.elevenlabs.io/v1/mcp", "auth": "oauth" } }
     },
     "brand-bed": {
       "label": "The brand's music bed from the kit",
@@ -397,8 +403,9 @@
       "label": "Epidemic Sound: licensed music and effects",
       "kind": "mcp",
       "lane": "script",
-      "staged": true,
-      "price": "subscription"
+      "paid": true,
+      "price": "subscription",
+      "setup": { "signup": "https://www.epidemicsound.com/pricing/", "docs": "https://developers.epidemicsound.com/docs/mcp" }
     },
     "filmcraft": {
       "label": "FilmCraft (fc/assemble.mjs, MCP filmcraft)",
