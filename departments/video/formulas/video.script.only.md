@@ -98,6 +98,7 @@
         "يوتيوب"
       ]
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -240,6 +241,7 @@ Write a 60-second video script for one {{repo}} feature: the idea, the shots and
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
 - Price, if the script mentions it: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}}
+- Video settings: {{settings}}
 
 ## References
 - Brand kit: {{brand_kit_url}}

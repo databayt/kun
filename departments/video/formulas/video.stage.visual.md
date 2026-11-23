@@ -49,6 +49,7 @@
       ],
       "default": "Facebook"
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -99,6 +100,7 @@ Produce the look of the film: cast, sets, camera moves and the keyframes or anim
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Destination: {{platform}} · {{format}} · {{length}}
+- Video settings: {{settings}}
 - Stage: 07 visual. Gate: look
 - This is an expensive stage: the script must be signed first.
 

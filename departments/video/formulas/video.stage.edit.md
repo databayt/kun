@@ -72,6 +72,7 @@
       ],
       "default": "Facebook"
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -141,6 +142,7 @@ Assemble the edit of one version from the visuals, captures, audio and captions.
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
 - Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}} · {{length}}
+- Video settings: {{settings}}
 - Stage: 09 edit (per variant)
 
 ## References

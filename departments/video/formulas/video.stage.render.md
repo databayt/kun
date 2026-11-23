@@ -72,6 +72,7 @@
       ],
       "default": "Facebook"
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -141,6 +142,7 @@ Render the master of one version and confirm it plays.
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
 - Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}}
+- Video settings: {{settings}}
 - Stage: 10 render (per variant)
 
 ## References

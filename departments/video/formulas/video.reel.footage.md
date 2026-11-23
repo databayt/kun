@@ -78,6 +78,7 @@
         "يوتيوب"
       ]
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -217,6 +218,7 @@ Cut a reel of about {{reel_length}} from the latest video in the work folder, wi
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Source: the latest video in the work folder, `{{latest_video}}`
 - Output: {{platform}} · {{format}} · {{reel_length}}
+- Video settings: {{settings}}
 - Today: {{today}}
 
 ## References

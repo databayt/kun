@@ -72,6 +72,7 @@
       ],
       "default": "Facebook"
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -139,6 +140,7 @@ Write the film's script from the approved brief, in the language of the focus ve
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
 - Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}} · {{length}}
+- Video settings: {{settings}}
 - Stage: 04 script. Gate: script
 
 ## References

@@ -72,6 +72,7 @@
       ],
       "default": "Facebook"
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -164,6 +165,7 @@ Prepare the publishing package of one variant for the destination and stop at th
 - Version: {{market_name}} · {{language}} · {{dialect}} dialect
 - Price: {{price}} {{currency}} per student per year
 - Destination: {{platform}} · {{format}}
+- Video settings: {{settings}}
 - Stage: 14 publish (per variant). Gate: publish
 
 ## References

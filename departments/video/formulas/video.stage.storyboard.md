@@ -49,6 +49,7 @@
       ],
       "default": "Facebook"
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -97,6 +98,7 @@ Turn the approved script into the shot list: every scene, its source, its timing
 - Repo / brand: {{repo}} / {{brand}} (the name the viewer sees)
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Destination: {{platform}} · {{format}} · {{length}}
+- Video settings: {{settings}}
 - Stage: 05 storyboard
 
 ## References

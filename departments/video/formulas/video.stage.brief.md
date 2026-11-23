@@ -103,6 +103,7 @@
         "يوتيوب"
       ]
     },
+    "settings": { "value": "as in the film request" },
     "format": {
       "choice": [
         "vertical 9:16, mobile",
@@ -238,6 +239,7 @@ Write the creative brief that the script and every later stage will follow.
 - Project: {{project}} · version {{version}} · variant: {{variant}}
 - Audience: {{audience}} · goal: {{goal}}
 - Destination: {{platform}} · {{format}} · {{length}}
+- Video settings: {{settings}}
 - Stage: 03 brief (shared by every variant)
 
 ## References
