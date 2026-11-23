@@ -6035,7 +6035,7 @@
         },
         {
           "name": "produce",
-          "effect": "The video factory — one engine, three lines (hogwarts, mkan, databayt); a request becomes a project, 14 stages chained over the existing skills, three human gates, an approved master on the CDN video tier",
+          "effect": "The video factory — one engine, three lines (hogwarts, mkan, databayt); a request becomes a project, 14 stages chained over the existing skills, four human gates (script · look · version · publish), an approved master on the CDN video tier",
           "order": [
             {
               "type": "familiar",
@@ -6051,12 +6051,12 @@
             }
           ],
           "steps": [
-            "produce init — brand, category, subject → ID like HOG-INTRO-20261120-V001 and ~/media/_projects/<ID>/",
+            "produce init — brand, category, subject → ID like hogwarts-intro-introduction-v001 and ~/media/_projects/<ID>/",
             "Research, brief, script (/draft) — script sign-off before any heavy stage",
             "Storyboard shot-list.json validated; real UI only for product claims, generated scenes marked illustrative",
             "Assets and visuals via /shoot /record /higgs /blender /carousel; audio and edit via /edit",
             "Render, then media-qa; QA must pass before approval",
-            "Approve the exact version, then produce ship (CDN video/<brand>/<ID>/) — dry-run first",
+            "Accepting the plan locks the 14 stages into 00-plan/; approve the exact version, then produce ship (CDN video/<brand>/<ID>/) — dry-run first",
             "Separate publish approval, then /publish and /facebook; one dept:video issue tracks it"
           ],
           "connects": [
@@ -7911,6 +7911,53 @@
         {
           "keyword": "measure",
           "action": "Reach and attribution read back per post"
+        }
+      ]
+    },
+    {
+      "id": "film-line",
+      "name": "Film Line",
+      "description": "A film from one-line brief to the channels — the production ledger, then the right tool per stage",
+      "steps": [
+        {
+          "keyword": "produce",
+          "action": "Open the project: brand, category, subject, and the 14-stage ledger"
+        },
+        {
+          "keyword": "draft",
+          "action": "Arabic script first, English mirrored; script sign-off before anything heavy"
+        },
+        {
+          "keyword": "shoot",
+          "action": "Still frames of the real product pages the film claims"
+        },
+        {
+          "keyword": "record",
+          "action": "Screen-record the real flows, with fake devices and no real camera"
+        },
+        {
+          "keyword": "blender",
+          "action": "3D scenes and flythroughs, rendered headless"
+        },
+        {
+          "keyword": "higgs",
+          "action": "Generated scenes and stills, marked illustrative"
+        },
+        {
+          "keyword": "motion graphic",
+          "action": "HyperFrames titles, captions and overlays from code"
+        },
+        {
+          "keyword": "edit",
+          "action": "Cut footage, voice and music into one timeline, then render"
+        },
+        {
+          "keyword": "approve",
+          "action": "Human gates: look, then the exact version"
+        },
+        {
+          "keyword": "publish",
+          "action": "Separate publish approval, then the channels"
         }
       ]
     },

@@ -198,6 +198,33 @@
         "lab"
       ],
       "description": "Blender Lab's official MCP (projects.blender.org/lab/blender_mcp v1.0.3, GPL, sha256-pinned): version-matched Blender 5.x Python API + manual full-text search, background-Blender exec on a .blend, datablock/object/missing-file summaries, screenshots and renders of an open Blender (add-on on 127.0.0.1:9878). Install/update: blender.sh install-lab. The /blender skill's lookup tool."
+    },
+    "elevenlabs": {
+      "type": "http",
+      "url": "https://api.elevenlabs.io/v1/mcp",
+      "description": "ElevenLabs hosted MCP (OAuth; docs https://elevenlabs.io/docs/eleven-api/resources/mcp-server; skills repo elevenlabs/skills, MIT): voice in Arabic and English, dubbing, sound effects, music.",
+      "$skipRegistration": true,
+      "$skipRegistration_why": "Staged 2026-11-23 for the video line: paid, so it needs a /decide entry and Abdout's approval before registration. The free plan (10,000 credits a month) is non-commercial with attribution only, so on it the server may only voice an internal animatic; the Starter plan ($6 a month) carries the commercial licence. The day it is approved: `claude mcp add --transport http elevenlabs https://api.elevenlabs.io/v1/mcp`, sign in through OAuth, then remove this flag."
+    },
+    "fal": {
+      "type": "http",
+      "url": "https://mcp.fal.ai/mcp-relay",
+      "description": "fal hosted MCP (OAuth; docs https://fal.ai/docs/documentation/setting-up/mcp): Seedance, Kling, Veo by API and Flux under one account.",
+      "$skipRegistration": true,
+      "$skipRegistration_why": "Staged 2026-11-23 for the video line: paid per run, so it needs a /decide entry and Abdout's approval before registration. The day it is approved: `claude mcp add --transport http --scope user fal https://mcp.fal.ai/mcp-relay`, sign in through OAuth, then remove this flag."
+    },
+    "minimax": {
+      "command": "uvx",
+      "args": [
+        "minimax-mcp",
+        "-y"
+      ],
+      "env": {
+        "MINIMAX_API_KEY": "${MINIMAX_API_KEY}"
+      },
+      "description": "MiniMax's official MCP (MiniMax-AI/MiniMax-MCP, MIT): voice, image and video. The run command is the one in the repo README; MINIMAX_API_HOST (https://api.minimax.io or https://api.minimaxi.com) is also required there.",
+      "$skipRegistration": true,
+      "$skipRegistration_why": "Staged 2026-11-23 for the video line: pay per use, so it needs a /decide entry and Abdout's approval before registration, and a MINIMAX_API_KEY in the Keychain. Using its tools may incur costs. Then remove this flag and re-run setup.sh."
     }
   },
   "$comment": "kun's MCP catalog — the DECLARED fleet, and the input health.sh counts. Claude Code does NOT read this file; setup.sh copies it to ~/.claude/mcp.json (also not read, but health.sh requires it and derives ROLE from it) and separately registers each entry for real via `claude mcp add-json -s user`. Pruned 2026-08-19 from 25 to 17: eight entries were unregistered not by oversight but because they are broken — design-system-analyzer (npm 404 (@yajihum/design-system-mcp)); memory-bank (npm 404 (@memory-bank/mcp-server)); algolia (local binary ~/.claude/bin/algolia-mcp is missing); gcloud (shell wrapper, speaks no JSON-RPC — not an MCP server); keychain (shell wrapper, speaks no JSON-RPC — not an MCP server); vercel (deliberate dedup — the claude.ai Vercel connector already covers it); neon (case-collides with the live user-scope `Neon`; wrong transport besides); postgres (@bytebase/dbhub — wrong driver, redundant with Neon). Every remaining entry documents a server that is live at user scope today. Asymmetry left deliberately unfixed: Neon, browser, browser-headed and cloudflare-docs are live at user scope but absent here; adding them changes project_mcp again for no gain. (higgs left user scope on 2026-09-28 — its skill runs the higgsfield CLI and says never to detour through the MCP; 1 call in 60 days.) The seven entries flagged $skipRegistration on 2026-09-28 were removed from registration on 2026-09-26; the flag stops an interactive setup.sh from re-adding them. The per-server `description` field is kun's own annotation and is stripped (del(.description)) before registration — it is not part of the MCP config schema. rea (morluto/rea, reverse engineering) is deliberately NOT registered (added 2026-10-21): the /reverse skill drives its CLI through .claude/skills/reverse/scripts/rea.sh (Node 24 shim, pinned 6.7.0), so no extra MCP process per session. If an MCP lane is ever wanted: claude mcp add rea -s user -- npx -y -p node@24 -p rea-agents@6.7.0 -- rea mcp. Never run `rea setup` — it rewrites agent configs kun owns."

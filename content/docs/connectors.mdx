@@ -16,7 +16,7 @@ badge and one line per card, filtered by category.
 | **Plugin** | A Claude Code bundle: skills, agents, and usually an MCP server | `/plugin` in Claude Code, from a marketplace such as `claude-plugins-official` |
 | **Local MCP** | A server kun registers on the machine | `.claude/mcp.json` is the catalog. `setup.sh` runs `claude mcp add` for each one, and the Machine app switches them on and off under `.claude → mcp` |
 
-The list in the app lives in `machine/src/components/connectors/registry.ts`. Edit it there and
+The list in the app lives in `machine/src/components/plugins/registry.ts`. Edit it there and
 update this page with it. "Installed" on a card means one of its names shows up in `claude mcp list`.
 
 ## Creative
@@ -30,7 +30,27 @@ update this page with it. "Installed" on a card means one of its names shows up 
 | **Canva** | Plugin | Searches, creates, fills and exports designs, with brand checks and social resizes | `canva` |
 | **Adobe for creativity** | Plugin | Adobe's creative skills | `adobe` |
 | **After Effects** / **Premiere Pro** | Local MCP | Controls the Adobe apps through a bridge panel, for when a client file needs them | `after effects`, `premiere` |
+| **HyperFrames** | Plugin (`hyperframes`) | Motion graphics, title cards and captions rendered from HTML. Its `media-use` skill finds music, effects and stock images with free local tools. Free, installed | `hyperframes`, `motion graphic`, `title card` |
+| **video-use** | Skill | Edits real footage by conversation: transcribe, cut, grade, burn subtitles. Free, installed | `video-use`, `rough cut` |
 | **Claude Design** | Connector | Anthropic Labs canvas: design-system sync and handoff to code. Sign in with `/design-login` | `claude design` |
+
+## Staged for the video line
+
+Listed so the Video department can see what exists. None of these is installed or signed in.
+Each one needs a decision, and a `/decide` entry, before it is switched on.
+
+| | Kind | Adds | Cost |
+|---|---|---|---|
+| **ElevenLabs** | Hosted MCP (OAuth) + [skills](https://github.com/elevenlabs/skills) | Voice in Arabic and English, dubbing, sound effects, music | Free plan: 10,000 credits a month, non-commercial with attribution only. Starter: $6 a month, carries the commercial licence |
+| **fal** | Hosted MCP (OAuth) | Seedance, Kling, Veo by API and Flux under one account | Pay per run |
+| **Google GenMedia** | [Repo](https://github.com/GoogleCloudPlatform/genmedia-creative-studio) (Apache-2.0) | MCP servers for Veo, Imagen, Lyria and Chirp 3 HD | Needs a Google Cloud project with billing |
+| **Epidemic Sound** | MCP (beta, [docs](https://developers.epidemicsound.com/docs/mcp)) | Licensed music and effects | Needs a subscription |
+| **Runway** | [Skills](https://github.com/runwayml/skills) (MIT) | Generated video | Credits |
+| **MiniMax** | [Repo](https://github.com/MiniMax-AI/MiniMax-MCP) (MIT, official) | Voice, image and video | Pay per use |
+| **DaVinci Resolve** | [Repo](https://github.com/samuelgursky/davinci-resolve-mcp) (MIT) | Grading and finishing | Direct scripting needs DaVinci Resolve Studio ($295 once). Its README says the free edition is reached only through a script that runs inside Resolve, and that this stops at Resolve 21.1 |
+
+ElevenLabs, fal and MiniMax are also staged in `.claude/mcp.json`, flagged `$skipRegistration`.
+The free ElevenLabs plan may only voice an internal animatic.
 
 ## Developer tools
 
