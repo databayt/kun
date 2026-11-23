@@ -414,6 +414,23 @@ test("lock --all keeps what a stage already decided; a plan's unknown tool falls
   assert.equal(ljson(id, "00-plan/08-audio.spec.json").decisions.voice, "none")
 })
 
+test("a stage re-locked after it was done makes the later stages wait until it is redone", () => {
+  const id = newFilm("lockstale")
+  assert.equal(lp("lock", id, "--all", "--no-sync").status, 0)
+  // request is done at init; changing its spec now marks the lock as changed
+  assert.equal(lp("lock", id, "request", "--set", "ratio=16:9", "--no-sync").status, 0)
+  assert.equal(lproject(id).locks.request.changed, true)
+  const f = join(lockHome, id, "02-research/product-research.md")
+  mkdirSync(dirname(f), { recursive: true })
+  writeFileSync(f, "# research\n")
+  const refused = lp("advance", id, "research", "--file", "02-research/product-research.md")
+  assert.notEqual(refused.status, 0)
+  assert.match(refused.stderr, /re-locked after it was done/)
+  assert.equal(lp("advance", id, "request", "--file", "01-brief/request.json").status, 0)
+  assert.equal(lproject(id).locks.request.changed, undefined)
+  assert.equal(lp("advance", id, "research", "--file", "02-research/product-research.md").status, 0)
+})
+
 test("advance refuses a heavy stage with no lock, passes after lock, --force bypasses", () => {
   const id = newFilm("lockgate")
   const f = join(lockHome, id, "06-production/visual-manifest.json")

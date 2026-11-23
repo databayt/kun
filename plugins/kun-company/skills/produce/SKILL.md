@@ -108,7 +108,7 @@ issue; the film issue closes after publish. Tests: `node --test scripts/produce.
 ## Lock the plan (`00-plan/`)
 
 A **spec** is one stage's decisions written down, a **lock** is a spec recorded in `project.json → locks`, the **plan** is all 14 compiled in order.
-Decisions of a stage = `settings.json` default ← `plan.picks` ← `plan.stages` ← `--set` ← `--spec`. Local writes only, safe to repeat, no `--create`.
+Decisions of a stage = `settings.json` default ← its existing spec ← `plan.picks` ← `plan.stages` ← `--set` ← `--spec`. Local writes only, safe to repeat, no `--create`. A tool id the plan gets wrong falls back to the stage's own (a warning); in a `--spec` it is an error. `08-render` paths carry no `work/` link (masters ship to the video tier).
 
 | Command | What it does |
 | --- | --- |
@@ -116,6 +116,7 @@ Decisions of a stage = `settings.json` default ← `plan.picks` ← `plan.stages
 | `lock <ID> <stage> [--set k=v]… [--spec <file>]` | one stage; a `--set` key the stage does not own is an error; `--spec` is the `kun-spec` block and its `stage` must match; add `--by`, `--no-sync` (skip the film-issue rewrite), `--json` |
 | `unlock <ID> <stage>` / `plan <ID> [--json]` | drop one lock (specs stay) / recompile the plan |
 | `advance <ID> visual\|audio\|edit\|render …` | refused without a lock (after the script gate) unless `--force` |
+| `advance <ID> <any later stage>` | refused while an earlier stage's lock says `changed` (its spec was re-locked after it was done): redo that stage first, which clears the mark; `--force` skips |
 | `url <ID> --path <rel>` | the CDN URL of a film file: `~/media/_projects/<ID>/<rel>` = `work/<ID>/ref/<rel>` |
 | `mirror <ID> [--stage <s>] [--create]` | uploads the stage folder(s) and `00-plan/` under that rule plus an `index.json` per folder; draft without `--create`; never `08-render/**`, fonts or files over 50 MB (each listed with its reason) |
 

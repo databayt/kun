@@ -463,6 +463,9 @@ function advance(id, stage) {
   if (stage === "publish" && !approval(p, "publish")) die("publish needs its own approval first: produce approve <ID> --gate publish --version Vnnn --by <login> --destination facebook")
   if (HEAVY.has(stage) && !approval(p, "script") && !has("force")) die(`"${stage}" is expensive production: sign the script off first (produce approve <ID> --gate script --version ${p.version} --by <login>), or pass --force`)
   if (HEAVY.has(stage) && !p.locks?.[stage] && !has("force")) die(`"${stage}" is not locked: lock its spec first (produce lock ${id} ${stage} [--set k=v]…, or produce lock ${id} --all), or pass --force`)
+  // a stage whose spec was re-locked after it was done must be redone first: the stages after it wait for it
+  const stale = STAGE_KEYS.slice(0, STAGE_KEYS.indexOf(stage)).find((k) => p.locks?.[k]?.changed)
+  if (stale && !has("force")) die(`"${stale}" was re-locked after it was done: redo it first (produce advance ${id} ${stale} --file …), or pass --force`)
   const file = opt("file")
   if (!file) die(`advance needs --file <deliverable> (expected ${STAGES.find((s) => s.key === stage).file})`, 2)
   const abs = resolveIn(p, file)
@@ -473,6 +476,8 @@ function advance(id, stage) {
     const errs = [...validate(sl, schemaOf("shot-list")), ...shotListRules(sl)]
     if (errs.length) die(`shot list invalid:\n  ${errs.join("\n  ")}`)
   }
+  // redoing a stage settles a spec that changed after it was done
+  if (p.locks?.[stage]?.changed) delete p.locks[stage].changed
   if (perVariant) {
     const v = targets[0]
     if (stage === "publish" && !vdone(p, v.id, "cdn")) die(`publish: ${v.id} is not on the CDN yet (produce ship <ID> --variant ${v.id})`)
