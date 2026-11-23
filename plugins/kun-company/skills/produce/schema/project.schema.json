@@ -13,7 +13,7 @@
     "title": { "type": "string" },
     "langs": { "type": "array", "minItems": 1, "items": { "type": "string", "enum": ["ar", "en"] } },
     "version": { "type": "string", "pattern": "^V\\d{3}$" },
-    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)?$", "$comment": "optional stable CDN slug <type>/<subject>: video/<cdn>/<slug>/<variant>/…; default = <type>/<subject>" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)?$", "$comment": "optional stable CDN slug <type>/<subject>: <cdn>/video/<slug>/<variant>/…; default = <type>/<subject>" },
     "markets": { "type": "array", "minItems": 1, "items": { "type": "string" }, "$comment": "optional market ids from content/media/markets.json (sa ae eg sd); presence switches the project to per-variant stages" },
     "variants": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["id", "lang"], "properties": { "id": { "type": "string" }, "market": { "type": ["string", "null"] }, "lang": { "type": "string", "enum": ["ar", "en"] } } }, "$comment": "<market>-<lang>; without markets, one per language with market null and id = lang" },
     "variantStages": { "type": "object", "properties": {}, "$comment": "variant id -> {audio|edit|render|qa|approval|cdn|publish: {status,file,at,sha?,inputsHash?}}" },

@@ -124,7 +124,7 @@ Decisions of a stage = `settings.json` default ← its existing spec ← `plan.p
 
 ## Identity
 
-**brand** = the production line, by its full name (hogwarts / mkan / databayt — never a code; CDN `video/<brand>/`). **identity** = the brand-kit
+**brand** = the production line, by its full name (hogwarts / mkan / databayt — never a code; CDN `<brand>/video/`). **identity** = the brand-kit
 face that appears on film — name, wordmark, colors. It defaults to the brand; set `init --identity balqalam` (or
 `set <ID> identity balqalam`) to make a hogwarts-line production under Balqalam, e.g. the intro film for school
 owners. `brand.mjs`, captions and the end card read `brand-kit[identity]`; a `balqalam` piece never carries the
@@ -138,18 +138,18 @@ colors, `produce.{direction,voiceNote,subtitle,lowerThird,intro,outro}`. Unknown
 
 ## CDN (`content/docs/cdn.mdx`, `media.mdx`)
 
-Variant projects (stable slug, URL known before the render, e.g. `https://cdn.databayt.org/video/hogwarts/intro/sa-ar/fb-9x16.mp4`):
+Variant projects (stable slug, URL known before the render, e.g. `https://cdn.databayt.org/hogwarts/video/intro/sa-ar/fb-9x16.mp4`):
 
 ```
-video/<cdn>/<slug>/<variant>/{fb-9x16.mp4, poster.webp, <lang>.vtt}   stable — overwritten on re-approval, invalidated
-video/<cdn>/<slug>/manifest.json                                       every shipped variant (max-age 60)
-video/<cdn>/<slug>/_v/<Vnnn>/<variant>/…                               immutable archive per version
+<cdn>/video/<slug>/<variant>/{fb-9x16.mp4, poster.webp, <lang>.vtt}   stable — overwritten on re-approval, invalidated
+<cdn>/video/<slug>/manifest.json                                       every shipped variant (max-age 60)
+<cdn>/video/<slug>/_v/<Vnnn>/<variant>/…                               immutable archive per version
 ```
 
 `ship` refuses when another film (different category/subject) already owns the brand+slug. Legacy projects:
 
 ```
-video/<brand>/<ID>/{master.mp4, fb-16x9.mp4, fb-9x16.mp4, fb-1x1.mp4, <lang>.vtt, poster.webp, manifest.json}
+<brand>/video/<ID>/{master.mp4, fb-16x9.mp4, fb-9x16.mp4, fb-1x1.mp4, <lang>.vtt, poster.webp, manifest.json}
 video/index.json     product · feature · version · approved · current · urls   (approved videos only)
 ```
 

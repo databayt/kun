@@ -328,7 +328,7 @@ uploaded, then an `index.json` is written in the stage folder and uploaded too:
 | --- | --- | --- |
 | Working files | `work/<film>/ref/<path>` | A film's folder, mirrored. Also the references of a work order |
 | Work-order submissions | `work/<film>/<issue number>/<file>` | What a teammate submits for one order |
-| The shipped master | `video/<brand>/<type>/<subject>/<variant>/fb-9x16.mp4`, with an archive in `_v/<Vnnn>/` | The approved film. See [CDN keys and the URL grammar](#cdn-keys-and-the-url-grammar) |
+| The shipped master | `<brand>/video/<type>/<subject>/<variant>/fb-9x16.mp4`, with an archive in `_v/<Vnnn>/` | The approved film. See [CDN keys and the URL grammar](#cdn-keys-and-the-url-grammar) |
 
 The tiers are described on the [CDN](/docs/cdn#work-tier-work) page.
 
@@ -368,9 +368,9 @@ A type the brand does not have is refused, and the brand's types are listed. The
 | --- | --- | --- |
 | Film id | `<brand>-<type>-<subject>-v<NNN>` | `hogwarts-feature-attendance-v001` |
 | Film folder | `~/media/_projects/<film id>/` | `~/media/_projects/hogwarts-feature-attendance-v001/` |
-| Stable CDN key | `video/<brand>/<type>/<subject>/<market>-<lang>/fb-9x16.mp4` | `video/hogwarts/feature/attendance/sd-ar/fb-9x16.mp4` |
-| Manifest | `video/<brand>/<type>/<subject>/manifest.json` | `video/hogwarts/feature/attendance/manifest.json` |
-| Archive | `video/<brand>/<type>/<subject>/_v/<Vnnn>/<market>-<lang>/…` | `video/hogwarts/feature/attendance/_v/V001/sd-ar/fb-9x16.mp4` |
+| Stable CDN key | `<brand>/video/<type>/<subject>/<market>-<lang>/fb-9x16.mp4` | `hogwarts/video/feature/attendance/sd-ar/fb-9x16.mp4` |
+| Manifest | `<brand>/video/<type>/<subject>/manifest.json` | `hogwarts/video/feature/attendance/manifest.json` |
+| Archive | `<brand>/video/<type>/<subject>/_v/<Vnnn>/<market>-<lang>/…` | `hogwarts/video/feature/attendance/_v/V001/sd-ar/fb-9x16.mp4` |
 | URL | `https://cdn.databayt.org/` + the key | |
 | Work tier | `work/<film id>/ref/<path>` and `work/<film id>/<issue>/<file>` | |
 
@@ -382,7 +382,7 @@ $P types --brand hogwarts
 
 ```text
 hogwarts  id hogwarts-<type>-<subject>-v<NNN>
-  url https://cdn.databayt.org/video/hogwarts/<type>/<subject>/<market>-<lang>/fb-9x16.mp4
+  url https://cdn.databayt.org/hogwarts/video/<type>/<subject>/<market>-<lang>/fb-9x16.mp4
   introduction  Introduction  2:00 9:16 Facebook   subject: who it is for or which cut: main, owners, long
   feature       Feature       1:00 9:16 Facebook   subject: the product block: attendance, timetable, exams, finance, admission
   tutorial      Tutorial      2:00 16:9 YouTube    subject: the app route or flow: students-add
@@ -402,14 +402,14 @@ $P url hogwarts-feature-attendance-v001
 
 ```text
 sd-ar  (sd, ar)
-  video    https://cdn.databayt.org/video/hogwarts/feature/attendance/sd-ar/fb-9x16.mp4
-  poster   https://cdn.databayt.org/video/hogwarts/feature/attendance/sd-ar/poster.webp
-  captions https://cdn.databayt.org/video/hogwarts/feature/attendance/sd-ar/ar.vtt
-  archive  https://cdn.databayt.org/video/hogwarts/feature/attendance/_v/V001/sd-ar/fb-9x16.mp4   (V001, immutable)
+  video    https://cdn.databayt.org/hogwarts/video/feature/attendance/sd-ar/fb-9x16.mp4
+  poster   https://cdn.databayt.org/hogwarts/video/feature/attendance/sd-ar/poster.webp
+  captions https://cdn.databayt.org/hogwarts/video/feature/attendance/sd-ar/ar.vtt
+  archive  https://cdn.databayt.org/hogwarts/video/feature/attendance/_v/V001/sd-ar/fb-9x16.mp4   (V001, immutable)
 sa-ar  (sa, ar)
-  video    https://cdn.databayt.org/video/hogwarts/feature/attendance/sa-ar/fb-9x16.mp4
+  video    https://cdn.databayt.org/hogwarts/video/feature/attendance/sa-ar/fb-9x16.mp4
   ...
-manifest https://cdn.databayt.org/video/hogwarts/feature/attendance/manifest.json
+manifest https://cdn.databayt.org/hogwarts/video/feature/attendance/manifest.json
 ```
 
 Asking for a type a brand does not have:
@@ -466,20 +466,20 @@ script and piece and stops; a real build needs the script sign-off.
 ## CDN keys and the URL grammar
 
 ```text
-https://cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/<variant>/fb-9x16.mp4   stable: always the approved latest
+https://cdn.databayt.org/<brand-cdn>/video/<type>/<subject>/<variant>/fb-9x16.mp4   stable: always the approved latest
                                                           /<variant>/poster.webp, <lang>.vtt
-https://cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/manifest.json          every shipped version, sha, approvedAt
-https://cdn.databayt.org/video/<brand-cdn>/<type>/<subject>/_v/V001/<variant>/…    immutable archive per version
+https://cdn.databayt.org/<brand-cdn>/video/<type>/<subject>/manifest.json          every shipped version, sha, approvedAt
+https://cdn.databayt.org/<brand-cdn>/video/<type>/<subject>/_v/V001/<variant>/…    immutable archive per version
 ```
 
-Example: `https://cdn.databayt.org/video/hogwarts/feature/attendance/sa-ar/fb-9x16.mp4`. The slug is `<type>/<subject>`
+Example: `https://cdn.databayt.org/hogwarts/video/feature/attendance/sa-ar/fb-9x16.mp4`. The slug is `<type>/<subject>`
 (one slash, lowercase letters, digits and hyphens). It is set by `init` from the type and the subject, or by `init --slug`,
 so the URL is known before anything renders. `ship <ID> --variant <v>|--all` uploads the `_v/` archive first,
 then the stable keys, then the merged manifest, and refuses if another film already owns the brand and slug. `--dry-run`
 prints the key list only. Projects without markets keep the legacy keys:
 
 ```text
-video/<brand>/<ID>/{master.mp4, fb-16x9.mp4, fb-9x16.mp4, fb-1x1.mp4, <lang>.vtt, poster.webp, manifest.json}
+<brand>/video/<ID>/{master.mp4, fb-16x9.mp4, fb-9x16.mp4, fb-1x1.mp4, <lang>.vtt, poster.webp, manifest.json}
 video/index.json        approved videos only
 ```
 

@@ -295,7 +295,7 @@ test("status --json: stage list, variant grid, gates, next, urls, and the shot-l
   assert.equal(j.next, "research")
   assert.deepEqual(Object.keys(j.gates), ["script", "look", "version", "publish"])
   assert.equal(j.urls.length, 1)
-  assert.match(j.urls[0].url, /^https:\/\/cdn\.databayt\.org\/video\/hogwarts\/introduction\/strip\/sd-ar\/fb-9x16\.mp4/)
+  assert.match(j.urls[0].url, /^https:\/\/cdn\.databayt\.org\/hogwarts\/video\/introduction\/strip\/sd-ar\/fb-9x16\.mp4/)
   assert.equal(j.paths.shot_list, join(home, id, "04-storyboard/shot-list.json"))
   assert.equal(j.paths.asset_manifest, join(home, id, "05-assets/asset-manifest.json"))
   assert.deepEqual([j.files.shot_list, j.files.asset_manifest, j.files.script], [true, false, false])
@@ -549,8 +549,8 @@ test("types: alias, default subject, slug <type>/<subject>, refusals, predicted 
   // the predicted URL follows the rule
   const f = JSON.parse(sp("init", "--brand", "hogwarts", "--category", "feature", "--subject", "attendance", "--lang", "ar", "--markets", "sd").stdout).id
   assert.equal(f, "hogwarts-feature-attendance-v001")
-  assert.match(sp("url", f).stdout, /https:\/\/cdn\.databayt\.org\/video\/hogwarts\/feature\/attendance\/sd-ar\/fb-9x16\.mp4/)
-  assert.match(sp("url", f).stdout, /manifest https:\/\/cdn\.databayt\.org\/video\/hogwarts\/feature\/attendance\/manifest\.json/)
+  assert.match(sp("url", f).stdout, /https:\/\/cdn\.databayt\.org\/hogwarts\/video\/feature\/attendance\/sd-ar\/fb-9x16\.mp4/)
+  assert.match(sp("url", f).stdout, /manifest https:\/\/cdn\.databayt\.org\/hogwarts\/video\/feature\/attendance\/manifest\.json/)
   // set slug accepts the slash form, and a ship dry-run needs only the approval (the slug path is not the blocker)
   assert.equal(sp("set", f, "slug", "feature/attendance-2").status, 0)
   assert.match(sp("url", f).stdout, /feature\/attendance-2\/sd-ar/)

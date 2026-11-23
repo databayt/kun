@@ -41,10 +41,10 @@
 // render qa approval cdn publish are per variant (project.json variantStages[<variant>][<stage>]).
 // CDN keys, variant mode (stable slug, not the dated ID):
 //   (slug = <type>/<subject>)
-//   video/<cdn>/<slug>/<variant>/{fb-9x16.mp4,poster.webp,<lang>.vtt}   stable, overwritten on re-approval + invalidated
-//   video/<cdn>/<slug>/manifest.json                                     every shipped variant
-//   video/<cdn>/<slug>/_v/<Vnnn>/<variant>/…                             immutable archive per version
-// Legacy keys (projects without markets): video/<brand>/<ID>/{master.mp4,fb-16x9.mp4,…,manifest.json}, plus video/index.json.
+//   <cdn>/video/<slug>/<variant>/{fb-9x16.mp4,poster.webp,<lang>.vtt}   stable, overwritten on re-approval + invalidated
+//   <cdn>/video/<slug>/manifest.json                                     every shipped variant
+//   <cdn>/video/<slug>/_v/<Vnnn>/<variant>/…                             immutable archive per version
+// Legacy keys (projects without markets): <brand>/video/<ID>/{master.mp4,fb-16x9.mp4,…,manifest.json}, plus video/index.json.
 // The existing <ns>/<lang>/<flow>/video.mp4 keys are untouched (publish.mjs modes unchanged).
 import { spawnSync } from "node:child_process"
 import { copyFileSync, existsSync, mkdtempSync, mkdirSync, rmSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs"
@@ -1089,8 +1089,8 @@ function submitCmd(ref, files) {
 }
 
 // ---- CDN tier --------------------------------------------------------------------------------
-const cdnBase = (p, kit) => `video/${kit.cdn}/${p.id}`
-const stableBase = (p, kit) => `video/${kit.cdn}/${slugOf(p)}` // variant mode: stable slug, never the dated ID
+const cdnBase = (p, kit) => `${kit.cdn}/video/${p.id}`
+const stableBase = (p, kit) => `${kit.cdn}/video/${slugOf(p)}` // brand first: <brand>/video/<type>/<subject>; never the dated ID
 const archiveBase = (p, kit) => `${stableBase(p, kit)}/_v/${p.version}`
 const cdnUrl = (key, sha) => `https://${CDN_HOST}/${key}${sha ? `?v=${sha}` : ""}`
 function shipPlan(p, kit) {
@@ -1175,7 +1175,7 @@ function ship(id) {
     const url = cdnUrl(x.key, sha)
     if (x.file.endsWith(".mp4")) {
       // videos go through publish.mjs (verify HEAD, sha skip, CloudFront invalidation, codec probing); no product manifest is written
-      const ns = "video", k = x.key.slice(ns.length + 1).replace(/\.mp4$/, "")
+      const ns = x.key.split("/")[0], k = x.key.slice(ns.length + 1).replace(/\.mp4$/, "") // ns = <brand>, key = video/…
       const r = spawnSync("node", [PUBLISH, "--ns", ns, "--key", k, "--id", p.id, ...(dry ? ["--dry-run"] : []), x.file], { encoding: "utf8" })
       if (r.status !== 0) die(`publish.mjs failed for ${x.key}: ${r.stderr.slice(-600)}`)
       report.push({ role: x.role, key: x.key, url, via: "publish.mjs", dry })
@@ -1291,8 +1291,8 @@ function shipVariants(p) {
   for (const x of plan) {
     if (x.file.endsWith(".mp4")) {
       // publish.mjs key mode: HEAD-verified, sha-skipping, overwrite + CloudFront invalidation, codec probing
-      const k = x.key.slice("video/".length).replace(/\.mp4$/, "")
-      const r = spawnSync("node", [PUBLISH, "--ns", "video", "--key", k, "--id", `${p.id}/${x.variant}`, x.file], { encoding: "utf8" })
+      const ns = x.key.split("/")[0], k = x.key.slice(ns.length + 1).replace(/\.mp4$/, "") // ns = <brand>
+      const r = spawnSync("node", [PUBLISH, "--ns", ns, "--key", k, "--id", `${p.id}/${x.variant}`, x.file], { encoding: "utf8" })
       if (r.status !== 0) die(`publish.mjs failed for ${x.key}: ${r.stderr.slice(-600)}`)
     } else {
       const put = putObject(x.file, x.key, x.tier === "archive" ? IMMUTABLE : STABLE)
