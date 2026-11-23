@@ -5,7 +5,7 @@ description: How a film starts in the Kun app, step by step. Phase 1 covers ever
 
 ## Phase 1 — the flow
 
-From opening Kun to an accepted plan, in four parts. Gold is what you do, teal is a Claude run, red
+From opening Kun to an accepted, locked plan, in four parts. Gold is what you do, teal is a Claude run, red
 is a failure path, blue hands over to the next part. The design behind the options and the prompts
 is on the [Station](/docs/station) page.
 
@@ -15,7 +15,7 @@ is on the [Station](/docs/station) page.
 %%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
 flowchart TD
     A(["You open Kun"]):::you
-    A --> B["Home screen<br/>input box · Department ▾ · Repo ▾<br/>health light · 3 options"]
+    A --> B["Home screen<br/>input box · gear · Department ▾ · Repo ▾<br/>health light · 3 options"]
     B --> P1[["Load the pack<br/>departments/video/pack.json"]]
     B --> H1[["Health check<br/>produce.mjs readiness"]]
     B --> S1[["Ask the board<br/>station.mjs board"]]
@@ -31,6 +31,9 @@ flowchart TD
     S2 --> O
     O -- "tap" --> O1(["You tap an option<br/>Continue production · New film · Video script"]):::you
     O -- "type" --> T1(["You type in any language<br/>and press the sparkle button"]):::you
+    O -- "gear" --> G1(["You pick in the settings menu<br/>and press the round button"]):::you
+    G1 --> G2["station.mjs compose, no model<br/>the chat shows one line<br/>that opens to the full prompt"]
+    G2 --> N3(["→ Send"]):::done
     O1 --> O2["station.mjs fill, no model, no spinner<br/>the full prompt fills the box<br/>its route is set silently<br/>nothing is sent"]
     O2 --> N2(["→ Send"]):::done
     T1 --> T2["station.mjs match<br/>a formula is looked for first<br/>the model refine is the fallback"]
@@ -242,14 +245,15 @@ flowchart TD
     L --> PR1["Gathers: project · brand<br/>markets · captures · references"]:::claude
     PR1 --> PR2["Lists actions that need your OK<br/>each with its command"]:::claude
     PR2 --> PR3["Writes the plan in English<br/>in the reply only, no plan file<br/>brief · journey · first step"]:::claude
-    PR3 --> END["Plan on screen:<br/>Shall I start with …?<br/>one button: Accept"]
+    PR3 --> END["Plan card on screen<br/>14 rows · cost line<br/>Shall I start with …?<br/>one button: Accept"]
     END --> RP(["You type a reply"]):::you
     RP --> RP1["Stays on the plan route<br/>read-only, with --resume<br/>answers or changes the plan"]:::claude
     RP1 --> END
     END --> AC(["You press Accept"]):::you
     AC --> AC1["One fixed message<br/>on the do route, with --resume"]
-    AC1 --> IS["The video agent creates<br/>the film issue<br/>a work order for each piece<br/>given to another person"]:::claude
-    IS --> GH(["Plan accepted and on GitHub<br/>film issue · first work orders<br/>→ phase 2"]):::done
+    AC1 --> LK["produce lock --all --plan<br/>the 14 stages are locked"]
+    LK --> IS["The video agent creates<br/>the film issue<br/>a work order for each piece<br/>given to another person"]:::claude
+    IS --> GH(["Plan accepted, line locked,<br/>film on GitHub<br/>→ phase 2"]):::done
     C1[["started → sessions.json<br/>→ Sessions"]]
     C2[["tool → folded steps<br/>text → the answer live"]]
     L -.-> C1
@@ -268,13 +272,13 @@ A film on the databayt video line is made in the **Kun desktop app** ([Machine](
 The terminal does not render it. The app drives [produce](/docs/produce), the ledger that keeps
 the 14 stages and the human gates.
 
-This page explains the pipeline one phase at a time. **Phase 1** is written; later phases are added
-as they settle.
+This page explains the pipeline one phase at a time. **Phases 1 and 2** are written; later phases
+are added as they settle.
 
 | Phase | From | To |
 | --- | --- | --- |
-| **1 · The front door** | You open Kun | The plan is accepted and on GitHub |
-| 2 · Pre-production | The plan is accepted | The script gate |
+| **1 · The front door** | You open Kun | The plan is accepted, the line is locked, and the film is on GitHub |
+| **2 · The locked line** | The line is locked | The next human gate, then the next one |
 | 3 · Production | Script approved | The version gate |
 | 4 · Delivery | Version approved | CDN and publish |
 
@@ -289,20 +293,22 @@ as they settle.
   length, and the links or paths to read.
 - **A decision on where it runs.** That means the agent, the model, the effort and the permission
   mode. The app makes this choice silently: you never see a selector.
-- **An accepted plan on GitHub.** One film issue that tracks the film, and the first work orders.
-  A *work order* is one request for one person with one deliverable, written as a GitHub issue.
+- **An accepted plan, locked and on GitHub.** All 14 stages are locked, one film issue tracks the
+  film, and the first work orders exist. A *work order* is one request for one person with one
+  deliverable, written as a GitHub issue.
 
-Four words are used from here on. A *formula* is a prompt written in advance for one kind of work.
+Five words are used from here on. A *formula* is a prompt written in advance for one kind of work.
 A *slot* is a blank in a formula that is filled when it is used. A *route* is one way of running a
 request. A *gate* is a point where the work stops until a person says yes; a film has four: script,
-look, version and publish. The [Station](/docs/station) page explains each of them in full.
+look, version and publish. A *lock* is one stage's decisions written down and recorded in the
+film's ledger; Phase 2 explains it. The [Station](/docs/station) page explains each of them in full.
 
 ### Step 0 — You open Kun
 
 You land on the home screen. It shows:
 
 - a greeting,
-- the input box,
+- the input box, with the **gear** inside it (see [The settings menu](#the-settings-menu)),
 - under the box, the **context line**: Department ▾ · Repo ▾ · a health light,
 - under that, **three options**. Each has an icon and a label, and a ✕ appears on hover to take that
   option off the list.
@@ -372,6 +378,9 @@ How the scores are made, and what would put an option in the Waiting place, is i
    (10 s at most), with the values the board attached to the option. The finished prompt appears in
    the box, with the caret at the end.
 3. The formula's route is chosen silently. For New film that is `plan`.
+
+The three home options are the only taps that fill the box. The gear starts a request another way;
+see [The settings menu](#the-settings-menu).
 
 **No model runs, and there is no spinner.** The script fills each slot from a file, from the state
 of the work, or from a default. A slot it cannot fill stays visible in the box as
@@ -642,16 +651,20 @@ times as you like; nothing on the computer or on GitHub changes.
 **Accept turns the plan into work.** One button, **Accept**, sits under the plan once it has
 finished without an error. Pressing it does two things: it moves the chat to the working route (`do`,
 the first route that is not plan mode), and it sends one fixed English message on that route. The
-formula that filled the box says what accepting it means, in its `record` field:
+formula that filled the box says what accepting it means, in its `record` field. Under the plan is
+a **plan card**: 14 rows (stage, tool, gate) and a cost line such as
+`9 stills · 1 Gemini window · 4 of 10 voice requests · $0`. If the agent's plan carries no
+`kun-plan` block, Accept still works: the line is locked from the settings and the defaults, and the
+chat says so in one line.
 
 | The formula's `record` | What the message asks for |
 | --- | --- |
-| `film` (a film plan, such as New film) | Create the production if it does not exist yet. Create the film issue with `produce issue <ID> --create`. For each piece the plan gives to another person, create its work order with `produce order <ID> <formula> --to <login> --create`. Reply with the links, then stop at the next gate |
+| `film` (a film plan, such as New film) | Create the production if it does not exist yet (`produce init`). Lock all 14 stages with `produce lock <ID> --all --plan <file>`. Create the film issue with `produce issue <ID> --create`. For each piece the plan gives to another person, create its work order with `produce order <ID> <formula> --to <login> --create`. Reply with the links, then stop at the next gate |
 | `issue` (a work order) | Create the work order as an issue and reply with its link. Then stop |
 | `none` | Carry out the first step, then stop at the next gate |
 
 **What the video agent does after Accept on a film plan.** Its own instructions have a section for
-this moment. It prints the film issue as a draft, reads it, and then creates it. For each piece the
+this moment. The lock comes first, so the film issue already shows the locks. It prints the film issue as a draft, reads it, and then creates it. For each piece the
 plan gives to another person it prints the work order as a draft and, when nothing is missing,
 creates it. A piece the agent does itself needs no work order: recording the stage ticks it on the
 film issue. It then replies with the links and stops at the next gate.
@@ -670,18 +683,42 @@ A film plan always takes two turns:
 
 The video department works in English: the questions, the plan and the replies. A film's version language (`language`, `dialect`) applies only to the film's own words.
 
-### The production strip
+### The settings menu
 
-Above the chat input, in the video department, a one-line strip shows the open film:
-`▸ intro-cinematic · ●●●●●●○○○○○○○○ 07 visual · script ✔ look ○`. It appears only when a film exists. With several films, a select picks one, and that id fills `{{project}}` in the formulas.
+In the Video department the **gear** is always in the chat box, with a film or without one. It opens
+a menu of six tabs that read as one sentence: **Film · Kind · Audience · Format · Style · Stages**.
 
-Click the strip and it grows upward. The input does not move. It has three tabs:
+| Tab | Clause | What you pick |
+| --- | --- | --- |
+| **Film** | Which film | A new film, or one of the open films |
+| **Kind** | What | Intro film, promo, explainer, tutorial, feature, reel from a video, video script, all versions |
+| **Audience** | For whom | The audience, and the market and language (`sd-ar`) |
+| **Format** | Where | Platform, ratio, length, resolution, frame rate |
+| **Style** | How | The look, the voice, the captions, the music |
+| **Stages** | The line | The 14 stage cards with their locks and gates |
 
-- **Stages**: the 14 stages with their gates.
-- **Scenes**: the shot list against the asset manifest, with a thumbnail for each capture, an icon for 3D, image, capture or video, and a mark on what is missing.
-- **Brand**: the logo, the fonts drawn in their own face, the colour swatches and the voice.
+As you tap, a quiet chip line above the box shows the sentence, for example
+`⇥ Tab · Intro film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice`.
+The tabs are data in kun (`departments/video/settings.json`), so a choice can change without a new
+app. A choice is defined once and names the stage that owns it: the Format and Style tabs and a stage
+card's answers are two views of the same decisions. The design is on the
+[Station](/docs/station#the-settings-menu) page.
 
-The strip has no action buttons. Clicking a stage or a scene fills the box with that stage's or order's formula. The chat is still the only place where anything runs. The strip reads `produce list --json` and `produce status <ID> --json`.
+**Starting a film from the tabs.**
+
+- **The round button** starts the composed request. With the box empty, it sends. The chat shows one
+  short line, the sentence, and the line opens to the full English prompt.
+- **Tab** drops the composed prompt into the box instead, when you want to edit it before sending.
+- **Typed text still works as before**: the chip, Tab, the sparkle button, and the three home
+  options, which fill the box.
+
+Behind the button, one script call, `station.mjs compose`, turns the picks into a formula and its
+values. It is the same switch that typed words go through, so tapping and typing land on the same
+formula. The agent then asks, but skips whatever the tabs already answered, and plans. The plan
+arrives as a plan card (Step 7).
+
+**Once the film is locked**, the tabs show the locked values. Changing one re-locks the stage that
+owns it. For a new film, the tabs are saved on this computer.
 
 ### Why a run is faster now
 
@@ -695,28 +732,120 @@ Why a film exists is also in the prompt now. `departments/_shared/company.md` (t
 
 ### Phase 1 ends here
 
-Phase 1 is done when the plan is accepted and on GitHub: the film issue, and a work order for each
-piece given to another person. Accept is what puts them there, and the film issue's link is the
-proof. Phase 2 starts from those issues.
+Phase 1 is done when the plan is accepted, the line is locked, and the film is on GitHub: all 14
+stages locked, the film issue, and a work order for each piece given to another person. Accept is
+what does all of it, and the film issue's link is the proof. Phase 2 starts from the locks.
 
-### Who is involved
+## Phase 2 — the locked line
 
-| Part | Role in phase 1 | Where it lives |
+**This phase starts when Accept has locked the line.** It succeeds when the film has moved, piece by
+piece, to the next human gate (script, look, version, publish), with every decision it used on record.
+
+Three words. A **spec** is one stage's decisions written down: what will be made, with which tool,
+from which inputs, into which files. A **lock** is a spec recorded in the film's ledger with who,
+when and a hash. The **plan** is all 14 locked specs compiled into one ordered list. A lock freezes
+a decision before work; a gate approves a result after it.
+
+**What Accept leaves behind.** Every stage card shows a lock. On disk, the film has a new folder at
+the top, `~/media/_projects/<film>/00-plan/`, with one spec for each stage, `plan.json` and
+`plan.md`. [Produce](/docs/produce#lock-the-line) lists the files.
+
+```mermaid
+%%{init: {"fontFamily": "Geist, Arial, sans-serif", "themeVariables": {"fontSize": "15px", "fontFamily": "Geist, Arial, sans-serif"}, "flowchart": {"wrappingWidth": 230, "nodeSpacing": 30, "rankSpacing": 38, "padding": 10}}}%%
+flowchart TD
+    A(["The line is locked"]):::done
+    A --> B(["You tap a stage card"]):::you
+    B --> C["station.mjs stage, no model<br/>the stage in the chat area<br/>its locked choices<br/>its standard choices as answers"]
+    C --> D{"What do you do?"}
+    D -- "pick another answer" --> E["produce lock --set, by script<br/>the stage is re-locked at once<br/>no model"]
+    D -- "Chat about this<br/>or type" --> F["The video agent, read-only<br/>video.spec.stage<br/>may ask more"]:::claude
+    F --> G["Ends with a kun-spec block<br/>the proposed spec"]:::claude
+    G --> H(["You press Lock"]):::you
+    H --> E
+    E --> I(["You press Continue production"]):::you
+    I --> J["All 14 locked?<br/>video.film.continue →<br/>video.film.run"]
+    J --> K["Each piece briefed by a<br/>filled order formula<br/>sub-agent, teammate or script"]:::claude
+    K --> L(["Stops at the next human gate<br/>script · look · version · publish"]):::done
+
+    classDef you fill:#3b2f1e,stroke:#b58a3c,color:#f5e6c8;
+    classDef claude fill:#12312e,stroke:#2f7d72,color:#c6e8e2;
+    classDef ok fill:#16301c,stroke:#3c8a4f,color:#cfeed7;
+    classDef bad fill:#2e1a16,stroke:#a6432f,color:#f0d2c9;
+    classDef done fill:#1d2540,stroke:#4a63b5,color:#d4dcf5;
+```
+
+### Tap a stage card
+
+The panel closes, and nothing touches the box. The chat area shows that stage: its number and name,
+its locked choices, and the standard choices as tappable answers. This is the question wizard you
+already use. The script writes it from `departments/video/stages.json`, and no model runs.
+
+- **Pick another answer.** The stage is re-locked by script, at once, with no model. When the stage
+  was already done, its lock is recorded as `changed`, and the stages after it wait until that
+  stage is redone.
+- **Chat about this, or type.** The video agent joins, read-only, on the formula `video.spec.stage`.
+  It may ask more questions and proposes a new spec. Its turn ends with a `kun-spec` block, and a
+  **Lock** button records it. The agent never writes the spec file.
+- **No tap starts a model by itself.** On brief, script, storyboard and visual, the stages whose spec
+  is drafted by the agent, "Chat about this" is simply the highlighted answer, so one Enter brings
+  the agent.
+
+**Each stage's discussion is its own chat.** It is remembered for that film and that stage. The film's
+own chat stays in Sessions. The reason is cost: continuing the film's chat would replay the whole
+plan conversation on every question about a stage.
+
+### Continue production
+
+**Continue production** now runs the locked plan to the next human gate. Its formula,
+`video.film.continue`, sees that every stage is locked and hands over to `video.film.run`. The run
+starts at the next stage that is not done and stops at the next gate or at the first failure. Each
+piece goes to the right worker, and its brief is a **filled order formula**, never a hand-written
+one: `video.order.still`, `.clip`, `.motion`, `.blender`, `.filmcraft`, `.voice` and the others. The
+worker is a sub-agent, a teammate (a GitHub work order) or a script. The video agent plans, talks and
+reviews, and builds nothing itself. Independent scenes run in parallel, each in its own folder.
+
+### Who makes what
+
+Each kind of piece has a ladder, cheapest first. The plan picks the first rung that is ready, and a
+stage discussion offers the others as answers. The ladder is `stages.json → pieces`, and the costs
+are `stages.json → tools`. A tool marked **needs a decision** is listed with its price and stays off
+until a `/decide` entry switches it on.
+
+| Piece | First rung | Next rungs | Cost of the first rung |
+| --- | --- | --- | --- |
+| Real product screens | `shoot` (stills) | `record` (video of real flows) | $0 |
+| 3D scene | Blender on this Mac | A Blender work order to a teammate | $0 |
+| Still | Nano Banana in the Gemini app seat | ChatGPT image seat, where a person pastes the prompt; Higgsfield | $0, about 9 per window |
+| Generated clip | Veo in the Gemini app seat, where a person pastes the prompt | Veo by API (needs a decision, $0.40 per 8 s clip); Higgsfield; fal (needs a decision, pay per run) | $0 |
+| Motion type and cards | HyperFrames | The carousel engine, with real Thmanyah type | $0 |
+| Voice | The Gemini stock voice, `voice.mjs` | A Chatterbox clone of one consenting teammate; ElevenLabs (needs a decision, $6 a month) | $0, 10 requests a day |
+| Music | The brand bed from the kit | Lyria RealTime; `media-use` free libraries; Epidemic Sound (needs a decision, subscription) | $0 |
+| Effects | `media-use` free libraries | ElevenLabs (needs a decision) | $0 |
+| Edit | FilmCraft | `video-use` | $0 |
+
+The rest of the line has one worker each. The video agent drafts the brief, the script and the
+storyboard. The `media-qa` agent checks. `produce ship` puts the master on the CDN, and publish and
+Facebook run only after the publish gate.
+
+## Who is involved
+
+| Part | Role | Where it lives |
 | --- | --- | --- |
-| Kun app (UI) | Home, the three options, the sparkle button, Accept, silent route, the stream on screen | `~/machine/src/components/chat/` |
+| Kun app (UI) | Home, the three options, the gear and its tabs, the sparkle button, the plan card, Accept, the stage discussions, silent route, the stream on screen | `~/machine/src/components/chat/` |
 | Kun app (Rust) | `ask` and `refine` commands; `board`, `fill` and `match_text`, which run the station script; builds and starts each run | `~/machine/src/components/chat/rust.rs`, `~/machine/src/components/pack/station.rs` |
-| Station script | Chooses the three options, fills a formula, matches typed text. No model | `kun/.claude/scripts/station.mjs` |
+| Station script | Chooses the three options, fills a formula, matches typed text, composes the tabs' picks, shows a stage. No model | `kun/.claude/scripts/station.mjs` |
+| Settings and stages | The tabs and their choices; the 14 stages and the tool ladder | `kun/departments/video/settings.json`, `stages.json` |
 | Formulas | The prompts written in advance, one file each | `kun/departments/video/formulas/` |
 | Video pack | Routes and their lanes, the frame, the department's constraints, the gather list, the fallback options, folders, health check, time limit | `kun/departments/video/pack.json` |
 | Lanes | The model and effort each route gets | `kun/.claude/engine.json → lanes` |
 | Department folder | Where every run starts; its rules | `~/.kun/machine/video/` (from `departments/video/prompt.md`) |
 | Claude Code | Runs every turn, and refine when it is needed, on your own subscription | `claude` on your computer |
 | Video agent | The department's lead: plans, asks, routes; after Accept it creates the film issue and the work orders; never approves | `kun/.claude/agents/video.md` |
-| produce ledger | Projects, stages, gates; `readiness` for the light; the film issue and its work orders | `~/.claude/skills/produce/scripts/produce.mjs` |
+| produce ledger | Projects, stages, gates, locks and the plan; `readiness` for the light; the film issue and its work orders | `~/.claude/skills/produce/scripts/produce.mjs` |
 | Brand and markets | Identity, price, currency, dialect | `kun/content/media/brand-kit.json`, `markets.json` |
 | Media library | Captures, projects, deliverables | `~/media/`, `~/media/_projects/<ID>/` |
 
-### Rules in this phase
+## Rules
 
 - **The prompt is always English**, under the five headings of the frame. The agent still answers
   you in your language.
@@ -724,8 +853,15 @@ proof. Phase 2 starts from those issues.
   `pack.json`; to change the model behind it, edit the lane in `engine.json`.
 - **The options stay a flat list of three at most**, with a ✕ to take one off. There is no
   accordion and no drill-down.
-- **A tap never runs a model.** The station script fills the formula. A model writes the prompt only
-  for typed text that fits no formula.
+- **A tap never runs a model.** The station script fills the formula or answers the stage. A model
+  writes the prompt only for typed text that fits no formula.
+- **The three home options fill the box. A stage card and a composed request start internally.** A
+  stage card opens the stage's discussion in the chat area. A composed request starts from the round
+  button. Neither puts a long prompt in the box.
 - **Fable is never used** in refine, a route or a sub-agent. The pack rejects it.
 - **Nothing is written before a plan is accepted.** Refine, the `plan` route and every typed reply
   to a plan are read-only. Only Accept moves to work.
+- **Nothing heavy runs without a lock.** `produce advance` refuses the visual, audio, edit and render
+  stages until their spec is locked.
+- **The agent proposes, a tap locks.** A spec from the agent is recorded only when you press Lock.
+  The agent never approves a gate.

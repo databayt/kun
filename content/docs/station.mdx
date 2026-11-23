@@ -61,7 +61,7 @@ sources, so nobody keeps them by hand. The full list of words is on the [Places]
 
 A **formula** is a prompt written in advance for one kind of work. It has blanks, called **slots**,
 that are filled at the moment it is used. Each formula is one file:
-`departments/<department>/formulas/<id>.md`. Video has 30 formulas and Sales has 7.
+`departments/<department>/formulas/<id>.md`. Video has 37 formulas and Sales has 7.
 
 A formula file has two parts. The first is a header, written as JSON between two `---` lines. The
 second is the prompt, under five fixed headings (Task, Context, References, Constraints,
@@ -89,7 +89,7 @@ Some formulas carry a few more fields:
 
 | Field | What it does | Used by |
 | --- | --- | --- |
-| `redirects` | Sends the request to another formula when a film is already open | `video.film.continue` goes to the formula of the film's current stage (`video.stage.{stage}`) |
+| `redirects` | Sends the request to another formula. It is one entry or a list; the first entry whose `if` holds wins. `open_project`: a film is open. `all_locked`: the open film has all 14 stages locked (see [Stages, specs and locks](#stages-specs-and-locks)) | `video.film.continue` has two: `all_locked` goes to `video.film.run`, `open_project` goes to the formula of the film's current stage (`video.stage.{stage}`) |
 | `needs` | `["tools"]` hides the formula while the health light is red | `video.film.continue`, `video.reel.footage`, `video.versions.fanout` |
 | `due` | The weekdays on which the formula is due | `sales.followup.today` |
 | `health_boost`, `health_only` | Bring the formula forward only when the tools are not healthy | `video.tools.check` |
@@ -199,6 +199,273 @@ Sales:
 
 The scores can be checked by hand. Continue production is 3 for `continue` plus 2 times 0.9 for
 `drive`, which is 4.8. Who to follow up is 2 times 1 for `drive` plus 2 for `due`, which is 4.
+
+## The settings menu
+
+The home screen has a **gear** in the chat box. It opens a menu of six tabs. The tabs read as one
+sentence, left to right: **Film · Kind · Audience · Format · Style · Stages**. Each tab answers one
+clause: which film, what kind, for whom, where it is shown, how it looks, and where the line stands.
+
+| Tab | Clause | What it holds |
+| --- | --- | --- |
+| **Film** | Which film | A new film, or one card for each open film |
+| **Kind** | What | Intro film, promo, explainer, tutorial, feature, reel from a video, video script, all versions |
+| **Audience** | For whom | The audience and the version (market and language, such as `sd-ar`) |
+| **Format** | Where | Platform, ratio, length, resolution, frame rate |
+| **Style** | How | The look, the voice, the captions, the music |
+| **Stages** | The line | The 14 stage cards, each with its lock and its gate |
+
+The menu is data, not code. It lives in `departments/<dept>/settings.json`, so a choice can change
+without a new app. A department that has this file gets the gear. Today only Video has one, and only
+Video has a Stages tab, because only Video has a ledger.
+
+**What one choice carries.** Every option in the menu is a small record:
+
+| Field | What it is |
+| --- | --- |
+| `label` | The name on the button, in English and Arabic |
+| `say` | The words the option adds to the sentence above the box |
+| `sets` | Formula slots it fills (the `9:16` option sets `format` to `vertical 9:16, mobile`) |
+| `line` | The phrase it adds to the formula's one-line `settings` slot (`look mixed`) |
+| `keywords` | Kun keywords it stands for, such as `blender` or `shoot`. Each must exist in the vocabulary or be a skill |
+| `tools` | The tools it calls on, by id from `stages.json` |
+
+Options on the **Kind** tab carry three more: `formula` (the formula the kind starts), `when`
+(`new` for a new film, `film` for an open one) and `workflow` (the keyword workflow it belongs to).
+
+**A choice is defined once, and names the stage that owns it.** The choice `ratio` is written once,
+in `settings.json`, with `"stage": "request"`. The Format tab shows it, and the request stage's
+card shows the same choice. They are two views of one decision. `look` belongs to the visual stage,
+`voice` and `music` to audio, `captions` to edit, `resolution` and `fps` to render.
+
+**Tap and type are one path.** The menu does not build a prompt on its own. It asks one zero-token
+command, `compose`, which turns the picks into a formula, its slot values and a sentence. The
+sentence is written from the same words the switch (`match`) listens for. It contains the formula's
+own trigger phrase (`Intro film` is a trigger of `video.film.plan`), so typing the sentence by hand
+lands on the same formula. This is the real answer for the default picks:
+
+```bash
+node .claude/scripts/station.mjs match "Intro film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice" --dept video --repo hogwarts --json
+```
+
+```json
+{
+  "id": "video.film.plan",
+  "confidence": 0.9,
+  "dept": null,
+  "set": {}
+}
+```
+
+`settings` reads the menu for a department:
+
+```bash
+node .claude/scripts/station.mjs settings --dept video --repo hogwarts --json
+```
+
+It returns `{ dept, lang, project, tabs, sentence }`. A tab with `keys` becomes `groups`, one for
+each key, and each group has its question, its `stage`, its `default`, its `current` value and its
+`options`. A tab with `"source": "ledger"` (Film and Stages) is passed through; the app fills it from
+`produce`. With `--project <film>`, `current` is the film's locked value, and the default otherwise.
+This is the `ratio` group of the Format tab, trimmed to its English text:
+
+```json
+{
+  "key": "ratio",
+  "label": "Ratio",
+  "q": "Which screen shape?",
+  "stage": "request",
+  "default": "9:16",
+  "current": "9:16",
+  "options": [
+    { "value": "9:16", "label": "9:16", "say": "9:16", "hint": "Vertical, for phones.", "when": null },
+    { "value": "4:5", "label": "4:5", "say": "4:5", "hint": "Portrait, for feeds.", "when": null },
+    { "value": "1:1", "label": "1:1", "say": "1:1", "hint": "Square.", "when": null },
+    { "value": "16:9", "label": "16:9", "say": "16:9", "hint": "Horizontal, for desktop and YouTube.", "when": null }
+  ]
+}
+```
+
+`compose` turns picks into a request. `--set` takes a **choice** key (`kind`, `ratio`), not a formula
+slot. With no `--set`, every choice takes its default:
+
+```bash
+node .claude/scripts/station.mjs compose --dept video --repo hogwarts --json
+```
+
+```json
+{
+  "formula": "video.film.plan",
+  "route": "plan",
+  "record": "film",
+  "set": {
+    "film_type": "intro",
+    "audience": "school owners and principals",
+    "market": "sd",
+    "lang": "ar",
+    "platform": "Facebook",
+    "format": "vertical 9:16, mobile",
+    "length": "about 2:00",
+    "settings": "1080p · 30 fps · version sd-ar · look mixed · voice stock voice · captions burned in · music brand bed",
+    "new": "1"
+  },
+  "sentence": {
+    "en": "Intro film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice"
+  },
+  "keywords": ["produce", "shoot", "blender", "edit", "captions"],
+  "tools": ["shoot", "blender", "voice", "brand-bed"],
+  "workflow": "film-line",
+  "missing": [],
+  "unknown": []
+}
+```
+
+The output is trimmed here: it also returns `picks`, the value of every choice, and the Arabic
+sentence (the Video pack is English only, so it repeats the English). A non-default request:
+
+```bash
+node .claude/scripts/station.mjs compose --dept video --repo hogwarts --set kind=reel --set ratio=16:9 --json
+```
+
+```json
+{
+  "formula": "video.reel.footage",
+  "route": "do",
+  "record": "none",
+  "set": {
+    "format": "horizontal 16:9, desktop",
+    "new": "1"
+  },
+  "sentence": {
+    "en": "Reel from a video · school owners · Sudan Arabic · Facebook 16:9 · 2:00 · real screens + 3D · stock voice"
+  },
+  "keywords": ["reel", "rough cut", "shoot", "blender", "edit", "captions"],
+  "tools": ["video-use", "filmcraft", "shoot", "blender", "voice", "brand-bed"],
+  "workflow": null,
+  "missing": ["latest_video"]
+}
+```
+
+(`set` is trimmed to the slots that differ from the first answer.) The Kind choice `reel` picked
+another formula, `video.reel.footage`. The ratio changed the `format` slot. `missing` names the one
+slot a person must still give, a source video.
+
+**The reserved slot `new`.** `compose` adds `new: "1"` to a request for a new film. It is not a
+slot of any formula. It tells `fill` to skip the formula's `redirects`. Without it, the New film
+request would be handed over to the open film's stage formula (`video.film.plan` becomes
+`video.stage.research` while a film is open) and the film would be worked on with no plan.
+
+**With a film.** `compose --project <film>` only offers the Kind options marked `when: "film"`
+(today, All versions), and there is no default: `formula` is `null` until one is chosen.
+
+**Lint.** `station.mjs lint` checks the menu. It fails when a choice names a formula that does not
+exist, a `sets` key that is not a slot of that formula, or a keyword that is in neither the
+vocabulary nor the skills.
+
+## Stages, specs and locks
+
+Three words first. A **spec** is one stage's decisions written down: what will be made, with which
+tool, from which inputs, into which files. A **lock** is a spec recorded in the film's ledger, with
+who locked it, when, and a hash of the file. The **plan** is all 14 locked specs compiled into one
+ordered list, and the run executes from it.
+
+A lock freezes a decision before work. A gate approves a result after it. They are different, and
+the agent still never approves.
+
+**The table of the line.** `departments/video/stages.json` is the one table of the 14 stages and the
+tool ladder. It carries the same keys, order and files as produce's own stage list, and `station.mjs
+lint` fails if they drift apart.
+
+| # | Stage | Folder | Deliverable | Gate | Spec drafted by | Choices it owns |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | request | `01-brief` | `request.json` | none | script | kind, audience, version, platform, ratio, length |
+| 2 | research | `02-research` | `product-research.md` | none | script | none |
+| 3 | brief | `01-brief` | `creative-brief.md` | none | agent | none |
+| 4 | script | `03-script` | `script.md` | script | agent | structure |
+| 5 | storyboard | `04-storyboard` | `shot-list.json` | none | agent | none |
+| 6 | assets | `05-assets` | `asset-manifest.json` | none | script | stills |
+| 7 | visual | `06-production` | `visual-manifest.json` | look | agent | look, threed |
+| 8 | audio | `07-audio` | `audio-package.json` | none | script | voice, music |
+| 9 | edit | `06-production/editing` | `edit-project.json` | none | script | captions, editor |
+| 10 | render | `08-render` | `masters/master.mp4` | none | script | resolution, fps |
+| 11 | qa | `09-quality` | `qa-report.md` | none | script | none |
+| 12 | approval | none | none | version | script | none |
+| 13 | cdn | none | none | none | script | none |
+| 14 | publish | `10-publishing` | `publishing-record.md` | publish | script | none |
+
+"Spec drafted by" says who writes the spec when a stage is opened. `script` means the standard
+choices only: no model runs. `agent` means the video agent, read-only, for a stage that needs
+writing or judgement. The four gates are unchanged: script, look, version and publish.
+
+**The tool ladder.** The same file lists every tool and, for each kind of piece, the rungs from the
+cheapest. The plan picks the first rung that is ready. A tool marked `staged` is listed with its price
+and is never used until a `/decide` entry switches it on. The ladder is shown on the
+[Video pipeline](/docs/pipeline#who-makes-what) page.
+
+**Look at one stage.** `station.mjs stage` shows a stage of a film: its lock, its current choices, its
+tool and the questions the app asks. It needs a film. For a film that has all 14 stages locked and
+`look` changed to `captures`, this is the real answer (the questions are trimmed to their English
+labels, the film's folder is written with `~`):
+
+```bash
+node .claude/scripts/station.mjs stage visual --dept video --project hogwarts-intro-introduction-v001 --json
+```
+
+```json
+{
+  "stage": "visual",
+  "n": 7,
+  "ask": "agent",
+  "gate": "look",
+  "locked": true,
+  "lock": {
+    "by": "Abdout",
+    "at": "2026-11-23T06:47:51.981Z",
+    "sha": "f73720c32d17a88704d9c9b4c36f731e4576f09a8a59064702a23b21d558877f",
+    "source": "set"
+  },
+  "current": { "look": "captures", "threed": "order" },
+  "tool": "blender-order",
+  "summary": [
+    "Look: Real screens",
+    "3D: A work order to a teammate",
+    "Tool: A Blender work order to a teammate",
+    "Output: 06-production/visual-manifest.json"
+  ],
+  "questions": [
+    { "key": "look", "question": "Which look?", "header": "Look",
+      "options": ["Real screens", "Real screens + 3D", "3D", "Generated"] },
+    { "key": "threed", "question": "Who builds the 3D scenes?", "header": "3D",
+      "options": ["A work order to a teammate", "Blender on this Mac", "No 3D"] }
+  ]
+}
+```
+
+Each question is one owned choice that has two to four options, and the option that holds the
+current value comes first. An owned choice with more than four options is not a question; it gets a
+summary line that ends with `(change it in the <Tab> tab)`. The real answer also carries the film,
+`label`, `done`, `tool_label`, `lane`, the spec's path and link, and the deliverable's path and link.
+The commands that write a lock are on the [Produce](/docs/produce#lock-the-line) page.
+
+**The formula that runs a locked plan.** `video.film.continue` now has two redirects, tried in order.
+When every stage is locked it hands over to `video.film.run`, which executes the plan from the next
+stage that is not done to the next human gate. Otherwise it hands over to the formula of the film's
+stage, as before. With the throwaway film all 14 locked, the real answer to
+`fill video.film.continue` was `video.film.run`; after `produce unlock … cdn` it was
+`video.stage.research`. Each piece `video.film.run` hands out is briefed by a filled order formula:
+
+| Formula | Makes |
+| --- | --- |
+| `video.order.still` | One still with Nano Banana in the Gemini app seat |
+| `video.order.clip` | One generated clip. Its free rung is a person in the Gemini app seat |
+| `video.order.motion` | One HyperFrames piece: a title card, a counter, a price card |
+| `video.spec.stage` | Not an order. The read-only discussion of one stage's spec |
+
+**Two blocks an agent turn may end with.** Besides `kun-questions`, the Video prompt
+(`departments/video/prompt.md`) defines two fenced blocks, each the last thing in a turn and JSON
+only. `kun-plan` ends the film plan: the film, all 14 stages with their decisions and tool, and the
+cost. The app draws it as a plan card. `kun-spec` ends a stage discussion: one stage, its decisions
+and its tool. The Lock button records it, and the agent never writes the spec file itself.
 
 ## Fill and match
 
@@ -397,7 +664,7 @@ message, through its `record`:
 
 | The formula's `record` | What the message asks the lead to do |
 | --- | --- |
-| `film` | Create the production if it does not exist yet, then its film issue (`produce issue <ID> --create`). For each piece the plan gives to another person, create its work order (`produce order <ID> <formula> --to <login> --create`). Reply with the links, then stop at the next gate |
+| `film` | Create the production if it does not exist yet, lock all 14 stages (`produce lock <ID> --all --plan <file>`), then its film issue (`produce issue <ID> --create`). For each piece the plan gives to another person, create its work order (`produce order <ID> <formula> --to <login> --create`). Reply with the links, then stop at the next gate |
 | `issue` | Create the work order as an issue and reply with its link. Then stop |
 | `none` | Carry out the first step, then stop at the next gate |
 
@@ -661,6 +928,9 @@ without it the script uses `video`.
 | `fill <formula-id> --dept <d> [--repo <r>] [--login <l>] [--project <film>] [--set k=v]… --json` | Returns the filled prompt, its route, its `record`, what is `missing`, and the references to upload |
 | `match "<text>" --dept <d> [--repo <r>] --json` | Returns the formula the text fits, a confidence, the values read out of the text (`set`), and the other department when the text names one (`dept`) |
 | `lint [--dept <d>]` | Checks every formula; with no department it checks every department that has formulas |
+| `settings --dept <d> [--repo <r>] [--project <film>] --json` | Returns the tabs of the settings menu, each choice with its options and its current value |
+| `compose --dept <d> [--repo <r>] [--project <film>] [--set <choice>=<value>]… --json` | Turns menu picks into a formula, its slot values, the sentence, the keywords, the tools and what is `missing` |
+| `stage <stage> --dept video --project <film> --json` | Returns one stage of a film: its lock, its current choices, its tool and the questions the app asks |
 | `--test` | Runs the fixed test cases. No network |
 | `--page` | Writes the formula matrix of every department at the end of this page |
 
@@ -677,6 +947,12 @@ GitHub prints a draft first; only `--create` writes.
 | `advance <ID> <stage> --file <deliverable>` | Records a stage. With a film issue it also ticks the stage and comments |
 | `approve <ID> --gate script\|look\|version\|publish --version <Vnnn> --by <login>` | Records an approval. With a film issue it also ticks the gate and comments |
 | `status <ID> [--json]` | Shows the stages, the gates, the work orders and who did what |
+| `lock <ID> --all [--plan <file>] [--set k=v]…` | Writes one spec for each of the 14 stages, records the locks and compiles the plan |
+| `lock <ID> <stage> [--set k=v]… [--spec <file>]` | Locks or re-locks one stage |
+| `unlock <ID> <stage>` | Removes a lock and keeps the spec files |
+| `plan <ID>` | Recompiles `00-plan/plan.json` and `plan.md` and prints the plan |
+| `mirror <ID> [--stage <s>] [--create]` | Prints what a stage folder would send to the CDN under `work/`. With `--create`, uploads it |
+| `url <ID> --path <file>` | Prints the CDN link of any file in the film's folder, before it is uploaded |
 
 ## What we took from other products
 
@@ -695,6 +971,11 @@ GitHub prints a draft first; only `--create` writes.
 | An always-on cloud computer for each agent | Dots, Muse, Grok Bot | makers' pages | Nothing | skipped: 120 to 500 dollars a month against a subscription-only rule |
 | A selection travels as a reference id plus where it came from (a preset or free text), not as expanded text, so the same id can be linked to directly | Higgsfield Marketing Studio | own session, the page's code | The formula id on the issue's kun block and on the receipt; recording whether a run began from a tapped option or typed text is still to do | built, one part later |
 | A small fixed set of presets ships with the app; the long tail comes from a catalogue | Higgsfield Marketing Studio | own session, the page's code | Formulas read from the kun clone; the pack's quick actions as the fallback | built |
+| The rig (camera, lens, light, genre) is structured settings, and the prompt describes only the scene | Higgsfield Cinema Studio 4.0 ([blog](https://higgsfield.ai/blog/cinema-studio-4-0)) | makers' documents, read on 2026-11-23 | The `shot` fields in `shot-list.json`; the Format and Style tabs | built |
+| A cheap still is approved before costly motion | Higgsfield hero frames ([guide](https://higgsfield.ai/blog/cinema-studio-guide)); Google Flow, frames to video ([help](https://support.google.com/flow/answer/16352836)) | makers' documents, read on 2026-11-23 | The look gate is signed on hero stills | built |
+| A chat assistant fills the form but never spends | Higgsfield Cinema Studio ([help](https://higgsfield.ai/creator-hub/help-center/tools/how-do-i-use-cinema-studio)) | makers' documents, read on 2026-11-23 | The agent proposes a spec (`kun-spec`); only a tap locks it | built |
+| Timed beats and labelled sound lines | Veo 3.1 ([prompting guide](https://cloud.google.com/blog/products/ai-machine-learning/ultimate-prompting-guide-for-veo-3-1)); Sora 2 ([prompting guide](https://developers.openai.com/cookbook/examples/sora/sora2_prompting_guide)) | makers' documents, read on 2026-11-23 | `beats` and `audio` on a scene in the shot list | built |
+| Result, details, exact text, constraints | OpenAI image prompting guide ([cookbook](https://developers.openai.com/cookbook/examples/multimodal/image-gen-models-prompting-guide)) | makers' documents, read on 2026-11-23 | `video.order.image` and `video.order.still` | built |
 
 The evidence is of four kinds. The rows for Hermes, DeepSeek Harness and free-claude-code come from
 reading their source code. The rows for Higgsfield's API, Dots, Grok Bot and Claude Duet come from
@@ -704,6 +985,10 @@ about how often Duet checks comes from coverage, not from the maker, and the sou
 Muse's help pages did not load, so Muse appears only where its public pages say something. Two rows
 have no outside evidence at all: ranking suggestions from a person's own state, and recording work
 as GitHub issues. Those are our own design.
+
+The five rows about shots and stills come from the makers' own documents, read on 2026-11-23. The
+exact labels in the Flow and Sora prompt boxes were not verified: no official page shows them, and
+nothing in Kun depends on them.
 
 Claude Duet could not be observed: the account's pages showed no Duet surface by the routes tried,
 so nothing was learned about how it lists tasks. Whether choosing a Higgsfield preset rewrites the
@@ -735,20 +1020,25 @@ the command again.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `video.film.continue` | Continue production · متابعة الإنتاج | do | next | — | none | yes | 1 | 0.9 |
 | `video.film.plan` | Intro film · فيلم تعريفي | plan | start | — | film | yes | 1 | 1 |
+| `video.film.run` | Run the locked plan · تشغيل الخطة المقفلة | do | next | — | none | — | 1 | 0.9 |
 | `video.gate.look` | Review the look · مراجعة الشكل | do | waiting | look | none | yes | 2 | 0.9 |
 | `video.gate.publish` | Approve publishing · اعتماد النشر | do | waiting | publish | none | yes | 2 | 0.9 |
 | `video.gate.script` | Review the script · مراجعة السكربت | do | waiting | script | none | yes | 2 | 0.9 |
 | `video.gate.version` | Approve a version · اعتماد نسخة | do | waiting | version | none | yes | 2 | 0.9 |
 | `video.order.blender` | Blender scene · مشهد بلندر | do | next | — | issue | — | 5 | 0.6 |
 | `video.order.capture` | Product capture · تصوير المنتج | do | next | — | issue | — | 3 | 0.6 |
+| `video.order.clip` | Clip for Veo · مقطع عبر Veo | do | next | — | issue | — | 4 | 0.6 |
 | `video.order.filmcraft` | Assemble in FilmCraft · تجميع في فيلم كرافت | do | next | — | issue | — | 5 | 0.6 |
 | `video.order.image` | Image for ChatGPT · صورة عبر ChatGPT | do | next | — | issue | — | 4 | 0.6 |
+| `video.order.motion` | Motion graphic · رسم متحرك | do | next | — | issue | — | 3 | 0.6 |
 | `video.order.pickup` | Start my work order · ابدأ طلب العمل | do | waiting | — | none | yes | 1 | 0.8 |
 | `video.order.review` | Review of a version · مراجعة نسخة | do | next | — | issue | — | 2 | 0.6 |
 | `video.order.script` | Script writing · كتابة سكربت | do | next | — | issue | — | 3 | 0.6 |
+| `video.order.still` | Still, Nano Banana · صورة عبر نانو بنانا | do | next | — | issue | — | 4 | 0.6 |
 | `video.order.voice` | Voiceover · تعليق صوتي | do | next | — | issue | — | 2 | 0.6 |
 | `video.reel.footage` | Reel from a video · ريلز من فيديو | do | start | — | none | yes | 2 | 0.4 |
 | `video.script.only` | Video script · سكربت فيديو | do | start | — | none | yes | 1 | 0.5 |
+| `video.spec.stage` | Discuss a stage · نقاش مرحلة | plan | next | — | none | — | 1 | 0.5 |
 | `video.stage.approval` | Version approval · اعتماد النسخة | do | next | version | none | — | 2 | 0.8 |
 | `video.stage.assets` | Assets · الأصول | do | next | — | none | — | 3 | 0.8 |
 | `video.stage.audio` | Audio · الصوت | do | next | — | none | — | 3 | 0.8 |

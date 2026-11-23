@@ -99,19 +99,27 @@ Only when no formula fits does a short Claude run rewrite your words into a full
 
 The whole design is on the [Station](/docs/station) page, and the [Video pipeline](/docs/pipeline) page walks through it step by step for the Video department.
 
-## The production strip
+## The settings menu
 
-In the Video department, once a film exists, a one-line strip sits above the chat input: the film's name, one dot per stage, the stage it has reached and its gates. With several films, a select picks one.
-
-Click it and it grows upward over the transcript. The input does not move. Three tabs:
+In the Video department the chat box always has a **gear**, with a film or without one. It opens a
+settings menu of six tabs that read as one sentence, and a quiet line above the box shows what you
+have picked so far. The round button starts the request the tabs describe; Tab drops it into the box
+so you can edit it first. Typing your own words and the three home options work as before.
 
 | Tab | Shows |
 | --- | --- |
-| **Stages** | The 14 stages with their gates |
-| **Scenes** | The shot list against the asset manifest: a thumbnail per capture, an icon for 3D, image, capture or video, and a mark on what is missing |
-| **Brand** | The logo, the fonts drawn in their own face, the colour swatches and the voice. Read once and kept |
+| **Film** | A new film, or one card for each open film |
+| **Kind** | What to make: intro film, promo, explainer, tutorial, feature, reel from a video, video script, all versions |
+| **Audience** | For whom: the audience, and the market and language |
+| **Format** | Where it is shown: platform, ratio, length, resolution, frame rate |
+| **Style** | How it looks and sounds: the look, the voice, the captions, the music |
+| **Stages** | The 14 stage cards, each with its lock and its gate. Tapping one opens that stage's discussion in the chat area |
 
-There are no action buttons. Clicking a stage or a scene fills the box with the matching `video.stage.*` or `video.order.*` formula, the same way a tap on the home does. The chat stays the only place where anything runs. The strip reads `produce.mjs list --json` and `status <ID> --json`, with no shell. A video picked from **+ → Videos** fills the `source` slot of the film plan. See [Video pipeline](/docs/pipeline).
+The choices are data in kun (`departments/video/settings.json`), not code in the app. The app reads
+them with `station.mjs settings`, and falls back to its built-in choices when the kun checkout has no
+such file. A tap on a stage card does not fill the box. A request from the tabs does not either. The
+[Video pipeline](/docs/pipeline#the-settings-menu) page walks through both, from the first tap to the
+locked line.
 
 ## Install and uninstall
 

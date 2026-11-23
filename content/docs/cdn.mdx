@@ -137,6 +137,38 @@ Example: `https://cdn.databayt.org/video/hogwarts/intro/sa-ar/fb-9x16.mp4`. The 
 approved and are invalidated; the `_v/` archive keys are written once and never overwritten. Projects created without
 markets keep `video/<brand>/<ID>/…`. See [produce](/docs/produce).
 
+## Work tier (`work/`)
+
+A film is made over many days, and a teammate on another computer needs to read its files. The
+`work/` prefix holds those working files. It is not a finished-asset tier like `video/`. Two kinds of
+file live there:
+
+```
+cdn.databayt.org/work/<film>/ref/<path>             a film's working files, mirrored from its folder
+cdn.databayt.org/work/<film>/<issue number>/<file>  what a teammate submits for one work order
+```
+
+**The path rule.** A file at `~/media/_projects/<film>/<path>` has the key `work/<film>/ref/<path>`
+and the link `https://cdn.databayt.org/work/<film>/ref/<path>`. `produce url <film> --path <path>`
+prints the link before anything is uploaded. For example, `03-script/script.md` of
+`hogwarts-intro-introduction-v001` is
+`https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/03-script/script.md`.
+
+**Who writes it.**
+
+| Command | Writes |
+| --- | --- |
+| `produce order … --create` | The references of a work order, under `ref/` |
+| `produce submit … --create` | A teammate's files, under `<issue number>/`. In the Kun app the Submit button does the same through short-lived upload links |
+| `produce mirror … --create` | A stage folder, under `ref/`, with an `index.json` |
+
+Each of them is a draft until `--create`. `mirror` never sends `08-render`, fonts, or a file over
+50 MB.
+
+**Masters never go here.** The approved film goes to the video tier, `video/<brand>/<slug>/<variant>/…`,
+through `produce ship`. A working file may be replaced as the film changes; a shipped master is
+archived and never overwritten. The commands are on the [produce](/docs/produce#one-path-rule-and-mirror) page.
+
 ## Catalog key scheme
 
 Catalog is the one tier whose keys are **persisted in the database** (the

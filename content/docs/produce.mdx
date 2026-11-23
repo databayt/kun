@@ -55,7 +55,7 @@ $P ship <ID> --dry-run
 A gate is a point where the work stops until a person says yes. Each is recorded with
 `approve --gate <name>`, in this order:
 
-1. **Script sign-off** (`script`) — light, before the expensive stages (visual, audio, edit, render refuse without it).
+1. **Script sign-off** (`script`) — light, before the expensive stages (visual, audio, edit, render refuse without it, and refuse again without a lock; see [Lock the line](#lock-the-line)).
 2. **Look approval** (`look`) — after the visual stage: a person reviews the film's look, the keyframes or the animatic. The Kun app shows it as waiting until it is approved. `produce` records the approval and does not block a later stage on it.
 3. **Exact-version approval** (`version`) — tied to one `Vnnn` and the sha of its master. A re-render voids it.
 4. **Publish approval** (`publish`) — a separate yes that names the destination. Approving a version is not approving a post.
@@ -115,14 +115,221 @@ Projects live outside every repo, in `~/media/_projects/<ID>/` (override with `P
 ```text
 hogwarts-intro-introduction-v001/
   project.json            the ledger
+  00-plan/                the locked specs and the plan
   01-brief/ 02-research/ 03-script/ 04-storyboard/
   05-assets/ 06-production/ 07-audio/
   08-render/ (previews, masters, delivery)
   09-quality/ 10-publishing/
 ```
 
-The ID is `<CODE>-<CATEGORY>-<SUBJECT>-<YYYYMMDD>-V<nnn>`. `produce validate <file>` checks a
+The ID is `<brand>-<category>-<subject>-v<NNN>`, for example `hogwarts-intro-introduction-v001`. It
+names the production line (`hogwarts`), never the public brand. `produce validate <file>` checks a
 `project.json` or a `shot-list.json` against the schemas.
+
+## Lock the line
+
+A **spec** is one stage's decisions written down: what will be made, with which tool, from which
+inputs, into which files. A **lock** is a spec recorded in the film's ledger, with who, when and a
+hash. The **plan** is all 14 locked specs compiled into one ordered list. A lock freezes a decision
+before work. A gate approves a result after it.
+
+```bash
+$P lock <ID> --all [--plan <file>] [--set k=v]…     # lock all 14 stages
+$P lock <ID> <stage> [--set k=v]… [--spec <file>]   # lock or re-lock one stage
+$P unlock <ID> <stage>                              # remove a lock, keep the files
+$P plan <ID>                                        # recompile and print the plan
+```
+
+`lock` writes files on this Mac only, and repeating it is safe, so it needs no `--create`. Add
+`--by <login>` to name who locked, `--json` for a machine answer, and `--no-sync` to leave the film
+issue alone. Without `--no-sync`, a film that has an issue gets its body rewritten.
+
+**Where the files go.** Everything is in one folder at the top of the film:
+
+```text
+~/media/_projects/hogwarts-intro-introduction-v001/00-plan/
+  01-request.spec.json   01-request.spec.md      one pair for each stage, 01 to 14
+  …
+  14-publish.spec.json   14-publish.spec.md
+  plan.json  plan.md                             the plan, compiled from the specs
+  plan.input.json                                the plan file that was given with --plan
+```
+
+**How a stage's decisions are assembled.** Each stage owns some choices (`stages.json → owns`; the
+choices themselves are in `settings.json`). For each choice, the first that exists wins, last to
+first:
+
+1. the choice's default, from `settings.json`,
+2. the plan's pick, `plan.picks.<choice>`,
+3. the plan's entry for the stage, `plan.stages.<stage>.decisions.<choice>`,
+4. a `--set choice=value`,
+5. the `--spec` file's `decisions`. A spec may carry extra keys; they are kept.
+
+An existing spec is kept unless something overrides it, so `lock --all` run twice changes nothing,
+and `lock --all --set voice=source` changes only the audio stage. With `--all`, each `--set` goes to
+the stage that owns it. With one stage, a `--set` the stage does not own is an error:
+
+```text
+produce: --set look: audio does not own it (owned by visual)
+```
+
+The `--plan` file is what the app saves at Accept. Every field is optional:
+`{ "picks": {…}, "film": {…}, "stages": { "<stage>": { "decisions": {…}, "tool": "<tool id>", "notes": "…" } }, "cost": ["…"] }`.
+The `--spec` file is the `kun-spec` block of a stage discussion:
+`{ "stage": "<stage>", "decisions": {…}, "tool": "<tool id>", "notes": "…" }`. Its `stage` must equal
+the stage on the command line, and a `tool` that is not in `stages.json → tools` is refused.
+
+**What a lock records.** In `project.json`, `locks.<stage>` holds `{ by, at, sha, source }`. `sha` is
+the hash of the spec file. `source` says where the decisions came from: `plan` (from `--all --plan`),
+`default` (`--all`, nothing in the plan for that stage), `set` or `spec`. A stage that was already
+done when it was locked gets `backfill: true`, and a done stage that is locked again with a changed
+spec gets `changed: true`.
+
+**A changed stage holds the line.** While a lock says `changed`, `advance` refuses every stage after
+it: `"request" was re-locked after it was done: redo it first`. Redoing that stage
+(`produce advance <ID> <stage> --file …`) clears the mark, and the stages after it can go on.
+`--force` skips the check.
+
+**A real run.** A throwaway film was created and locked (the film id is written as the documented
+one; the home folder is `~`):
+
+```bash
+node ~/.claude/skills/produce/scripts/produce.mjs lock hogwarts-intro-introduction-v001 --all --no-sync
+```
+
+```text
+hogwarts-intro-introduction-v001: request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish — locked 14 of 14
+plan: https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/00-plan/plan.md
+```
+
+One spec, `00-plan/07-visual.spec.json`:
+
+```json
+{
+  "film": "hogwarts-intro-introduction-v001",
+  "stage": "visual",
+  "n": 7,
+  "label": "Visual",
+  "decisions": { "look": "mixed", "threed": "blender" },
+  "tool": "blender",
+  "lane": "build",
+  "inputs": [
+    { "path": "04-storyboard/shot-list.json", "url": "https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/04-storyboard/shot-list.json" },
+    { "path": "05-assets/asset-manifest.json", "url": "https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/05-assets/asset-manifest.json" }
+  ],
+  "outputs": [
+    { "path": "06-production/visual-manifest.json", "url": "https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/06-production/visual-manifest.json" }
+  ],
+  "gate": "look",
+  "notes": "",
+  "source": "default",
+  "by": "Abdout",
+  "at": "2026-11-23T06:47:06.322Z"
+}
+```
+
+The ledger entry for it in `project.json → locks.visual`:
+
+```json
+{ "by": "Abdout", "at": "2026-11-23T06:47:06.322Z", "sha": "71bf83deead34b48fa7dbdc9633d76cbbae4ebae35acfb028dfe9d806b0557ac", "source": "default" }
+```
+
+`unlock` removes the lock and keeps the spec files. After `unlock … visual`, the command printed
+`visual — locked 13 of 14`, both `07-visual.spec.*` files were still there, and the plan showed the
+stage as `open`.
+
+**`advance` refuses a heavy stage without a lock.** The heavy stages are visual, audio, edit and
+render. After the script is signed off, advancing `visual` with no lock printed:
+
+```text
+produce: "visual" is not locked: lock its spec first (produce lock hogwarts-intro-introduction-v001 visual [--set k=v]…, or produce lock hogwarts-intro-introduction-v001 --all), or pass --force
+```
+
+The refusal comes after the existing script-gate check. Before the script is signed off, `advance`
+still gives the older message about signing the script off.
+
+**The film issue shows the locks.** Each stage line of `produce issue <ID>` ends with
+`· locked by <login>`, and a `## Plan` section links `plan.md` and says how many stages are locked
+(`locked: 13 of 14` in the run above). A lock made from the app is local and instant; the issue
+shows it the next time it is rewritten (an advance, an approval, or `issue --sync`).
+
+**A film that already exists** is locked with one command, `lock <ID> --all`, which takes the
+defaults. A stage that was already done is marked `backfill: true`. Nothing is renamed.
+
+## One path rule, and `mirror`
+
+A film's folder and the CDN follow one rule, so a link can be known before anything is uploaded:
+
+| Where | Path | Written by |
+| --- | --- | --- |
+| A file in the film's folder | `~/media/_projects/<film>/<path>` | the stages |
+| The same file on the CDN, as a key | `work/<film>/ref/<path>` | `order --create`, `mirror --create` |
+| The same file on the CDN, as a link | `https://cdn.databayt.org/work/<film>/ref/<path>` | |
+
+`url --path` prints the link of any file in the film's folder. It rejects an absolute path and a
+path with `..`:
+
+```bash
+node ~/.claude/skills/produce/scripts/produce.mjs url hogwarts-intro-introduction-v001 --path 03-script/script.md
+```
+
+```text
+https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/03-script/script.md
+```
+
+```text
+produce: --path must be relative to the film folder, with no ".." (got "/etc/passwd")
+```
+
+The link is the same one a work order already uses for its references.
+
+`mirror` copies a stage folder to the CDN under that rule. Like every produce command that writes
+outside this Mac, it is a **draft** unless `--create` is given. The name is `mirror` because `sync`
+already means two other things in kun.
+
+```bash
+produce mirror <ID> [--stage <stage>] [--create]
+```
+
+Without `--stage`, it takes every stage folder and `00-plan`. Some files are never sent, and the draft
+lists each one with its reason:
+
+| Skipped | Why |
+| --- | --- |
+| `08-render/**` | Masters belong to the video tier; `produce ship` sends them |
+| `.ttf`, `.otf`, `.woff`, `.woff2` | Fonts are never rehosted |
+| A file over 50 MB | Too large for a mirror |
+
+A draft for the script folder, with a font in it:
+
+```text
+DRAFT — nothing uploaded. Add --create to mirror to the CDN.
+film: hogwarts-intro-introduction-v001
+
+03-script/ (2 file(s))
+  03-script/notes.json
+    => https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/03-script/notes.json
+  03-script/script.md
+    => https://cdn.databayt.org/work/hogwarts-intro-introduction-v001/ref/03-script/script.md
+
+skipped:
+  03-script/f.woff2 — fonts are never rehosted
+```
+
+For a master and a file over the limit, the draft listed `08-render/masters/master.mp4 — masters
+belong to the video tier (ship)` and `05-assets/big.mov — over 50 MB`. With `--create`, each file is
+uploaded, then an `index.json` is written in the stage folder and uploaded too:
+`{ "film", "stage", "files": [ { "path", "url", "sha", "bytes" } ] }`.
+
+**Three tiers share the CDN.** They never overlap:
+
+| Tier | Key | Holds |
+| --- | --- | --- |
+| Working files | `work/<film>/ref/<path>` | A film's folder, mirrored. Also the references of a work order |
+| Work-order submissions | `work/<film>/<issue number>/<file>` | What a teammate submits for one order |
+| The shipped master | `video/<brand>/<slug>/<variant>/fb-9x16.mp4`, with an archive in `_v/<Vnnn>/` | The approved film. See [CDN keys and the URL grammar](#cdn-keys-and-the-url-grammar) |
+
+The tiers are described on the [CDN](/docs/cdn#work-tier-work) page.
 
 ## Markets & versions
 
@@ -157,6 +364,7 @@ whose QA has not passed. A project created without `--markets` keeps the single-
 ```bash
 $P build <ID> --variant sa-ar|--all [--dry-run]   # piece.mjs → assemble.mjs, per version
 $P url <ID> [--variant sa-ar]                     # predicted URLs, known before the render
+$P url <ID> --path <file>                         # the CDN link of one file in the film's folder
 ```
 
 `build` runs `piece.mjs`, which writes the resolved script `03-script/variants/<v>.json` and the FilmCraft piece
@@ -217,12 +425,25 @@ The wav is the timing master. Its record sits in `project.json → voice.<varian
 
 A file with no audio is refused. A failed transcription keeps the copy and the wav.
 
-Two commands feed the app's production strip. Both print JSON.
+Two commands feed the Kun app. Both print JSON.
 
 | Command | Prints |
 | --- | --- |
 | `produce list --json [--repo <line>]` | Every project, newest first: id, title, brand, identity, category, version, status, next stage, focus, variants, markets, langs, dir |
-| `produce status <ID> --json` | The 14 stages (`stage_list`), the variant grid (`variants`), the gates, `next`, the predicted `urls`, `paths` and `files` for the script, `04-storyboard/shot-list.json` and `05-assets/asset-manifest.json`, and `voice` |
+| `produce status <ID> --json` | The 14 stages (`stage_list`), the variant grid (`variants`), the gates, `next`, the predicted `urls`, `paths` and `files` for the script, `04-storyboard/shot-list.json` and `05-assets/asset-manifest.json`, `voice`, and the locks and the plan (below) |
+
+`status --json` gives the app every path and link it needs, so the app and the formulas never build
+one themselves. These fields are new:
+
+| Field | Where | What it holds |
+| --- | --- | --- |
+| `dir` | each `stage_list[]` entry | The stage's folder, for example `06-production` |
+| `spec` | each `stage_list[]` entry | The absolute path of the stage's spec file, or `null` before it is written |
+| `spec_url` | each `stage_list[]` entry | The spec's CDN link |
+| `file_url` | each `stage_list[]` entry | The deliverable's CDN link, or `null` for a stage with no file |
+| `locked` | each `stage_list[]` entry | `true` when the stage has a lock |
+| `locks` | top level | The ledger's locks: for each locked stage `{ by, at, sha, source }` |
+| `plan` | top level | `{ json, md, url, locked_all }`, or `null` before the first lock |
 
 The video department works in English. Questions, plans and replies are English. A film's version language (`language`, `dialect`) applies only to the film's own words: the script, the captions and the voiceover.
 
@@ -268,8 +489,8 @@ app opens and after every update. See [Machine](/docs/machine).
 3. **Send.** The chat starts and the plan run asks its own questions in a wizard (Enter, ↑/↓, Tab,
    Esc; "Type something" or "Chat about this" if no option fits). Your answers go back to the same
    session, it may ask again, then it writes the plan. Nothing is created until you **Accept**. Accept
-   turns the plan into the next phase's prompt, opens the film issue and a work order for each piece
-   handed to another person. The model is chosen for you (Settings → Model).
+   turns the plan into the next phase's prompt, locks the 14 stages, opens the film issue and a work
+   order for each piece handed to another person. The model is chosen for you (Settings → Model).
 4. **The four gates are yours.** Script, look (animatic), version and publish each stop for your
    approval; the app never approves. Between gates, **Continue production** on the board fills the
    next stage.
