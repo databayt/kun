@@ -246,11 +246,13 @@ Write the creative brief that the script and every later stage will follow.
 - Research: `{{project_dir}}/02-research/product-research.md`
 - Brand kit: {{brand_kit_url}}
 - Markets: {{markets_url}}
+- Locked spec: `{{project_dir}}/00-plan/03-brief.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - One message, one call to action. Anything that does not serve the goal is cut.
 - Tone from the brand kit; the viewer sees the brand name exactly as written there.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/01-brief/creative-brief.md`.

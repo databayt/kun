@@ -105,6 +105,22 @@ without `--create` (draft output otherwise); `gh` missing means a clear message 
 A work order's issue body **is** the filled formula; references are links, never local paths. Only the CEO closes an
 issue; the film issue closes after publish. Tests: `node --test scripts/produce.test.mjs` (`PRODUCE_STUB_DIR` stubs gh, the uploader and station).
 
+## Lock the plan (`00-plan/`)
+
+A **spec** is one stage's decisions written down, a **lock** is a spec recorded in `project.json → locks`, the **plan** is all 14 compiled in order.
+Decisions of a stage = `settings.json` default ← `plan.picks` ← `plan.stages` ← `--set` ← `--spec`. Local writes only, safe to repeat, no `--create`.
+
+| Command | What it does |
+| --- | --- |
+| `lock <ID> --all [--plan <file>] [--set k=v]…` | writes `00-plan/<NN>-<stage>.spec.{json,md}` for all 14 stages, locks them, recompiles `plan.json` + `plan.md`; the `--plan` file is kept as `plan.input.json` |
+| `lock <ID> <stage> [--set k=v]… [--spec <file>]` | one stage; a `--set` key the stage does not own is an error; `--spec` is the `kun-spec` block and its `stage` must match; add `--by`, `--no-sync` (skip the film-issue rewrite), `--json` |
+| `unlock <ID> <stage>` / `plan <ID> [--json]` | drop one lock (specs stay) / recompile the plan |
+| `advance <ID> visual\|audio\|edit\|render …` | refused without a lock (after the script gate) unless `--force` |
+| `url <ID> --path <rel>` | the CDN URL of a film file: `~/media/_projects/<ID>/<rel>` = `work/<ID>/ref/<rel>` |
+| `mirror <ID> [--stage <s>] [--create]` | uploads the stage folder(s) and `00-plan/` under that rule plus an `index.json` per folder; draft without `--create`; never `08-render/**`, fonts or files over 50 MB (each listed with its reason) |
+
+`status --json` adds `locks`, `plan` and, per stage, `dir`, `spec`, `spec_url`, `file_url`, `locked`; the film issue shows `locked by <login>` or `open` per stage and a `## Plan` section.
+
 ## Identity
 
 **brand** = the production line, by its full name (hogwarts / mkan / databayt — never a code; CDN `video/<brand>/`). **identity** = the brand-kit

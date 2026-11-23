@@ -7,6 +7,12 @@
 //   node .claude/scripts/station.mjs questions <formula-id> --dept video [--repo r] [--set k=v]… [--lang en|ar] --json
 //        (the slots still worth asking before Send, in the formula's `order`; --set slots are dropped; no model)
 //   node .claude/scripts/station.mjs match "<text in any language>" --dept video [--repo r] --json
+//   node .claude/scripts/station.mjs settings --dept video [--repo r] [--project <film>] --json
+//        (the settings menu as data: tabs, groups, options, current value per choice, the sentence)
+//   node .claude/scripts/station.mjs compose --dept video [--repo r] [--project <film>] [--set <choice>=<value>]… --json
+//        (tab picks -> formula, route, record, formula slots, one sentence, keywords, tools; --set carries CHOICE keys)
+//   node .claude/scripts/station.mjs stage <stage> --dept video --project <film> --json
+//        (one stage's locked spec: current decisions, the questions worth asking, a summary, spec and file links)
 //   node .claude/scripts/station.mjs lint [--dept video]       exit 1 and list every error
 //   node .claude/scripts/station.mjs --test                    golden cases, deterministic, no network
 //   node .claude/scripts/station.mjs --page                    the formula matrix between markers in content/docs/station.mdx
@@ -250,6 +256,8 @@ function loadProduceProjects(ctx, repo) {
   return list.map((p) => ({
     ...p,
     variants: asList(p.variants).map((v) => (typeof v === "string" ? v : v.id)),
+    locks: p.locks && typeof p.locks === "object" && !Array.isArray(p.locks) ? p.locks : {},
+    locked_all: STAGE_KEYS.every((k) => p.locks?.[k]),
     next_stage: currentStage(p),
     waiting: waitingGates(p),
     dir: path.join(ctx.produceHome, p.id ?? ""),
@@ -595,14 +603,19 @@ export function fill(ctx, dept, id, input = {}) {
   if (!f) return { id, prompt: "", route: pack.defaultRoute ?? "plan", record: "none", missing: [`formula ${id}`], redirected_from: null }
   const state = loadState(ctx, dept, inputs)
   let redirected = null
+  // `redirects` is one {to, if} or a list; the first entry whose condition holds (and whose target exists) wins.
+  // `new` is reserved: a new-film request is never handed to another formula, and it is never a slot.
   const rd = f.header.redirects
   if (rd && !inputs.set.new && state.project && isOpen(state.project)) {
     const type = inputs.set.film_type || f.header.slots?.film_type?.default
-    const ok = rd.if === "open_project" || (rd.if === "open_project_same_type" && (!type || state.project.category === type))
-    const target = formulas.find((x) => x.id === rd.to.replace("{stage}", state.project.next_stage))
-    if (ok && target && target.id !== f.id) {
-      redirected = f.id
-      f = target
+    for (const r of Array.isArray(rd) ? rd : [rd]) {
+      const ok = r.if === "open_project" || (r.if === "open_project_same_type" && (!type || state.project.category === type)) || (r.if === "all_locked" && state.project.locked_all === true)
+      const target = formulas.find((x) => x.id === r.to.replace("{stage}", state.project.next_stage))
+      if (ok && target && target.id !== f.id) {
+        redirected = f.id
+        f = target
+        break
+      }
     }
   }
   inputs.set = expandSets(f, inputs.set)
@@ -675,6 +688,309 @@ function questionsRaw(ctx, dept, id, input = {}) {
   const fillText = (t) => String(t).replace(/\{\{(\w+)\}\}/g, (_, n) => r.get(n) ?? `[unfilled: ${n}]`)
   const intro = f.header.intro ? { en: fillText(f.header.intro.en), ar: fillText(f.header.intro.ar) } : null
   return { id: f.id, intro, questions: list }
+}
+
+// ---- settings / compose / stage ------------------------------------------------------------------------
+// The Video department's settings menu (departments/<dept>/settings.json) and its 14 stages (stages.json) as data,
+// for the app. Zero tokens: the standard choices only, no model.
+const deptJson = (dept, name) => readJson(path.join(ROOT, "departments", dept, name))
+const uniq = (list) => [...new Set(list)]
+const pad2 = (n) => String(n).padStart(2, "0")
+const tabKeys = (doc) => uniq(asList(doc.tabs).flatMap((t) => asList(t.keys)))
+// English-only pack: every `ar` mirrors `en`.
+const bi = (pack, o) => (o == null ? null : englishOnly(pack) ? { en: o.en, ar: o.en } : { en: o.en, ar: o.ar ?? o.en })
+const cdnRef = (film, rel) => `https://${CDN_HOST}/work/${film}/ref/${rel}`
+// The locked spec of one stage: the film's own 00-plan folder, or the fixture's specs/ folder.
+function specFile(ctx, proj, key) {
+  const name = `${pad2(STAGE_KEYS.indexOf(key) + 1)}-${key}.spec.json`
+  return ctx.fixtures ? path.join(ctx.fixtures, "specs", name) : path.join(proj.dir, "00-plan", name)
+}
+const readSpec = (ctx, proj, key) => (proj ? readJson(specFile(ctx, proj, key)) : null)
+const findOption = (choice, value) => asList(choice?.options).find((o) => o.value === value)
+
+export function settings(ctx, dept, input = {}) {
+  const doc = deptJson(dept, "settings.json")
+  if (!doc) return { error: "no settings" }
+  const pack = loadPack(dept) || {}
+  const L = (o) => bi(pack, o)
+  let proj = null
+  if (input.project) {
+    proj = loadState(ctx, dept, { repo: input.repo || "", set: {}, project: input.project }).project
+    if (!proj) return { error: `unknown film ${input.project}` }
+  }
+  const current = (key, choice) => readSpec(ctx, proj, choice.stage)?.decisions?.[key] ?? choice.default
+  const tabs = asList(doc.tabs).map((t) => {
+    const base = { id: t.id, label: L(t.label) }
+    if (!t.keys) return { ...base, source: t.source ?? null }
+    return {
+      ...base,
+      groups: t.keys.filter((k) => doc.choices?.[k]).map((k) => {
+        const c = doc.choices[k]
+        return {
+          key: k,
+          label: L(c.label),
+          q: L(c.q),
+          stage: c.stage,
+          default: c.default,
+          current: current(k, c),
+          options: asList(c.options).map((o) => ({ value: o.value, label: L(o.label), say: L(o.say), hint: L(o.hint), when: o.when ?? null })),
+        }
+      }),
+    }
+  })
+  return { dept, lang: englishOnly(pack) ? "en" : null, project: proj?.id ?? null, tabs, sentence: L(doc.sentence) }
+}
+
+export function compose(ctx, dept, input = {}) {
+  const doc = deptJson(dept, "settings.json")
+  if (!doc) return { error: "no settings" }
+  const pack = loadPack(dept) || {}
+  const choices = doc.choices ?? {}
+  const given = input.set || {}
+  const proj = input.project ? loadState(ctx, dept, { repo: input.repo || "", set: {}, project: input.project }).project : null
+  if (input.project && !proj) return { error: `unknown film ${input.project}` }
+  // With a film only `when: "film"` kinds are eligible and there is no default kind; without one, the new-film kinds.
+  const eligible = (key, o) => key !== "kind" || (proj ? o.when === "film" : o.when !== "film")
+  const unknown = []
+  const picks = {}
+  const chosen = {}
+  for (const [k, v] of Object.entries(given)) {
+    const o = choices[k] ? asList(choices[k].options).find((x) => x.value === String(v) && eligible(k, x)) : null
+    if (!o) unknown.push(`${k}=${v}`)
+  }
+  for (const k of tabKeys(doc)) {
+    const c = choices[k]
+    if (!c) continue
+    const asked = given[k] === undefined ? null : asList(c.options).find((x) => x.value === String(given[k]) && eligible(k, x))
+    const o = asked ?? (k === "kind" && proj ? null : findOption(c, c.default))
+    if (o) {
+      picks[k] = o.value
+      chosen[k] = o
+    }
+  }
+  const kindOpt = chosen.kind ?? null
+  const set = {}
+  for (const o of Object.values(chosen)) for (const [k, v] of Object.entries(o.sets ?? {})) set[k] = String(v)
+  const lineKeys = asList(doc.line?.keys).filter((k) => chosen[k])
+  if (doc.line?.slot && lineKeys.length) set[doc.line.slot] = lineKeys.map((k) => chosen[k].line ?? `${k} ${chosen[k].value}`).join(" · ")
+  if (proj) set.project = proj.id
+  const formula = kindOpt?.formula ?? null
+  if (formula && !proj) set.new = "1"
+  const sentence = {}
+  for (const lang of ["en", "ar"]) {
+    const tpl = (englishOnly(pack) ? doc.sentence?.en : doc.sentence?.[lang]) ?? ""
+    const say = (k) => (chosen[k] ? (englishOnly(pack) ? chosen[k].say?.en : chosen[k].say?.[lang]) ?? chosen[k].say?.en ?? "" : "")
+    sentence[lang] = tpl
+      .split(" · ")
+      .map((seg) => {
+        const holes = [...seg.matchAll(/\{(\w+)\}/g)].map((m) => m[1])
+        if (holes.length && holes.every((h) => !say(h))) return ""
+        return seg.replace(/\{(\w+)\}/g, (_, h) => say(h)).replace(/\s+/g, " ").trim()
+      })
+      .filter(Boolean)
+      .join(" · ")
+  }
+  const hdr = formula ? loadFormulas(dept).formulas.find((x) => x.id === formula)?.header : null
+  const picked = Object.values(chosen)
+  const missing = formula ? fill(ctx, dept, formula, { repo: input.repo, login: input.login, set, project: proj?.id ?? "" }).missing : []
+  return {
+    formula,
+    route: hdr?.route ?? null,
+    record: hdr ? hdr.record ?? "none" : null,
+    picks,
+    set,
+    sentence,
+    keywords: uniq(picked.flatMap((o) => asList(o.keywords))),
+    tools: uniq(picked.flatMap((o) => asList(o.tools))),
+    workflow: kindOpt?.workflow ?? null,
+    missing,
+    unknown,
+  }
+}
+
+export function stage(ctx, dept, key, input = {}) {
+  const st = deptJson(dept, "stages.json")
+  const doc = deptJson(dept, "settings.json")
+  if (!st || !doc) return { error: "no stages" }
+  const def = asList(st.stages).find((x) => x.key === key)
+  if (!def) return { error: `unknown stage ${key}` }
+  if (!input.project) return { error: "stage needs --project <film>" }
+  const pack = loadPack(dept) || {}
+  const L = (o) => bi(pack, o)
+  const proj = loadState(ctx, dept, { repo: input.repo || "", set: {}, project: input.project }).project
+  if (!proj) return { error: `unknown film ${input.project}` }
+  const specPath = specFile(ctx, proj, key)
+  const spec = readJson(specPath)
+  const lock = proj.locks?.[key] ?? null
+  const decisions = spec?.decisions ?? {}
+  const current = {}
+  const questions = []
+  const summary = []
+  const tabOf = (k) => asList(doc.tabs).find((t) => asList(t.keys).includes(k))
+  for (const k of asList(def.owns)) {
+    const c = doc.choices?.[k]
+    if (!c) continue
+    const cur = decisions[k] ?? c.default
+    current[k] = cur
+    const opts = asList(c.options)
+    const shown = findOption(c, cur)
+    const label = shown ? L(shown.label).en : String(cur)
+    if (opts.length >= 2 && opts.length <= 4) {
+      const first = shown ? [shown] : [{ value: cur, label: { en: String(cur) } }]
+      const rest = opts.filter((o) => o.value !== cur)
+      questions.push({
+        key: k,
+        question: L(c.q).en,
+        header: L(c.label).en.slice(0, 12),
+        multiSelect: false,
+        // The wizard takes 4 options at most: a typed value that is not an option still comes first.
+        options: [...first, ...rest].slice(0, 4).map((o) => ({ value: o.value, label: L(o.label).en, description: L(o.hint)?.en ?? "" })),
+      })
+      summary.push(`${L(c.label).en}: ${label}`)
+    } else summary.push(`${L(c.label).en}: ${label} (change it in the ${tabOf(k) ? L(tabOf(k).label).en : "settings"} tab)`)
+  }
+  const toolId = spec?.tool ?? def.tool
+  const tool = st.tools?.[toolId]
+  const toolLabel = tool?.label ?? toolId
+  summary.push(`Tool: ${toolLabel}`)
+  const file = def.file && !String(def.file).startsWith("(") ? def.file : null
+  if (file) summary.push(`Output: ${file}`)
+  const nn = pad2(def.n)
+  return {
+    film: proj.id,
+    stage: key,
+    n: def.n,
+    group: def.group,
+    label: L(def.label),
+    ask: def.ask,
+    gate: def.gate ?? null,
+    done: proj.stages?.[key]?.status === "done",
+    locked: !!lock,
+    lock,
+    current,
+    tool: toolId,
+    tool_label: toolLabel,
+    lane: spec?.lane ?? def.lane,
+    summary,
+    questions,
+    spec: fs.existsSync(specPath) ? specPath : null,
+    spec_url: fs.existsSync(specPath) ? cdnRef(proj.id, `00-plan/${nn}-${key}.spec.json`) : null,
+    file,
+    // 08-render is never mirrored (masters ship to the video tier), so the render master has no work/ link
+    file_url: file && !file.startsWith("08-render/") ? cdnRef(proj.id, file) : null,
+  }
+}
+
+// Pure checks over the two data files. ctxInfo carries what they are checked against, so tests can pass small docs.
+//   lintSettings: { formulas: [{id, header}], vocab: Set, skills: Set, tools: Set|null }
+//   lintStages:   { settings, lanes: Set, formulaIds: Set }
+export function lintSettings(doc, ctxInfo = {}) {
+  const errors = []
+  const e = (m) => errors.push(`settings.json: ${m}`)
+  const choices = doc?.choices ?? {}
+  const keys = Object.keys(choices)
+  const formulas = asList(ctxInfo.formulas)
+  const byId = new Map(formulas.map((f) => [f.id, f]))
+  const slotNames = new Set(formulas.flatMap((f) => Object.keys(f.header?.slots ?? {})))
+  const bil = (o) => o && typeof o.en === "string" && o.en && typeof o.ar === "string" && o.ar
+  if (new RegExp("fa" + "ble", "i").test(JSON.stringify(doc ?? {}))) e("never name the escalate model")
+  for (const t of asList(doc?.tabs)) {
+    if (!t.id) e("a tab has no id")
+    if (!bil(t.label)) e(`tab ${t.id}: label needs en and ar`)
+    if (!t.keys && !t.source) e(`tab ${t.id}: needs keys or source`)
+    for (const k of asList(t.keys)) if (!choices[k]) e(`tab ${t.id}: key "${k}" is not a choice`)
+  }
+  if (typeof doc?.line?.slot !== "string") e("line.slot must be a string")
+  for (const k of asList(doc?.line?.keys)) if (!choices[k]) e(`line.keys: "${k}" is not a choice`)
+  for (const m of String(doc?.sentence?.en ?? "").matchAll(/\{(\w+)\}/g)) if (!choices[m[1]]) e(`sentence.en: {${m[1]}} is not a choice`)
+  for (const k of keys) {
+    const c = choices[k]
+    const at = (m) => e(`choice ${k}: ${m}`)
+    if (!bil(c.label)) at("label needs en and ar")
+    if (!bil(c.q)) at("q needs en and ar")
+    if (!STAGE_KEYS.includes(c.stage)) at(`stage "${c.stage}" is not one of the 14 stages`)
+    const opts = asList(c.options)
+    if (!opts.length) at("no options")
+    if (!opts.some((o) => o.value === c.default)) at(`default "${c.default}" is not an option value`)
+    const seen = new Set()
+    for (const o of opts) {
+      const oa = (m) => e(`choice ${k}.${o.value}: ${m}`)
+      if (seen.has(o.value)) oa("duplicate value")
+      seen.add(o.value)
+      if (!bil(o.label)) oa("label needs en and ar")
+      if (!bil(o.say)) oa("say needs en and ar")
+      if (o.when !== undefined && !["new", "film"].includes(o.when)) oa('when must be "new" or "film"')
+      if (o.formula !== undefined) {
+        const f = byId.get(o.formula)
+        if (!f) oa(`formula ${o.formula} is not a formula of this department`)
+        else {
+          const phrases = asList(f.header?.triggers?.en).map((x) => String(x).toLowerCase())
+          const say = String(o.say?.en ?? "").toLowerCase()
+          if (!phrases.some((p) => say.includes(p))) oa(`say.en must contain a trigger of ${o.formula} (${phrases.join(" | ")})`)
+        }
+      }
+      for (const sk of Object.keys(o.sets ?? {})) if (sk !== "new" && !slotNames.has(sk)) oa(`sets "${sk}" is no formula's slot`)
+      if (ctxInfo.vocab || ctxInfo.skills) for (const kw of asList(o.keywords)) if (!ctxInfo.vocab?.has(kw) && !ctxInfo.skills?.has(kw)) oa(`keyword "${kw}" is neither a spell nor a skill`)
+      if (ctxInfo.tools) for (const tl of asList(o.tools)) if (!ctxInfo.tools.has(tl)) oa(`tool "${tl}" is not in stages.json tools`)
+    }
+  }
+  return errors
+}
+
+export function lintStages(doc, ctxInfo = {}) {
+  const errors = []
+  const e = (m) => errors.push(`stages.json: ${m}`)
+  const stages = asList(doc?.stages)
+  const tools = doc?.tools ?? {}
+  const choices = ctxInfo.settings?.choices ?? {}
+  if (new RegExp("fa" + "ble", "i").test(JSON.stringify(doc ?? {}))) e("never name the escalate model")
+  if (stages.map((s) => s.key).join("|") !== STAGE_KEYS.join("|")) e(`stage keys must be ${STAGE_KEYS.join(", ")} in that order`)
+  const laneOk = (lane) => (ctxInfo.lanes ? ctxInfo.lanes.has(lane) : true) && lane !== "escalate"
+  stages.forEach((s, i) => {
+    const at = (m) => e(`stage ${s.key}: ${m}`)
+    if (s.n !== i + 1) at(`n must be ${i + 1}`)
+    if (!["script", "agent"].includes(s.ask)) at('ask must be "script" or "agent"')
+    if (s.gate !== null && !GATES.includes(s.gate)) at(`gate must be null or one of ${GATES.join(", ")}`)
+    if (!laneOk(s.lane)) at(`lane "${s.lane}" is not a usable lane (a key of engine.json lanes, never escalate)`)
+    if (!tools[s.tool]) at(`tool "${s.tool}" is not in tools`)
+    for (const id of Object.values(s.pieces ?? {}).flat()) if (!tools[id]) at(`pieces: "${id}" is not in tools`)
+    for (const k of asList(s.owns)) {
+      if (!choices[k]) at(`owns "${k}", which is no choice in settings.json`)
+      else if (choices[k].stage !== s.key) at(`owns "${k}", but that choice belongs to stage ${choices[k].stage}`)
+    }
+  })
+  for (const [k, c] of Object.entries(choices)) {
+    const owner = stages.find((s) => s.key === c.stage)
+    if (owner && !asList(owner.owns).includes(k)) e(`choice ${k} says stage ${c.stage}, which does not own it`)
+  }
+  for (const [id, tl] of Object.entries(tools)) {
+    if (!laneOk(tl.lane)) e(`tool ${id}: lane "${tl.lane}" is not a usable lane (a key of engine.json lanes, never escalate)`)
+    if (tl.order !== undefined && ctxInfo.formulaIds && !ctxInfo.formulaIds.has(tl.order)) e(`tool ${id}: order ${tl.order} is not a formula`)
+    if (tl.staged === true && !tl.price) e(`tool ${id}: a staged tool needs a price`)
+  }
+  return errors
+}
+function lintData(dept) {
+  const errors = []
+  const sFile = path.join(ROOT, "departments", dept, "settings.json")
+  const tFile = path.join(ROOT, "departments", dept, "stages.json")
+  const hasS = fs.existsSync(sFile)
+  const hasT = fs.existsSync(tFile)
+  if (!hasS && !hasT) return errors
+  const settingsDoc = hasS ? readJson(sFile) : null
+  const stagesDoc = hasT ? readJson(tFile) : null
+  if (hasS && !settingsDoc) errors.push("settings.json is not valid JSON")
+  if (hasT && !stagesDoc) errors.push("stages.json is not valid JSON")
+  const { formulas } = loadFormulas(dept)
+  const vocab = new Set(asList(readJson(path.join(ROOT, ".claude", "vocabulary.json"))?.schools).flatMap((sc) => asList(sc.spells).map((x) => x.name)))
+  let skills = new Set()
+  try {
+    skills = new Set(fs.readdirSync(path.join(ROOT, ".claude", "skills"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name))
+  } catch {}
+  const lanes = new Set(Object.keys(readJson(path.join(ROOT, ".claude", "engine.json"))?.lanes ?? {}).filter((k) => !k.startsWith("$")))
+  if (settingsDoc) errors.push(...lintSettings(settingsDoc, { formulas, vocab, skills, tools: stagesDoc ? new Set(Object.keys(stagesDoc.tools ?? {})) : null }))
+  if (stagesDoc) errors.push(...lintStages(stagesDoc, { settings: settingsDoc, lanes, formulaIds: new Set(formulas.map((f) => f.id)) }))
+  return errors
 }
 
 // ---- match ---------------------------------------------------------------------------------------
@@ -848,7 +1164,7 @@ export function board(ctx, dept, input = {}) {
     }
     // the new film never duplicates "Continue production": with a film open it becomes the generic "New film"
     let label = h.label
-    if (h.redirects?.if === "open_project_same_type" && openP.length && ledger.new_label) {
+    if ([].concat(h.redirects ?? []).some((r) => r?.if === "open_project_same_type") && openP.length && ledger.new_label) {
       set.new = "1"
       label = ledger.new_label ?? label
     }
@@ -1011,10 +1327,13 @@ export function lint(dept) {
       else for (const k of unknownStages(h.when.stage_in, ledger.stages)) e(`when.stage_in: unknown stage "${k}" (${ledger.stages.join(", ")})`)
     }
     if (h.redirects) {
-      const re = new RegExp("^" + h.redirects.to.replace(/[.*+?^$()|[\]\\]/g, "\\$&").replace("{stage}", "[a-z]+") + "$")
-      if (!formulas.some((x) => re.test(x.id))) e(`redirects.to ${h.redirects.to} matches no formula`)
+      for (const rr of Array.isArray(h.redirects) ? h.redirects : [h.redirects]) {
+        const re = new RegExp("^" + String(rr?.to).replace(/[.*+?^$()|[\]\\]/g, "\\$&").replace("{stage}", "[a-z]+") + "$")
+        if (!formulas.some((x) => re.test(x.id))) e(`redirects.to ${rr?.to} matches no formula`)
+      }
     }
   }
+  errors.push(...lintData(dept))
   for (const q of asList(pack.quickActions)) if (q.id && !seen.has(q.id)) errors.push(`pack.quickActions: id ${q.id} is not a formula`)
   const boardRoles = new Set(formulas.filter((f) => f.header.board).map((f) => f.header.role))
   for (const r of ROLES) if (!boardRoles.has(r)) errors.push(`no board formula with role "${r}"`)
@@ -1530,6 +1849,151 @@ function runTests() {
     ok(fill(mk("none"), "video", "video.film.plan", { repo: "hogwarts" }).prompt.includes("- Source video: none"), "optional: none by default")
     eq(fill(mk("none"), "video", "video.film.plan", { repo: "hogwarts", project: "hogwarts-nope-v009" }).missing, ["project"], "a pinned project that is unknown is reported")
   })
+  // ---- settings, compose, stage, the new lint ----
+  t("settings: tabs in file order, ar mirrors en, current is the default without a film", () => {
+    const r = settings(mk("none"), "video", { repo: "hogwarts" })
+    eq(r.tabs.map((x) => x.id), ["film", "kind", "audience", "format", "style", "stages"])
+    eq(r.tabs[0].source, "ledger")
+    eq(r.project, null)
+    for (const g of r.tabs.flatMap((x) => x.groups ?? [])) {
+      eq(g.current, g.default, g.key)
+      ok(g.label.ar === g.label.en && g.q.ar === g.q.en && g.options.every((o) => o.label.ar === o.label.en && o.say.ar === o.say.en), `${g.key} mirrors en`)
+    }
+    eq(r.sentence.ar, r.sentence.en)
+    eq(r.tabs[1].groups[0].options[0].when, "new")
+    eq(r.tabs[3].groups[0].options[0].hint === null || typeof r.tabs[3].groups[0].options[0].hint === "object", true)
+    eq(settings(mk("none"), "sales", {}).error, "no settings")
+  })
+  t("settings --project reads the film's locked decisions", () => {
+    const r = settings(mk("locked"), "video", { project: "hogwarts-locked-v001" })
+    eq(r.project, "hogwarts-locked-v001")
+    eq(r.tabs[4].groups.find((g) => g.key === "look").current, "3D")
+    eq(r.tabs[4].groups.find((g) => g.key === "voice").current, "stock")
+    ok(settings(mk("locked"), "video", { project: "nope" }).error, "unknown film")
+  })
+  t("compose: the defaults give the film plan, the exact settings line and the sentence", () => {
+    const r = compose(mk("none"), "video", { repo: "hogwarts" })
+    eq([r.formula, r.route, r.record, r.set.new], ["video.film.plan", "plan", "film", "1"])
+    eq(r.set.settings, "1080p · 30 fps · version sd-ar · look mixed · voice stock voice · captions burned in · music brand bed")
+    eq(r.sentence.en, "Intro film · school owners · Sudan Arabic · Facebook 9:16 · 2:00 · real screens + 3D · stock voice")
+    eq(r.sentence.ar, r.sentence.en)
+    eq([r.workflow, r.unknown], ["film-line", []])
+    eq(r.missing, [])
+  })
+  t("compose: kind, ratio and bad keys", () => {
+    const ctx = mk("none")
+    eq(compose(ctx, "video", { repo: "hogwarts", set: { kind: "reel" } }).formula, "video.reel.footage")
+    eq(compose(ctx, "video", { repo: "hogwarts", set: { ratio: "16:9" } }).set.format, "horizontal 16:9, desktop")
+    const bad = compose(ctx, "video", { repo: "hogwarts", set: { nope: "1", ratio: "7:7", kind: "versions" } })
+    eq(bad.unknown.length, 3)
+    eq([bad.picks.ratio, bad.formula], ["9:16", "video.film.plan"], "defaults apply; a film kind is not eligible without a film")
+  })
+  t("compose --project: no kind means no formula; versions fan out", () => {
+    const ctx = mk("locked")
+    const a = compose(ctx, "video", { repo: "hogwarts", project: "hogwarts-locked-v001" })
+    eq([a.formula, a.set.project, a.record, a.route], [null, "hogwarts-locked-v001", null, null])
+    eq(a.missing, [])
+    ok(a.picks.kind === undefined && a.set.new === undefined, "no kind, no new")
+    const b = compose(ctx, "video", { repo: "hogwarts", project: "hogwarts-locked-v001", set: { kind: "versions" } })
+    eq(b.formula, "video.versions.fanout")
+    eq(compose(ctx, "video", { project: "hogwarts-locked-v001", set: { kind: "reel" } }).unknown, ["kind=reel"])
+  })
+  t("fill: new=1 skips redirects even with a same-type film open; without it the redirect fires", () => {
+    const a = fill(mk("script-gate"), "video", "video.film.plan", { repo: "hogwarts", login: "abdout" })
+    eq(a.redirected_from, "video.film.plan")
+    const b = fill(mk("script-gate"), "video", "video.film.plan", { repo: "hogwarts", login: "abdout", set: { new: "1" } })
+    eq([b.redirected_from, b.id], [null, "video.film.plan"])
+    ok(!b.prompt.includes('"new"') && !b.missing.includes("new"), "new is never a slot")
+  })
+  t("stage: a locked stage shows current decisions, questions and a summary", () => {
+    const r = stage(mk("locked"), "video", "visual", { project: "hogwarts-locked-v001" })
+    eq([r.locked, r.current.look, r.current.threed, r.n, r.ask, r.gate], [true, "3D", "order", 7, "agent", "look"])
+    const q = r.questions.find((x) => x.key === "look")
+    eq([q.options[0].value, q.options[0].label, q.header, q.multiSelect], ["3D", "3D", "Look", false])
+    ok(r.summary.some((l) => l.startsWith("Look:")), "Look: line")
+    ok(r.summary.some((l) => l.startsWith("Tool:")) && r.summary.at(-1) === "Output: 06-production/visual-manifest.json", "tool and output")
+    eq(r.spec_url, "https://cdn.databayt.org/work/hogwarts-locked-v001/ref/00-plan/07-visual.spec.json")
+    eq(r.file_url, "https://cdn.databayt.org/work/hogwarts-locked-v001/ref/06-production/visual-manifest.json")
+    ok(r.spec && r.spec.endsWith("07-visual.spec.json"), "spec path")
+  })
+  t("stage: more than four options is a summary line, not a question; unknown stage is an error", () => {
+    const r = stage(mk("locked"), "video", "request", { project: "hogwarts-locked-v001" })
+    ok(!r.questions.some((x) => x.key === "version"), "no version question")
+    ok(r.summary.some((l) => l.startsWith("Version:") && l.endsWith("(change it in the Audience tab)")), "summary line")
+    ok(r.questions.some((x) => x.key === "audience"), "audience is a question")
+    eq([r.spec, r.spec_url], [null, null])
+    ok(stage(mk("locked"), "video", "nope", { project: "hogwarts-locked-v001" }).error, "unknown stage")
+    ok(stage(mk("locked"), "video", "visual", { project: "nope" }).error, "unknown film")
+    eq(stage(mk("locked"), "video", "approval", { project: "hogwarts-locked-v001" }).file_url, null)
+  })
+  t("stage: an unlocked film reports defaults", () => {
+    const r = stage(mk("script-gate"), "video", "visual", { project: "hogwarts-demo-v001" })
+    eq([r.locked, r.lock, r.current.look], [false, null, "mixed"])
+  })
+  t("redirect list: all_locked hands over to the run formula, otherwise to the stage formula", () => {
+    const { formulas } = loadFormulas("video")
+    const cont = formulas.find((x) => x.id === "video.film.continue")
+    const hasList = Array.isArray(cont?.header.redirects) && cont.header.redirects.some((r) => r.if === "all_locked") && formulas.some((x) => x.id === "video.film.run")
+    if (!hasList) console.log("  skip redirect list: video.film.continue / video.film.run are not on disk yet")
+    else {
+      eq(fill(mk("locked"), "video", "video.film.continue", { repo: "hogwarts", login: "abdout" }).id, "video.film.run")
+      eq(fill(mk("script-gate"), "video", "video.film.continue", { repo: "hogwarts", login: "abdout" }).id, "video.stage.storyboard")
+    }
+    ok(mk("locked") && loadProduceProjects(mk("locked"), "hogwarts")[0].locked_all === true, "locked_all")
+    eq(loadProduceProjects(mk("script-gate"), "hogwarts")[0].locks, {})
+  })
+  const miniFormulas = [{ id: "video.a", header: { triggers: { en: ["make a thing"] }, slots: { s1: {} } } }]
+  const miniSettings = () => ({
+    tabs: [{ id: "k", label: { en: "K", ar: "ك" }, keys: ["kind"] }],
+    sentence: { en: "{kind}", ar: "{kind}" },
+    line: { slot: "settings", keys: ["kind"] },
+    choices: { kind: { label: { en: "K", ar: "ك" }, q: { en: "?", ar: "؟" }, stage: "request", default: "a", options: [{ value: "a", label: { en: "A", ar: "أ" }, say: { en: "Make a thing now", ar: "أ" }, formula: "video.a", sets: { s1: "x" } }] } },
+  })
+  t("lintSettings: a clean doc passes; unknown formula, stray sets key, bad stage, bad default are caught", () => {
+    const info = { formulas: miniFormulas, vocab: new Set(["produce"]), skills: new Set(["shoot"]), tools: new Set(["t1"]) }
+    eq(lintSettings(miniSettings(), info), [])
+    const d = (fn) => { const x = miniSettings(); fn(x.choices.kind); return lintSettings(x, info) }
+    ok(d((c) => (c.options[0].formula = "video.zzz")).length === 1, "unknown formula")
+    ok(d((c) => (c.options[0].sets = { typo: "1" })).length === 1, "sets key is no slot")
+    ok(d((c) => (c.options[0].sets = { new: "1" })).length === 0, "new is allowed")
+    ok(d((c) => (c.options[0].say.en = "unrelated")).length === 1, "say must contain a trigger")
+    ok(d((c) => (c.stage = "nope")).length === 1, "bad stage")
+    ok(d((c) => (c.default = "z")).length === 1, "bad default")
+    ok(d((c) => (c.options[0].keywords = ["nothing"])).length === 1, "unknown keyword")
+    ok(d((c) => (c.options[0].tools = ["nothing"])).length === 1, "unknown tool")
+    ok(d((c) => (c.options[0].when = "later")).length === 1, "bad when")
+    ok(d((c) => c.options.push({ ...c.options[0] })).length >= 1, "duplicate value")
+    const x = miniSettings()
+    x.tabs[0].keys = ["ghost"]
+    ok(lintSettings(x, info).length === 1, "tab key that is no choice")
+  })
+  const miniStages = () => ({
+    stages: STAGE_KEYS.map((k, i) => ({ key: k, n: i + 1, ask: "script", gate: null, lane: "script", tool: "produce", owns: k === "request" ? ["kind"] : [] })),
+    tools: { produce: { lane: "script" } },
+  })
+  const stageInfo = { settings: miniSettings(), lanes: new Set(["script", "build", "escalate"]), formulaIds: new Set(["video.a"]) }
+  t("lintStages: a clean doc passes; missing stage, escalate lane, staged tool without price are caught", () => {
+    eq(lintStages(miniStages(), stageInfo), [])
+    const d = (fn) => { const x = miniStages(); fn(x); return lintStages(x, stageInfo) }
+    ok(d((x) => x.stages.pop()).length >= 1, "missing stage key")
+    ok(d((x) => (x.stages[1].lane = "escalate")).length === 1, "escalate lane")
+    ok(d((x) => (x.tools.produce.lane = "escalate")).length === 1, "escalate tool lane")
+    ok(d((x) => (x.tools.produce.staged = true)).length === 1, "staged without price")
+    ok(d((x) => (x.tools.produce.order = "video.nope")).length === 1, "order is no formula")
+    ok(d((x) => (x.stages[0].owns = [])).length === 1, "a choice nobody owns")
+    ok(d((x) => (x.stages[2].tool = "ghost")).length === 1, "unknown tool")
+    ok(d((x) => (x.stages[0].ask = "model")).length === 1, "bad ask")
+    ok(d((x) => (x.stages[0].gate = "maybe")).length === 1, "bad gate")
+    ok(d((x) => (x.stages[3].n = 9)).length === 1, "n out of order")
+  })
+  t("parity: STAGE_KEYS equals the STAGES table of produce.mjs", () => {
+    const text = fs.readFileSync(path.join(ROOT, ".claude", "skills", "produce", "scripts", "produce.mjs"), "utf8")
+    const table = text.slice(text.indexOf("export const STAGES = ["))
+    const keys = [...table.slice(0, table.indexOf("].map(")).matchAll(/^\s*\["([a-z]+)",/gm)].map((m) => m[1])
+    eq(keys, STAGE_KEYS)
+    const st = readJson(path.join(ROOT, "departments", "video", "stages.json"))
+    eq(st.stages.map((x) => x.key), STAGE_KEYS)
+  })
   t("norm: Arabic forms fold together", () => eq(norm("إنتاج  فيديو"), norm("انتاج فيديو")))
   console.log(`station: ${pass} passed, ${fails.length} failed`)
   return fails.length === 0
@@ -1584,13 +2048,16 @@ function main() {
     if (cmd === "board") return out(a, board(ctx, dept, { repo: a.repo, login: a.login, health: a.health, lang: a.lang }), (r) => r.options.map((o) => `${o.role.padEnd(8)}${o.id.padEnd(26)}${o.score}  ${o.why.join(", ")}`).join("\n"))
     if (cmd === "fill") return out(a, fill(ctx, dept, a._[1], { repo: a.repo, login: a.login, set: a.set, project: a.project }), (r) => r.prompt + (r.missing.length ? `\n\n(missing: ${r.missing.join(", ")})` : ""))
     if (cmd === "questions") return out(a, questions(ctx, dept, a._[1], { repo: a.repo, login: a.login, set: a.set, project: a.project }), (r) => r.questions.map((x) => `${x.slot} [${x.kind}] ${x.q.en} (current: ${x.current ?? "-"})`).join("\n"))
+    if (cmd === "settings") return out(a, settings(ctx, dept, { repo: a.repo, project: a.project }), (r) => (r.error ? r.error : r.tabs.map((t) => t.id).join(" · ")))
+    if (cmd === "compose") return out(a, compose(ctx, dept, { repo: a.repo, login: a.login, set: a.set, project: a.project }), (r) => (r.error ? r.error : `${r.formula ?? "no formula"}\n${r.sentence.en}`))
+    if (cmd === "stage") return out(a, stage(ctx, dept, a._[1], { repo: a.repo, project: a.project }), (r) => (r.error ? r.error : r.summary.join("\n")))
     if (cmd === "match") return out(a, match(ctx, dept, a._.slice(1).join(" "), a.repo), (r) => `${r.id ?? "none"} (${r.confidence})${r.dept ? ` dept=${r.dept}` : ""}`)
   } catch (e) {
     // never fail loudly: the app reads JSON and treats an empty answer as "nothing to show"
     console.log(JSON.stringify({ error: String(e?.message ?? e), department: dept, options: [] }))
     return
   }
-  console.error("usage: station.mjs board|fill|questions|match|lint|selftest|--page  (see the header of this file)")
+  console.error("usage: station.mjs board|fill|questions|match|settings|compose|stage|lint|selftest|--page  (see the header of this file)")
   process.exit(2)
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === SELF) main()

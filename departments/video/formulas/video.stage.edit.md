@@ -149,11 +149,13 @@ Assemble the edit of one version from the visuals, captures, audio and captions.
 - Visuals: `{{project_dir}}/06-production/visual-manifest.json`
 - Audio: `{{project_dir}}/07-audio/audio-package.json`
 - Brand kit: {{brand_kit_url}}
+- Locked spec: `{{project_dir}}/00-plan/09-edit.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Edit with FilmCraft (`fc/assemble.mjs` or the `filmcraft` MCP); `produce build {{project}} --variant {{variant}}` runs piece then assemble.
 - Captions in the version's language, RTL shaping checked on every frame.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/06-production/editing/edit-project.json`.

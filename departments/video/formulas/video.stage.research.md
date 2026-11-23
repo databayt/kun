@@ -100,11 +100,13 @@ Write the product research for the film: what the product really does, what the 
 - Product: {{product_domain}} and the product docs in the {{repo}} repo
 - Real captures: ~/media/{{repo}}/
 - Markets: {{markets_url}}
+- Locked spec: `{{project_dir}}/00-plan/02-research.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Product claims come only from real captures or the product docs; mark each claim with its source.
 - Competitor and reference material is read, never copied.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/02-research/product-research.md`.

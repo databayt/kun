@@ -16,6 +16,11 @@
 //   produce order <ID> <formula-id> --to <login> [--set k=v]… [--after ref,ref] [--create]   a WORK ORDER issue for one person
 //   produce submit <issue-ref> <file>… [--summary "…"] [--next "…"] [--stage s] [--create]   upload deliverables + receipt comment
 //   (set PRODUCE_STUB_DIR=<dir> to stub gh, the CDN uploader and station in tests: calls are logged to <dir>/gh.log + upload.log)
+//   produce lock <ID> --all [--plan <file>] [--set k=v]… | lock <ID> <stage> [--set k=v]… [--spec <file>]   [--by <login>] [--no-sync] [--json]
+//        write 00-plan/<NN>-<stage>.spec.{json,md}, record project.json locks, recompile 00-plan/plan.{json,md}; heavy stages need a lock
+//   produce unlock <ID> <stage>  |  produce plan <ID> [--json]   drop one lock (spec files stay) / recompile the plan
+//   produce mirror <ID> [--stage <s>] [--create]   upload stage folders to work/<ID>/ref/<path> (draft without --create; never 08-render, fonts, >50 MB)
+//   produce url <ID> --path <relative path>        the CDN URL of any film file (work/<ID>/ref/<path>)
 //   produce url <ID> [--variant <v>]               predicted stable + archive CDN URLs, before anything renders
 //   produce build <ID> --variant <v>|--all [--dry-run] [--force]   piece.mjs -> assemble.mjs per variant (skips unchanged inputs)
 //   produce ship <ID> [--variant <v>|--all] [--dry-run]
@@ -76,7 +81,7 @@ const STAGE_KEYS = STAGES.map((s) => s.key)
 const PER_VARIANT = ["audio", "edit", "render", "qa", "approval", "cdn", "publish"]
 const HEAVY = new Set(["visual", "audio", "edit", "render"]) // expensive: need the script sign-off first
 const FOLDERS = [
-  "01-brief", "02-research", "03-script", "04-storyboard",
+  "00-plan", "01-brief", "02-research", "03-script", "04-storyboard",
   "05-assets/screen-recordings", "05-assets/images", "05-assets/generated-video", "05-assets/3d", "05-assets/graphics", "05-assets/audio",
   "06-production/blender", "06-production/filmcraft", "06-production/editing",
   "07-audio/voiceover", "07-audio/music", "07-audio/sound-effects",
@@ -96,7 +101,7 @@ const opt = (name, def) => {
 }
 const has = (name) => argv.includes(`--${name}`)
 const optAll = (name) => argv.flatMap((a, i) => (a === `--${name}` && i + 1 < argv.length ? [argv[i + 1]] : []))
-const VALUE_FLAGS = new Set(["markets", "slug", "variant", "brand", "category", "subject", "lang", "title", "version", "by", "gate", "destination", "issue", "file", "verdict", "item", "usd", "note", "repo", "out", "identity", "audience", "objective", "from-reference", "to", "set", "after", "summary", "next", "stage", "items"])
+const VALUE_FLAGS = new Set(["markets", "slug", "variant", "brand", "category", "subject", "lang", "title", "version", "by", "gate", "destination", "issue", "file", "verdict", "item", "usd", "note", "repo", "out", "identity", "audience", "objective", "from-reference", "to", "set", "after", "summary", "next", "stage", "items", "plan", "spec", "path"])
 const pos = () => {
   const out = []
   for (let i = 0; i < argv.length; i++) {
@@ -327,6 +332,7 @@ function contributors(p) {
 function statusJson(p) {
   const vm = variantMode(p)
   const dir = dirOf(p.id)
+  const defs = stageDefs()
   const cellOf = (v, k) => (vm ? (vst(p, v, k)?.status ?? "todo") : (p.stages[k]?.status ?? "todo"))
   const stageList = STAGES.map((s) => {
     const per = PER_VARIANT.includes(s.key)
@@ -336,7 +342,10 @@ function statusJson(p) {
       const cells = variantsOf(p).map((v) => cellOf(v.id, s.key))
       status = cells.every((c) => ["done", "passed"].includes(c)) ? "done" : cells.some((c) => c !== "todo") ? "partial" : "todo"
     }
-    return { key: s.key, n: s.n, file: s.file, per_variant: per, status, done: stageDone(p, s), at: vm && per ? null : st?.at ?? null }
+    const d = defs.find((x) => x.key === s.key)
+    const sp = d && existsSync(specPath(p.id, d)) ? specPath(p.id, d) : null
+    return { key: s.key, n: s.n, file: s.file, per_variant: per, status, done: stageDone(p, s), at: vm && per ? null : st?.at ?? null,
+      dir: d?.dir ?? null, spec: sp, spec_url: sp ? refUrl(p.id, `00-plan/${specName(d)}.json`) : null, file_url: d?.file && !String(d.file).startsWith("08-render/") ? refUrl(p.id, d.file) : null, locked: !!p.locks?.[s.key] }
   })
   const shared = STAGES.filter((s) => !(vm && PER_VARIANT.includes(s.key)))
   const nextShared = shared.find((s) => !p.stages[s.key])
@@ -351,6 +360,7 @@ function statusJson(p) {
     contributors: contributors(p),
     brand: p.brand, identity: p.identity ?? p.brand, category: p.category, subject: p.subject, langs: p.langs, markets: p.markets ?? [], focus: p.focus ?? [],
     stage_list: stageList, variants, next, urls: filmUrls(p), paths, files, voice: p.voice ?? {},
+    locks: p.locks ?? {}, plan: existsSync(planInfo(p).json) ? planInfo(p) : null,
   }
 }
 
@@ -452,6 +462,7 @@ function advance(id, stage) {
   if (perVariant && has("all")) die("advance takes one --variant at a time (the deliverable differs per variant)", 2)
   if (stage === "publish" && !approval(p, "publish")) die("publish needs its own approval first: produce approve <ID> --gate publish --version Vnnn --by <login> --destination facebook")
   if (HEAVY.has(stage) && !approval(p, "script") && !has("force")) die(`"${stage}" is expensive production: sign the script off first (produce approve <ID> --gate script --version ${p.version} --by <login>), or pass --force`)
+  if (HEAVY.has(stage) && !p.locks?.[stage] && !has("force")) die(`"${stage}" is not locked: lock its spec first (produce lock ${id} ${stage} [--set k=v]…, or produce lock ${id} --all), or pass --force`)
   const file = opt("file")
   if (!file) die(`advance needs --file <deliverable> (expected ${STAGES.find((s) => s.key === stage).file})`, 2)
   const abs = resolveIn(p, file)
@@ -532,6 +543,260 @@ function approve(id) {
   syncFilm(p, `approved: ${gate} · ${version} · by ${by}`)
 }
 
+// ---- lock / plan / mirror ----------------------------------------------------------------------
+// A spec is one stage's decisions written to 00-plan/<NN>-<stage>.spec.json; a lock records it in project.json;
+// the plan (00-plan/plan.json + plan.md) is all 14 specs in order. One path rule maps a film file to the CDN:
+// ~/media/_projects/<film>/<rel>  <->  work/<film>/ref/<rel>  <->  https://cdn.databayt.org/work/<film>/ref/<rel>.
+const refKey = (id, relPath) => `work/${id}/ref/${relPath}`
+const refUrl = (id, relPath) => cdnUrl(refKey(id, relPath))
+const planDir = (id) => join(dirOf(id), "00-plan")
+const specName = (d) => `${String(d.n).padStart(2, "0")}-${d.key}.spec`
+function videoData(name) {
+  for (const base of [KUN_DIR, join(HERE, "..", "..", "..", "..")]) {
+    const f = join(base, "departments", "video", name)
+    if (!existsSync(f)) continue
+    try { return readJson(f) } catch {}
+  }
+  return null
+}
+let _warned = false
+const stagesDoc = () => videoData("stages.json")
+const settingsDoc = () => videoData("settings.json")
+// the 14 stage definitions: stages.json when found, else the bare ledger list (no owns, no tools)
+function stageDefs() {
+  const doc = stagesDoc()
+  if (doc?.stages?.length) return doc.stages
+  if (!_warned && !settingsDoc()) { _warned = true; console.error("produce: warning — departments/video/stages.json and settings.json not found; locking with empty decisions") }
+  return STAGES.map((s) => ({ key: s.key, n: Number(s.n), label: { en: s.key }, dir: s.file.startsWith("(") ? null : s.file.split("/")[0], file: s.file.startsWith("(") ? null : s.file, gate: null, tool: null, lane: null, owns: [], inputs: [] }))
+}
+const toolsDoc = () => stagesDoc()?.tools ?? {}
+const stageLabel = (d) => d.label?.en ?? d.key
+const choiceOf = (k) => settingsDoc()?.choices?.[k]
+const choiceLabel = (k) => choiceOf(k)?.label?.en ?? k
+const optionLabel = (k, v) => choiceOf(k)?.options?.find((o) => String(o.value) === String(v))?.label?.en ?? String(v)
+const specPath = (id, d) => join(planDir(id), `${specName(d)}.json`)
+const readSpec = (id, d) => { try { return readJson(specPath(id, d)) } catch { return null } }
+const allLocked = (p) => stageDefs().every((d) => p.locks?.[d.key])
+const planInfo = (p) => ({ json: join(planDir(p.id), "plan.json"), md: join(planDir(p.id), "plan.md"), url: refUrl(p.id, "00-plan/plan.md"), locked_all: allLocked(p) })
+const parseSets = () => optAll("set").map((x) => {
+  const i = x.indexOf("=")
+  if (i < 1) die(`--set takes k=v, got: ${x}`, 2)
+  return [x.slice(0, i), x.slice(i + 1)]
+})
+// 08-render is never mirrored (masters ship to the video tier), so a path under it has no work/ link
+const mirrored = (rel) => !String(rel).startsWith("08-render/")
+const ioList = (id, paths) => (paths ?? []).map((path) => ({ path, url: mirrored(path) ? refUrl(id, path) : null }))
+
+// decisions: default <- plan.picks <- plan.stages[stage].decisions <- --set <- --spec (the existing spec, when
+// re-locking one stage, sits just above the default so earlier answers survive a one-key --set)
+function specFor(p, d, sources) {
+  const { plan = {}, sets = [], spec = null, prior = null } = sources
+  const decisions = {}
+  for (const k of d.owns ?? []) if (choiceOf(k)?.default !== undefined) decisions[k] = choiceOf(k).default
+  let source = "default"
+  if (prior?.decisions) Object.assign(decisions, prior.decisions)
+  for (const k of d.owns ?? []) if (plan.picks?.[k] !== undefined) { decisions[k] = plan.picks[k]; source = "plan" }
+  const ps = plan.stages?.[d.key]
+  if (ps) { Object.assign(decisions, ps.decisions ?? {}); source = "plan" }
+  for (const [k, v] of sets) if ((d.owns ?? []).includes(k)) { decisions[k] = v; source = "set" }
+  if (spec) { Object.assign(decisions, spec.decisions ?? {}); source = "spec" }
+  // a plan is written by an agent for all 14 stages at once: a tool id it got wrong must not sink the whole lock,
+  // so that stage keeps its own tool; a spec for one stage is explicit and an unknown tool there is an error
+  let planTool = ps?.tool
+  if (planTool && Object.keys(toolsDoc()).length && !toolsDoc()[planTool]) {
+    console.error(`produce: warning — the plan names an unknown tool "${planTool}" for ${d.key}; keeping ${d.tool}`)
+    planTool = undefined
+  }
+  const tool = spec?.tool ?? planTool ?? prior?.tool ?? d.tool
+  if (tool && Object.keys(toolsDoc()).length && !toolsDoc()[tool]) die(`unknown tool "${tool}" for ${d.key} — one of ${Object.keys(toolsDoc()).join(", ")}`, 2)
+  return {
+    film: p.id, stage: d.key, n: d.n, label: stageLabel(d), decisions, tool: tool ?? null, lane: prior?.lane ?? d.lane ?? null,
+    inputs: ioList(p.id, d.inputs), outputs: ioList(p.id, d.file ? [d.file] : []), gate: d.gate ?? null,
+    notes: spec?.notes ?? ps?.notes ?? prior?.notes ?? "", source,
+  }
+}
+const decisionLines = (s) => Object.entries(s.decisions).map(([k, v]) => `- ${choiceLabel(k)}: ${optionLabel(k, v)}`)
+const toolLabel = (t) => (t ? (toolsDoc()[t]?.label ?? t) : "-")
+function specMd(p, s) {
+  const lines = [`# ${String(s.n).padStart(2, "0")} ${s.label} — ${p.title}`, ""]
+  const dl = decisionLines(s)
+  lines.push(...(dl.length ? dl : ["_No decisions for this stage._"]), "", `Tool: ${toolLabel(s.tool)}`, "")
+  lines.push("Inputs:", ...(s.inputs.length ? s.inputs.map((x) => `- ${x.path}${x.url ? ` — ${x.url}` : ""}`) : ["- (none)"]), "")
+  lines.push("Outputs:", ...(s.outputs.length ? s.outputs.map((x) => `- ${x.path}${x.url ? ` — ${x.url}` : ""}`) : ["- (none)"]), "")
+  lines.push(`Gate: ${s.gate ?? "none"}`)
+  if (s.notes) lines.push("", `Notes: ${s.notes}`)
+  lines.push("", `Locked by ${s.by} at ${s.at} (${s.source})`, "")
+  return lines.join("\n")
+}
+const stripVolatile = (s) => { const { by, at, source, ...rest } = s; return JSON.stringify(rest) }
+// write one spec (json + md); an unchanged spec keeps its file, its lock and its time, so repeating a lock is a no-op
+function writeSpec(p, d, spec, source) {
+  const prior = readSpec(p.id, d)
+  const body = { ...spec, source, by: actor(), at: now() }
+  if (prior && p.locks?.[d.key] && stripVolatile(prior) === stripVolatile(body)) return { changed: false }
+  mkdirSync(planDir(p.id), { recursive: true })
+  const f = specPath(p.id, d)
+  writeFileSync(f, JSON.stringify(body, null, 2) + "\n")
+  writeFileSync(join(planDir(p.id), `${specName(d)}.md`), specMd(p, body))
+  const sha = sha256Full(f)
+  const prev = p.locks?.[d.key]
+  const rec = { by: body.by, at: body.at, sha, source }
+  const wasDone = stageDone(p, { key: d.key })
+  if (wasDone && !prev) rec.backfill = true
+  else if (wasDone && prev) { if (prev.backfill) rec.backfill = true; if (prev.sha !== sha) rec.changed = true }
+  ;(p.locks ??= {})[d.key] = rec
+  return { changed: true }
+}
+// all 14 steps in order (an unlocked stage shows its defaults), as plan.json + plan.md
+function compilePlan(p, input) {
+  const inFile = join(planDir(p.id), "plan.input.json")
+  const inp = input ?? (existsSync(inFile) ? readJson(inFile) : {})
+  const steps = stageDefs().map((d) => {
+    const s = readSpec(p.id, d) ?? specFor(p, d, { plan: inp })
+    return {
+      n: d.n, stage: d.key, label: stageLabel(d), tool: s.tool, tool_label: toolLabel(s.tool), lane: s.lane, decisions: s.decisions,
+      inputs: s.inputs, outputs: s.outputs, gate: s.gate, locked: !!p.locks?.[d.key], done: stageDone(p, d),
+    }
+  })
+  const cost = Array.isArray(inp.cost) ? inp.cost : []
+  const plan = { film: p.id, version: p.version, compiledAt: now(), locked_all: allLocked(p), steps, cost }
+  const info = planInfo(p)
+  mkdirSync(planDir(p.id), { recursive: true })
+  writeFileSync(info.json, JSON.stringify(plan, null, 2) + "\n")
+  const cell = (x) => String(x ?? "-").replace(/\|/g, "\\|")
+  const md = [`# Plan — ${p.title} (${p.id} ${p.version})`, "", "| # | Stage | Tool | Lane | Output | Gate | Locked |", "| --- | --- | --- | --- | --- | --- | --- |",
+    ...steps.map((s) => `| ${String(s.n).padStart(2, "0")} | ${cell(s.label)} | ${cell(s.tool_label)} | ${cell(s.lane)} | ${s.outputs.length ? s.outputs.map((o) => (o.url ? `[${cell(o.path)}](${o.url})` : cell(o.path))).join(", ") : "-"} | ${cell(s.gate ?? "none")} | ${s.locked ? `locked by ${p.locks[s.stage].by}` : "open"} |`), ""]
+  if (cost.length) md.push("## Cost", ...cost.map((c) => `- ${typeof c === "string" ? c : JSON.stringify(c)}`), "")
+  writeFileSync(info.md, md.join("\n"))
+  return info
+}
+function lockOut(p, touched, info) {
+  const out = { id: p.id, locked: touched, locks: p.locks ?? {}, plan: info }
+  if (has("json")) return console.log(JSON.stringify(out, null, 2))
+  console.log(`${p.id}: ${touched.join(", ")} — locked ${Object.keys(p.locks ?? {}).length} of ${stageDefs().length}\nplan: ${info.url}`)
+}
+function lockCmd(id, stage) {
+  const p = load(id)
+  const defs = stageDefs()
+  const all = has("all")
+  if (all && stage) die("lock takes either <stage> or --all, not both", 2)
+  if (!all && !stage) die("usage: lock <ID> --all [--plan <file>] | lock <ID> <stage> [--set k=v]… [--spec <file>]  [--by <login>] [--no-sync] [--json]", 2)
+  const target = all ? defs : defs.filter((d) => d.key === stage)
+  if (!target.length) die(`unknown stage "${stage}" — one of ${defs.map((d) => d.key).join(" ")}`, 2)
+  const sets = parseSets()
+  for (const [k] of sets) {
+    const owners = defs.filter((d) => (d.owns ?? []).includes(k))
+    if (!owners.length) die(`--set ${k}: no stage owns a choice called "${k}"`, 2)
+    if (!all && !owners.some((d) => d.key === stage)) die(`--set ${k}: ${stage} does not own it (owned by ${owners.map((d) => d.key).join(", ")})`, 2)
+  }
+  let plan = {}, planGiven = false
+  if (opt("plan")) {
+    try { plan = readJson(resolve(opt("plan"))) } catch (e) { die(`--plan file unreadable: ${e.message}`, 2) }
+    planGiven = true
+  }
+  let spec = null
+  if (opt("spec")) {
+    if (all) die("--spec is for one stage: lock <ID> <stage> --spec <file>", 2)
+    try { spec = readJson(resolve(opt("spec"))) } catch (e) { die(`--spec file unreadable: ${e.message}`, 2) }
+    if (spec.stage !== stage) die(`--spec is for stage "${spec.stage}", not "${stage}"`, 2)
+  }
+  if (planGiven) {
+    mkdirSync(planDir(id), { recursive: true })
+    writeFileSync(join(planDir(id), "plan.input.json"), JSON.stringify(plan, null, 2) + "\n")
+  }
+  for (const d of target) {
+    // an existing spec always sits just above the defaults, so `lock --all` on a locked film keeps what each
+    // stage already decided and only applies what the plan or --set brings
+    const s = specFor(p, d, { plan, sets, spec, prior: readSpec(id, d) })
+    writeSpec(p, d, s, s.source)
+  }
+  save(p)
+  const info = compilePlan(p, planGiven ? plan : undefined)
+  lockOut(p, target.map((d) => d.key), info)
+  if (!has("no-sync")) syncFilm(p, null)
+}
+function unlockCmd(id, stage) {
+  const p = load(id)
+  if (!stage || !stageDefs().some((d) => d.key === stage)) die(`usage: unlock <ID> <stage> — one of ${stageDefs().map((d) => d.key).join(" ")}`, 2)
+  if (p.locks) delete p.locks[stage]
+  save(p)
+  const info = compilePlan(p)
+  lockOut(p, [stage], info)
+  if (!has("no-sync")) syncFilm(p, null)
+}
+function planCmd(id) {
+  const p = load(id)
+  const info = compilePlan(p)
+  if (has("json")) return console.log(JSON.stringify({ id: p.id, locked: Object.keys(p.locks ?? {}), locks: p.locks ?? {}, plan: info }, null, 2))
+  process.stdout.write(readFileSync(info.md, "utf8"))
+  console.log(`\n${info.url}`)
+}
+
+const NO_MIRROR_EXT = new Set(["ttf", "otf", "woff", "woff2"])
+const MAX_MIRROR = 50 * 1024 * 1024
+function walkFiles(root) {
+  const out = []
+  const go = (d) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      if (e.name === ".DS_Store") continue
+      const f = join(d, e.name)
+      if (e.isDirectory()) go(f)
+      else if (e.isFile()) out.push(f)
+    }
+  }
+  if (existsSync(root)) go(root)
+  return out.sort()
+}
+function mirrorCmd(id) {
+  const p = load(id)
+  const defs = stageDefs()
+  const only = opt("stage")
+  let units // [{ rel dir, stage label }]
+  if (only) {
+    const d = defs.find((x) => x.key === only)
+    if (!d) die(`unknown stage "${only}" — one of ${defs.map((x) => x.key).join(" ")}`, 2)
+    if (!d.dir) die(`stage ${only} has no folder to mirror`, 2)
+    units = [{ dir: d.dir, stage: only }]
+  } else {
+    const by = new Map([["00-plan", ["plan"]]])
+    for (const d of defs) if (d.dir) by.set(d.dir, [...(by.get(d.dir) ?? []), d.key])
+    const dirs = [...by.keys()].filter((x) => ![...by.keys()].some((o) => o !== x && x.startsWith(o + "/")))
+    units = dirs.map((x) => ({ dir: x, stage: by.get(x).join(",") }))
+  }
+  const base = dirOf(id)
+  const jobs = [], skipped = []
+  for (const u of units) {
+    const files = []
+    for (const f of walkFiles(join(base, u.dir))) {
+      const r = f.slice(base.length + 1)
+      if (r === `${u.dir}/index.json`) continue // the index this command writes
+      const ext = r.split(".").pop().toLowerCase()
+      if (r.startsWith("08-render/")) skipped.push({ path: r, why: "masters belong to the video tier (ship)" })
+      else if (NO_MIRROR_EXT.has(ext)) skipped.push({ path: r, why: "fonts are never rehosted" })
+      else if (statSync(f).size > MAX_MIRROR) skipped.push({ path: r, why: "over 50 MB" })
+      else files.push({ file: f, path: r, key: refKey(id, r), url: refUrl(id, r), bytes: statSync(f).size })
+    }
+    jobs.push({ ...u, files })
+  }
+  if (!has("create")) {
+    console.log(`DRAFT — nothing uploaded. Add --create to mirror to the CDN.\nfilm: ${id}`)
+    for (const j of jobs) { console.log(`\n${j.dir}/ (${j.files.length} file(s))`); for (const x of j.files) console.log(`  ${x.path}\n    => ${x.url}`) }
+    if (skipped.length) { console.log("\nskipped:"); for (const s of skipped) console.log(`  ${s.path} — ${s.why}`) }
+    return
+  }
+  const indexes = []
+  for (const j of jobs) {
+    const entries = []
+    for (const x of j.files) { uploadToCdn(x.file, x.key); entries.push({ path: x.path, url: x.url, sha: sha256Full(x.file), bytes: x.bytes }) }
+    const idx = join(base, j.dir, "index.json")
+    mkdirSync(dirname(idx), { recursive: true })
+    writeFileSync(idx, JSON.stringify({ film: id, stage: j.stage, files: entries }, null, 2) + "\n")
+    const irel = `${j.dir}/index.json`
+    indexes.push({ dir: j.dir, files: entries.length, index: uploadToCdn(idx, refKey(id, irel)) })
+  }
+  console.log(JSON.stringify({ id, uploaded: jobs.reduce((a, j) => a + j.files.length, 0), indexes, skipped }, null, 2))
+}
+
 // ---- cost / issue ----------------------------------------------------------------------------
 function cost(id) {
   const p = load(id)
@@ -596,7 +861,7 @@ const rememberClosed = (p, states) => {
   if (changed) save(p)
 }
 function issueBody(p, states = orderStates(p)) {
-  const box = (s) => `- [${stageDone(p, s) ? "x" : " "}] ${s.n} ${s.key} → \`${s.file}\``
+  const box = (s) => `- [${stageDone(p, s) ? "x" : " "}] ${s.n} ${s.key} → \`${s.file}\` · ${p.locks?.[s.key] ? `locked by ${p.locks[s.key].by}` : "open"}`
   const orders = (p.orders ?? []).map((o) => `- [${states[o.issue] ? "x" : " "}] #${o.issue.split("#").pop()} ${o.label ?? o.formula} — ${o.to}`)
   const urls = filmUrls(p).map((u) => `- ${u.id}: ${u.url}`)
   const repo = (p.issue ?? DEFAULT_REPO).split("#")[0].split("/").pop()
@@ -617,6 +882,10 @@ ${STAGES.map(box).join("\n")}
 ${GATE_NAMES.map((g) => `- [${gateRec(p, g) ? "x" : " "}] ${g} — ${gateState(p, g)}`).join("\n")}
 
 Hard rules: real product UI only for product claims; generated property scenes are illustrative; no publish without approve.
+
+## Plan
+- ${refUrl(p.id, "00-plan/plan.md")}
+- locked: ${Object.keys(p.locks ?? {}).length} of ${STAGES.length}
 
 ## Work orders
 ${orders.length ? orders.join("\n") : "_none yet — `produce order <ID> <formula> --to <login>`_"}
@@ -950,6 +1219,11 @@ function variantUrls(p, kit, v) {
 }
 function urlCmd(id) {
   const p = load(id)
+  if (has("path")) {
+    const r = opt("path", "")
+    if (!r || isAbsolute(r) || r.startsWith("~") || r.split("/").includes("..")) die(`--path must be relative to the film folder, with no ".." (got "${r}")`, 2)
+    return console.log(refUrl(p.id, r))
+  }
   const kit = loadBrand(p.brand)
   const vs = selectVariants(p, { optional: true })
   for (const v of vs) {
@@ -1297,6 +1571,10 @@ const run = {
   submit: () => submitCmd(rest[0], rest.slice(1)),
   ship: () => ship(rest[0]),
   url: () => urlCmd(rest[0]),
+  lock: () => lockCmd(rest[0], rest[1]),
+  unlock: () => unlockCmd(rest[0], rest[1]),
+  plan: () => planCmd(rest[0]),
+  mirror: () => mirrorCmd(rest[0]),
   build: () => build(rest[0]),
   index,
   validate: () => validateFile(rest[0]),
@@ -1304,5 +1582,5 @@ const run = {
   list: listCmd,
   "from-reference": () => fromReferenceSeed(rest[0], rest[1]),
 }[cmd]
-if (!run) die("usage: produce <init|list|set|status|advance|approve|cost|issue|order|submit|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
+if (!run) die("usage: produce <init|list|set|status|advance|approve|lock|unlock|plan|mirror|cost|issue|order|submit|url|build|ship|index|validate|readiness|from-reference> …  (see the header of this file)", 2)
 run()

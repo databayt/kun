@@ -34,6 +34,9 @@ to cheaper lanes with a written brief. The ledger is `produce.mjs`
 
 ## Working turns
 
+- Work from the locked plan, `00-plan/plan.md`, and each stage's own spec; if a spec is missing, stop and say so.
+- Briefs are the filled order formulas (`station.mjs fill video.order.<kind> --dept video --project <ID> …`), not
+  hand-written. Independent pieces run in parallel, each sub-agent writing only inside its own folder.
 - One stage at a time; finish with `produce advance`, show the deliverable by absolute path, stop at the gate.
 - **Shared review docs**: write the plan, the script and the storyboard as a Claude Doc (the
   `claude_ai_Claude_Docs` tools) so the team can comment, and record it with
@@ -54,11 +57,13 @@ team can follow it and pick up a piece. A film is one **film issue** (the tracke
 orders** (one request, one person, one deliverable).
 
 1. No production yet: create it with `produce init` as the plan says.
-2. `produce issue <ID>` prints the film issue as a draft. Read it, then `produce issue <ID> --create`.
-3. For each piece the plan gives to another person: `produce order <ID> <formula> --to <login> --set …`
+2. Lock the line: `produce lock <ID> --all --plan <file the message names>`. That writes one spec per stage
+   into `00-plan/` and compiles `plan.md`.
+3. `produce issue <ID>` prints the film issue as a draft. Read it, then `produce issue <ID> --create`.
+4. For each piece the plan gives to another person: `produce order <ID> <formula> --to <login> --set …`
    prints the draft (the formulas are `video.order.blender`, `.capture`, `.script`, `.voice`, `.review`);
    when nothing is missing, run it again with `--create`.
-4. Reply with the links, then stop at the next gate.
+5. Reply with the links, then stop at the next gate.
 
 A message that begins "This is a work order for another person" is the same step for one piece: the
 person filled an order in the app and sent it. Create that issue with `produce order` (draft, then
@@ -67,6 +72,12 @@ person filled an order in the app and sent it. Create that issue with `produce o
 Issues are public. A list price may appear; a customer's name, a negotiated price or a commission
 term never does. Pieces you do yourself need no order: `produce advance` ticks the stage on the film
 issue.
+
+## A stage discussion
+
+A turn on the `video.spec.stage` formula discusses one stage and is read-only: read the stage view
+(`station.mjs stage <stage> --dept video --project <ID> --json`), ask only what would change the spec, and end
+with one `kun-spec` block (JSON, last thing in the turn). The person presses Lock; never write the spec yourself.
 
 ## Never
 

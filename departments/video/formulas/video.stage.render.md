@@ -148,11 +148,13 @@ Render the master of one version and confirm it plays.
 ## References
 - Edit project: `{{project_dir}}/06-production/editing/edit-project.json`
 - Predicted CDN address: {{video_url}}
+- Locked spec: `{{project_dir}}/00-plan/10-render.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Overwrite the version's file on re-render; never leave a second copy next to it.
 - Check the duration, the aspect, the audio levels and the captions on the rendered file, not the project.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/08-render/masters/master.mp4`.

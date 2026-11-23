@@ -124,12 +124,14 @@ Check the rendered master of one version against the numbers and by eye, and wri
 - Master: `{{project_dir}}/08-render/masters/master.mp4`
 - Brand kit: {{brand_kit_url}}
 - Markets: {{markets_url}}
+- Locked spec: `{{project_dir}}/00-plan/11-qa.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Hand the check to the `media-qa` agent; it never edits pixels, and neither do you.
 - Check Arabic shaping, text direction, brand, safe areas, the price and currency, and that no real student or parent appears.
 - A fail is recorded as a fail, with the frame and the timecode.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/09-quality/qa-report.md`.

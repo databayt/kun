@@ -30,6 +30,11 @@
     "skill:shoot",
     "skill:blender",
     "skill:higgs",
+    "skill:carousel",
+    "skill:draft",
+    "skill:approve",
+    "skill:publish",
+    "skill:facebook",
     "agent:media-qa"
   ],
   "repos": [

@@ -172,11 +172,13 @@ Prepare the publishing package of one variant for the destination and stop at th
 - Public video: {{video_url}}
 - Poster: {{poster_url}} · captions: {{captions_url}}
 - Brand kit: {{brand_kit_url}}
+- Locked spec: `{{project_dir}}/00-plan/14-publish.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Nothing is posted without a recorded publish approval naming the destination.
 - Caption, hashtags and link follow the brand kit; the price and currency match the market.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/10-publishing/publishing-record.md`.

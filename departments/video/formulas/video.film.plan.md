@@ -315,6 +315,9 @@
       "new video",
       "make a video",
       "promo video",
+      "promo film",
+      "tutorial video",
+      "feature film",
       "explainer video",
       "plan a film",
       "plan a video"
@@ -325,6 +328,9 @@
       "فيديو جديد",
       "فيلم جديد",
       "فيديو ترويجي",
+      "فيلم ترويجي",
+      "فيديو تعليمي",
+      "فيلم روائي",
       "انتاج فيديو",
       "فيديو شرح",
       "خطط فيديو"
@@ -358,6 +364,7 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}) in two turns: first ask the q
 - Source video: {{source}}
 - Open projects ({{line}} line): {{projects}}
 - Why this film: {{why}}
+- The request's settings (kind, audience, version, platform, shape, length, look, voice, captions, music) were already chosen in the app and are given above. Do not ask about them again: turn 1 asks only what still changes the film.
 - Today: {{today}}. If an open project above matches this film type, say so and propose continuing it instead.
 
 ## References
@@ -382,3 +389,10 @@ Plan a new {{film_label}} for {{brand}} ({{repo}}) in two turns: first ask the q
 - The journey as a numbered list: stage → tool → lane → gate → what is reused. Stages run request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish; gates are script · look · version · publish.
 - The actions that need the person's yes, each with its exact command. If a source video is given (not `none`), the first step is `node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{line}} --identity {{identity}} --category {{film_type}} --subject <slug> --lang {{lang}} --markets {{market}}`, then `node ~/.claude/skills/produce/scripts/produce.mjs from-reference <ID> {{source}} --voiceover`.
 - The first step and what it produces, ending with the question "Shall I start with …?".
+- After the journey and the first step, the turn ENDS with one fenced block with the info string `kun-plan`: JSON only, the last thing in the turn, nothing after it. List all 14 stages (request, research, brief, script, storyboard, assets, visual, audio, edit, render, qa, approval, cdn, publish); a stage with nothing special carries only its tool. Tool ids come from `departments/video/stages.json`, cheapest rung first, never a `staged` one. Accepting the plan locks every stage from this block.
+
+```kun-plan
+{ "film": { "category": "<category>", "subject": "<slug>", "slug": "<slug>", "langs": ["<lang>"], "markets": ["<market>"] },
+  "stages": { "<stage key>": { "decisions": { "<choice key>": "<value>" }, "tool": "<tool id>", "notes": "<one line>" } },
+  "cost": ["<one line per capped resource, e.g. 9 stills in 1 Gemini window>", "$0"] }
+```

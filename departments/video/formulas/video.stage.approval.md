@@ -127,11 +127,13 @@ Prepare the exact version of one variant for the person's approval, and stop at 
 ## References
 - QA report: `{{project_dir}}/09-quality/qa-report.md`
 - Master: {{video_url}}
+- Locked spec: `{{project_dir}}/00-plan/12-approval.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - The approval is for one exact version of the file. Do not proceed if the QA verdict is not pass.
 - Never run `produce approve`.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - A review package: the master, its poster, the captions, the QA verdict and what changed since the last version.

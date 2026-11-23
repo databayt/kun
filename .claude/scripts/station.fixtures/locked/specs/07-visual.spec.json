@@ -1,0 +1,16 @@
+{
+ "film": "hogwarts-locked-v001",
+ "stage": "visual",
+ "n": 7,
+ "label": "Visual",
+ "decisions": {
+  "look": "3D",
+  "threed": "order"
+ },
+ "tool": "blender",
+ "lane": "build",
+ "gate": "look",
+ "by": "abdout",
+ "at": "2026-11-23T10:00:00.000Z",
+ "source": "plan"
+}

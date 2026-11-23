@@ -104,15 +104,18 @@ Turn the approved script into the shot list: every scene, its source, its timing
 ## References
 - Script: `{{project_dir}}/03-script/script.md`
 - Brand kit: {{brand_kit_url}}
+- Locked spec: `{{project_dir}}/00-plan/05-storyboard.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - A scene that makes a product claim must have `source.type = capture` (real product UI).
 - A generated or 3D scene must set `illustrative: true`.
 - Check the script is signed (`produce status {{project}}`) before writing; the heavy stages after this one depend on it.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/04-storyboard/shot-list.json`.
+- Each scene MAY carry the optional structured `shot` object: `{ "size", "lens", "move", "light", "mood", "beats": [{ "at", "action" }], "audio": { "line", "sfx", "ambient" }, "refs": [] }`. The rig lives in those fields and the prose prompt carries only the scene. The still, clip and Blender orders (`video.order.still`, `video.order.clip`, `video.order.blender`) read it.
 - Validate the file with `node ~/.claude/skills/produce/scripts/produce.mjs validate {{project_dir}}/04-storyboard/shot-list.json` and fix every error.
 - Add the storyboard as a Claude Doc and record it: `produce set {{project}} doc storyboard <url>`.
 - When the deliverable exists, record it: `node ~/.claude/skills/produce/scripts/produce.mjs advance {{project}} storyboard --file <04-storyboard/shot-list.json>`.

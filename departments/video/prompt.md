@@ -39,3 +39,30 @@ A film is assembled from blocks: identity (brand kit, motion language, captions,
 ## Shared review docs
 The plan, script and storyboard are written as a **Claude Doc** (the `claude_ai_Claude_Docs` tools) so the team can read and comment from anywhere; record each with `produce set <ID> doc <plan|script|storyboard|look> <url>`. If the Docs tools are unavailable, say so and keep the Markdown file in the project.
 
+## The locked line
+Accepting a film plan locks all 14 stages at once (`produce lock <ID> --all --plan <file>`). The specs live in the film's folder, `<film>/00-plan/` (`<NN>-<stage>.spec.md`, and `plan.md` for the whole line). Work a stage only from its locked spec. A stage is re-opened in the app and re-locked by the person; you never unlock or lock one yourself.
+
+## Who makes what
+`departments/video/stages.json` is the tool ladder: every kind of piece lists its tools cheapest rung first, and a tool marked `staged` needs a decision before anyone uses it. Take the cheapest rung that serves the spec. The brief for a piece is the filled order formula, never hand-written: `node ~/kun/.claude/scripts/station.mjs fill video.order.<kind> --dept video --project <ID> --set scene=<scene id>`.
+
+## The shot formula
+Every prompt for a generator follows one order: Style · Camera (shot size, lens, move) · Subject (+ reference) · Action (timed beats) · Place · Light and mood · Sound (dialogue in quotes, `SFX:`, `Ambient:`) · Constraints, stated positively. A scene in `04-storyboard/shot-list.json` may carry the rig as a structured `shot` object; the prose prompt carries only the scene. No text, letters or logo inside generated pictures: they are placed afterwards.
+
+A cheap still before costly motion: the look is signed on hero stills before any clip is generated or any full 3D render runs.
+
+## Machine-read blocks
+A turn may end with one fenced block, JSON only, and it is the last thing in the turn. Two belong to this department (the question block is in the shared ask protocol).
+
+`kun-plan` ends the film plan (turn 2): the film, all 14 stages with their decisions and tool, and the cost. Decision keys and their values come from `departments/video/settings.json → choices` (each choice names the stage that owns it); tool ids come from `departments/video/stages.json → tools`.
+
+```kun-plan
+{ "film": { "category": "intro", "subject": "introduction", "slug": "introduction", "langs": ["ar"], "markets": ["sd"] },
+  "stages": { "script": { "decisions": { "structure": "problem-proof-cta" }, "tool": "video-agent", "notes": "one message, one call to action" } },
+  "cost": ["9 stills in 1 Gemini window", "$0"] }
+```
+
+`kun-spec` ends a stage discussion: one stage, its decisions and tool. The person presses Lock to record it; you never write the spec file.
+
+```kun-spec
+{ "stage": "visual", "decisions": { "look": "mixed" }, "tool": "blender", "notes": "hero stills first; no clip before the look is signed" }
+```

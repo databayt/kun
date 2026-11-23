@@ -85,11 +85,13 @@ Gather every asset the shot list needs: real captures, graphics, stills and soun
 - Existing captures: ~/media/{{repo}}/ (reuse before you capture)
 - Product: {{product_domain}}
 - Brand kit: {{brand_kit_url}}
+- Locked spec: `{{project_dir}}/00-plan/06-assets.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Real captures use the `shoot` and `record` skills with demo data only: fake devices, camera permission denied, no real student or parent data.
 - Licensed fonts and assets are never committed or rehosted.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/05-assets/asset-manifest.json`.

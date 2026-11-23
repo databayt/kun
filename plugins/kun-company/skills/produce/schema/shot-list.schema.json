@@ -30,7 +30,17 @@
           "transition": { "type": "string" },
           "sound": { "type": "string" },
           "productClaim": { "type": "boolean", "$comment": "true = the scene states what the product does; only source.type=capture (real UI) may carry it" },
-          "illustrative": { "type": "boolean", "$comment": "generated property / concept scenes; must be flagged so the video can say so" }
+          "illustrative": { "type": "boolean", "$comment": "generated property / concept scenes; must be flagged so the video can say so" },
+          "shot": {
+            "type": "object",
+            "$comment": "optional cinematography for the scene; every field is optional",
+            "properties": {
+              "size": { "type": "string" }, "lens": { "type": "string" }, "move": { "type": "string" }, "light": { "type": "string" }, "mood": { "type": "string" },
+              "beats": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "string" }, "action": { "type": "string" } } } },
+              "audio": { "type": "object", "properties": { "line": { "type": "string" }, "sfx": { "type": "string" }, "ambient": { "type": "string" } } },
+              "refs": { "type": "array", "items": { "type": "string" } }
+            }
+          }
         }
       }
     }

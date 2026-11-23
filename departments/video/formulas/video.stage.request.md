@@ -14,6 +14,9 @@
   "route": "do",
   "gate": null,
   "slots": {
+    "project_dir": {
+      "context": "project.dir"
+    },
     "film_label": {
       "map": {
         "intro": "intro film",
@@ -142,11 +145,13 @@ Open the production project for the {{film_label}} of {{brand}}: create it with 
 - Ledger: `~/.claude/skills/produce/scripts/produce.mjs` (its header lists every command)
 - Markets: {{markets_url}}
 - Brand kit: {{brand_kit_url}}
+- Locked spec: `{{project_dir}}/00-plan/01-request.spec.md` (once the line is locked; the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Run `produce list --json --repo {{line}}` first. If an open project already covers this category and subject, stop and report it; never create a second one.
 - One project per film. Market versions are variants inside it, not separate projects.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- The locked spec exists only once the line is locked (accepting the plan, or `produce lock <ID> --all`); when it is there, follow it. Do not stop for its absence.
 
 ## Deliverable
 - Run `node ~/.claude/skills/produce/scripts/produce.mjs init --brand {{line}} --category {{film_type}} --subject {{subject}} --lang ar,en --markets {{markets}} --audience "{{audience}}" --objective "{{goal}}"`.

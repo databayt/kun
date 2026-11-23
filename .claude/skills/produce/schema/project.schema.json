@@ -20,6 +20,7 @@
     "status": { "type": "string", "enum": ["draft", "in-production", "in-review", "approved", "shipped", "published", "rejected"] },
     "createdAt": { "type": "string" },
     "issue": { "type": ["string", "null"], "$comment": "the FILM issue (tracker) as <owner/repo>#<n>; null until `produce issue <ID> --create`" },
+    "locks": { "type": "object", "properties": {}, "$comment": "stage key -> {by, at, sha, source: plan|default|set|spec, backfill?, changed?}: a stage whose spec is written to 00-plan/ (`produce lock`)" },
     "orders": {
       "type": "array",
       "$comment": "work orders created by `produce order … --create`; each is its own issue made for one person",

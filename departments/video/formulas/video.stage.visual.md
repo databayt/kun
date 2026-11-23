@@ -108,12 +108,15 @@ Produce the look of the film: cast, sets, camera moves and the keyframes or anim
 - Shot list: `{{project_dir}}/04-storyboard/shot-list.json`
 - Asset manifest: `{{project_dir}}/05-assets/asset-manifest.json`
 - Brand kit: {{brand_kit_url}}
+- Locked spec: `{{project_dir}}/00-plan/07-visual.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Confirm the script is signed with `produce status {{project}}`; if not, stop.
 - Blender work runs through `blender.sh` and the `blender` or `blender-lab` MCP; HyperFrames for motion type. Hand independent scenes to a sub-agent or a work order with a written brief.
+- A cheap still before costly motion: the look gate is signed on hero stills (keyframes) of each key scene before any clip is generated or any full 3D render runs. Motion and renders follow only after the look is approved.
 - Phone screens show real captures only.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/06-production/visual-manifest.json`.

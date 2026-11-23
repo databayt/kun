@@ -14,6 +14,9 @@
   "route": "do",
   "gate": null,
   "slots": {
+    "project_dir": {
+      "context": "project.dir"
+    },
     "repo": {
       "context": "repo",
       "default": "hogwarts"
@@ -118,11 +121,13 @@ Ship the approved version of one variant to the CDN and verify the public addres
 ## References
 - Public address after shipping: {{video_url}}
 - Poster: {{poster_url}} · captions: {{captions_url}}
+- Locked spec: `{{project_dir}}/00-plan/13-cdn.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Only after the version gate is approved for this exact version; `produce status {{project}}` shows it. If it is not, stop.
 - Run `produce ship {{project}} --variant {{variant}} --dry-run` first, then without the flag.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Open the public address and confirm the file plays, the poster loads and the captions load; report the three links and the archive link ({{archive_url}}).

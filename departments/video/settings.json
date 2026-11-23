@@ -1,0 +1,751 @@
+{
+  "$comment": "The Video department's settings menu (the gear in the Kun app's chat box) as data. Each tab is one clause of one sentence; each choice is defined once here and names the stage that owns it (stages.json). Read by `station.mjs settings|compose|stage` (zero tokens), by `produce lock` (which stage a choice belongs to) and, through them, by the app. A Kind option names the formula it starts. `sets` are formula slots; `line` is the phrase a choice adds to the `settings` slot; `say` is the phrase it adds to the sentence the person sees. Keywords must exist in .claude/vocabulary.json or as a skill; `station.mjs lint` checks all of it. Docs: content/docs/station.mdx.",
+  "dept": "video",
+  "tabs": [
+    {
+      "id": "film",
+      "label": { "en": "Film", "ar": "الفيلم" },
+      "source": "ledger"
+    },
+    {
+      "id": "kind",
+      "label": { "en": "Kind", "ar": "النوع" },
+      "keys": ["kind"]
+    },
+    {
+      "id": "audience",
+      "label": { "en": "Audience", "ar": "الجمهور" },
+      "keys": ["audience", "version"]
+    },
+    {
+      "id": "format",
+      "label": { "en": "Format", "ar": "الصيغة" },
+      "keys": ["platform", "ratio", "length", "resolution", "fps"]
+    },
+    {
+      "id": "style",
+      "label": { "en": "Style", "ar": "الأسلوب" },
+      "keys": ["look", "voice", "captions", "music"]
+    },
+    {
+      "id": "stages",
+      "label": { "en": "Stages", "ar": "المراحل" },
+      "source": "ledger"
+    }
+  ],
+  "sentence": {
+    "en": "{kind} · {audience} · {version} · {platform} {ratio} · {length} · {look} · {voice}",
+    "ar": "{kind} · {audience} · {version} · {platform} {ratio} · {length} · {look} · {voice}"
+  },
+  "line": {
+    "slot": "settings",
+    "keys": [
+      "resolution",
+      "fps",
+      "version",
+      "look",
+      "voice",
+      "captions",
+      "music"
+    ]
+  },
+  "choices": {
+    "kind": {
+      "label": { "en": "Kind", "ar": "النوع" },
+      "q": { "en": "What are we making?", "ar": "ماذا نصنع؟" },
+      "stage": "request",
+      "default": "intro",
+      "options": [
+        {
+          "value": "intro",
+          "label": { "en": "Intro film", "ar": "فيلم تعريفي" },
+          "say": { "en": "Intro film", "ar": "فيلم تعريفي" },
+          "hint": {
+            "en": "The product in two minutes, for a first-time viewer.",
+            "ar": "المنتج في دقيقتين لمن يراه أول مرة."
+          },
+          "when": "new",
+          "formula": "video.film.plan",
+          "sets": { "film_type": "intro" },
+          "keywords": ["produce"],
+          "workflow": "film-line"
+        },
+        {
+          "value": "promo",
+          "label": { "en": "Promo video", "ar": "فيديو ترويجي" },
+          "say": { "en": "Promo video", "ar": "فيديو ترويجي" },
+          "hint": {
+            "en": "One offer, one call to action.",
+            "ar": "عرض واحد ودعوة واحدة."
+          },
+          "when": "new",
+          "formula": "video.film.plan",
+          "sets": { "film_type": "promo" },
+          "keywords": ["produce"],
+          "workflow": "film-line"
+        },
+        {
+          "value": "explainer",
+          "label": { "en": "Explainer video", "ar": "فيديو شرح" },
+          "say": { "en": "Explainer video", "ar": "فيديو شرح" },
+          "hint": {
+            "en": "How one part of the product works.",
+            "ar": "كيف يعمل جزء من المنتج."
+          },
+          "when": "new",
+          "formula": "video.film.plan",
+          "sets": { "film_type": "explainer" },
+          "keywords": ["produce"],
+          "workflow": "film-line"
+        },
+        {
+          "value": "tutorial",
+          "label": { "en": "Tutorial video", "ar": "فيديو تعليمي" },
+          "say": { "en": "Tutorial video", "ar": "فيديو تعليمي" },
+          "hint": {
+            "en": "Step by step, from real screens.",
+            "ar": "خطوة بخطوة من شاشات حقيقية."
+          },
+          "when": "new",
+          "formula": "video.film.plan",
+          "sets": { "film_type": "tutorial" },
+          "keywords": ["produce", "record"],
+          "workflow": "film-line"
+        },
+        {
+          "value": "feature",
+          "label": { "en": "Feature film", "ar": "فيلم عن ميزة" },
+          "say": { "en": "Feature film", "ar": "فيلم عن ميزة" },
+          "hint": {
+            "en": "One feature, shown at its best.",
+            "ar": "ميزة واحدة في أفضل صورة."
+          },
+          "when": "new",
+          "formula": "video.film.plan",
+          "sets": { "film_type": "feature" },
+          "keywords": ["produce"],
+          "workflow": "film-line"
+        },
+        {
+          "value": "reel",
+          "label": { "en": "Reel from a video", "ar": "ريلز من فيديو" },
+          "say": { "en": "Reel from a video", "ar": "ريلز من فيديو" },
+          "hint": {
+            "en": "A short cut of footage that already exists.",
+            "ar": "مقطع قصير من فيديو موجود."
+          },
+          "when": "new",
+          "formula": "video.reel.footage",
+          "keywords": ["reel", "rough cut"],
+          "tools": ["video-use", "filmcraft"]
+        },
+        {
+          "value": "script",
+          "label": { "en": "Video script", "ar": "سكربت فيديو" },
+          "say": { "en": "Video script", "ar": "سكربت فيديو" },
+          "hint": {
+            "en": "The words only: idea, shots and voiceover.",
+            "ar": "النص فقط: الفكرة واللقطات والتعليق."
+          },
+          "when": "new",
+          "formula": "video.script.only",
+          "keywords": ["draft"]
+        },
+        {
+          "value": "versions",
+          "label": { "en": "All versions", "ar": "كل النسخ" },
+          "say": { "en": "All versions", "ar": "كل النسخ" },
+          "hint": {
+            "en": "The same stage for every market version, in parallel.",
+            "ar": "المرحلة نفسها لكل نسخ الأسواق معاً."
+          },
+          "when": "film",
+          "formula": "video.versions.fanout",
+          "keywords": ["produce"]
+        }
+      ]
+    },
+    "audience": {
+      "label": { "en": "Audience", "ar": "الجمهور" },
+      "q": { "en": "Who is it for?", "ar": "لمن هذا الفيلم؟" },
+      "stage": "request",
+      "default": "owners",
+      "options": [
+        {
+          "value": "owners",
+          "label": { "en": "School owners", "ar": "ملاك المدارس" },
+          "say": { "en": "school owners", "ar": "ملاك المدارس" },
+          "hint": {
+            "en": "Pitch the value and the price.",
+            "ar": "اعرض القيمة والسعر."
+          },
+          "sets": { "audience": "school owners and principals" }
+        },
+        {
+          "value": "teachers",
+          "label": { "en": "Teachers", "ar": "المعلمون" },
+          "say": { "en": "teachers", "ar": "المعلمون" },
+          "hint": {
+            "en": "Show the daily workflow.",
+            "ar": "اعرض العمل اليومي."
+          },
+          "sets": { "audience": "teachers" }
+        },
+        {
+          "value": "parents",
+          "label": { "en": "Parents", "ar": "أولياء الأمور" },
+          "say": { "en": "parents", "ar": "أولياء الأمور" },
+          "hint": {
+            "en": "Show attendance and results.",
+            "ar": "اعرض الحضور والنتائج."
+          },
+          "sets": { "audience": "parents" }
+        }
+      ]
+    },
+    "version": {
+      "label": { "en": "Version", "ar": "النسخة" },
+      "q": { "en": "Which market and language?", "ar": "أي سوق وأي لغة؟" },
+      "stage": "request",
+      "default": "sd-ar",
+      "options": [
+        {
+          "value": "sd-ar",
+          "label": { "en": "sd-ar", "ar": "sd-ar" },
+          "say": { "en": "Sudan Arabic", "ar": "السودان عربي" },
+          "sets": { "market": "sd", "lang": "ar" },
+          "line": "version sd-ar"
+        },
+        {
+          "value": "sa-ar",
+          "label": { "en": "sa-ar", "ar": "sa-ar" },
+          "say": { "en": "Saudi Arabic", "ar": "السعودية عربي" },
+          "sets": { "market": "sa", "lang": "ar" },
+          "line": "version sa-ar"
+        },
+        {
+          "value": "ae-ar",
+          "label": { "en": "ae-ar", "ar": "ae-ar" },
+          "say": { "en": "UAE Arabic", "ar": "الإمارات عربي" },
+          "sets": { "market": "ae", "lang": "ar" },
+          "line": "version ae-ar"
+        },
+        {
+          "value": "eg-ar",
+          "label": { "en": "eg-ar", "ar": "eg-ar" },
+          "say": { "en": "Egypt Arabic", "ar": "مصر عربي" },
+          "sets": { "market": "eg", "lang": "ar" },
+          "line": "version eg-ar"
+        },
+        {
+          "value": "sd-en",
+          "label": { "en": "sd-en", "ar": "sd-en" },
+          "say": { "en": "Sudan English", "ar": "السودان إنجليزي" },
+          "sets": { "market": "sd", "lang": "en" },
+          "line": "version sd-en"
+        },
+        {
+          "value": "sa-en",
+          "label": { "en": "sa-en", "ar": "sa-en" },
+          "say": { "en": "Saudi English", "ar": "السعودية إنجليزي" },
+          "sets": { "market": "sa", "lang": "en" },
+          "line": "version sa-en"
+        },
+        {
+          "value": "rw-en",
+          "label": { "en": "rw-en", "ar": "rw-en" },
+          "say": { "en": "Rwanda English", "ar": "رواندا إنجليزي" },
+          "sets": { "market": "rw", "lang": "en" },
+          "line": "version rw-en"
+        }
+      ]
+    },
+    "platform": {
+      "label": { "en": "Platform", "ar": "المنصة" },
+      "q": { "en": "Where will it be posted?", "ar": "أين سيُنشر؟" },
+      "stage": "request",
+      "default": "Facebook",
+      "options": [
+        {
+          "value": "Facebook",
+          "label": { "en": "Facebook", "ar": "فيسبوك" },
+          "say": { "en": "Facebook", "ar": "فيسبوك" },
+          "sets": { "platform": "Facebook" }
+        },
+        {
+          "value": "Instagram",
+          "label": { "en": "Instagram", "ar": "إنستغرام" },
+          "say": { "en": "Instagram", "ar": "إنستغرام" },
+          "sets": { "platform": "Instagram" }
+        },
+        {
+          "value": "TikTok",
+          "label": { "en": "TikTok", "ar": "تيك توك" },
+          "say": { "en": "TikTok", "ar": "تيك توك" },
+          "sets": { "platform": "TikTok" }
+        },
+        {
+          "value": "YouTube",
+          "label": { "en": "YouTube", "ar": "يوتيوب" },
+          "say": { "en": "YouTube", "ar": "يوتيوب" },
+          "sets": { "platform": "YouTube" }
+        }
+      ]
+    },
+    "ratio": {
+      "label": { "en": "Ratio", "ar": "النسبة" },
+      "q": { "en": "Which screen shape?", "ar": "ما شكل الشاشة؟" },
+      "stage": "request",
+      "default": "9:16",
+      "options": [
+        {
+          "value": "9:16",
+          "label": { "en": "9:16", "ar": "9:16" },
+          "say": { "en": "9:16", "ar": "9:16" },
+          "hint": { "en": "Vertical, for phones.", "ar": "عمودي للجوال." },
+          "sets": { "format": "vertical 9:16, mobile" }
+        },
+        {
+          "value": "4:5",
+          "label": { "en": "4:5", "ar": "4:5" },
+          "say": { "en": "4:5", "ar": "4:5" },
+          "hint": { "en": "Portrait, for feeds.", "ar": "طولي للخلاصات." },
+          "sets": { "format": "portrait 4:5, mobile" }
+        },
+        {
+          "value": "1:1",
+          "label": { "en": "1:1", "ar": "1:1" },
+          "say": { "en": "1:1", "ar": "1:1" },
+          "hint": { "en": "Square.", "ar": "مربع." },
+          "sets": { "format": "square 1:1, mobile" }
+        },
+        {
+          "value": "16:9",
+          "label": { "en": "16:9", "ar": "16:9" },
+          "say": { "en": "16:9", "ar": "16:9" },
+          "hint": {
+            "en": "Horizontal, for desktop and YouTube.",
+            "ar": "أفقي للحاسوب ويوتيوب."
+          },
+          "sets": { "format": "horizontal 16:9, desktop" }
+        }
+      ]
+    },
+    "length": {
+      "label": { "en": "Length", "ar": "المدة" },
+      "q": { "en": "How long should it be?", "ar": "ما مدة الفيلم؟" },
+      "stage": "request",
+      "default": "2:00",
+      "options": [
+        {
+          "value": "source",
+          "label": { "en": "match source", "ar": "مثل المصدر" },
+          "say": { "en": "source length", "ar": "مدة المصدر" },
+          "sets": { "length": "match the source video" }
+        },
+        {
+          "value": "0:15",
+          "label": { "en": "0:15", "ar": "0:15" },
+          "say": { "en": "0:15", "ar": "0:15" },
+          "sets": { "length": "about 0:15" }
+        },
+        {
+          "value": "0:30",
+          "label": { "en": "0:30", "ar": "0:30" },
+          "say": { "en": "0:30", "ar": "0:30" },
+          "sets": { "length": "about 0:30" }
+        },
+        {
+          "value": "1:00",
+          "label": { "en": "1:00", "ar": "1:00" },
+          "say": { "en": "1:00", "ar": "1:00" },
+          "sets": { "length": "about 1:00" }
+        },
+        {
+          "value": "2:00",
+          "label": { "en": "2:00", "ar": "2:00" },
+          "say": { "en": "2:00", "ar": "2:00" },
+          "sets": { "length": "about 2:00" }
+        }
+      ]
+    },
+    "resolution": {
+      "label": { "en": "Resolution", "ar": "الدقة" },
+      "q": { "en": "Which resolution?", "ar": "أي دقة؟" },
+      "stage": "render",
+      "default": "1080p",
+      "options": [
+        {
+          "value": "1080p",
+          "label": { "en": "1080p", "ar": "1080p" },
+          "say": { "en": "1080p", "ar": "1080p" },
+          "hint": {
+            "en": "The delivery size for every platform we post to.",
+            "ar": "حجم التسليم لكل منصة ننشر عليها."
+          },
+          "line": "1080p"
+        },
+        {
+          "value": "4K",
+          "label": { "en": "4K", "ar": "4K" },
+          "say": { "en": "4K", "ar": "4K" },
+          "hint": {
+            "en": "Four times the render time and the file size.",
+            "ar": "أربعة أضعاف زمن الإخراج وحجم الملف."
+          },
+          "line": "4K"
+        }
+      ]
+    },
+    "fps": {
+      "label": { "en": "Frame rate", "ar": "الإطارات" },
+      "q": { "en": "Which frame rate?", "ar": "أي معدل إطارات؟" },
+      "stage": "render",
+      "default": "30",
+      "options": [
+        {
+          "value": "30",
+          "label": { "en": "30 fps", "ar": "30 fps" },
+          "say": { "en": "30 fps", "ar": "30 fps" },
+          "hint": {
+            "en": "The standard for social video.",
+            "ar": "المعيار لفيديو التواصل."
+          },
+          "line": "30 fps"
+        },
+        {
+          "value": "60",
+          "label": { "en": "60 fps", "ar": "60 fps" },
+          "say": { "en": "60 fps", "ar": "60 fps" },
+          "hint": {
+            "en": "Smoother screen motion, double the render.",
+            "ar": "حركة أنعم وضعف زمن الإخراج."
+          },
+          "line": "60 fps"
+        }
+      ]
+    },
+    "look": {
+      "label": { "en": "Look", "ar": "المظهر" },
+      "q": { "en": "Which look?", "ar": "أي مظهر؟" },
+      "stage": "visual",
+      "default": "mixed",
+      "options": [
+        {
+          "value": "mixed",
+          "label": {
+            "en": "Real screens + 3D",
+            "ar": "شاشات حقيقية + ثلاثي الأبعاد"
+          },
+          "say": {
+            "en": "real screens + 3D",
+            "ar": "شاشات حقيقية + ثلاثي الأبعاد"
+          },
+          "hint": {
+            "en": "Real product captures inside 3D scenes.",
+            "ar": "لقطات حقيقية للمنتج داخل مشاهد ثلاثية الأبعاد."
+          },
+          "line": "look mixed",
+          "keywords": ["shoot", "blender"],
+          "tools": ["shoot", "blender"]
+        },
+        {
+          "value": "captures",
+          "label": { "en": "Real screens", "ar": "شاشات حقيقية" },
+          "say": { "en": "real screens", "ar": "شاشات حقيقية" },
+          "hint": {
+            "en": "Only real captures of the product, with motion type.",
+            "ar": "لقطات حقيقية فقط مع حركة نصية."
+          },
+          "line": "look captures",
+          "keywords": ["shoot", "record"],
+          "tools": ["shoot", "record"]
+        },
+        {
+          "value": "3D",
+          "label": { "en": "3D", "ar": "ثلاثي الأبعاد" },
+          "say": { "en": "3D scenes", "ar": "مشاهد ثلاثية الأبعاد" },
+          "hint": {
+            "en": "Characters and sets built in Blender.",
+            "ar": "شخصيات ومواقع مبنية في بلندر."
+          },
+          "line": "look 3D",
+          "keywords": ["blender"],
+          "tools": ["blender"]
+        },
+        {
+          "value": "generated",
+          "label": { "en": "Generated", "ar": "مولّد" },
+          "say": { "en": "generated scenes", "ar": "مشاهد مولّدة" },
+          "hint": {
+            "en": "Stills from Nano Banana, marked illustrative.",
+            "ar": "صور من نانو بنانا، موسومة كتوضيحية."
+          },
+          "line": "look generated",
+          "keywords": ["higgs"],
+          "tools": ["gemini-web", "chatgpt-seat"]
+        }
+      ]
+    },
+    "voice": {
+      "label": { "en": "Voice", "ar": "الصوت" },
+      "q": { "en": "Which voice?", "ar": "أي صوت؟" },
+      "stage": "audio",
+      "default": "stock",
+      "options": [
+        {
+          "value": "source",
+          "label": { "en": "source voiceover", "ar": "صوت المصدر" },
+          "say": { "en": "source voice", "ar": "صوت المصدر" },
+          "hint": {
+            "en": "Keep the source video's own voiceover as the timing master.",
+            "ar": "أبقِ تعليق الفيديو المصدر مرجعاً للتوقيت."
+          },
+          "line": "voice source voiceover"
+        },
+        {
+          "value": "stock",
+          "label": { "en": "stock voice", "ar": "صوت جاهز" },
+          "say": { "en": "stock voice", "ar": "صوت جاهز" },
+          "hint": {
+            "en": "The Gemini stock voice in the market's dialect.",
+            "ar": "صوت جيميناي الجاهز بلهجة السوق."
+          },
+          "line": "voice stock voice",
+          "keywords": ["edit"],
+          "tools": ["voice"]
+        },
+        {
+          "value": "none",
+          "label": { "en": "none", "ar": "بلا" },
+          "say": { "en": "no voice", "ar": "بلا صوت" },
+          "hint": {
+            "en": "Music and captions only.",
+            "ar": "موسيقى وترجمة فقط."
+          },
+          "line": "voice none"
+        }
+      ]
+    },
+    "captions": {
+      "label": { "en": "Captions", "ar": "الترجمة" },
+      "q": { "en": "Captions on the picture?", "ar": "ترجمة على الصورة؟" },
+      "stage": "edit",
+      "default": "burned in",
+      "options": [
+        {
+          "value": "burned in",
+          "label": { "en": "burned in", "ar": "مدمجة" },
+          "say": { "en": "captions on", "ar": "مع ترجمة" },
+          "hint": {
+            "en": "Readable with the sound off.",
+            "ar": "تُقرأ والصوت مغلق."
+          },
+          "line": "captions burned in",
+          "keywords": ["captions"]
+        },
+        {
+          "value": "off",
+          "label": { "en": "off", "ar": "إيقاف" },
+          "say": { "en": "no captions", "ar": "بلا ترجمة" },
+          "hint": {
+            "en": "A clean picture; a separate caption file still ships.",
+            "ar": "صورة نظيفة؛ ملف الترجمة يُرفق منفصلاً."
+          },
+          "line": "captions off"
+        }
+      ]
+    },
+    "music": {
+      "label": { "en": "Music", "ar": "الموسيقى" },
+      "q": { "en": "Which music?", "ar": "أي موسيقى؟" },
+      "stage": "audio",
+      "default": "brand bed",
+      "options": [
+        {
+          "value": "brand bed",
+          "label": { "en": "brand bed", "ar": "موسيقى الهوية" },
+          "say": { "en": "brand music", "ar": "موسيقى الهوية" },
+          "hint": {
+            "en": "The brand's own music bed from the kit.",
+            "ar": "موسيقى الهوية من العدة."
+          },
+          "line": "music brand bed",
+          "tools": ["brand-bed"]
+        },
+        {
+          "value": "none",
+          "label": { "en": "off", "ar": "إيقاف" },
+          "say": { "en": "no music", "ar": "بلا موسيقى" },
+          "hint": { "en": "Voice only.", "ar": "صوت فقط." },
+          "line": "music none"
+        }
+      ]
+    },
+    "structure": {
+      "label": { "en": "Structure", "ar": "البناء" },
+      "q": { "en": "Which story structure?", "ar": "أي بناء للقصة؟" },
+      "stage": "script",
+      "default": "problem-proof-cta",
+      "options": [
+        {
+          "value": "problem-proof-cta",
+          "label": {
+            "en": "Problem, proof, call to action",
+            "ar": "مشكلة، دليل، دعوة"
+          },
+          "say": {
+            "en": "problem, proof, call to action",
+            "ar": "مشكلة، دليل، دعوة"
+          },
+          "hint": {
+            "en": "The pain, the product solving it on real screens, one ask.",
+            "ar": "الألم، ثم المنتج يحله على شاشات حقيقية، ثم طلب واحد."
+          }
+        },
+        {
+          "value": "day-in-the-life",
+          "label": { "en": "A day in the life", "ar": "يوم في الحياة" },
+          "say": { "en": "a day in the life", "ar": "يوم في الحياة" },
+          "hint": {
+            "en": "One person's day, with the product in each moment.",
+            "ar": "يوم شخص واحد والمنتج في كل لحظة."
+          }
+        },
+        {
+          "value": "walkthrough",
+          "label": { "en": "Feature walk-through", "ar": "جولة في الميزة" },
+          "say": { "en": "a feature walk-through", "ar": "جولة في الميزة" },
+          "hint": {
+            "en": "The steps in order, as the user does them.",
+            "ar": "الخطوات بالترتيب كما ينفذها المستخدم."
+          }
+        }
+      ]
+    },
+    "stills": {
+      "label": { "en": "Stills", "ar": "الصور" },
+      "q": {
+        "en": "Who makes the generated stills?",
+        "ar": "من يصنع الصور المولّدة؟"
+      },
+      "stage": "assets",
+      "default": "gemini",
+      "options": [
+        {
+          "value": "gemini",
+          "label": {
+            "en": "Nano Banana, Gemini seat",
+            "ar": "نانو بنانا عبر جيميناي"
+          },
+          "say": { "en": "Nano Banana stills", "ar": "صور نانو بنانا" },
+          "hint": {
+            "en": "Automated in the Gemini app, about 9 images per window, no cost.",
+            "ar": "آلي في تطبيق جيميناي، نحو 9 صور في النافذة، بلا تكلفة."
+          },
+          "keywords": ["higgs"],
+          "tools": ["gemini-web"]
+        },
+        {
+          "value": "chatgpt",
+          "label": { "en": "ChatGPT image seat", "ar": "صور ChatGPT" },
+          "say": { "en": "ChatGPT stills", "ar": "صور ChatGPT" },
+          "hint": {
+            "en": "A person pastes the prompt and saves the file.",
+            "ar": "شخص يلصق النص ويحفظ الملف."
+          },
+          "tools": ["chatgpt-seat"]
+        },
+        {
+          "value": "none",
+          "label": { "en": "No generated stills", "ar": "بلا صور مولّدة" },
+          "say": { "en": "no generated stills", "ar": "بلا صور مولّدة" },
+          "hint": {
+            "en": "Real captures and 3D only.",
+            "ar": "لقطات حقيقية وثلاثي الأبعاد فقط."
+          }
+        }
+      ]
+    },
+    "threed": {
+      "label": { "en": "3D", "ar": "ثلاثي الأبعاد" },
+      "q": {
+        "en": "Who builds the 3D scenes?",
+        "ar": "من يبني المشاهد الثلاثية؟"
+      },
+      "stage": "visual",
+      "default": "blender",
+      "options": [
+        {
+          "value": "blender",
+          "label": {
+            "en": "Blender on this Mac",
+            "ar": "بلندر على هذا الجهاز"
+          },
+          "say": { "en": "Blender here", "ar": "بلندر هنا" },
+          "hint": {
+            "en": "A Sonnet sub-agent drives Blender from the shot list.",
+            "ar": "وكيل فرعي يقود بلندر من قائمة اللقطات."
+          },
+          "keywords": ["blender"],
+          "tools": ["blender"]
+        },
+        {
+          "value": "order",
+          "label": {
+            "en": "A work order to a teammate",
+            "ar": "طلب عمل لزميل"
+          },
+          "say": { "en": "a Blender work order", "ar": "طلب عمل بلندر" },
+          "hint": {
+            "en": "One issue per scene, built on their machine.",
+            "ar": "تذكرة لكل مشهد تُبنى على جهازه."
+          },
+          "tools": ["blender-order"]
+        },
+        {
+          "value": "none",
+          "label": { "en": "No 3D", "ar": "بلا ثلاثي الأبعاد" },
+          "say": { "en": "no 3D", "ar": "بلا ثلاثي الأبعاد" },
+          "hint": {
+            "en": "Captures, stills and motion type only.",
+            "ar": "لقطات وصور وحركة نصية فقط."
+          }
+        }
+      ]
+    },
+    "editor": {
+      "label": { "en": "Editor", "ar": "المونتاج" },
+      "q": {
+        "en": "Which editor assembles the film?",
+        "ar": "أي محرر يجمع الفيلم؟"
+      },
+      "stage": "edit",
+      "default": "filmcraft",
+      "options": [
+        {
+          "value": "filmcraft",
+          "label": { "en": "FilmCraft", "ar": "فيلم كرافت" },
+          "say": { "en": "FilmCraft", "ar": "فيلم كرافت" },
+          "hint": {
+            "en": "The shot list assembled over the voiceover, by command.",
+            "ar": "قائمة اللقطات تُجمع فوق التعليق بالأوامر."
+          },
+          "keywords": ["filmcraft"],
+          "tools": ["filmcraft"]
+        },
+        {
+          "value": "video-use",
+          "label": { "en": "video-use", "ar": "video-use" },
+          "say": { "en": "video-use", "ar": "video-use" },
+          "hint": {
+            "en": "Transcript-driven cuts of real footage.",
+            "ar": "قص من النص المفرّغ لفيديو حقيقي."
+          },
+          "keywords": ["rough cut"],
+          "tools": ["video-use"]
+        }
+      ]
+    }
+  }
+}

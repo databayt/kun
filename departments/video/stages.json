@@ -1,0 +1,439 @@
+{
+  "$comment": "The Video production line as data: the 14 stages (the same keys, order and files as STAGES in .claude/skills/produce/scripts/produce.mjs; `station.mjs lint` fails when they drift) and the tool ladder. `owns` names the choices in settings.json that belong to a stage; `ask` says who drafts the stage's spec when it is opened in the app (`script`: the standard choices only, no model; `agent`: the video agent on the read-only plan route); `pieces` is the ladder per kind of piece, cheapest first, each rung an id in `tools`. A tool with `staged: true` is listed and never used until a /decide entry switches it on. `lane` is a row of .claude/engine.json → lanes and is never `escalate`. Read by `station.mjs stage`, `produce lock|plan` and the formulas. Docs: content/docs/station.mdx, content/docs/produce.mdx.",
+  "dept": "video",
+  "stages": [
+    {
+      "key": "request",
+      "n": 1,
+      "group": "idea",
+      "label": { "en": "Request", "ar": "الطلب" },
+      "dir": "01-brief",
+      "file": "01-brief/request.json",
+      "gate": null,
+      "ask": "script",
+      "tool": "produce",
+      "lane": "script",
+      "owns": ["kind", "audience", "version", "platform", "ratio", "length"],
+      "inputs": []
+    },
+    {
+      "key": "research",
+      "n": 2,
+      "group": "idea",
+      "label": { "en": "Research", "ar": "البحث" },
+      "dir": "02-research",
+      "file": "02-research/product-research.md",
+      "gate": null,
+      "ask": "script",
+      "tool": "explore",
+      "lane": "research",
+      "owns": [],
+      "inputs": ["01-brief/request.json"]
+    },
+    {
+      "key": "brief",
+      "n": 3,
+      "group": "idea",
+      "label": { "en": "Brief", "ar": "الملخص" },
+      "dir": "01-brief",
+      "file": "01-brief/creative-brief.md",
+      "gate": null,
+      "ask": "agent",
+      "tool": "video-agent",
+      "lane": "judge",
+      "owns": [],
+      "inputs": ["01-brief/request.json", "02-research/product-research.md"]
+    },
+    {
+      "key": "script",
+      "n": 4,
+      "group": "story",
+      "label": { "en": "Script", "ar": "السكربت" },
+      "dir": "03-script",
+      "file": "03-script/script.md",
+      "gate": "script",
+      "ask": "agent",
+      "tool": "video-agent",
+      "lane": "judge",
+      "owns": ["structure"],
+      "inputs": [
+        "01-brief/creative-brief.md",
+        "02-research/product-research.md"
+      ]
+    },
+    {
+      "key": "storyboard",
+      "n": 5,
+      "group": "story",
+      "label": { "en": "Storyboard", "ar": "القصة المصورة" },
+      "dir": "04-storyboard",
+      "file": "04-storyboard/shot-list.json",
+      "gate": null,
+      "ask": "agent",
+      "tool": "video-agent",
+      "lane": "build",
+      "owns": [],
+      "inputs": ["03-script/script.md"]
+    },
+    {
+      "key": "assets",
+      "n": 6,
+      "group": "make",
+      "label": { "en": "Assets", "ar": "الأصول" },
+      "dir": "05-assets",
+      "file": "05-assets/asset-manifest.json",
+      "gate": null,
+      "ask": "script",
+      "tool": "shoot",
+      "lane": "build",
+      "owns": ["stills"],
+      "inputs": ["04-storyboard/shot-list.json"],
+      "pieces": {
+        "capture": ["shoot", "record"],
+        "still": ["gemini-web", "chatgpt-seat", "higgs"],
+        "motion": ["hyperframes", "carousel"]
+      }
+    },
+    {
+      "key": "visual",
+      "n": 7,
+      "group": "make",
+      "label": { "en": "Visual", "ar": "المرئيات" },
+      "dir": "06-production",
+      "file": "06-production/visual-manifest.json",
+      "gate": "look",
+      "ask": "agent",
+      "tool": "blender",
+      "lane": "build",
+      "owns": ["look", "threed"],
+      "inputs": [
+        "04-storyboard/shot-list.json",
+        "05-assets/asset-manifest.json"
+      ],
+      "pieces": {
+        "3d": ["blender", "blender-order"],
+        "still": ["gemini-web", "chatgpt-seat", "higgs"],
+        "clip": ["gemini-seat-video", "veo-api", "higgs", "fal"],
+        "motion": ["hyperframes", "carousel"],
+        "capture": ["shoot", "record"]
+      }
+    },
+    {
+      "key": "audio",
+      "n": 8,
+      "group": "make",
+      "label": { "en": "Audio", "ar": "الصوت" },
+      "dir": "07-audio",
+      "file": "07-audio/audio-package.json",
+      "gate": null,
+      "ask": "script",
+      "tool": "voice",
+      "lane": "script",
+      "owns": ["voice", "music"],
+      "inputs": ["03-script/script.md"],
+      "pieces": {
+        "voice": ["voice", "chatterbox", "elevenlabs"],
+        "music": ["brand-bed", "lyria", "media-use", "epidemic"],
+        "effects": ["media-use", "elevenlabs"]
+      }
+    },
+    {
+      "key": "edit",
+      "n": 9,
+      "group": "make",
+      "label": { "en": "Edit", "ar": "المونتاج" },
+      "dir": "06-production/editing",
+      "file": "06-production/editing/edit-project.json",
+      "gate": null,
+      "ask": "script",
+      "tool": "filmcraft",
+      "lane": "build",
+      "owns": ["captions", "editor"],
+      "inputs": [
+        "06-production/visual-manifest.json",
+        "07-audio/audio-package.json"
+      ],
+      "pieces": {
+        "edit": ["filmcraft", "video-use"]
+      }
+    },
+    {
+      "key": "render",
+      "n": 10,
+      "group": "ship",
+      "label": { "en": "Render", "ar": "الإخراج" },
+      "dir": "08-render",
+      "file": "08-render/masters/master.mp4",
+      "gate": null,
+      "ask": "script",
+      "tool": "filmcraft",
+      "lane": "script",
+      "owns": ["resolution", "fps"],
+      "inputs": ["06-production/editing/edit-project.json"]
+    },
+    {
+      "key": "qa",
+      "n": 11,
+      "group": "ship",
+      "label": { "en": "QA", "ar": "فحص الجودة" },
+      "dir": "09-quality",
+      "file": "09-quality/qa-report.md",
+      "gate": null,
+      "ask": "script",
+      "tool": "media-qa",
+      "lane": "judge",
+      "owns": [],
+      "inputs": ["08-render/masters/master.mp4"]
+    },
+    {
+      "key": "approval",
+      "n": 12,
+      "group": "ship",
+      "label": { "en": "Approval", "ar": "الاعتماد" },
+      "dir": null,
+      "file": null,
+      "gate": "version",
+      "ask": "script",
+      "tool": "person",
+      "lane": "script",
+      "owns": [],
+      "inputs": ["09-quality/qa-report.md"]
+    },
+    {
+      "key": "cdn",
+      "n": 13,
+      "group": "ship",
+      "label": { "en": "CDN", "ar": "الرفع" },
+      "dir": null,
+      "file": null,
+      "gate": null,
+      "ask": "script",
+      "tool": "ship",
+      "lane": "script",
+      "owns": [],
+      "inputs": ["08-render/delivery"]
+    },
+    {
+      "key": "publish",
+      "n": 14,
+      "group": "ship",
+      "label": { "en": "Publish", "ar": "النشر" },
+      "dir": "10-publishing",
+      "file": "10-publishing/publishing-record.md",
+      "gate": "publish",
+      "ask": "script",
+      "tool": "publish",
+      "lane": "script",
+      "owns": [],
+      "inputs": ["10-publishing/metadata.json"]
+    }
+  ],
+  "tools": {
+    "produce": {
+      "label": "produce (the ledger)",
+      "kind": "script",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "person": {
+      "label": "A person's yes",
+      "kind": "person",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "video-agent": {
+      "label": "The video agent, drafting with a Sonnet sub-agent",
+      "kind": "agent",
+      "lane": "judge",
+      "cost": { "usd": 0 }
+    },
+    "explore": {
+      "label": "An Explore agent with a written brief",
+      "kind": "agent",
+      "lane": "research",
+      "cost": { "usd": 0 }
+    },
+    "shoot": {
+      "label": "shoot: stills of real product screens",
+      "kind": "skill",
+      "skill": "shoot",
+      "order": "video.order.capture",
+      "lane": "build",
+      "cost": { "usd": 0 }
+    },
+    "record": {
+      "label": "record: video of real product flows",
+      "kind": "skill",
+      "skill": "record",
+      "order": "video.order.capture",
+      "lane": "build",
+      "cost": { "usd": 0 }
+    },
+    "blender": {
+      "label": "Blender on this Mac (blender.sh, MCP blender / blender-lab)",
+      "kind": "mcp",
+      "skill": "blender",
+      "order": "video.order.blender",
+      "lane": "build",
+      "cost": { "usd": 0 }
+    },
+    "blender-order": {
+      "label": "A Blender work order to a teammate",
+      "kind": "person",
+      "order": "video.order.blender",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "gemini-web": {
+      "label": "Nano Banana in the Gemini app seat (scripts/gemini-web.mjs)",
+      "kind": "seat",
+      "skill": "higgs",
+      "order": "video.order.still",
+      "lane": "build",
+      "cost": { "unit": "image", "cap": "about 9 per window", "usd": 0 }
+    },
+    "chatgpt-seat": {
+      "label": "ChatGPT image seat (a person pastes the prompt)",
+      "kind": "person",
+      "order": "video.order.image",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "higgs": {
+      "label": "Higgsfield",
+      "kind": "skill",
+      "skill": "higgs",
+      "order": "video.order.still",
+      "lane": "build",
+      "cost": {
+        "unit": "credit",
+        "cap": "credits on the account (drained on 2026-11-23)"
+      }
+    },
+    "gemini-seat-video": {
+      "label": "Veo in the Gemini app seat (a person pastes the prompt)",
+      "kind": "person",
+      "order": "video.order.clip",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "veo-api": {
+      "label": "Veo by API (scripts/gemini-media.mjs)",
+      "kind": "script",
+      "order": "video.order.clip",
+      "lane": "build",
+      "staged": true,
+      "price": "$0.40 per 8 s clip (veo-lite)"
+    },
+    "fal": {
+      "label": "fal: Seedance, Kling, Veo by API",
+      "kind": "mcp",
+      "order": "video.order.clip",
+      "lane": "build",
+      "staged": true,
+      "price": "pay per run"
+    },
+    "hyperframes": {
+      "label": "HyperFrames motion graphics (hf.sh)",
+      "kind": "skill",
+      "skill": "hyperframes",
+      "order": "video.order.motion",
+      "lane": "build",
+      "cost": { "usd": 0 }
+    },
+    "carousel": {
+      "label": "Carousel engine: cards with real Thmanyah type",
+      "kind": "skill",
+      "skill": "carousel",
+      "order": "video.order.motion",
+      "lane": "build",
+      "cost": { "usd": 0 }
+    },
+    "voice": {
+      "label": "voice.mjs: the Gemini stock voice in the market's dialect",
+      "kind": "script",
+      "skill": "edit",
+      "order": "video.order.voice",
+      "lane": "script",
+      "cost": { "unit": "request", "cap": "10 a day", "usd": 0 }
+    },
+    "chatterbox": {
+      "label": "Chatterbox clone of one consenting teammate (local)",
+      "kind": "script",
+      "skill": "edit",
+      "order": "video.order.voice",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "elevenlabs": {
+      "label": "ElevenLabs: voice, dubbing, effects, music",
+      "kind": "mcp",
+      "order": "video.order.voice",
+      "lane": "script",
+      "staged": true,
+      "price": "$6 a month, Starter (the free plan is non-commercial)"
+    },
+    "brand-bed": {
+      "label": "The brand's music bed from the kit",
+      "kind": "script",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "lyria": {
+      "label": "Lyria RealTime music bed (edit/scripts/media/lyria.py, free tier, AI-music label)",
+      "kind": "script",
+      "skill": "edit",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "media-use": {
+      "label": "media-use: free music, effects and stock libraries, licence recorded",
+      "kind": "skill",
+      "skill": "media-use",
+      "lane": "build",
+      "cost": { "usd": 0 }
+    },
+    "epidemic": {
+      "label": "Epidemic Sound: licensed music and effects",
+      "kind": "mcp",
+      "lane": "script",
+      "staged": true,
+      "price": "subscription"
+    },
+    "filmcraft": {
+      "label": "FilmCraft (fc/assemble.mjs, MCP filmcraft)",
+      "kind": "mcp",
+      "skill": "edit",
+      "order": "video.order.filmcraft",
+      "lane": "build",
+      "cost": { "usd": 0 }
+    },
+    "video-use": {
+      "label": "video-use: transcript-driven cuts of real footage",
+      "kind": "skill",
+      "skill": "video-use",
+      "lane": "build",
+      "cost": { "usd": 0 }
+    },
+    "media-qa": {
+      "label": "The media-qa agent",
+      "kind": "agent",
+      "order": "video.order.review",
+      "lane": "judge",
+      "cost": { "usd": 0 }
+    },
+    "ship": {
+      "label": "produce ship (the CDN video tier)",
+      "kind": "script",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    },
+    "publish": {
+      "label": "publish and facebook, after the publish gate",
+      "kind": "skill",
+      "skill": "publish",
+      "lane": "script",
+      "cost": { "usd": 0 }
+    }
+  }
+}

@@ -63,10 +63,16 @@
   "needs": [
     "tools"
   ],
-  "redirects": {
-    "to": "video.stage.{stage}",
-    "if": "open_project"
-  },
+  "redirects": [
+    {
+      "to": "video.film.run",
+      "if": "all_locked"
+    },
+    {
+      "to": "video.stage.{stage}",
+      "if": "open_project"
+    }
+  ],
   "triggers": {
     "en": [
       "continue production",

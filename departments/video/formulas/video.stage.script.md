@@ -148,11 +148,13 @@ Write the film's script from the approved brief, in the language of the focus ve
 - Research: `{{project_dir}}/02-research/product-research.md`
 - Reference transcript, if any: `{{project_dir}}/02-research/reference/`
 - Markets: {{markets_url}}
+- Locked spec: `{{project_dir}}/00-plan/04-script.spec.md` (the decisions for this stage; the whole plan is `{{project_dir}}/00-plan/plan.md`)
 
 ## Constraints
 - Write for the ear: short sentences, the market's dialect, numbers and currency as the viewer says them.
 - Each scene states what is shown and whether it is a real capture or an illustrative generated scene.
 - Work this one stage only, then stop. Append anything that slowed you down to `09-quality/friction.md` in the project.
+- Follow the locked spec. If the file is missing, stop and say so: the line is locked by accepting the plan, or with `produce lock {{project}} --all`.
 
 ## Deliverable
 - Deliverable file: `{{project_dir}}/03-script/script.md`.
