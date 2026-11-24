@@ -186,8 +186,8 @@ fi
 if [ -d "$KUN_DIR/.claude/bin" ]; then
     mkdir -p "$CLAUDE_DIR/bin"
     atomic_copy "$KUN_DIR/.claude/bin/"*.sh "$CLAUDE_DIR/bin"
-    # gabriel and d have no extension (they are commands on PATH), so the *.sh glob misses them
-    for cmd in gabriel d; do
+    # gabriel, d and kun have no extension (they are commands on PATH), so the *.sh glob misses them
+    for cmd in gabriel d kun; do
         [ -f "$KUN_DIR/.claude/bin/$cmd" ] || continue
         cp -p "$KUN_DIR/.claude/bin/$cmd" "$CLAUDE_DIR/bin/.$cmd.kun-tmp.$$" 2>/dev/null \
             && chmod 755 "$CLAUDE_DIR/bin/.$cmd.kun-tmp.$$" && mv -f "$CLAUDE_DIR/bin/.$cmd.kun-tmp.$$" "$CLAUDE_DIR/bin/$cmd"
@@ -447,6 +447,18 @@ if [ -f "$KUN_DIR/.claude/scripts/antigravity-sync.sh" ]; then
     else
         bash "$KUN_DIR/.claude/scripts/antigravity-sync.sh"
     fi
+fi
+
+# Native config for every other agent (fcc, codex, opencode, agy; hermes stays a dry-run) —
+# `kun compile`. Skipped when this run was itself started by compile (setup.sh is its claude adapter).
+if [ -z "${KUN_COMPILE_ACTIVE:-}" ] && command -v node >/dev/null 2>&1 && [ -f "$KUN_DIR/.claude/scripts/compile/index.mjs" ]; then
+    node "$KUN_DIR/.claude/scripts/compile/index.mjs" --all --quiet --from-setup || info "kun compile reported drift (run: kun compile --check --all)"
+fi
+
+# Post-merge hook: a pull that moves the kun source re-compiles the agents. Installed only if absent.
+if [ -d "$KUN_DIR/.git/hooks" ] && [ ! -e "$KUN_DIR/.git/hooks/post-merge" ] && [ -f "$KUN_DIR/.claude/templates/post-merge.sh" ]; then
+    cp "$KUN_DIR/.claude/templates/post-merge.sh" "$KUN_DIR/.git/hooks/post-merge" && chmod 755 "$KUN_DIR/.git/hooks/post-merge"
+    info "git post-merge hook (kun compile)"
 fi
 
 # Codebase clone (every machine)

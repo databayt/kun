@@ -268,6 +268,19 @@ p_engine_mirror() {
     has node || return 2
     node "$SCRIPT_DIR/mirror-agents.mjs" --check >/dev/null 2>&1 && ok "mirrors in sync" || bad "agent mirrors drifted"
 }
+# `kun compile --check` per agent (compile.<agent> steps): 0 in sync · 1 drifted · 2 agent not installed
+compile_probe() {
+    local agent="$1" dir="$2" out
+    has node || return 2
+    [ -d "$dir" ] || return 2
+    out="$(node "$SCRIPT_DIR/compile/index.mjs" --check --only "$agent" 2>&1)"
+    if [ $? -eq 0 ]; then ok "$agent config in sync"; else bad "$agent drifted: $(echo "$out" | sed -n 2p | sed 's/^ *//' | cut -c1-90)"; fi
+}
+p_compile_claude() { compile_probe claude "$CLAUDE_DIR"; }
+p_compile_codex() { compile_probe codex "$HOME/.codex"; }
+p_compile_opencode() { compile_probe opencode "$HOME/.config/opencode"; }
+p_compile_agy() { compile_probe agy "$HOME/.gemini"; }
+p_compile_hermes() { compile_probe hermes "$HOME/.hermes"; }
 p_engine_maintain() {
     launchctl list 2>/dev/null | grep -q "com.databayt.kun-maintain" || { bad "heartbeat not armed"; return; }
     local fresh; fresh="$(find "$CLAUDE_DIR/logs" -name 'maintain-*.log' -mmin -2880 2>/dev/null | head -1)"

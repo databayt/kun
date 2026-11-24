@@ -10,6 +10,13 @@
 # Idempotent. Called by setup.sh after the MCP copy; safe to run standalone.
 # Usage: bash .claude/scripts/antigravity-sync.sh
 
+# `kun compile --only agy` is the maintained version of this script (same behaviour, plus --check and a
+# merge that keeps servers kun does not own). Delegate to it; KUN_SYNC_LEGACY=1 runs the original below.
+_KUN="$(cd "$(dirname "$0")/../.." && pwd)"
+if [ -z "${KUN_SYNC_LEGACY:-}" ] && command -v node >/dev/null 2>&1 && [ -f "$_KUN/.claude/scripts/compile/index.mjs" ]; then
+    exec node "$_KUN/.claude/scripts/compile/index.mjs" --only agy
+fi
+
 CLAUDE_DIR="$HOME/.claude"
 GEMINI_DIR="$HOME/.gemini"
 KUN_DIR="$(cd "$(dirname "$0")/../.." && pwd)"

@@ -2262,6 +2262,157 @@
       }
     },
     {
+      "id": "compile.claude",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد Claude Code مُجمَّع",
+        "en": "Claude Code config compiled"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "engine.mirror"
+      ],
+      "human": false,
+      "check": {
+        "probe": "compile.claude",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/compile/index.mjs --only claude"
+      }
+    },
+    {
+      "id": "compile.codex",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد Codex مُجمَّع",
+        "en": "Codex config compiled"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "engine.mirror"
+      ],
+      "human": false,
+      "check": {
+        "probe": "compile.codex",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/compile/index.mjs --only codex"
+      }
+    },
+    {
+      "id": "compile.opencode",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد opencode مُجمَّع",
+        "en": "opencode config compiled"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "engine.mirror"
+      ],
+      "human": false,
+      "check": {
+        "probe": "compile.opencode",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/compile/index.mjs --only opencode"
+      }
+    },
+    {
+      "id": "compile.agy",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد Antigravity مُجمَّع",
+        "en": "Antigravity config compiled"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "engine.mirror"
+      ],
+      "human": false,
+      "check": {
+        "probe": "compile.agy",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/compile/index.mjs --only agy"
+      }
+    },
+    {
+      "id": "compile.hermes",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد Hermes مُجمَّع",
+        "en": "Hermes SOUL + cron compiled"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "engine.mirror"
+      ],
+      "human": true,
+      "check": {
+        "probe": "compile.hermes",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "node .claude/scripts/compile/index.mjs --only hermes --write",
+        "message": "Review the dry-run, then write Hermes SOUL.md and cron jobs"
+      }
+    },
+    {
       "id": "engine.maintain",
       "stage": "engine",
       "title": {

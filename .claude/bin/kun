@@ -1,0 +1,21 @@
+#!/bin/bash
+# kun — the engine's command line. One verb so far:
+#
+#   kun compile --all                     turn the kun source into every agent's native config
+#   kun compile --only codex,opencode     just those (claude fcc codex opencode agy hermes)
+#   kun compile --check [--all]           drift report, writes nothing, exit 1 on drift
+#   kun compile --dry-run | --quiet       print planned writes | one line per agent
+#   kun compile --only hermes --write     hermes is a dry-run unless told to write
+#
+# Installed at ~/.claude/bin/kun by setup.sh; canonical copy in kun. KUN_ROOT overrides the checkout.
+set -u
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="${KUN_ROOT:-}"
+if [ -z "$ROOT" ]; then
+    if [ -f "$HERE/../scripts/compile/index.mjs" ]; then ROOT="$(cd "$HERE/../.." && pwd)"; else ROOT="$HOME/kun"; fi
+fi
+case "${1:-}" in
+    compile) shift; exec node "$ROOT/.claude/scripts/compile/index.mjs" "$@" ;;
+    ""|-h|--help|help) sed -n 2,11p "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "kun: unknown command '$1' (try: kun compile --all)" >&2; exit 64 ;;
+esac
