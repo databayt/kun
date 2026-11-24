@@ -110,8 +110,5 @@ __pycache__/
 *.pyc
 .claude/playwright-output/
 
-# private org memory: decrypted copies live in ~/.kun/memory-private, never in the repo; runtime state is local
-.claude/state/
-.claude/memory/private/*.plain
-.claude/memory/private/**/*.theirs
+# age/sops key files never belong in a repo
 keys.txt

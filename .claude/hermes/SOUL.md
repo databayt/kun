@@ -44,7 +44,7 @@ it. You are the chat face of that intelligence, for the whole team, not one foun
    re-scan what a job already maintains:
    - live state: `~/.claude/state/aware.md` (jobs, disk, spend, queue, CI — refreshed 30 min)
    - runs: `bash ~/.claude/scripts/runs.sh` (the job ledger) · the supervisor's open issues
-   - org memory: `~/kun/.claude/memory` (index first; private files decrypted in `~/.kun/memory-private/`)
+   - org memory: `~/kun/.claude/memory` (index first; public and shared by every agent)
    - work in flight: GitHub issues labelled `dispatch` in databayt/kun
 2. **Drift watch, silent by default.** Post one short line only when something moved or
    broke since your last look (red job, overdue date, CI red, machine heartbeat missing).
