@@ -165,7 +165,7 @@ Write each command out. **zsh does not word-split an unquoted variable** — a `
 
 - `curl -s https://<apex>/api/health` — `uptime` resets to seconds when the new container is
   serving. `status: degraded` is the known heap heuristic (heapUsed ÷ heapTotal), not a failure.
-- **Real login through the browser MCP**: `admin@kingfahd.com` / `1234` on
+- **Real login through the browser MCP**: `admin@kingfahd.com`, password from the Keychain (`security find-generic-password -s hogwarts-kingfahd-pilot-admin -w`; never paste it anywhere public), on
   `kingfahd.balqalam.com/dashboard` → `/en/dashboard` titled _Overview_. Escape closes the tour
   dialog on the first authed page. Wait for `load`, never `networkidle`.
 - The pages the diff touched, on a phone viewport when the diff was mobile work.
