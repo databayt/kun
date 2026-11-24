@@ -59,6 +59,10 @@ Settings → Model → OmniRoute → Providers → the source → **Get key** �
 
 Free-tier terms bind the account holder, so every key is the teammate's own and lives only in their credential store (service `org.databayt.kun.machine`). Free providers may read prompts: **client data and secrets stay on Claude.** The company pays $0; any paid rung is off until funded and recorded with `/decide`.
 
+## Scheduled jobs on the pool
+
+A scheduled job opts in through the `free` lane in `.claude/engine.json`: name it in `jobs.$lanes` (a prefix) or set `jobs.<job>.lane` to `free`. `kun-claude.sh` then runs the job through `kun-free.sh` on combo `kun-long` instead of the Max plan, writes the ledger row with lane `free` and cost 0, and keeps running while the plan is parked. If the free run fails, it retries once on haiku. Same data rule as above: only jobs that touch no client data or secrets belong on it. See [Lanes](/docs/lanes).
+
 ## The ledger
 
 `harvest.mjs` runs every 30 minutes (launchd job `harvest`) and writes `~/.claude/state/harvest.json`: per source its status, requests, tokens, success rate and quota. It also feeds Hermes's one-hour Nous key into the Pool and unlocks connections a dead model locked. `lane pool`, `health.sh`, Settings → Health and `f` all read it.

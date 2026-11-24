@@ -20,6 +20,7 @@ A lane is a kind of work with a fixed model and a fixed effort. Every agent and 
 | `judge` | opus | high | the main loop or an opus agent |
 | `captain` | opus | xhigh | the main loop, attended |
 | `crm` | sonnet | medium | the lead or funnel agent against Twenty (crm-api.databayt.org); reads and hygiene that a script already does stay on the script lane |
+| `free` | free | — | Claude Code on the free pool (kun-free.sh) — $0, own data and internal output only; never client data or secrets |
 | `escalate` | fable | xhigh | by hand, attended only — never unattended |
 
 The table lives in `.claude/engine.json` under `lanes`. Change a row, run `node .claude/scripts/compile-lanes.mjs`, and everything on that lane changes with it.
@@ -37,6 +38,14 @@ The router reads each prompt, matches these words and phrases (whole words, case
 | `crm` | sonnet · medium | `crm`, `twenty`, `lead`, `leads`, `pipeline`, `prospect`, `qualify`, `follow up`, `outreach`, `عملاء محتملين`, `متابعة` |
 | `build` | sonnet · medium | `component`, `page`, `form`, `table`, `wire`, `schema`, `server action`, `add a`, `build`, `implement`, `scaffold`, `refactor`, `migrate to` |
 | `lookup` | haiku · low | `figma`, `neon`, `list the tables`, `show the tables`, `figma read`, `get design context`, `neon describe`, `list tables`, `describe table`, `github read`, `search code`, `context7`, `library docs`, `ref docs`, `markitdown`, `convert to markdown`, `find where`, `where is`, `which file`, `look up` |
+
+## The free lane
+
+`free` is the one lane that does not run on the Claude plan. A scheduled job on it goes through `kun-free.sh`: Claude Code with kun's config, pointed at the free token pool (OmniRoute, combo `kun-long`) or straight at Nous, for $0. It exists so routine loops keep working when the Max plan is limited: the plan's park does not block a free run.
+
+- **Who uses it.** Headless jobs only, through `kun-claude.sh`: any job whose name matches a `free` entry in `jobs.$lanes` (today `seek:google`, `seek:wave`, `seek:week`, `funnel:learn`, `sync:prompt-audit`, `kun:`, `test:`, `bench:`), or whose own `jobs.<job>.lane` says `free`. No agent or skill declares it.
+- **Fallback.** A free run that exits non-zero, hits a 429 or rate limit, overflows the context window or comes back empty is retried once on the `fallback` lane (`mechanical`: haiku, low) through the normal Claude path. The ledger gets a row for each attempt, noted `free→fallback`. Fable is never a fallback.
+- **The data rule.** Free providers may read prompts. Own data and internal output only: **client data and secrets never go on the free lane.**
 
 ## What a lane writes
 

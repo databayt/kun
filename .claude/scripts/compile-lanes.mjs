@@ -133,7 +133,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   } else if (mode === "--page") {
     // The public page: the lane table and who is on each lane. Generated, so it cannot go stale.
     const lanes = JSON.parse(fs.readFileSync(path.join(ROOT, ".claude/engine.json"), "utf8")).lanes || {};
-    const order = ["script", "mechanical", "lookup", "research", "build", "work", "judge", "captain", "crm", "escalate"];
+    const order = ["script", "mechanical", "lookup", "research", "build", "work", "judge", "captain", "crm", "free", "escalate"];
     const code = (x) => "`" + x + "`";
     const on = (lane, kind) => rows.filter((r) => r.lane === lane && r.kind === kind).map((r) => r.name);
     const L = ["---", "title: Lanes", "description: One table decides which model and how much effort each kind of work gets", "---", ""];
@@ -159,6 +159,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       }
       L.push("");
     }
+    L.push("## The free lane", "");
+    L.push("`free` is the one lane that does not run on the Claude plan. A scheduled job on it goes through `kun-free.sh`: Claude Code with kun's config, pointed at the free token pool (OmniRoute, combo `kun-long`) or straight at Nous, for $0. It exists so routine loops keep working when the Max plan is limited: the plan's park does not block a free run.", "");
+    L.push("- **Who uses it.** Headless jobs only, through `kun-claude.sh`: any job whose name matches a `free` entry in `jobs.$lanes` (today `seek:google`, `seek:wave`, `seek:week`, `funnel:learn`, `sync:prompt-audit`, `kun:`, `test:`, `bench:`), or whose own `jobs.<job>.lane` says `free`. No agent or skill declares it.");
+    L.push("- **Fallback.** A free run that exits non-zero, hits a 429 or rate limit, overflows the context window or comes back empty is retried once on the `fallback` lane (`mechanical`: haiku, low) through the normal Claude path. The ledger gets a row for each attempt, noted `free→fallback`. Fable is never a fallback.");
+    L.push("- **The data rule.** Free providers may read prompts. Own data and internal output only: **client data and secrets never go on the free lane.**");
+    L.push("");
     L.push("## What a lane writes", "");
     L.push("| For | It writes | Why |", "| --- | --- | --- |");
     L.push("| an agent | `model` and `effort` | applied when the agent starts |");

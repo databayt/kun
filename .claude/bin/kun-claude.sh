@@ -19,6 +19,12 @@
 #      ledger line carries lane, model (asked) and model_actual (what answered)
 #   6. no Fable unattended: a run that would land on a fable model exits 75 before it starts —
 #      `claude -p` bills Fable to usage credits without asking
+#   7. the free lane (2026-11-24): a job on lane `free` (engine.json → lanes.free) runs through
+#      kun-free.sh — Claude Code on the free pool (OmniRoute) or Nous, $0 — instead of the Max
+#      plan. No --model is passed; the plan's park does not block it (the lane exists to keep
+#      working when Max is limited). A failed run (non-zero, 429/rate-limit/context errors, empty
+#      result) retries ONCE on lanes.free.fallback through the normal claude path; both attempts
+#      get a ledger row. Own data and internal output only — client data and secrets never go free.
 # Output contract: text mode (the default) still prints only the result text on stdout;
 # a caller that passes --output-format json gets the JSON untouched; stream-json is passed
 # through unparsed (logged without tokens). Exit code is claude's own, except 75 (capped/parked).
@@ -84,16 +90,30 @@ if not lane:
     hits = [p for p in pref if job.startswith(p)]
     lane = pref[max(hits, key=len)] if hits else jobs.get("$lane_default") or "build"
 l = lanes.get(lane) if isinstance(lanes.get(lane), dict) else {}
-print(lane, l.get("model") or "-", l.get("effort") or "-")
+# A lane with a `runner` (free → kun-free.sh) also names its pool combo and the lane a failed
+# run falls back to; the fallback's own model and effort travel on the same line (2026-11-24).
+fb = l.get("fallback") or ""; f = lanes.get(fb) if isinstance(lanes.get(fb), dict) else {}
+print(lane, l.get("model") or "-", l.get("effort") or "-", l.get("runner") or "-", l.get("combo") or "-",
+      fb or "-", f.get("model") or "-", f.get("effort") or "-")
 PY
 )
-read -r LANE LANE_MODEL LANE_EFFORT <<EOF
+read -r LANE LANE_MODEL LANE_EFFORT LANE_RUNNER FREE_COMBO FB_LANE FB_MODEL FB_EFFORT <<EOF
 ${LANE_INFO:-build sonnet medium}
 EOF
 [ -n "$LANE" ] || LANE=build
 { [ -z "$LANE_MODEL" ] || [ "$LANE_MODEL" = "-" ]; } && LANE_MODEL=sonnet
 [ "$LANE_EFFORT" = "-" ] && LANE_EFFORT=""
-if [ "$MODEL" = "default" ]; then
+RUNNER=claude; FREE_BIN=""; FREE_PARKED=""
+if [ "$MODEL" = "default" ] && [ "$LANE" = free ] && [ "${LANE_RUNNER:--}" != "-" ]; then
+    # The free lane (2026-11-24): the lane's "model" is not a model name — kun-free.sh picks the
+    # model from the pool combo. No --model or --effort goes to claude; the lane stays `free`.
+    RUNNER=free; MODEL=free; EFFORT=default
+    FREE_BIN="${KUN_FREE_BIN:-$(dirname "$0")/$LANE_RUNNER}"
+    [ "${FREE_COMBO:--}" = "-" ] && FREE_COMBO=kun-code
+    if [ "${FB_MODEL:--}" = "-" ]; then FB_LANE=mechanical; FB_MODEL=haiku; FB_EFFORT=low; fi
+    [ "${FB_EFFORT:--}" = "-" ] && FB_EFFORT=""
+elif [ "$MODEL" = "default" ]; then
+    [ "$LANE" = free ] && { LANE=build; LANE_MODEL=sonnet; LANE_EFFORT=medium; }  # a free lane with no runner: never --model free
     MODEL="$LANE_MODEL"; set -- "$@" --model "$MODEL"
     # Effort follows the lane only when the lane also chose the model: a caller that named
     # its own model keeps the effort that model is configured with.
@@ -183,15 +203,19 @@ for limit, span, name in ((wu, wh * 3600, f"{wh:g} h"), (ku, 7 * 86400, "7 days"
         print(f"{iso(until)}\t{reason}"); sys.exit(0)
 PY
 )
+if [ -n "$PARKED" ] && [ "$RUNNER" = free ]; then
+    # The free lane runs while Max is parked; only its fallback to the plan waits for the park.
+    FREE_PARKED="$PARKED"; PARKED=""
+fi
 if [ -n "$PARKED" ]; then
     echo "kun-claude: $JOB parked until ${PARKED%%	*} — ${PARKED#*	}" >&2
     exit 75
 fi
 
-record() {  # record <exit> <json-file-or-empty> <started-epoch> [summary]
-    python3 - "$LEDGER" "$JOB" "$MODEL" "$EFFORT" "$1" "$2" "$3" "$JOB_SOURCE" "$LANE" "${4:-}" <<'PY' 2>/dev/null || true
+record() {  # record <exit> <json-file-or-empty> <started-epoch> [summary] [free → cost 0]
+    python3 - "$LEDGER" "$JOB" "$MODEL" "$EFFORT" "$1" "$2" "$3" "$JOB_SOURCE" "$LANE" "${4:-}" "${5:-}" <<'PY' 2>/dev/null || true
 import json, os, sys, time
-ledger, job, model, effort, rc, jf, started, source, lane, note = sys.argv[1:11]
+ledger, job, model, effort, rc, jf, started, source, lane, note, free = sys.argv[1:12]
 r = {}
 if jf and os.path.exists(jf):
     try:
@@ -218,7 +242,7 @@ line = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "kind": "claud
         # re-read every turn (cheap per token). The first Monday routine: 120K fresh, 2.15M cached.
         "fresh_tokens": int(u.get("input_tokens") or 0) + int(u.get("cache_creation_input_tokens") or 0) + int(u.get("output_tokens") or 0),
         "cache_read_tokens": int(u.get("cache_read_input_tokens") or 0),
-        "cost_usd": round(float(r.get("total_cost_usd") or 0), 4), "turns": r.get("num_turns"),
+        "cost_usd": 0 if free else round(float(r.get("total_cost_usd") or 0), 4), "turns": r.get("num_turns"),
         "duration_s": round(time.time() - float(started)), "summary": note or ("" if ok else f"claude exit {rc}"),
         "needs_human": False}
 os.makedirs(os.path.dirname(ledger), exist_ok=True)
@@ -237,6 +261,11 @@ case "$(printf '%s' "$MODEL" | tr '[:upper:]' '[:lower:]')" in
         echo "kun-claude: $JOB asked for $MODEL — Fable does not run unattended (it bills usage credits). Name opus, sonnet or haiku, or give the job a lane in engine.json → jobs.\$lanes." >&2
         record 75 "" "$(date +%s)" "refused: $MODEL in an unattended run"
         exit 75 ;;
+esac
+
+# The free lane's fallback is a claude run too: never Fable. No fallback beats a refused one.
+case "$(printf '%s' "${FB_MODEL:-}" | tr '[:upper:]' '[:lower:]')" in
+    *fable* | *mythos*) FB_MODEL="" ;;
 esac
 
 # Lean mode: no MCP servers, no skill listing. Measured 2026-11-01 on a one-word haiku
@@ -303,20 +332,78 @@ print(75)
 PY
 }
 
+# The free lane's run and its one retry (2026-11-24). attempt runs the chosen binary; the
+# free attempt's output is held until it is known to be good, so a retry never prints twice.
+# FB_ARGS = the same args on the fallback lane's model (the caller named neither model nor
+# effort, or the free lane would not have been chosen).
+FB_ARGS=("$@")
+if [ -n "${FB_MODEL:-}" ] && [ "$FB_MODEL" != "-" ]; then
+    FB_ARGS+=(--model "$FB_MODEL")
+    [ "$EFFORT" = "default" ] && [ -n "${FB_EFFORT:-}" ] && FB_ARGS+=(--effort "$FB_EFFORT")
+fi
+attempt() {  # attempt <free|claude> <claude args…>
+    local kind="$1"; shift
+    # Two API retries, not claude's default ten: a dead pool must reach the fallback in seconds.
+    if [ "$kind" = free ]; then CLAUDE_CODE_MAX_RETRIES="${CLAUDE_CODE_MAX_RETRIES:-2}" KUN_FREE_COMBO="${KUN_FREE_COMBO:-$FREE_COMBO}" "$FREE_BIN" "$@"
+    else "$CLAUDE_BIN" "$@"; fi
+}
+free_failure() {  # free_failure <rc> <json-file> → why a free run must retry; prints nothing when it is good
+    python3 - "$1" "$2" <<'PY' 2>/dev/null
+import json, os, re, sys
+rc, jf = sys.argv[1:3]
+raw = open(jf).read() if jf and os.path.exists(jf) else ""
+try:
+    r = json.loads(raw)
+    if isinstance(r, list): r = next((x for x in reversed(r) if x.get("type") == "result"), {})
+except Exception:
+    r = {}
+res = str(r.get("result") or "")
+text = (res or raw)[-2000:]
+bad = re.search(r"\b429\b|rate.?limit|too many requests|context.{0,20}(length|window)|maximum context|prompt is too long|overloaded|quota", text, re.I)
+if rc != "0": print(f"exit {rc}" + (f" ({bad.group(0)})" if bad else ""))
+elif r.get("is_error"): print("error result" + (f" ({bad.group(0)})" if bad else ""))
+elif not res.strip(): print("empty result")
+elif bad and (r.get("num_turns") or 0) <= 1 and len(res) < 400: print(bad.group(0))
+PY
+}
+to_fallback() {  # to_fallback <why> — the free attempt is ledgered as failed; the next run is the fallback lane's
+    record "$RC" "${TMP:-}" "$STARTED" "free→fallback: $1" free
+    echo "kun-claude: $JOB free lane failed ($1) — retrying once on $FB_LANE ($FB_MODEL)" >&2
+    RUNNER=claude; LANE="$FB_LANE"; MODEL="$FB_MODEL"; EFFORT="${FB_EFFORT:-default}"; NOTE="free→fallback"
+    STARTED=$(date +%s)
+}
+can_fall_back() { [ -n "${FB_MODEL:-}" ] && [ -z "$FREE_PARKED" ]; }
+
+NOTE=""
 STARTED=$(date +%s)
 case "$FORMAT" in
     stream-json)
-        "$CLAUDE_BIN" "$@"; RC=$?
-        record "$RC" "" "$STARTED"; exit $RC ;;
+        attempt "$RUNNER" "$@"; RC=$?
+        if [ "$RUNNER" = free ] && [ "$RC" != 0 ] && can_fall_back; then
+            TMP=""; to_fallback "exit $RC"; attempt claude "${FB_ARGS[@]}"; RC=$?
+        fi
+        record "$RC" "" "$STARTED" "$NOTE" "$([ "$RUNNER" = free ] && echo free)"; exit $RC ;;
     json)
         TMP=$(mktemp -t kun-claude.XXXXXX)
-        "$CLAUDE_BIN" "$@" > "$TMP"; RC=$?
-        cat "$TMP"; record "$RC" "$TMP" "$STARTED"
-        [ "$(limit_check "$RC" "$TMP")" = 75 ] && { echo "kun-claude: plan limit — every headless job parks until the reset (~/.claude/state/claude-park/_plan.json)" >&2; RC=75; }
+        attempt "$RUNNER" "$@" > "$TMP"; RC=$?
+        if [ "$RUNNER" = free ]; then
+            WHY=$(free_failure "$RC" "$TMP")
+            if [ -n "$WHY" ] && can_fall_back; then
+                to_fallback "$WHY"; attempt claude "${FB_ARGS[@]}" > "$TMP"; RC=$?
+            fi
+        fi
+        cat "$TMP"; record "$RC" "$TMP" "$STARTED" "$NOTE" "$([ "$RUNNER" = free ] && echo free)"
+        [ "$RUNNER" != free ] && [ "$(limit_check "$RC" "$TMP")" = 75 ] && { echo "kun-claude: plan limit — every headless job parks until the reset (~/.claude/state/claude-park/_plan.json)" >&2; RC=75; }
         rm -f "$TMP"; exit $RC ;;
     *)
         TMP=$(mktemp -t kun-claude.XXXXXX)
-        "$CLAUDE_BIN" "$@" --output-format json > "$TMP"; RC=$?
+        attempt "$RUNNER" "$@" --output-format json > "$TMP"; RC=$?
+        if [ "$RUNNER" = free ]; then
+            WHY=$(free_failure "$RC" "$TMP")
+            if [ -n "$WHY" ] && can_fall_back; then
+                to_fallback "$WHY"; attempt claude "${FB_ARGS[@]}" --output-format json > "$TMP"; RC=$?
+            fi
+        fi
         # Text-mode contract: print what `claude -p` would have printed — the result text.
         python3 -c "
 import json,sys
@@ -328,7 +415,7 @@ try:
 except Exception:
     sys.stdout.write(raw)
 " "$TMP"
-        record "$RC" "$TMP" "$STARTED"
-        [ "$(limit_check "$RC" "$TMP")" = 75 ] && { echo "kun-claude: plan limit — every headless job parks until the reset (~/.claude/state/claude-park/_plan.json)" >&2; RC=75; }
+        record "$RC" "$TMP" "$STARTED" "$NOTE" "$([ "$RUNNER" = free ] && echo free)"
+        [ "$RUNNER" != free ] && [ "$(limit_check "$RC" "$TMP")" = 75 ] && { echo "kun-claude: plan limit — every headless job parks until the reset (~/.claude/state/claude-park/_plan.json)" >&2; RC=75; }
         rm -f "$TMP"; exit $RC ;;
 esac
