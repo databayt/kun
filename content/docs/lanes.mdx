@@ -43,7 +43,7 @@ The router reads each prompt, matches these words and phrases (whole words, case
 
 `free` is the one lane that does not run on the Claude plan. A scheduled job on it goes through `kun-free.sh`: Claude Code with kun's config, pointed at the free token pool (OmniRoute, combo `kun-long`) or straight at Nous, for $0. It exists so routine loops keep working when the Max plan is limited: the plan's park does not block a free run.
 
-- **Who uses it.** Headless jobs only, through `kun-claude.sh`: any job whose name matches a `free` entry in `jobs.$lanes` (today `seek:google`, `seek:wave`, `seek:week`, `funnel:learn`, `sync:prompt-audit`, `kun:`, `test:`, `bench:`), or whose own `jobs.<job>.lane` says `free`. No agent or skill declares it.
+- **Who uses it.** Headless jobs only, through `kun-claude.sh`: any job whose name matches a `free` entry in `jobs.$lanes` (today `seek:google`, `seek:wave`, `seek:week`, `funnel:learn`, `kun:`, `test:`, `bench:`), or whose own `jobs.<job>.lane` says `free`. No agent or skill declares it.
 - **Fallback.** A free run that exits non-zero, hits a 429 or rate limit, overflows the context window or comes back empty is retried once on the `fallback` lane (`mechanical`: haiku, low) through the normal Claude path. The ledger gets a row for each attempt, noted `free→fallback`. Fable is never a fallback.
 - **The data rule.** Free providers may read prompts. Own data and internal output only: **client data and secrets never go on the free lane.**
 
