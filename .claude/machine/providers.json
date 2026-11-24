@@ -123,21 +123,23 @@
       "signup": "https://aistudio.google.com/apikey",
       "keychain": "GEMINI_API_KEY",
       "limits": {
-        "note": "per-model free quotas, region-dependent"
+        "note": "AI Studio free tier, text only (image models limit 0); models probed 2026-11-24"
       },
       "privacy": "public",
       "roles": {
         "coding": [
-          "gemini-3.8-flash"
+          "gemini-3-flash-preview",
+          "gemini-2.5-flash"
         ],
         "fast": [
-          "gemini-3.8-flash-lite"
+          "gemini-3.1-flash-lite-preview",
+          "gemini-2.5-flash-lite"
         ],
         "vision": [
-          "gemini-3.8-flash"
+          "gemini-2.5-flash"
         ],
         "long": [
-          "gemini-3.8-flash"
+          "gemini-2.5-flash"
         ]
       },
       "source": "sharbel way 3",
