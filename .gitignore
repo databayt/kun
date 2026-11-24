@@ -105,3 +105,7 @@ pt.json
 
 # machine moved to databayt/machine; only the local build cache (CARGO_TARGET_DIR reuse) stays here
 /machine/
+.env*
+__pycache__/
+*.pyc
+.claude/playwright-output/
