@@ -1486,6 +1486,36 @@
       }
     },
     {
+      "id": "launcher.x",
+      "stage": "agents",
+      "title": {
+        "ar": "اختصار x — Codex",
+        "en": "`x` launcher — codex"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "codex.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "launcher.x",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-ready --fix-launchers"
+      }
+    },
+    {
       "id": "launcher.o",
       "stage": "agents",
       "title": {

@@ -14,6 +14,17 @@
       "needs": "claude.cli"
     },
     {
+      "id": "x",
+      "name": "Codex",
+      "bin": "codex",
+      "args": [
+        "--dangerously-bypass-approvals-and-sandbox"
+      ],
+      "bypass": true,
+      "agent": "codex",
+      "needs": "codex.cli"
+    },
+    {
       "id": "a",
       "name": "Antigravity (secondary)",
       "bin": "agy",

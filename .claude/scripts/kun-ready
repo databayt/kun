@@ -234,6 +234,7 @@ print(msg); sys.exit(0 if len(on) >= 3 else 1)
 PY
 }
 p_launcher_f() { launcher_probe f; }
+p_launcher_x() { launcher_probe x; }
 p_opencode_cli() { has opencode && ok "$(opencode --version 2>/dev/null | head -1)" || bad "opencode not installed"; }
 p_opencode_allow() { _ag_opencode_bypass && ok "permission allow" || bad "opencode.json lacks permission: allow"; }
 p_codex_cli() { has codex && ok "$(codex --version 2>/dev/null | head -1)" || bad "codex not installed"; }
