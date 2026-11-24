@@ -1,0 +1,71 @@
+#!/bin/bash
+# lane — run one prompt headless through any agent lane, or smoke-test them all.
+#
+#   lane <c|a|o|h|f|d> "prompt"   one-shot, prints the answer, runs in the current folder
+#   lane test [c a o h f]         same bug-fix task through each lane in a temp folder → PASS/FAIL + seconds
+#   lane models                   which model each lane is set to
+#
+# Interactive use is the shell launchers (c a o h f, from .claude/machine/launchers.json) or
+# Machine → Terminal. This is the scripted door. Lanes: c Claude Code (Max plan) · a Antigravity
+# (Google, free) · o opencode (Zen free models) · h Hermes (Nous free) · f Claude Code on Nous
+# free models (kun-free.sh) · d Claude Code on DeepSeek (own key, kun-d.sh).
+#
+# stdin is always closed (</dev/null): opencode reads a non-tty stdin as part of the prompt
+# and waits for EOF forever — the 300 s hangs of 2026-11-24.
+# Installed at ~/.claude/bin/lane (and ~/.local/bin/lane); canonical copy in kun.
+set -u
+
+TIMEOUT="${LANE_TIMEOUT:-300}"
+
+run() { # run <lane> <prompt>
+    local l="$1" p="$2"
+    case "$l" in
+        c) claude -p --dangerously-skip-permissions "$p" ;;
+        a) agy --dangerously-skip-permissions -p "$p" ;;
+        o) opencode run "$p" ;;
+        h) hermes chat -Q --yolo --max-turns 30 --source lane -q "$p" ;;
+        f) kun-free.sh -p --dangerously-skip-permissions "$p" ;;
+        d) kun-d.sh -p --dangerously-skip-permissions "$p" ;;
+        *) echo "lane: unknown lane '$l' (c a o h f d)" >&2; return 64 ;;
+    esac </dev/null
+}
+
+models() {
+    printf 'c  Claude Code       %s\n' "$(python3 -c "import json;print(json.load(open('$HOME/.claude/settings.json')).get('model','default'))" 2>/dev/null)"
+    printf 'a  Antigravity       %s\n' "$(python3 -c "import json;print(json.load(open('$HOME/.gemini/antigravity-cli/settings.json')).get('model'))" 2>/dev/null)"
+    printf 'o  opencode          %s\n' "$(python3 -c "import json;print(json.load(open('$HOME/.config/opencode/opencode.json')).get('model'))" 2>/dev/null)"
+    printf 'h  Hermes            %s\n' "$(sed -n '/^model:/,/^[a-z]/s/^  default: //p' "$HOME/.hermes/config.yaml" | head -1)"
+    printf 'f  Claude Code free  %s\n' "${KUN_FREE_MODEL:-meituan/longcat-2.5:free}"
+    printf 'd  Claude Code d     %s\n' "deepseek (own key)"
+}
+
+smoke() { # smoke <lane> → one row
+    local l="$1" dir s e r
+    dir=$(mktemp -d "${TMPDIR:-/tmp}/lane-$l.XXXX")
+    printf 'function sum(xs) { let t = 0; for (let i = 1; i < xs.length; i++) t += xs[i]; return t; }\nmodule.exports = sum;\n' > "$dir/sum.js"
+    printf "const sum = require('./sum'); if (sum([1,2,3]) !== 6) { console.log('FAIL'); process.exit(1) } console.log('PASS')\n" > "$dir/test.js"
+    s=$(date +%s)
+    (cd "$dir" && timeout "$TIMEOUT" "$0" "$l" "In this folder test.js fails. Fix the bug in sum.js, then run 'node test.js' and report its output." >"$dir/out.txt" 2>&1)
+    e=$(( $(date +%s) - s ))
+    r=$(cd "$dir" && node test.js 2>/dev/null)
+    [ "$r" = PASS ] || r="FAIL  ($(grep -m1 -iE 'error|not eligible|expired|limit' "$dir/out.txt" | cut -c1-90))"
+    printf '%-2s %4ss  %s\n' "$l" "$e" "$r"
+    rm -rf "$dir"
+}
+
+case "${1:-}" in
+    ""|-h|--help) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    models) models ;;
+    test)
+        shift
+        set -- "${@:-c a o h f}"
+        [ $# -eq 1 ] && set -- $1
+        echo "lane  time  result"
+        for l in "$@"; do smoke "$l"; done
+        ;;
+    *)
+        [ $# -ge 2 ] || { echo "usage: lane <c|a|o|h|f|d> \"prompt\"" >&2; exit 64; }
+        l="$1"; shift
+        run "$l" "$*"
+        ;;
+esac

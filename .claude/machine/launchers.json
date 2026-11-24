@@ -6,7 +6,9 @@
       "id": "c",
       "name": "Claude Code (primary)",
       "bin": "claude",
-      "args": ["--dangerously-skip-permissions"],
+      "args": [
+        "--dangerously-skip-permissions"
+      ],
       "bypass": true,
       "agent": "code",
       "needs": "claude.cli"
@@ -15,7 +17,9 @@
       "id": "a",
       "name": "Antigravity (secondary)",
       "bin": "agy",
-      "args": ["--dangerously-skip-permissions"],
+      "args": [
+        "--dangerously-skip-permissions"
+      ],
       "bypass": true,
       "agent": "agy",
       "needs": "agy.cli"
@@ -38,6 +42,18 @@
       "bypass": false,
       "agent": "hermes",
       "needs": "hermes.cli"
+    },
+    {
+      "id": "f",
+      "name": "Claude Code free (Nous)",
+      "bin": "kun-free.sh",
+      "args": [
+        "--dangerously-skip-permissions"
+      ],
+      "bypass": true,
+      "agent": "free",
+      "needs": "hermes.cli",
+      "note": "Claude Code on Nous Portal's free models through the Hermes login — $0, its own config dir ~/.claude-free (.claude/bin/kun-free.sh)"
     }
   ]
 }

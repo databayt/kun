@@ -10,12 +10,13 @@
 #   a — Antigravity `agy` (second)  bypass: --dangerously-skip-permissions
 #   o — opencode (tertiary)         bypass: config-level "permission": "allow"
 #   h — Hermes (optional)           assistant GATEWAY (NousResearch), not a coding CLI
+#   f — Claude Code free (`kun-free.sh`) Claude Code on Nous Portal free models via the Hermes login
 #
 # Source it:  . "$(dirname "$0")/lib/agents.sh"
 # Functions:  agents_detect_all | agents_detect_json | agents_delta <sel>
 #             agents_write_alias_block <sel> | agents_configure_opencode
 #             agents_selected_contains <sel> <name>
-# <sel> is "all" or a csv of: code,desktop,agy,opencode,hermes
+# <sel> is "all" or a csv of: code,desktop,agy,opencode,hermes,free
 # (legacy token "openclaw" in persisted wizard state is normalized to "hermes")
 # =============================================================================
 

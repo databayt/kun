@@ -1,0 +1,3 @@
+#!/bin/bash
+# f — the free lane (see kun-free.sh). Installed at ~/.claude/bin/f; canonical copy in kun.
+exec "$(dirname "$0")/kun-free.sh" "$@"

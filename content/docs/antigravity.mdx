@@ -12,6 +12,8 @@ description: Google's Antigravity CLI as kun's fallback agent — same MCP fleet
 1. **Fallback** — when `claude` is down, unauthenticated, or rate-limited, reach for `a` and keep moving.
 2. **Easy / cheap tasks** — quick edits, lookups, renames, one-file changes. Antigravity defaults to **Gemini Flash** (fast + cheap), so offloading trivial work here saves the primary agent's budget for the hard problems.
 
+**Models (free tier, 2026-11-24, `agy models`):** Gemini 3.8 Flash (High/Medium/Low), Claude Opus 4.6 (Thinking), Claude Sonnet 4.6 (Thinking), GPT-OSS 120B. The default stays **Gemini 3.8 Flash (High)** in `~/.gemini/antigravity-cli/settings.json`; pick Opus 4.6 for one hard task with `agy --model claude-opus-4-6-thinking`, its free quota is small. If every call fails with *"Eligibility check failed: Your current account is not eligible for Antigravity"*, Google wants the account verified: run `agy` interactively and finish the sign-in link in the browser, then `lane test a`.
+
 It is not a different toolchain. The onboarding wizard wires it to the **same MCP fleet, the same skills, and the same databayt playbook** Claude Code uses — so `a` behaves like kun, just on a lighter model. Reach for Claude Code (`c`) for anything beyond "easy": architecture, multi-step features, schema/migration work, anything risky.
 
 ---
