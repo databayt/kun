@@ -2,23 +2,83 @@
   "$schema": "North Star metric — single value tracked every weekly review",
   "metric": "Active paying schools using Hogwarts",
   "definition": "A school is counted if (a) subscription_status = 'active', (b) at least 5 student records exist, (c) any of {attendance recorded OR invoice generated} in the last 30 days, AND (d) the school has paid an invoice covering the current month or a future month.",
-  "last_updated": "2026-11-21",
-  "last_updated_by": "weekly-plan-2026-11-22 (business desk; measured on Hogwarts production)",
+  "last_updated": "2026-11-24",
+  "last_updated_by": "org-rethink-state-refresh-2026-11-24",
   "source": "Hogwarts production database (neon MCP) — query: SELECT COUNT(*) FROM Tenant WHERE subscription_status = 'active' AND last_active_at > NOW() - INTERVAL '30 days'",
-
   "current_value": 0,
-
   "targets": [
-    {"horizon": "today", "date": "2026-05-12", "target": 0, "actual": 0, "status": "on-track", "note": "Ahmed Baha pilot; not yet paying"},
-    {"horizon": "Q3-2026", "date": "2026-09-30", "target": 1, "actual": 0, "status": "missed", "note": "King Fahad Schools converts at Professional tier ($99/mo) — did not happen; the tenant has never taken attendance"},
-    {"horizon": "Q4-2026", "date": "2026-12-31", "target": 2, "actual": null, "status": "open", "note": "Second school via Ali's outreach"},
-    {"horizon": "12-months", "date": "2027-05-12", "target": 3, "actual": null, "status": "open", "note": "Default-alive boundary — 3 paying schools at avg $100/mo ≈ $300 MRR covers 60% of burn"},
-    {"horizon": "24-months", "date": "2028-05-12", "target": 10, "actual": null, "status": "open", "note": "$1K-1.5K MRR. First-hire trigger."},
-    {"horizon": "5-year", "date": "2031-05-12", "target": 50, "actual": null, "status": "open", "note": "Vision target — $5-10K MRR"}
+    {
+      "horizon": "today",
+      "date": "2026-11-24",
+      "target": 0,
+      "actual": 0,
+      "status": "behind-plan",
+      "note": "Re-baselined 2026-11-24: Al-Ibda is client #1 but unsigned and unpaid. The 2026-05-12 row (target 0, actual 0) is kept in weekly_history."
+    },
+    {
+      "horizon": "Q3-2026",
+      "date": "2026-09-30",
+      "target": 1,
+      "actual": 0,
+      "status": "missed",
+      "note": "Missed. Plan assumed King Fahad Schools at Professional tier ($99/mo); King Fahad went dormant and has never taken attendance. Al-Ibda became the candidate; the $99/mo flat tier no longer exists (per-student pricing since 2026-11-08)."
+    },
+    {
+      "horizon": "Q4-2026",
+      "date": "2026-12-31",
+      "target": 1,
+      "actual": null,
+      "status": "open",
+      "note": "Committed: Al-Ibda signs and pays (1). Stretch: a second school (Alqabs / King Fahad / Bakri's school) by 12-31. Original target 2 revised 2026-11-24 because Q3's target 1 was missed and no second school has a tenant with attendance.",
+      "stretch_target": 2
+    },
+    {
+      "horizon": "12-months",
+      "date": "2027-05-12",
+      "target": 3,
+      "actual": null,
+      "status": "open",
+      "note": "Default-alive boundary was '3 schools at ~$100/mo = ~$300 MRR'. Under 24 SAR/student ($6.40/yr) 3 schools of Al-Ibda's size (81 students) = ~$130/mo, 26% of a $500 burn. Count target kept at 3, boundary unreconciled: see revenue.json break_even (~940 paying students)."
+    },
+    {
+      "horizon": "24-months",
+      "date": "2028-05-12",
+      "target": 10,
+      "actual": null,
+      "status": "open",
+      "note": "Was '$1K-1.5K MRR'. At Al-Ibda's size 10 schools = ~$432 MRR (810 students x $6.40 / 12). The MRR claim holds only if average school size is ~190-280 students. Not changed."
+    },
+    {
+      "horizon": "5-year",
+      "date": "2031-05-12",
+      "target": 50,
+      "actual": null,
+      "status": "open",
+      "note": "Was '$5-10K MRR'; at the same 81-student average 50 schools = ~$2.2K MRR. Not changed; flagged."
+    }
   ],
-
   "weekly_history": [
-    {"week_of": "2026-05-11", "value": 0, "delta": 0, "note": "Baseline week — captain OS bootstrap"},
-    {"week_of": "2026-11-22", "value": 0, "delta": 0, "active_not_paying": 1, "note": "Measured 2026-11-21. Al-Ibda is active (81 students, 971 attendance marks in 7 days) with no paid invoice; King Fahad (14) and Alwafi (4) have never taken attendance. No school has trialEndsAt set. Week target: 1 (Al-Ibda signs and pays its first half by 11-26)."}
-  ]
+    {
+      "week_of": "2026-05-11",
+      "value": 0,
+      "delta": 0,
+      "note": "Baseline week — captain OS bootstrap"
+    },
+    {
+      "week_of": "2026-11-22",
+      "value": 0,
+      "delta": 0,
+      "active_not_paying": 1,
+      "note": "Measured 2026-11-21. Al-Ibda is active (81 students, 971 attendance marks in 7 days) with no paid invoice; King Fahad (14) and Alwafi (4) have never taken attendance. No school has trialEndsAt set. Week target: 1 (Al-Ibda signs and pays its first half by 11-26)."
+    },
+    {
+      "week_of": "2026-11-24",
+      "value": 0,
+      "delta": 0,
+      "measured": false,
+      "note": "Not re-measured this session (no production read). Value carried from the 2026-11-21 measurement; Al-Ibda still unsigned per the last readable record."
+    }
+  ],
+  "definition_conflict_note": "docs/NORTH-STAR.md counts a school if it has >=5 student records AND (attendance OR invoice) in 30 days AND has paid; this file's definition adds subscription_status='active' and requires a paid invoice for the current/future month; the SQL in `source` checks only subscription_status and last_active_at, not payment. Result is 0 under every reading today. Reconcile in an amend-north-star decision.",
+  "reconciliation_2026-11-24": "See revenue.json _reconciliation: pricing basis, break-even and pilot count differ across files."
 }

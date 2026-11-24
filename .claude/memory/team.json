@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "updated": "2026-11-08",
-  "$comment": "ids = CRM/workspace logins (<id>@databayt.org works on every *.crm.databayt.org workspace and Slack databayt-sh).",
+  "updated": "2026-11-24",
+  "$comment": "ids = CRM/workspace logins (<id>@databayt.org works on every *.crm.databayt.org workspace and Slack databayt-sh). | 2026-11-24: current_focus_2026-11-24 mirrors capacity.json (proposed allocation, not observed); git_activity_30d is from git log --since=2026-10-25.",
   "company": {
     "name": "Databayt",
     "license": "SSPL",
@@ -30,7 +30,9 @@
       "role": "Founder & Tech Lead",
       "traits": "Visionary",
       "installRole": "engineer",
-      "email": "abdout@databayt.org"
+      "email": "abdout@databayt.org",
+      "current_focus_2026-11-24": "see capacity.json: Al-Ibda contract in SAR at the confirmed count, invoice on signing day; decide open reports; domains restore abdoutgroup.com (P0 kun#165)",
+      "git_activity_30d": "191 hogwarts / 307 mkan / 230 kun / 15 food / 2 catalog"
     },
     {
       "id": "ibrahim",
@@ -42,7 +44,9 @@
       "role": "Senior Fullstack Engineer (web + mobile)",
       "traits": "Highly skilled fullstack web and mobile engineer",
       "installRole": "engineer",
-      "email": "ibrahim@databayt.org"
+      "email": "ibrahim@databayt.org",
+      "current_focus_2026-11-24": "see capacity.json: Phone test (sign in by code, join live class) Android + iOS by 11-24; hogwarts main CI green by 11-26",
+      "git_activity_30d": "none under this name (all repo commits are authored 'abdout')"
     },
     {
       "id": "moutaz",
@@ -58,7 +62,9 @@
       "role": "Product Engineer (business + sales + AI + network)",
       "traits": "Experienced software engineer with strong business, sales, AI, and network skills; owns the Albayan pilot",
       "installRole": "engineer",
-      "email": "moutaz@databayt.org"
+      "email": "moutaz@databayt.org",
+      "current_focus_2026-11-24": "see capacity.json: King Fahad demo + free-month offer (11-24); Alqabs meeting + demo (11-25)",
+      "git_activity_30d": "none under this name (all repo commits are authored 'abdout')"
     },
     {
       "id": "aseel",
@@ -82,7 +88,9 @@
           "sales@balqalam.com",
           "support@balqalam.com"
         ]
-      }
+      },
+      "current_focus_2026-11-24": "see capacity.json: CRM: every deal a future next date + SAR amount (11-23); Bakri's school meeting (11-25); Alwafi yes/no",
+      "git_activity_30d": "none under this name (all repo commits are authored 'abdout')"
     },
     {
       "id": "moed",
@@ -99,7 +107,9 @@
       "role": "Business Development + Copywriting + Network",
       "traits": "Well educated, loves reading; good at business, sales, copywriting, and networking",
       "installRole": "business",
-      "email": "moed@databayt.org"
+      "email": "moed@databayt.org",
+      "current_focus_2026-11-24": "see capacity.json: Offer message at the one rate (text + one image) for Abdout's approval; Al-Ibda story draft after the signature",
+      "git_activity_30d": "none under this name (all repo commits are authored 'abdout')"
     },
     {
       "id": "samia",
@@ -116,7 +126,9 @@
       "accessibility": {
         "blind": true,
         "screen_reader_user": true
-      }
+      },
+      "current_focus_2026-11-24": "see capacity.json: One-page brief on the Alqabs group for Moutaz (11-23); language pass on the offer message",
+      "git_activity_30d": "none under this name (all repo commits are authored 'abdout')"
     },
     {
       "id": "sedon",
@@ -129,7 +141,9 @@
       "role": "DevOps + Saudi facilitator",
       "traits": "Reality-driven — practical thinking grounded in reality, very smart, brings a different perspective; owns deploys/infra cadence + Saudi physical ops",
       "installRole": "ops",
-      "email": "sedon@databayt.org"
+      "email": "sedon@databayt.org",
+      "current_focus_2026-11-24": "see capacity.json: On-call for Al-Ibda (first reply within 2 h) to 11-26; payment route/account for the first payment (11-24)",
+      "git_activity_30d": "none under this name (all repo commits are authored 'abdout')"
     },
     {
       "id": "abobaker",
@@ -144,7 +158,9 @@
       "traits": "Two decades of institutional systems: technical director of Sudan's national data-exchange platform (40+ institutions, 78+ services), architect of the passport booking system (40+ global offices, 674K+ bookings), lead on the foreigners management system (85+ offices); ex-CTO of a telecom/digital services company; founder of a bank notification platform (95K+ users, 1.6M+ notifications, self-funded). Value-driven monetization; knows the Sudan + Saudi market, public sector and commercial",
       "status": "busy",
       "status_since": "2026-11-08",
-      "status_note": "Still CEO (Abdout, 2026-11-08) but busy; Kun runs the weekly rhythm as the standing CEO agent and sends him a one-page brief"
+      "status_note": "Still CEO (Abdout, 2026-11-08) but busy; Kun runs the weekly rhythm as the standing CEO agent and sends him a one-page brief",
+      "current_focus_2026-11-24": "see capacity.json: On leave / busy since 2026-11-08; one-page brief through Huwaida on 11-26",
+      "git_activity_30d": "none under this name (all repo commits are authored 'abdout')"
     },
     {
       "id": "huwaida",
@@ -159,7 +175,10 @@
       "role": "Business, marketing, social media and sales",
       "installRole": "business",
       "traits": "Communities of Sudanese school owners/principals; school-digitisation survey; wants to open the Gulf",
-      "joined": "2026-09-28"
+      "joined": "2026-09-28",
+      "current_focus_2026-11-24": null,
+      "git_activity_30d": "none under this name (all repo commits are authored 'abdout')"
     }
-  ]
+  ],
+  "last_updated_by": "org-rethink-state-refresh-2026-11-24"
 }

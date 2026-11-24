@@ -33,20 +33,20 @@ Alternative metrics rejected:
 
 ## Targets
 
-| Horizon                  | Target | Why                                                                                            |
-| ------------------------ | ------ | ---------------------------------------------------------------------------------------------- |
-| **Today** (2026-05-12)   | 0      | Ahmed Baha (King Fahad Schools) is pilot, not yet paying.                                      |
-| **Q3 2026** (Sep)        | 1      | King Fahad Schools converts. First paying school.                                              |
-| **Q4 2026** (Dec)        | 2      | Second school via Ali's outreach.                                                              |
-| **12 months** (May 2027) | 3      | "Default alive" boundary — 3 paying schools at $99-149/mo ≈ $300-450 MRR. Covers ~85% of burn. |
-| **24 months** (May 2028) | 10     | $1K-1.5K MRR. Profitable on burn. First hire trigger.                                          |
-| **5 years** (2031)       | 50     | $5-10K MRR. The vision target.                                                                 |
+| Horizon                  | Target | Why                                                                                                                       |
+| ------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------- |
+| **Today** (2026-11-24)   | 0      | Al-Ibda is client #1: active (81 students) but unsigned and unpaid. Re-baselined 2026-11-24.                              |
+| **Q3 2026** (Sep)        | 1      | **Missed (actual 0).** King Fahad Schools was the assumed first payer; it went dormant and never took attendance.        |
+| **Q4 2026** (Dec)        | 1 (stretch 2) | Revised 2026-11-24. Committed: Al-Ibda signs and pays. Stretch: a second school (Alqabs, King Fahad, Bakri's school). |
+| **12 months** (May 2027) | 3      | Count target kept. The old "$300-450 MRR covers ~85% of burn" no longer holds at 24 SAR per student: 3 schools of 81 students are ~$130/mo. |
+| **24 months** (May 2028) | 10     | Count target kept. $1K-1.5K MRR needs ~190-280 students per school on average; at 81 it is ~$430 MRR.                      |
+| **5 years** (2031)       | 50     | The vision target. At 81 students per school it is ~$2.2K MRR; the $5-10K claim is unreconciled.                          |
 
 These targets are gates, not goalposts. A miss triggers a review (premortem, pivot, persevere). A beat triggers an investment decision (where to deploy the slack).
 
 ## The "enough" line
 
-**Break-even = paying schools × price/mo ≥ $500/mo burn** — at $99–149/mo pricing, that is **4–5 active paying schools**. This line is the _Company of One_ discipline (adopted 2026-07-10): growth that adds complexity — a new product, a bespoke feature, a hire — without moving the count toward this line gets refused by default. The captain cites this line when saying no.
+**Break-even** was written as "paying schools x price/mo >= $500/mo burn", 4-5 schools at $99-149/mo. That pricing was replaced on 2026-11-08 (D-20261108) and 2026-11-17 (D-20261117): one rate of 24 SAR ($6.40) per student per year. On the unverified $500/mo burn, break-even is about **940 paying students** (~12 schools the size of Al-Ibda); on the full cost quoted in D-20261117 ($2,700-4,000/mo) it is about 5,000-7,500 students. The cost base is itself unverified (see `runway.json`). This line is the _Company of One_ discipline (adopted 2026-07-10): growth that adds complexity without moving the paying-school count toward it gets refused by default.
 
 ---
 
@@ -76,3 +76,4 @@ Until all three are true, this metric stays.
 ## Last reviewed
 
 2026-05-12 — Founding metric for Databayt.
+2026-11-24 — Targets revised (Q3 marked missed, Q4 re-set to 1 + stretch 2, break-even restated per student); definition unchanged. Open: `north_star.json` and this file define "active/paying" differently (see its `definition_conflict_note`).

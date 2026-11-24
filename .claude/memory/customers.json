@@ -1,11 +1,11 @@
 {
   "$schema": "Pilot + customer roster — MENA-10 free pilot cohort with 10 slots, plus paid customer roster. Slots are not first-come-first-served; each held until written commitment or 14-day silence.",
-  "last_updated": "2026-11-08",
-  "last_updated_by": "interim-ceo-session-2026-11-08",
+  "last_updated": "2026-11-24",
+  "last_updated_by": "org-rethink-state-refresh-2026-11-24",
   "cohort": {
     "name": "MENA-10",
     "description": "10 free pilots across MENA — 6 months each, weekly feedback call, case-study commitment at month 6, conversion offer at PRO 30%-off",
-    "target_completion": "2026-08-31",
+    "target_completion": "2026-08-31 (missed)",
     "current_filled": 1,
     "current_recruiting": 9,
     "status": "ended 2026-11-08 — replaced by a 1-month free trial for every new school"
@@ -20,16 +20,22 @@
       "product": "hogwarts",
       "stage": "trial",
       "subscription_status": "free_until_2026-12-18",
-      "students": 48,
-      "teachers": 36,
+      "students": 81,
+      "teachers": 37,
       "subdomain": "alabidae.balqalam.com",
       "pilot_start_date": "2026-09-19",
-      "first_bill_date": "2026-12-19",
+      "first_bill_date": "on signing (target 2026-11-26); the 2026-12-19 date from 11-08 is superseded by D-20261117",
       "annual_value_usd": 307.2,
       "first_payment_usd": 153.6,
       "owner": "abdout",
-      "next_step": "Contract signed by 2026-11-20 (one-page PDF + offer in ~/.claude/state/team/outbox/01)",
-      "note": "Client #1. Teaching starts the week of 2026-11-08. Keeps the 3 months it joined under (D-20261108-pricing-one-month-trial)."
+      "next_step": "Confirm student count, sign contract (target 2026-11-26), first payment by 2026-12-15",
+      "note": "Client #1. Teaching started week of 2026-11-08. Pricing D-20261117: 24 SAR per student per year.",
+      "students_as_of": "2026-11-21 (hogwarts production); offer was written at 48",
+      "students_unconfirmed": true,
+      "annual_value_usd_at_current_students": 518.4,
+      "annual_value_sar_at_current_students": 1944,
+      "status_note": "Production has no trialEndsAt for any school; D-20261117 says Al-Ibda already used its free period and pays from signing, while subscription_status below still carries the 11-08 free_until date. Kept unchanged pending Abdout.",
+      "production_activity": "971 attendance marks in 7 days, 1,125 in 30 days, 0 paid invoices (2026-11-21)"
     },
     {
       "slot": 2,
@@ -42,8 +48,11 @@
       "students": 14,
       "subdomain": "kingfahd.balqalam.com",
       "owner": "mutaz",
-      "next_step": "Demo of the new year + free-month offer (CRM next 2026-11-15)",
-      "note": "Pilot Apr–Oct went dormant; came back 2026-10-21 with more students and branches."
+      "next_step": "Demo of the new year + free-month offer (CRM next was 2026-11-15, overdue; proposed 2026-11-24)",
+      "note": "Pilot Apr–Oct went dormant; came back 2026-10-21 with more students and branches.",
+      "students_as_of": "2026-11-21",
+      "teachers": 9,
+      "production_activity": "0 attendance in 30 days - dormant"
     },
     {
       "slot": 3,
@@ -54,7 +63,7 @@
       "product": "hogwarts",
       "stage": "discovery",
       "owner": "mutaz",
-      "next_step": "Meet + demo (CRM next 2026-11-17)",
+      "next_step": "Meet + demo (CRM next was 2026-11-17, overdue; proposed 2026-11-25)",
       "note": "A chain — one contract could be many schools. No production tenant yet."
     },
     {
@@ -68,13 +77,17 @@
       "students": 4,
       "subdomain": "alwafi.balqalam.com",
       "owner": "ali",
-      "next_step": "Confirm intent + free month (CRM next 2026-11-15)"
+      "next_step": "Confirm intent (CRM next was 2026-11-15, overdue; no new date - owner to set)",
+      "students_as_of": "2026-11-21",
+      "teachers": 1,
+      "production_activity": "0 attendance in 30 days - not started"
     }
   ],
   "paid_customers": [],
   "lost": [],
   "_legacy_single_customer_schema_archived_at": "customers.legacy.json",
   "_unconfirmed": [
-    "london (1 student) and alhuda (0) tenants: real schools or tests? asked Abdout 2026-11-08"
+    "london (1 student) and alhuda (0) tenants: real schools or tests? asked Abdout 2026-11-08, still unanswered 2026-11-22",
+    "Bakri's school (Port Sudan) is a 5th CRM deal not on this roster"
   ]
 }

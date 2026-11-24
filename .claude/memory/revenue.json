@@ -1,13 +1,14 @@
 {
   "$schema": "Captain revenue state — MRR/ARR per customer and monthly history",
-  "last_updated": "2026-11-08",
-  "last_updated_by": "interim-ceo-session-2026-11-08",
+  "last_updated": "2026-11-24",
+  "last_updated_by": "org-rethink-state-refresh-2026-11-24",
   "summary": {
     "mrr_usd": 0,
     "arr_usd": 0,
     "paying_customers": 0,
     "pilot_customers": 1,
-    "total_active_customers": 1
+    "total_active_customers": 1,
+    "_note": "pilot_customers=1 counts only Al-Ibda (trial). customers.json lists 4 pilot-roster entries: 1 in trial (Al-Ibda), 3 in discovery with no attendance. Paying 0 is consistent across files."
   },
   "customers": [],
   "pricing": {
@@ -16,10 +17,12 @@
       "rate_usd_per_student_year": 6.4,
       "free_students": 0,
       "trial_months": 1,
-      "schedule": "50% when the free month ends, then 12.5% at months 3, 6, 9, 12",
-      "sudan": "USD price paid in SDG at the bank rate on the payment day, by Bankak"
+      "schedule": "50% at signing or when the trial ends, then 4 x 12.5% across the school year (D-20261117); the 11-08 schedule (12.5% at months 3, 6, 9, 12) is superseded",
+      "sudan": "USD price paid in SDG at the bank rate on the payment day, by Bankak",
+      "quoting_currency": "SAR (KSA pays by bank transfer, no VAT line; Sudan pays the SAR price in SDG at the bank rate via Bankak)",
+      "note": "USD figure assumes 3.75 SAR/USD; rates.ts is the code source."
     },
-    "source": "hogwarts src/components/saas-marketing/pricing/rates.ts (D-20261108-pricing-one-month-trial)"
+    "source": "hogwarts src/components/saas-marketing/pricing/rates.ts; D-20261108-pricing-one-month-trial as amended by D-20261117-pricing-proportional-sar"
   },
   "monthly_history": [
     {
@@ -35,20 +38,85 @@
       "paying_customers": 0,
       "new": 0,
       "churn": 0
+    },
+    {
+      "month": "2026-06",
+      "mrr": 0,
+      "paying_customers": 0,
+      "new": 0,
+      "churn": 0,
+      "basis": "no paid invoice exists on production; north star 0 throughout"
+    },
+    {
+      "month": "2026-07",
+      "mrr": 0,
+      "paying_customers": 0,
+      "new": 0,
+      "churn": 0,
+      "basis": "no paid invoice exists on production; north star 0 throughout"
+    },
+    {
+      "month": "2026-08",
+      "mrr": 0,
+      "paying_customers": 0,
+      "new": 0,
+      "churn": 0,
+      "basis": "no paid invoice exists on production; north star 0 throughout"
+    },
+    {
+      "month": "2026-09",
+      "mrr": 0,
+      "paying_customers": 0,
+      "new": 0,
+      "churn": 0,
+      "basis": "no paid invoice exists on production; north star 0 throughout"
+    },
+    {
+      "month": "2026-10",
+      "mrr": 0,
+      "paying_customers": 0,
+      "new": 0,
+      "churn": 0,
+      "basis": "no paid invoice exists on production; north star 0 throughout"
+    },
+    {
+      "month": "2026-11",
+      "mrr": 0,
+      "paying_customers": 0,
+      "new": 0,
+      "churn": 0,
+      "basis": "as of 2026-11-21; Al-Ibda unsigned"
     }
   ],
   "projections": {
     "first_payment": {
-      "date": "2026-12-19",
+      "date": null,
+      "target_date": "2026-11-26",
+      "due_by": "2026-12-15",
       "usd": 153.6,
-      "from": "alibda"
+      "usd_at_current_students": 259.2,
+      "sar": 576,
+      "sar_at_current_students": 972,
+      "from": "alibda",
+      "basis": "D-20261117: Al-Ibda pays 50% from signing. USD/SAR shown at 48 students (offer) and 81 (production 2026-11-21); count unconfirmed. Contingent on signature - the 2026-12-19 date was the 11-08 rule and is superseded."
     },
     "break_even": {
       "paying_students": 940,
-      "basis": "~$500/mo costs (unverified since April) ÷ $0.533 per student-month"
+      "basis": "~$500/mo costs (unverified since April) / $0.533 per student-month",
+      "derivation": "500 / (6.4/12) = 937.5",
+      "caveat": "Cost basis is the unverified burn in runway.json; D-20261117 premortem quotes full cost ~$2,700-4,000/mo (needs ~5,000-7,500 students). Both are 'break-even' on different cost bases.",
+      "schools_equivalent_at_81_students": 11.6
     },
     "north_star_gate": {
-      "paying_schools": 10
+      "paying_schools": 10,
+      "note": "10 schools x 81 students = 810 students, below the 940 break-even; the gate and the break-even figure do not describe the same state."
     }
-  }
+  },
+  "_reconciliation_2026-11-24": [
+    "Pricing basis: docs/NORTH-STAR.md and north_star.json (Q3 note, 12-month row) still assume flat $99-149/mo tiers; revenue/customers/pipeline use per-student 24 SAR. Notes added, targets not rewritten.",
+    "First payment date: 12-19 (11-08 decision, customers/revenue) vs on-signing (11-17 decision). Set to the 11-17 rule.",
+    "Al-Ibda size: 48 students in the offer, pipeline, customers (307.2 USD/yr) vs 81 in production (518.4 USD/yr).",
+    "Pilot count: revenue.json 1 pilot; customers.json 4 roster entries; pipeline.json pilot_recruitment 'current_signed 1 of 10'; plan says 5 CRM deals.",
+    "Break-even: 940 students (revenue) vs 4-5 schools (NORTH-STAR.md) vs 5,000-7,500 students (D-20261117) vs 10 schools gate."
+  ]
 }

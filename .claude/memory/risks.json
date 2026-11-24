@@ -1,51 +1,53 @@
 {
   "$schema": "Captain risk register — existential and operational risks with mitigation status",
-  "last_updated": "2026-05-12",
-  "last_updated_by": "captain-os-bootstrap",
-  "review_cadence": "monthly",
-
+  "last_updated": "2026-11-24",
+  "last_updated_by": "org-rethink-state-refresh-2026-11-24",
+  "review_cadence": "monthly (last full review 2026-11-24; the register was not reviewed between 2026-05-12 and now)",
   "risks": [
     {
       "id": "R-001",
       "title": "Anthropic price hike or service interruption",
       "category": "vendor",
-      "description": "Anthropic raises Claude Max pricing or changes terms in a way that breaks the $200/mo envelope or makes the Kun engine unaffordable. Service outages could block the engine for hours/days.",
+      "description": "Anthropic changes Claude Max pricing or terms, or has an outage. Envelope today is Max $100/mo, subscription-only (no usage credits, no API-key spend beyond the plan's included credits, each capped in code). The engine consumed 4.8M fresh tokens + 245M cache reads on 2026-11-24 alone, so plan-limit throttling is as likely as a price move.",
       "likelihood": 3,
       "impact": 4,
       "score": 12,
       "owner": "abdout",
       "status": "open",
-      "mitigation": "Track spend in spend.jsonl (fix instrumentation). Maintain a Claude API fallback (Pay-as-you-go) and OSS LLM fallback design. Cost auto-throttle at $180/mo.",
+      "mitigation": "Spend tracked in the run ledger and `economy`; cost routes to cheaper lanes (delegation rule). The old 'pay-as-you-go fallback' is dropped: it conflicts with the subscription-only policy. Fallback lanes: Antigravity (`a`), opencode (`o`).",
       "first_seen": "2026-05-12",
-      "last_reviewed": "2026-05-12"
+      "last_reviewed": "2026-11-24",
+      "review_note": "Applies. Re-scoped to the $100 plan."
     },
     {
       "id": "R-002",
       "title": "Abdout key-person risk",
       "category": "people",
-      "description": "Abdout is the only full-stack engineer with deep context across all 14 repos. If he is unavailable (illness, injury, burnout, life event) for more than 2 weeks, every product's velocity drops to near-zero.",
-      "likelihood": 2,
+      "description": "Abdout is the only engineer in the git history of every active repo. Commits since 2026-10-25: mkan 307, kun 230, hogwarts 191, farm 378, machine 134, space 39, android-app 23, food 15, ios-app 3, catalog 2 - all under one author identity; no other author appears in any repo. If he is unavailable for 2 weeks every product stops.",
+      "likelihood": 3,
       "impact": 5,
-      "score": 10,
+      "score": 15,
       "owner": "abdout",
       "status": "open",
-      "mitigation": "Onboard Ibrahim to second-engineer status. Document architecture (already done in docs/ARCHITECTURE.md, docs/STACK.md). Maintain Kun captain so partial autonomy is possible. Train Samia on operational basics. Long-term: hire a second senior engineer at MRR ≥ $3K.",
+      "mitigation": "Unchanged in intent: second-engineer onboarding (Ibrahim), docs, captain autonomy. The git record shows no commits by Ibrahim or Moutaz in any local repo, so the mitigation is not evidenced; either they push elsewhere or it is not happening. Needs a human check.",
       "first_seen": "2026-05-12",
-      "last_reviewed": "2026-05-12"
+      "last_reviewed": "2026-11-24",
+      "review_note": "Worsened: likelihood 2 to 3 (judgment) because the onboarding mitigation shows no activity."
     },
     {
       "id": "R-003",
       "title": "Sudan banking / sanctions / currency",
       "category": "regulatory",
-      "description": "Sudan-based clients (King Fahad Schools first) cannot easily pay in USD. Banking sanctions, currency depreciation (SDG), and PayPal/Stripe restrictions on Sudan complicate revenue collection.",
+      "description": "Sudan-based clients cannot easily pay in USD. Payment route for the first invoice is still open (SAR transfer or Bankak, account owed; Sedon due 2026-11-24). Al-Ibda is Sudan-based with a Dammam branch; KSA schools pay SAR by bank transfer. SDG moves between invoice and payment.",
       "likelihood": 4,
       "impact": 4,
       "score": 16,
       "owner": "sedon",
       "status": "open",
-      "mitigation": "Sedon's Saudi bank + MADA + STC Pay routes Sudan customer payments through KSA. Investigate Lemfi, Wise alternatives. Investigate USDT (stablecoin) for Sudan customers as last resort.",
+      "mitigation": "Price quoted in SAR, paid in SDG at the bank rate on the day (D-20261117). Sedon's Saudi bank + Bankak route; confirm an account that can receive the first payment before the contract is sent.",
       "first_seen": "2026-05-12",
-      "last_reviewed": "2026-05-12"
+      "last_reviewed": "2026-11-24",
+      "review_note": "Applies; first-payment path is the live instance."
     },
     {
       "id": "R-004",
@@ -59,66 +61,140 @@
       "status": "monitored",
       "mitigation": "Acceptable for now — private schools are the beachhead and SSPL is the strategic posture (Counter-Positioning per Helmer). If/when district sales become a priority, evaluate dual-license offering.",
       "first_seen": "2026-05-12",
-      "last_reviewed": "2026-05-12"
+      "last_reviewed": "2026-11-24",
+      "review_note": "Applies, unchanged. No institutional buyer has been approached; all active deals are private schools."
     },
     {
       "id": "R-005",
-      "title": "No paying customer within 6 months",
+      "title": "No paying customer within 6 months (TRIGGERED 2026-11-12)",
       "category": "existential",
-      "description": "If King Fahad Schools doesn't convert and Ali's outreach yields no signed deal by 2026-11-12, runway drops below 4 months and default-dead becomes acute.",
-      "likelihood": 3,
+      "description": "The condition in the original text occurred: no signed deal by 2026-11-12 (north star 0 on 2026-11-24; Q3 target missed). Capital last verified 2026-04-02; estimated 2-5 months of runway.",
+      "likelihood": 5,
       "impact": 5,
-      "score": 15,
+      "score": 25,
       "owner": "captain",
-      "status": "open",
-      "mitigation": "Weekly review tracks weeks_remaining. At 6-month mark, captain dispatches wartime-mode escalation to Abdout (cut all non-pilot work, all hands on conversion). At 3-month mark, hard escalation. Conversion-conversation with Ahmed Baha scheduled by 2026-06-15.",
+      "status": "triggered",
+      "mitigation": "Wartime mode per the 3-month trigger: stop list in the 2026-11-22 week plan (mkan and engine work stop until the Al-Ibda signature). Weekly review tracks the signature; premortem/decision on the 2026-11-30 miss line in D-20261108.",
       "first_seen": "2026-05-12",
-      "last_reviewed": "2026-05-12"
+      "last_reviewed": "2026-11-24",
+      "review_note": "Triggered, not merely open."
     },
     {
       "id": "R-006",
-      "title": "Pilot fails silently — Ahmed Baha disengages",
+      "title": "Pilot fails silently - a school disengages",
       "category": "customer",
-      "description": "King Fahad Schools pilot has been live for ~4 weeks. No structured check-in cadence. Risk of silent disengagement (he stops using the product, doesn't say why, doesn't convert).",
-      "likelihood": 3,
+      "description": "Occurred with King Fahad Schools (pilot Apr-Oct went dormant, 14 students, never took attendance; came back 2026-10-21 but still 0 attendance). Same exposure now for Alwafi (4 students, never started) and for Al-Ibda if the signature slips, though Al-Ibda is active (971 attendance marks in 7 days).",
+      "likelihood": 4,
       "impact": 5,
-      "score": 15,
+      "score": 20,
       "owner": "ali",
-      "status": "open",
-      "mitigation": "Add weekly Ahmed check-in to Ali's allocation. Track 'last_contact' in customers.json. If days_since_contact > 14, captain dispatches an alert to Ali + Sedon.",
+      "status": "materialized",
+      "mitigation": "Weekly activity read from production (north_star weekly_history). Owner moves to Moutaz (King Fahad) and Abdout (Al-Ibda); the Ahmed Baha check-in line is obsolete. Add last-contact dates to customers.json when the CRM is current.",
       "first_seen": "2026-05-12",
-      "last_reviewed": "2026-05-12"
+      "last_reviewed": "2026-11-24",
+      "review_note": "Re-scoped from 'Ahmed Baha' to the pilot cohort; materialized once already."
     },
     {
       "id": "R-007",
       "title": "Sedon part-time bottleneck on Saudi ops",
       "category": "people",
-      "description": "Sedon at 15 hrs/week is the only Saudi-resident operator. Payment setup, bank operations, physical mail, MADA, STC Pay — all funnel through him. He is also the bridge to Ali in Sudan for customer comms.",
-      "likelihood": 2,
+      "description": "Sedon (15 h/week, Saudi-resident) now sits on the critical path of the first cash: payment route for Al-Ibda's first invoice, and on-call (first reply within 2 hours) for Al-Ibda to 2026-11-26. Hours are the 07-02 figure, not re-verified.",
+      "likelihood": 3,
       "impact": 3,
-      "score": 6,
+      "score": 9,
       "owner": "sedon",
       "status": "monitored",
       "mitigation": "Document Sedon's procedures so others could pick up if needed. Batch his tasks Mon/Wed/Fri (already in place). At MRR ≥ $5K, consider a second Saudi operator (or paid PEO).",
       "first_seen": "2026-05-12",
-      "last_reviewed": "2026-05-12"
+      "last_reviewed": "2026-11-24",
+      "review_note": "Likelihood 2 to 3: his tasks now gate revenue. Still medium."
     },
     {
       "id": "R-008",
-      "title": "Captain dispatching errors (Apple Notes drift)",
+      "title": "Dispatch drift: drafts and handoffs that never reach people",
       "category": "operational",
-      "description": "The captain dispatches via Apple Notes (Dispatch/Captain, Dispatch/Cowork, Dispatch/Inbox). If Abdout doesn't check his iPhone for days, escalations stall. If Notes sync breaks, dispatches are lost.",
-      "likelihood": 3,
-      "impact": 2,
-      "score": 6,
+      "description": "The channel is no longer only Apple Notes: it is Hermes/Slack and the 'المدرسة 2.0' WhatsApp group, with drafts staged in ~/.claude/state/team/outbox. Drafts 01-05 (the Al-Ibda offer, announcement, sprint 1, Bakri meeting) were still unsent on 2026-11-21 and the offer text was stale (USD terms). aware.md shows 6 handoffs to Cowork and 11 decision reviews due.",
+      "likelihood": 4,
+      "impact": 3,
+      "score": 12,
       "owner": "abdout",
       "status": "open",
-      "mitigation": "24h/72h escalation gate — captain follows up if no response. Daily pulse routine surfaces unread Inbox count. Backup channel: Slack #dispatch for critical escalations.",
+      "mitigation": "Every outbox draft carries a send date and an owner; weekly review lists unsent drafts; the sender confirms in the group. The 24h/72h escalation gate is not evidenced to be running.",
       "first_seen": "2026-05-12",
-      "last_reviewed": "2026-05-12"
+      "last_reviewed": "2026-11-24",
+      "review_note": "Re-scoped from Apple Notes to the real channels; score up 6 to 12."
+    },
+    {
+      "id": "R-009",
+      "title": "Runway is an unverified estimate",
+      "category": "existential",
+      "description": "Capital $5,000 was last verified 2026-04-02; burn $500/mo has not been verified since April and its breakdown is stale. Arithmetic on the file's own inputs gives ~2.2 months, the 2026-11-08 estimate says 3-5. D-20261117 puts full cost at $2,700-4,000/mo, a different basis. Every trigger decision (6/3/1 months) is made on a guess.",
+      "likelihood": 4,
+      "impact": 5,
+      "owner": "abdout",
+      "status": "open",
+      "mitigation": "Abdout supplies cash on hand and the real monthly costs (asked 2026-11-08); runway.json months_remaining stays null until then (Q4 O3-KR1, due 2026-11-27).",
+      "first_seen": "2026-11-24",
+      "score": 20,
+      "last_reviewed": "2026-11-24"
+    },
+    {
+      "id": "R-010",
+      "title": "Single-customer and single-product dependency",
+      "category": "existential",
+      "description": "The north star rests on one unsigned school (Al-Ibda). The next three deals have no attendance and overdue next actions. Effort does not match the metric: in 30 days mkan had 307 commits and hogwarts 191, while the stop list says mkan stops until the signature lands.",
+      "likelihood": 4,
+      "impact": 4,
+      "owner": "abdout",
+      "status": "open",
+      "mitigation": "Company-of-One refusal line (docs/NORTH-STAR.md): growth work that does not move the paying-school count is refused. Q4 O1/O2 put both signatures on dated KRs.",
+      "first_seen": "2026-11-24",
+      "score": 16,
+      "last_reviewed": "2026-11-24"
+    },
+    {
+      "id": "R-011",
+      "title": "CI never green on hogwarts main; mkan red 8 days",
+      "category": "operational",
+      "description": "aware.md 2026-11-24: hogwarts main CI failed (Playwright), never green; mkan main CI red 8 days; supervisor has open issues on hogwarts perf/keep-cache-warm and a readiness-digest cron. The client product ships with no passing gate while a paying school is about to depend on it.",
+      "likelihood": 4,
+      "impact": 3,
+      "owner": "ibrahim",
+      "status": "open",
+      "mitigation": "Q4 O3-KR3: hogwarts main green by 2026-11-26. Until then a manual /check + /watch before every deploy that Al-Ibda sees.",
+      "first_seen": "2026-11-24",
+      "score": 12,
+      "last_reviewed": "2026-11-24"
+    },
+    {
+      "id": "R-012",
+      "title": "Registry and engine drift",
+      "category": "operational",
+      "description": "The repo registry pointed at wrong checkouts until commit f857216 (re-pointed 2026-11-24). Engine sync is overdue (anthropic 23 d, stack/services/practice 59 d, self 23 d), the dispatch bench is 22 days old against a 7-day cadence, and the skill listing is over its 34,600 budget. Files in ~/.claude/memory and kun/.claude/memory were duplicated copies (not links) and were identical only by luck.",
+      "likelihood": 3,
+      "impact": 2,
+      "owner": "abdout",
+      "status": "open",
+      "mitigation": "Run /sync and /bench in an attended session; keep one canonical copy of the state files (kun repo) and sync to ~/.claude/memory by setup.sh only.",
+      "first_seen": "2026-11-24",
+      "score": 6,
+      "last_reviewed": "2026-11-24"
+    },
+    {
+      "id": "R-013",
+      "title": "Live-class infrastructure fails during Al-Ibda's first paid weeks",
+      "category": "technical",
+      "description": "Al-Ibda is an online school; live classes run on LiveKit (self-hosting on Hetzner decided 2026-11-09; LiveKit Cloud free plan has a 5,000 participant-minute cap shared by all schools). The review of that decision was due 2026-11-23 and six sign-in/class-entry reports (11-03 to 11-16) are undecided. An outage in class is the fastest way to lose the signature.",
+      "likelihood": 3,
+      "impact": 4,
+      "owner": "abdout",
+      "status": "open",
+      "mitigation": "Sedon on-call to 2026-11-26; Ibrahim phone test (sign-in by code, join a class) on Android and iOS by 2026-11-24; decide the Al-Ibda reports.",
+      "first_seen": "2026-11-24",
+      "score": 12,
+      "last_reviewed": "2026-11-24"
     }
   ],
-
   "scoring_rubric": {
     "likelihood": {
       "1": "Very unlikely (<10%)",
@@ -140,5 +216,6 @@
       "11-15": "High — captain dispatches alert if delta worsens",
       "16-25": "Critical — wartime decision required"
     }
-  }
+  },
+  "review_summary_2026-11-24": "R-001..R-008 reviewed and all still apply: R-005 triggered, R-006 materialized, R-002/R-007/R-008 worsened or re-scoped. R-009..R-013 added. Scores on changed likelihoods are judgment, not measurement."
 }

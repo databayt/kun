@@ -1,7 +1,7 @@
 {
   "$schema": "Quarterly OKRs — 3-5 objectives, 3-5 key results each, graded 0.0-1.0",
-  "last_updated": "2026-05-12",
-  "last_updated_by": "captain-os-bootstrap",
+  "last_updated": "2026-11-24",
+  "last_updated_by": "org-rethink-state-refresh-2026-11-24",
   "grading_rubric": {
     "0.0": "Failed completely — no measurable progress",
     "0.3": "Partial progress — under half the target",
@@ -9,126 +9,318 @@
     "0.7": "Stretch achieved — the right target for stretch goals",
     "1.0": "Fully achieved or exceeded — sandbagging warning if too many at 1.0"
   },
-
-  "current_quarter": "2026-Q2",
-  "quarter_start": "2026-04-01",
-  "quarter_end": "2026-06-30",
-
+  "current_quarter": "2026-Q4",
+  "quarter_start": "2026-10-01",
+  "quarter_end": "2026-12-31",
   "objectives": [
     {
-      "id": "O1-2026Q2",
-      "objective": "Convert King Fahad Schools from pilot to first paying customer",
-      "rationale": "North-star advance from 0 to 1. Unblocks the default-alive path.",
-      "owner": "ali",
-      "supporting_owners": ["abdout", "sedon"],
+      "id": "O1-2026Q4",
+      "objective": "Al-Ibda signs and pays: the first paying school (north star 0 → 1)",
+      "rationale": "The Drive: cash flow first. Al-Ibda is the only school with real usage (81 students, 971 attendance marks in 7 days) and no paid invoice. Everything else waits on this signature.",
+      "owner": "abdout",
+      "supporting_owners": [
+        "sedon",
+        "ibrahim",
+        "ali"
+      ],
       "key_results": [
         {
           "id": "KR1",
-          "result": "Hold a conversion conversation with Ahmed Baha by 2026-06-15",
+          "result": "Student count confirmed with Al-Ibda and the contract filled at that count (24 SAR per student per year; 81 students = 1,944 SAR, 48 = 1,152)",
           "target": 1,
           "current": 0,
           "grade": null,
-          "due": "2026-06-15"
+          "due": "2026-11-25"
         },
         {
           "id": "KR2",
-          "result": "Hogwarts admission flow at 33/33 tests pass",
-          "target": 33,
-          "current": 31,
-          "grade": null,
-          "due": "2026-06-01"
-        },
-        {
-          "id": "KR3",
-          "result": "Submit a formal proposal to King Fahad Schools",
+          "result": "Al-Ibda contract signed and the signed copy stored in the CRM",
           "target": 1,
           "current": 0,
           "grade": null,
-          "due": "2026-06-22"
+          "due": "2026-11-26"
+        },
+        {
+          "id": "KR3",
+          "result": "First payment received: 50% of the year at signing (972 SAR at 81 students, 576 at 48)",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-12-15",
+          "note": "D-20261117 target is 576 SAR by 12-15; plan goal is 11-26. Payment route (SAR transfer or Bankak) owed by Sedon 2026-11-24."
         },
         {
           "id": "KR4",
-          "result": "First paid invoice generated and paid",
+          "result": "North star measured on production = 1 (active subscription, paid invoice, attendance in 30 days)",
           "target": 1,
           "current": 0,
           "grade": null,
-          "due": "2026-06-30"
+          "due": "2026-12-15"
+        },
+        {
+          "id": "KR5",
+          "result": "Al-Ibda problems open longer than 24 h",
+          "target": 0,
+          "current": null,
+          "grade": null,
+          "due": "2026-12-10",
+          "note": "current unknown: 14 hogwarts reports undecided as of 2026-11-21; six are Al-Ibda sign-in or class-entry reports."
         }
       ]
     },
     {
-      "id": "O2-2026Q2",
-      "objective": "Ship the Kun captain operating system — identity, state, cadence",
-      "rationale": "Make the captain a real CEO brain with persistent memory. Multiplies founder leverage.",
-      "owner": "abdout",
-      "supporting_owners": ["samia"],
+      "id": "O2-2026Q4",
+      "objective": "Start a second school: Alqabs, King Fahad or Bakri's school begins its free month",
+      "rationale": "North-star Q4 target is 2. One signed school is the committed outcome; a second is the stretch. Alqabs (chain, 15+ branches) is the only open deal that moves break-even (~940 paying students).",
+      "owner": "moutaz",
+      "supporting_owners": [
+        "ali",
+        "samia",
+        "huwaida"
+      ],
       "key_results": [
         {
           "id": "KR1",
-          "result": "Phase A complete — CONSTITUTION.md, PRINCIPLES.md, NORTH-STAR.md, all state files, captain.md refactored, /captain global skill",
+          "result": "Alqabs meeting and demo held; branches, students per branch and decision-maker in the CRM",
           "target": 1,
           "current": 0,
           "grade": null,
-          "due": "2026-05-19"
+          "due": "2026-11-25"
         },
         {
           "id": "KR2",
-          "result": "Captain runs at least 3 weekly reviews using new state files (archive in weekly/)",
-          "target": 3,
-          "current": 0,
-          "grade": null,
-          "due": "2026-06-30"
-        },
-        {
-          "id": "KR3",
-          "result": "First monthly review run (rolls weekly archives + revenue + risk-delta)",
-          "target": 1,
-          "current": 0,
-          "grade": null,
-          "due": "2026-06-30"
-        }
-      ]
-    },
-    {
-      "id": "O3-2026Q2",
-      "objective": "Build customer-development discipline — at least one new prospect per week in pipeline",
-      "rationale": "Default-dead won't change without new prospects. Ali's outreach needs structure.",
-      "owner": "ali",
-      "supporting_owners": ["captain"],
-      "key_results": [
-        {
-          "id": "KR1",
-          "result": "5+ named prospects in pipeline.json by end of quarter",
-          "target": 5,
-          "current": 1,
-          "grade": null,
-          "due": "2026-06-30"
-        },
-        {
-          "id": "KR2",
-          "result": "≥1 customer interview per week (8 total in Q2)",
-          "target": 8,
-          "current": 0,
-          "grade": null,
-          "due": "2026-06-30"
-        },
-        {
-          "id": "KR3",
-          "result": "2 proposals sent",
+          "result": "King Fahad and Bakri's school each have an agreed free-month start date in the CRM",
           "target": 2,
           "current": 0,
           "grade": null,
-          "due": "2026-06-30"
+          "due": "2026-11-26"
+        },
+        {
+          "id": "KR3",
+          "result": "Schools other than Al-Ibda with attendance recorded in the last 30 days",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-12-15",
+          "note": "King Fahad, Alwafi and London/Alhuda have never taken attendance."
+        },
+        {
+          "id": "KR4",
+          "result": "Second school contract signed",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-12-31",
+          "note": "stretch: north star 2 by 2026-12-31"
+        }
+      ]
+    },
+    {
+      "id": "O3-2026Q4",
+      "objective": "Make the numbers true: verified runway, a live CRM, a green main branch",
+      "rationale": "The runway (3-5 months, capital last verified 2026-04-02) and every pipeline date are guesses. The 3-month wartime trigger cannot be judged on guesses.",
+      "owner": "abdout",
+      "supporting_owners": [
+        "ali",
+        "ibrahim",
+        "huwaida"
+      ],
+      "key_results": [
+        {
+          "id": "KR1",
+          "result": "Real cash and real monthly costs recorded in runway.json",
+          "target": 2,
+          "current": 0,
+          "grade": null,
+          "due": "2026-11-27",
+          "note": "two values owed by Abdout since 2026-11-08: cash on hand, monthly cost."
+        },
+        {
+          "id": "KR2",
+          "result": "CRM deals with a future next-action date and a SAR amount",
+          "target": 5,
+          "current": 0,
+          "grade": null,
+          "due": "2026-11-30",
+          "note": "5 CRM deals per the 11-22 plan; pipeline.json mirrors 4 (Bakri's school is missing)."
+        },
+        {
+          "id": "KR3",
+          "result": "hogwarts main CI run green (Playwright)",
+          "target": 1,
+          "current": 0,
+          "grade": null,
+          "due": "2026-11-26",
+          "note": "never green per aware.md."
+        },
+        {
+          "id": "KR4",
+          "result": "Weekly reviews archived in memory/weekly during the quarter",
+          "target": 6,
+          "current": 1,
+          "grade": null,
+          "due": "2026-12-31",
+          "note": "2026-11-22 plan exists; Sunday plans from 11-29 on."
         }
       ]
     }
   ],
-
-  "previous_quarters": [],
-
+  "previous_quarters": [
+    {
+      "quarter": "2026-Q2",
+      "start": "2026-04-01",
+      "end": "2026-06-30",
+      "graded_on": "2026-11-24",
+      "overall_grade": 0.13,
+      "headline": "North star 0 at quarter end; first paying school did not happen.",
+      "objectives": [
+        {
+          "id": "O1-2026Q2",
+          "objective": "Convert King Fahad Schools from pilot to first paying customer",
+          "rationale": "North-star advance from 0 to 1. Unblocks the default-alive path.",
+          "owner": "ali",
+          "supporting_owners": [
+            "abdout",
+            "sedon"
+          ],
+          "key_results": [
+            {
+              "id": "KR1",
+              "result": "Hold a conversion conversation with Ahmed Baha by 2026-06-15",
+              "target": 1,
+              "current": 0,
+              "grade": 0.0,
+              "due": "2026-06-15",
+              "grade_basis": "No conversion conversation with Ahmed Baha is recorded in any state file; King Fahad went dormant."
+            },
+            {
+              "id": "KR2",
+              "result": "Hogwarts admission flow at 33/33 tests pass",
+              "target": 33,
+              "current": 31,
+              "grade": null,
+              "due": "2026-06-01",
+              "grade_basis": "Not verifiable from state files (no test-run record for the admission flow); left ungraded rather than guessed."
+            },
+            {
+              "id": "KR3",
+              "result": "Submit a formal proposal to King Fahad Schools",
+              "target": 1,
+              "current": 0,
+              "grade": 0.0,
+              "due": "2026-06-22",
+              "grade_basis": "No proposal to King Fahad on record; the proposal that exists is for Al-Ibda (Nov)."
+            },
+            {
+              "id": "KR4",
+              "result": "First paid invoice generated and paid",
+              "target": 1,
+              "current": 0,
+              "grade": 0.0,
+              "due": "2026-06-30",
+              "grade_basis": "No paid invoice exists in production as of 2026-11-21 (north star 0)."
+            }
+          ],
+          "grade": 0.0,
+          "outcome": "Missed. North star stayed 0; King Fahad went dormant Apr-Oct (14 students, never took attendance) and was never converted. The first real candidate turned out to be Al-Ibda (client #1, joined 2026-09-19)."
+        },
+        {
+          "id": "O2-2026Q2",
+          "objective": "Ship the Kun captain operating system — identity, state, cadence",
+          "rationale": "Make the captain a real CEO brain with persistent memory. Multiplies founder leverage.",
+          "owner": "abdout",
+          "supporting_owners": [
+            "samia"
+          ],
+          "key_results": [
+            {
+              "id": "KR1",
+              "result": "Phase A complete — CONSTITUTION.md, PRINCIPLES.md, NORTH-STAR.md, all state files, captain.md refactored, /captain global skill",
+              "target": 1,
+              "current": 0,
+              "grade": 1.0,
+              "due": "2026-05-19",
+              "grade_basis": "docs/CONSTITUTION.md, PRINCIPLES.md, NORTH-STAR.md and the state files exist; /captain skill is listed."
+            },
+            {
+              "id": "KR2",
+              "result": "Captain runs at least 3 weekly reviews using new state files (archive in weekly/)",
+              "target": 3,
+              "current": 0,
+              "grade": 0.0,
+              "due": "2026-06-30",
+              "grade_basis": "memory/weekly holds only 2026-11-01 and 2026-11-22 plans; no review archived in Q2."
+            },
+            {
+              "id": "KR3",
+              "result": "First monthly review run (rolls weekly archives + revenue + risk-delta)",
+              "target": 1,
+              "current": 0,
+              "grade": 0.0,
+              "due": "2026-06-30",
+              "grade_basis": "No monthly review archived."
+            }
+          ],
+          "grade": 0.3,
+          "outcome": "Partly done. The captain state files, CONSTITUTION/PRINCIPLES/NORTH-STAR docs and /captain skill exist; the cadence never ran in Q2."
+        },
+        {
+          "id": "O3-2026Q2",
+          "objective": "Build customer-development discipline — at least one new prospect per week in pipeline",
+          "rationale": "Default-dead won't change without new prospects. Ali's outreach needs structure.",
+          "owner": "ali",
+          "supporting_owners": [
+            "captain"
+          ],
+          "key_results": [
+            {
+              "id": "KR1",
+              "result": "5+ named prospects in pipeline.json by end of quarter",
+              "target": 5,
+              "current": 1,
+              "grade": 0.2,
+              "due": "2026-06-30",
+              "grade_basis": "1 of 5 named prospects at quarter end (current value recorded in May; 4 deals by 2026-11-08, after the quarter)."
+            },
+            {
+              "id": "KR2",
+              "result": "≥1 customer interview per week (8 total in Q2)",
+              "target": 8,
+              "current": 0,
+              "grade": 0.0,
+              "due": "2026-06-30",
+              "grade_basis": "0 of 8 recorded."
+            },
+            {
+              "id": "KR3",
+              "result": "2 proposals sent",
+              "target": 2,
+              "current": 0,
+              "grade": 0.0,
+              "due": "2026-06-30",
+              "grade_basis": "0 of 2 recorded."
+            }
+          ],
+          "grade": 0.1,
+          "outcome": "Missed. Pipeline reached 4 CRM deals only on 2026-11-08, after quarter end; no interviews or proposals were recorded in Q2."
+        }
+      ]
+    },
+    {
+      "quarter": "2026-Q3",
+      "start": "2026-07-01",
+      "end": "2026-09-30",
+      "graded_on": "2026-11-24",
+      "overall_grade": null,
+      "headline": "No OKR set was written for Q3 (next_quarter_set 2026-07-01 never ran). The only Q3 target on record is north-star Q3 = 1 paying school: missed (actual 0).",
+      "objectives": []
+    }
+  ],
   "next_review": {
-    "mid_quarter_check": "2026-05-20",
-    "end_quarter_grade": "2026-06-30",
-    "next_quarter_set": "2026-07-01"
-  }
+    "mid_quarter_check": "2026-12-03",
+    "end_quarter_grade": "2026-12-31",
+    "next_quarter_set": "2027-01-01"
+  },
+  "set_on": "2026-11-24",
+  "_source_note": "Derived from north_star.json (0 paying; Al-Ibda 81 students, no paid invoice, measured 2026-11-21), pipeline.json, customers.json, D-20261117-pricing-proportional-sar and the 2026-11-22 week plan. Dates inside KRs follow that week plan, which is proposed and not yet confirmed by Abdout."
 }

@@ -1,11 +1,12 @@
 {
   "$schema": "Captain runway state — read at every weekly review",
-  "last_updated": "2026-11-08",
-  "last_updated_by": "interim-ceo-session-2026-11-08",
+  "last_updated": "2026-11-24",
+  "last_updated_by": "org-rethink-state-refresh-2026-11-24",
   "capital": {
     "amount_usd": 5000,
     "source": "founder",
-    "last_verified": "2026-04-02"
+    "last_verified": "2026-04-02",
+    "_note": "Founder capital 5000 last verified 2026-04-02 - 236 days ago."
   },
   "burn": {
     "monthly_usd": 500,
@@ -19,29 +20,35 @@
       "other_services": 145
     },
     "salary_usd": 0,
-    "salary_note": "Equity / sweat / Contribution Units phase. No cash salary."
+    "salary_note": "Equity / sweat / Contribution Units phase. No cash salary.",
+    "_note": "Breakdown predates 2026-06-12 and is stale: Anthropic is now the Max $100/mo plan (listed 200); Vercel is largely replaced by Cloudflare (listed 60); Hetzner LiveKit/CRM hosting (~EUR 9-15/mo for LiveKit) is not listed. Total 500 is therefore unverified in both directions; left unchanged."
   },
   "revenue": {
     "mrr_usd": 0,
     "arr_usd": 0,
     "paying_customers": 0,
-    "last_invoice_date": null
+    "last_invoice_date": null,
+    "_note": "mrr 0 / paying 0 as of 2026-11-21 production measurement."
   },
   "runway": {
-    "months_remaining": 10,
-    "weeks_remaining": 43,
-    "status": "default-dead — near the 3-month wartime trigger (estimate)",
+    "months_remaining": null,
+    "weeks_remaining": null,
+    "status": "default-dead - at or past the 3-month wartime trigger on the file's own arithmetic (estimate; cash unverified)",
     "status_note": "Capital last verified 2026-04-02; burn changed (Max plan $100 since 06-12, container cut 10-25). Estimate 3–5 months left. Real cash + monthly costs asked of Abdout 2026-11-08 — replace this estimate when answered.",
     "exit_to_default_alive": {
       "condition": "MRR ≥ monthly_burn × 0.85, with 3+ paying customers and ≥3 months of consecutive positive net",
-      "estimated_path": "3 paying Hogwarts schools at $99-149/mo each = $300-450 MRR → 85% of $500 burn"
+      "estimated_path": "Superseded: '3 schools at $99-149/mo' assumed flat tiers. At 24 SAR per student ($6.40/yr), 85% of $500 burn needs ~800 paying students, see revenue.json."
     },
-    "months_remaining_estimate": "3-5 (unverified)"
+    "months_remaining_estimate": "2-5 (unverified): 2.2 by file arithmetic, 3-5 by the 2026-11-08 estimate that burn fell (Max plan $100 since 06-12, container cut 10-25)",
+    "months_remaining_note": "The 10-month figure (5000 / 500) was a 2026-04-02 calculation and was never rolled forward. Under the file's own inputs, 236 days x $500/mo (~$3,876 spent) leaves ~$1,124, about 2.2 months. That is arithmetic on unverified inputs, not a measurement; written as null.",
+    "months_remaining_if_file_inputs_hold": 2.2
   },
   "alerts": {
     "trigger_at_6_months": "Review burn cuts + accelerate Ali outreach + consider pricing experiment",
     "trigger_at_3_months": "Wartime CEO mode (Horowitz) — cut all non-pilot work, all hands on Hogwarts conversion",
-    "trigger_at_1_month": "Either close a paying customer this month or pause the company"
+    "trigger_at_1_month": "Either close a paying customer this month or pause the company",
+    "status_2026-11-24": "trigger_at_6_months and trigger_at_3_months are both crossed on every estimate. The 2026-11-22 plan states the wartime stop list (mkan and engine work until the signature lands).",
+    "_open_question": "Real cash and monthly costs asked of Abdout 2026-11-08; still owed."
   },
   "history": [
     {
@@ -50,6 +57,14 @@
       "burn": 500,
       "mrr": 0,
       "months_remaining": 10
+    },
+    {
+      "date": "2026-11-24",
+      "capital": null,
+      "burn": null,
+      "mrr": 0,
+      "months_remaining": null,
+      "note": "no verified cash or burn; file-arithmetic estimate 2.2 months; real figures owed by Abdout"
     }
   ]
 }

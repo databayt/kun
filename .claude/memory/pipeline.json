@@ -1,7 +1,7 @@
 {
   "$schema": "Deal pipeline — every prospect, current stage, last contact",
-  "last_updated": "2026-11-08",
-  "last_updated_by": "interim-ceo-session-2026-11-08",
+  "last_updated": "2026-11-24",
+  "last_updated_by": "org-rethink-state-refresh-2026-11-24",
   "stages": {
     "cold": "Identified prospect, no contact yet",
     "warm": "First conversation held; interest expressed",
@@ -9,7 +9,8 @@
     "proposal": "Proposal sent; awaiting response",
     "signed": "Contract signed; pre-launch",
     "live": "Customer is live and using the product (paying or pilot)",
-    "lost": "Did not convert; reason logged"
+    "lost": "Did not convert; reason logged",
+    "discovery": "CRM stage name used by 3 deals; sits between cold and warm (not in the original list). Meeting/demo not yet held."
   },
   "deals": [
     {
@@ -18,28 +19,69 @@
       "expected_annual_usd": 307.2,
       "owner": "abdout",
       "next_action": "Contract signed",
-      "next_action_due": "2026-11-20"
+      "next_action_due": "2026-11-26",
+      "status": "overdue",
+      "original_next_action_due": "2026-11-20",
+      "new_due_basis": "proposed in the 2026-11-22 week plan (not yet confirmed by Abdout)",
+      "stage_verified": false,
+      "needs_human": true,
+      "needs_human_reason": "CRM shows PROPOSAL untouched since 11-08 and the offer draft was unsent as of 11-21. Whether the contract was sent or signed after 11-21 is not in any readable source. Also unconfirmed: student count (48 in offer, 81 in production) which sets the amount.",
+      "expected_annual_usd_at_current_students": 518.4,
+      "expected_annual_sar_at_current_students": 1944,
+      "expected_annual_usd_note": "307.2 = 48 students x $6.40 (offer basis). At 81 students (production 2026-11-21) it is 518.4 USD / 1,944 SAR. Count unconfirmed."
     },
     {
       "customer_id": "king-fahad-schools",
       "stage": "discovery",
       "owner": "mutaz",
       "next_action": "Demo + free-month offer",
-      "next_action_due": "2026-11-15"
+      "next_action_due": "2026-11-24",
+      "status": "overdue",
+      "original_next_action_due": "2026-11-15",
+      "new_due_basis": "proposed in the 2026-11-22 week plan (unconfirmed)",
+      "stage_verified": false,
+      "needs_human": true,
+      "needs_human_reason": "Demo + free-month offer was due 11-15 with no CRM update. Tenant has 14 students and has never taken attendance; whether the demo happened is unknown."
     },
     {
       "customer_id": "alqabs",
       "stage": "discovery",
       "owner": "mutaz",
       "next_action": "Meet + demo",
-      "next_action_due": "2026-11-17"
+      "next_action_due": "2026-11-25",
+      "status": "overdue",
+      "original_next_action_due": "2026-11-17",
+      "new_due_basis": "proposed in the 2026-11-22 week plan (unconfirmed)",
+      "stage_verified": false,
+      "needs_human": true,
+      "needs_human_reason": "Meeting + demo was due 11-17 with no CRM update; no production tenant. Whether the meeting happened is unknown."
     },
     {
       "customer_id": "alwafi",
       "stage": "discovery",
       "owner": "ali",
       "next_action": "Confirm intent",
-      "next_action_due": "2026-11-15"
+      "next_action_due": null,
+      "status": "overdue",
+      "original_next_action_due": "2026-11-15",
+      "new_due_basis": "none - owner to set",
+      "stage_verified": false,
+      "needs_human": true,
+      "needs_human_reason": "Confirm-intent was due 11-15 with no update; 4 students and no attendance. The 11-22 plan asks Ali for a yes/no by 11-23, which has also passed with no record, so no new date is proposed."
+    },
+    {
+      "customer_id": "bakri-school-port-sudan",
+      "name_note": "Bakri's school (Port Sudan) - name and CRM record not in the state files",
+      "stage": "discovery",
+      "owner": "ali",
+      "next_action": "First face-to-face meeting, five questions answered in the CRM",
+      "original_next_action_due": "2026-11-12",
+      "next_action_due": "2026-11-25",
+      "status": "overdue",
+      "new_due_basis": "proposed in the 2026-11-22 week plan (unconfirmed)",
+      "stage_verified": false,
+      "needs_human": true,
+      "needs_human_reason": "The 11-22 plan counts 5 CRM opportunities and shows this one (CRM next 11-12, drafts 04/05 unsent); pipeline.json mirrored only 4. Stage, amount and real name not derivable from the repo."
     }
   ],
   "weekly_targets": {
@@ -47,22 +89,18 @@
     "outreach_actions": 10,
     "customer_interviews": 2,
     "proposals_sent": 1,
-    "_revised_2026-05-12": "Bumped from {1, 5, 1, 0} under MENA-10 cohort strategy. See /Users/abdout/hogwarts/content/docs-en/pilot.mdx + leads.mdx."
+    "_revised_2026-05-12": "Bumped from {1, 5, 1, 0} under MENA-10 cohort strategy. See /Users/abdout/hogwarts/content/docs-en/pilot.mdx + leads.mdx.",
+    "_status_2026-11-24": "Targets (3 warm, 10 outreach, 2 interviews, 1 proposal per week) are May numbers; no weekly count of them is recorded after 2026-11-08. Not re-set here."
   },
   "pilot_recruitment": {
     "cohort": "MENA-10",
     "target_signed": 10,
     "current_signed": 1,
-    "target_completion": "2026-08-31",
+    "target_completion": "2026-08-31 (missed; cohort closed)",
     "monthly_target": 2,
-    "open_slots_by_country": {
-      "Sudan": 2,
-      "Saudi Arabia": 2,
-      "Egypt": 2,
-      "Jordan": 1,
-      "Morocco": 1,
-      "UAE": 1
-    }
+    "open_slots_by_country": null,
+    "status": "ended 2026-11-08 - MENA-10 replaced by a 1-month free trial for every new school",
+    "_note": "open_slots_by_country was a May plan; not maintained since. current_signed 1 = Al-Ibda; 0 paying."
   },
   "outreach_scope": {
     "schools": "Sudan + Saudi private schools (Hogwarts beachhead)",
@@ -75,5 +113,14 @@
     "sponsors": "Open-source sponsors via GitHub Sponsors / Open Collective",
     "owner": "ali (sales@databayt.org)"
   },
-  "source_of_truth": "Twenty CRM hogwarts workspace (hogwarts.databayt.org) — 4 opportunities created/updated 2026-11-08; this file mirrors it"
+  "source_of_truth": "Twenty CRM hogwarts workspace (hogwarts.databayt.org) - 5 opportunities per the 2026-11-22 plan (4 mirrored here + Bakri's school); this file mirrors it and was last reconciled with evidence 2026-11-24, not with a fresh CRM read",
+  "_stage_review": {
+    "reviewed_on": "2026-11-24",
+    "evidence": [
+      "2026-11-22 week plan: all 5 CRM opportunities had a next-action date in the past, none updated after 2026-11-08",
+      "hogwarts production 2026-11-21: Al-Ibda 0 paid invoices; King Fahad and Alwafi never took attendance; Alqabs has no tenant",
+      "~/.claude/state/team/outbox drafts 01-05 unsent as of 11-21; whether sent since is unknown (WhatsApp group unreadable from this session)"
+    ],
+    "rule": "No due date was moved silently: the original date stays in original_next_action_due, status says why it is overdue, and every new date is marked as proposed."
+  }
 }
