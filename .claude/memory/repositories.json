@@ -1,7 +1,7 @@
 {
   "$schema": "repository-registry-schema",
   "description": "Track all databayt organization repositories for deep reference",
-  "lastUpdated": "2026-11-17",
+  "lastUpdated": "2026-11-24",
   "organization": {
     "name": "databayt",
     "url": "https://github.com/databayt",
@@ -31,7 +31,7 @@
         ],
         "agent": null,
         "priority": 1,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           "src/components/",
@@ -47,7 +47,7 @@
         "name": "shadcn/ui Fork",
         "url": "https://github.com/databayt/shadcn",
         "upstream": "https://github.com/shadcn-ui/ui",
-        "local": "/Users/abdout/oss/shadcn",
+        "local": null,
         "description": "Fork of shadcn/ui with customizations",
         "stack": [
           "React",
@@ -60,19 +60,20 @@
         ],
         "agent": "shadcn",
         "priority": 1,
-        "status": "active",
+        "status": "clone-or-study",
         "lastSync": null,
         "watchPaths": [
           "apps/www/registry/",
           "packages/"
-        ]
+        ],
+        "not_checked_out": true
       },
       {
         "id": "radix",
         "name": "Radix UI Fork",
         "url": "https://github.com/databayt/radix",
         "upstream": "https://github.com/radix-ui/primitives",
-        "local": "/Users/abdout/oss/radix",
+        "local": null,
         "description": "Fork of Radix UI primitives",
         "stack": [
           "React",
@@ -84,11 +85,12 @@
         ],
         "agent": null,
         "priority": 1,
-        "status": "active",
+        "status": "clone-or-study",
         "lastSync": null,
         "watchPaths": [
           "packages/react/"
-        ]
+        ],
+        "not_checked_out": true
       },
       {
         "id": "kun",
@@ -108,7 +110,7 @@
         ],
         "agent": null,
         "priority": 1,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           ".claude/",
@@ -138,7 +140,7 @@
         ],
         "agent": null,
         "priority": 1,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           "sd/",
@@ -170,7 +172,7 @@
         ],
         "agent": "rust",
         "priority": 2,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           "machine/",
@@ -183,7 +185,7 @@
         "id": "hogwarts",
         "name": "Hogwarts",
         "url": "https://github.com/databayt/hogwarts",
-        "local": "/Users/abdout/oss/hogwarts",
+        "local": "/Users/abdout/hogwarts",
         "description": "Education SaaS platform - multi-tenant, LMS, billing",
         "stack": [
           "Next.js",
@@ -206,7 +208,7 @@
         ],
         "agent": "hogwarts",
         "priority": 2,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           "src/components/platform/",
@@ -225,7 +227,7 @@
         "id": "souq",
         "name": "Souq",
         "url": "https://github.com/databayt/souq",
-        "local": "/Users/abdout/oss/souq",
+        "local": "/Users/abdout/souq",
         "description": "E-commerce marketplace - multi-vendor",
         "stack": [
           "Next.js",
@@ -246,20 +248,21 @@
         ],
         "agent": "souq",
         "priority": 2,
-        "status": "active",
+        "status": "pre-launch",
         "lastSync": null,
         "watchPaths": [
           "src/store/",
           "src/app/vendor/",
           "prisma/models/"
         ],
-        "bareMatch": true
+        "bareMatch": true,
+        "needs_human": "~/souq origin is abdout/wathba (databayt/wathba), the org also has databayt/souq with no checkout: which repo is \"souq\"?"
       },
       {
         "id": "mkan",
         "name": "Mkan",
         "url": "https://github.com/databayt/mkan",
-        "local": "/Users/abdout/oss/mkan",
+        "local": "/Users/abdout/mkan",
         "description": "Rental marketplace - Airbnb-style",
         "stack": [
           "Next.js",
@@ -281,7 +284,7 @@
         ],
         "agent": "mkan",
         "priority": 2,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           "src/components/search/",
@@ -297,7 +300,7 @@
         "id": "shifa",
         "name": "Shifa",
         "url": "https://github.com/databayt/shifa",
-        "local": "/Users/abdout/oss/shifa",
+        "local": "/Users/abdout/shifa",
         "description": "Medical/healthcare platform",
         "stack": [
           "Next.js",
@@ -318,7 +321,7 @@
         ],
         "agent": "shifa",
         "priority": 2,
-        "status": "active",
+        "status": "pre-launch",
         "lastSync": null,
         "watchPaths": [
           "src/app/clinic/",
@@ -345,9 +348,10 @@
         "crm": "https://sijillee.crm.databayt.org",
         "agent": null,
         "priority": 3,
-        "status": "planned",
+        "status": "pre-launch",
         "lastSync": null,
-        "watchPaths": []
+        "watchPaths": [],
+        "not_checked_out": true
       },
       {
         "id": "moallimee",
@@ -367,9 +371,10 @@
         "crm": "https://moallimee.crm.databayt.org",
         "agent": null,
         "priority": 3,
-        "status": "planned",
+        "status": "pre-launch",
         "lastSync": null,
-        "watchPaths": []
+        "watchPaths": [],
+        "not_checked_out": true
       }
     ],
     "specialized": [
@@ -377,7 +382,7 @@
         "id": "ios-app",
         "name": "iOS App",
         "url": "https://github.com/databayt/ios-app",
-        "local": "/Users/abdout/oss/ios-app",
+        "local": "/Users/abdout/ios-app",
         "description": "iOS application (Hogwarts mobile) — successor of swift-app",
         "stack": [
           "Swift 6",
@@ -397,7 +402,7 @@
         ],
         "agent": null,
         "priority": 3,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           "Sources/"
@@ -407,7 +412,7 @@
         "id": "android-app",
         "name": "Android App",
         "url": "https://github.com/databayt/android-app",
-        "local": "/Users/abdout/oss/android-app",
+        "local": "/Users/abdout/android-app",
         "description": "Android application (Hogwarts mobile)",
         "stack": [
           "Kotlin",
@@ -424,7 +429,7 @@
         ],
         "agent": null,
         "priority": 3,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           "app/src/"
@@ -434,7 +439,7 @@
         "id": "crm",
         "name": "CRM",
         "url": "https://github.com/databayt/crm",
-        "local": "/Users/abdout/oss/crm",
+        "local": null,
         "description": "Self-hosted CRM — 4 product workspaces on *.crm.databayt.org (see memory/crm.json)",
         "stack": [
           "TypeScript"
@@ -446,15 +451,17 @@
         ],
         "agent": null,
         "priority": 3,
-        "status": "active",
+        "status": "pre-launch",
         "lastSync": null,
-        "watchPaths": []
+        "watchPaths": [],
+        "needs_human": "registry crm = databayt/crm (\"a Twenty clone on the databayt stack\", no checkout). Local Twenty fork is ~/twenty (databayt/twenty, branch databayt) — registered as id \"twenty\". Which one is the CRM of record (Twenty runs on Hetzner)? Also org has private databayt/crm-hub, no checkout.",
+        "not_checked_out": true
       },
       {
         "id": "distributed-computer",
         "name": "Distributed Computer",
         "url": "https://github.com/databayt/distributed-computer",
-        "local": "/Users/abdout/oss/distributed-computer",
+        "local": null,
         "description": "Rust infrastructure for fair compensation",
         "stack": [
           "Rust",
@@ -473,17 +480,19 @@
         ],
         "agent": null,
         "priority": 3,
-        "status": "active",
+        "status": "dead",
         "lastSync": null,
         "watchPaths": [
           "crates/"
-        ]
+        ],
+        "needs_human": "no checkout and no inventory evidence it is alive — confirm dead or archive",
+        "not_checked_out": true
       },
       {
         "id": "marketing",
         "name": "Marketing",
         "url": "https://github.com/databayt/marketing",
-        "local": "/Users/abdout/oss/marketing",
+        "local": "/Users/abdout/marketing",
         "description": "Marketing website",
         "stack": [
           "Next.js",
@@ -502,7 +511,7 @@
         ],
         "agent": null,
         "priority": 3,
-        "status": "active",
+        "status": "live-product",
         "lastSync": null,
         "watchPaths": [
           "src/components/",
@@ -538,7 +547,7 @@
         ],
         "agent": null,
         "priority": 3,
-        "status": "active",
+        "status": "clone-or-study",
         "lastSync": null,
         "watchPaths": [],
         "aliases": [
@@ -549,7 +558,7 @@
         "id": "lab",
         "name": "Lab",
         "url": "https://github.com/databayt/lab",
-        "local": "/Users/abdout/oss/lab",
+        "local": "/Users/abdout/lab",
         "description": "Experiments sandbox — prototypes before they earn a repo",
         "stack": [],
         "purpose": [
@@ -557,15 +566,16 @@
         ],
         "agent": null,
         "priority": 3,
-        "status": "active",
+        "status": "pre-launch",
         "lastSync": null,
-        "watchPaths": []
+        "watchPaths": [],
+        "needs_human": "~/lab has no git remote; org has databayt/lab (public, empty) — add the remote?"
       },
       {
         "id": "spma",
         "name": "SPMA",
         "url": "https://github.com/databayt/spma",
-        "local": "/Users/abdout/oss/spma",
+        "local": "/Users/abdout/spma",
         "description": "Internal tool",
         "stack": [],
         "purpose": [
@@ -573,9 +583,39 @@
         ],
         "agent": null,
         "priority": 3,
-        "status": "active",
+        "status": "dead",
         "lastSync": null,
-        "watchPaths": []
+        "watchPaths": [],
+        "needs_human": "archived on GitHub 2026-02-23; local checkout kept"
+      },
+      {
+        "id": "twenty",
+        "name": "Twenty (fork)",
+        "url": "https://github.com/databayt/twenty",
+        "local": "/Users/abdout/twenty",
+        "description": "Local Twenty CRM fork on branch `databayt` (fork of twentyhq/twenty); the CRM the org runs. Not the same repo as databayt/crm.",
+        "agent": null,
+        "priority": 4,
+        "status": "live-product",
+        "lastSync": null,
+        "upstream": "https://github.com/twentyhq/twenty",
+        "branch": "databayt"
+      },
+      {
+        "id": "co",
+        "name": "Co",
+        "url": "https://github.com/databayt/co",
+        "local": "/Users/abdout/co",
+        "description": "Private Next.js app (databayt/co).",
+        "agent": null,
+        "priority": 4,
+        "status": "live-product",
+        "lastSync": null,
+        "visibility": "private",
+        "needs_human": "~/acme is a second checkout of this same repo (origin abdout/co redirects to databayt/co) — which to keep? Registered ~/co as canonical; ~/acme left as duplicate.",
+        "duplicate_checkouts": [
+          "/Users/abdout/acme"
+        ]
       }
     ],
     "sites": [
@@ -585,7 +625,7 @@
         "url": "https://github.com/databayt/space",
         "local": "/Users/abdout/space",
         "description": "Space — Port Sudan coworking hub: bookings, cafe, events, membership",
-        "status": "active",
+        "status": "live-product",
         "visibility": "private",
         "aliases": [
           "spacehub",
@@ -600,7 +640,7 @@
         "url": "https://github.com/databayt/food",
         "local": "/Users/abdout/food",
         "description": "Restaurant ordering — cashier, kitchen, QR menu, order tracking",
-        "status": "active",
+        "status": "live-product",
         "aliases": [
           "bu.databayt.org"
         ]
@@ -611,7 +651,7 @@
         "url": "https://github.com/databayt/farm",
         "local": "/Users/abdout/farm",
         "description": "Digital farm site",
-        "status": "active",
+        "status": "live-product",
         "aliases": [
           "farm.databayt.org"
         ]
@@ -622,11 +662,208 @@
         "url": "https://github.com/databayt/leader",
         "local": "/Users/abdout/leader",
         "description": "Garment manufacturer and exporter site",
-        "status": "active",
+        "status": "live-product",
         "visibility": "private",
         "aliases": [
           "leader.databayt.org"
         ]
+      }
+    ],
+    "clones": [
+      {
+        "id": "acme",
+        "name": "Acme (duplicate of co)",
+        "url": "https://github.com/databayt/co",
+        "local": "/Users/abdout/acme",
+        "description": "Duplicate checkout of databayt/co (origin abdout/co). Keep or delete — needs-human.",
+        "agent": null,
+        "priority": 4,
+        "status": "dead",
+        "lastSync": null,
+        "visibility": "private",
+        "needs_human": "duplicate of ~/co; pick one checkout",
+        "duplicate_of": "co"
+      },
+      {
+        "id": "gocart",
+        "name": "GoCart",
+        "url": "https://github.com/databayt/gocart",
+        "local": "/Users/abdout/gocart",
+        "description": "Fork of GoCart — multi-vendor e-commerce template (Next.js)",
+        "agent": null,
+        "priority": 4,
+        "status": "clone-or-study",
+        "lastSync": null
+      },
+      {
+        "id": "nike",
+        "name": "Nike",
+        "url": "https://github.com/databayt/nike",
+        "local": "/Users/abdout/nike",
+        "description": "Nike clone (runs on :3002, branch `local`)",
+        "agent": null,
+        "priority": 4,
+        "status": "clone-or-study",
+        "lastSync": null
+      },
+      {
+        "id": "topmate",
+        "name": "Topmate",
+        "url": "https://github.com/databayt/topmate",
+        "local": "/Users/abdout/topmate",
+        "description": "Topmate.io clone — Next.js 16 / shadcn",
+        "agent": null,
+        "priority": 4,
+        "status": "clone-or-study",
+        "lastSync": null,
+        "needs_human": "origin is abdout/topmate (redirects to databayt)"
+      },
+      {
+        "id": "zenda",
+        "name": "Zenda",
+        "url": "https://github.com/databayt/zenda",
+        "local": "/Users/abdout/zenda",
+        "description": "Zenda school-payment fintech website clone",
+        "agent": null,
+        "priority": 4,
+        "status": "clone-or-study",
+        "lastSync": null,
+        "needs_human": "origin is abdout/zenda (redirects to databayt)"
+      },
+      {
+        "id": "ziara",
+        "name": "Ziara",
+        "url": "https://github.com/databayt/ziara",
+        "local": "/Users/abdout/ziara",
+        "description": "E-commerce shop (Next.js)",
+        "agent": null,
+        "priority": 4,
+        "status": "clone-or-study",
+        "lastSync": null
+      },
+      {
+        "id": "almersal",
+        "name": "Almersal",
+        "url": "https://github.com/databayt/almersal",
+        "local": "/Users/abdout/almersal",
+        "description": "Almersal Media Production — Arabic media company website",
+        "agent": null,
+        "priority": 4,
+        "status": "pre-launch",
+        "lastSync": null,
+        "needs_human": "origin is abdout/almersal (redirects to databayt)"
+      },
+      {
+        "id": "maid",
+        "name": "Maid",
+        "url": "https://github.com/databayt/maid",
+        "local": "/Users/abdout/maid",
+        "description": "Maid UAE — domestic worker hiring platform",
+        "agent": null,
+        "priority": 4,
+        "status": "pre-launch",
+        "lastSync": null,
+        "needs_human": "origin is abdout/maid (redirects to databayt)"
+      },
+      {
+        "id": "heirs",
+        "name": "Heirs",
+        "url": "https://github.com/databayt/heirs",
+        "local": "/Users/abdout/heirs",
+        "description": "Internal Arabic-only inheritance coordination tool (private)",
+        "agent": null,
+        "priority": 4,
+        "status": "pre-launch",
+        "lastSync": null,
+        "visibility": "private",
+        "needs_human": "origin is abdout/heirs (redirects to databayt)"
+      },
+      {
+        "id": "nmbd",
+        "name": "Nmbd",
+        "url": "https://github.com/databayt/nmbd",
+        "local": "/Users/abdout/nmbd",
+        "description": "Private Next.js app, 989 uncommitted files locally",
+        "agent": null,
+        "priority": 4,
+        "status": "pre-launch",
+        "lastSync": null,
+        "visibility": "private",
+        "needs_human": "origin is abdout/nmbd (redirects to databayt)"
+      },
+      {
+        "id": "loreal",
+        "name": "Loreal",
+        "url": null,
+        "local": "/Users/abdout/loreal",
+        "description": "loreal — essentiality-of-beauty.loreal.com 1:1 study, no remote",
+        "agent": null,
+        "priority": 4,
+        "status": "clone-or-study",
+        "lastSync": null
+      },
+      {
+        "id": "noor",
+        "name": "Noor",
+        "url": null,
+        "local": "/Users/abdout/noor",
+        "description": "Noor Natural — digital experience prototype, no remote",
+        "agent": null,
+        "priority": 4,
+        "status": "clone-or-study",
+        "lastSync": null
+      },
+      {
+        "id": "thmanyah",
+        "name": "Thmanyah",
+        "url": null,
+        "local": "/Users/abdout/thmanyah",
+        "description": "Thmanyah study, no remote, no README",
+        "agent": null,
+        "priority": 4,
+        "status": "clone-or-study",
+        "lastSync": null
+      }
+    ],
+    "personal": [
+      {
+        "id": "mazin",
+        "name": "Mazin",
+        "url": "https://github.com/abdout/mazin",
+        "local": "/Users/abdout/mazin",
+        "description": "Personal repo (abdout/mazin) — not part of the databayt org",
+        "agent": null,
+        "priority": 4,
+        "status": "pre-launch",
+        "lastSync": null,
+        "needs_human": "personal, not org — confirm it should be routed at all"
+      }
+    ],
+    "org-only": [
+      {
+        "id": "crm-hub",
+        "name": "crm-hub",
+        "url": "https://github.com/databayt/crm-hub",
+        "local": null,
+        "not_checked_out": true,
+        "description": "Private CRM hub (org repo, no local checkout)",
+        "agent": null,
+        "priority": 4,
+        "status": "pre-launch",
+        "lastSync": null,
+        "visibility": "private"
+      },
+      {
+        "id": ".github",
+        "name": ".github",
+        "url": "https://github.com/databayt/.github",
+        "local": null,
+        "not_checked_out": true,
+        "description": "Org profile repo (no local checkout)",
+        "agent": null,
+        "priority": 4,
+        "status": "live-product",
+        "lastSync": null
       }
     ]
   },
@@ -725,36 +962,144 @@
     ]
   },
   "sync": {
-    "lastFullSync": null,
+    "lastFullSync": "2026-11-24",
     "syncScript": "~/.claude/scripts/sync-repos.sh",
     "repos": {
       "codebase": {
-        "synced": false,
-        "hash": null
+        "synced": true,
+        "hash": "db493ace4ffa18b4923e34c131f2125f5a108bba"
       },
-      "shadcn": {
-        "synced": false,
-        "hash": null
+      "kun": {
+        "synced": true,
+        "hash": "1c8a4c76b7e48f2ae6901f619730639f383355e1"
       },
-      "radix": {
-        "synced": false,
-        "hash": null
+      "catalog": {
+        "synced": true,
+        "hash": "3e3ba6ed8ffd24d660fa04d877f2aec5a6875878"
+      },
+      "machine": {
+        "synced": true,
+        "hash": "d6904e159dddfd393684fc225c74f6a2068e0578"
       },
       "hogwarts": {
-        "synced": false,
-        "hash": null
+        "synced": true,
+        "hash": "2593a1fbb101e9186114e0866e4ed12cd20e16cf"
       },
       "souq": {
-        "synced": false,
-        "hash": null
+        "synced": true,
+        "hash": "f2c4363aaca5cb62f2c2b51f2e051dd07b980788"
       },
       "mkan": {
-        "synced": false,
-        "hash": null
+        "synced": true,
+        "hash": "646bc26a6794ab1a547d9132d9de25ab903ce25f"
       },
       "shifa": {
-        "synced": false,
-        "hash": null
+        "synced": true,
+        "hash": "87e2d35d29aa0ee3093a240b2907fd8cfe670060"
+      },
+      "ios-app": {
+        "synced": true,
+        "hash": "7f0c4273d130dc87a16ee605bc45999d3c3a21f1"
+      },
+      "android-app": {
+        "synced": true,
+        "hash": "06b74b20ae156d78f74f5a07ddc71c6148a0bae9"
+      },
+      "marketing": {
+        "synced": true,
+        "hash": "e564685be6b07c3a6fc74cd59a8a4e688d22477e"
+      },
+      "apple": {
+        "synced": true,
+        "hash": "7adb4c302ebc93cc8593912089f2923f7c754703"
+      },
+      "lab": {
+        "synced": true,
+        "hash": "5338386284bd8d0d90cb30b45692fdab5a3135f7"
+      },
+      "spma": {
+        "synced": true,
+        "hash": "5ae7c0617fdf4e201da3be3a2883caaf430dd5e3"
+      },
+      "twenty": {
+        "synced": true,
+        "hash": "640db1f8eb6d9e0264b82d958fea47a8b62d5687"
+      },
+      "co": {
+        "synced": true,
+        "hash": "1c999355334e1d293e2ee1943bdd681a6520c26b"
+      },
+      "space": {
+        "synced": true,
+        "hash": "6df2fb74ad7bd55e30ece771186d670f3a51d4c2"
+      },
+      "food": {
+        "synced": true,
+        "hash": "06bcc4fbc1555bd2c51a345270e390fc6675c7f7"
+      },
+      "farm": {
+        "synced": true,
+        "hash": "36df26b53f07b53b615db1d532aaa1ff33c39843"
+      },
+      "leader": {
+        "synced": true,
+        "hash": "be9f06e6a69f6a5093c2e3c637287ed92bc4fbbc"
+      },
+      "acme": {
+        "synced": true,
+        "hash": "ce679df325bd581042e2e60d140e893af4c60e6a"
+      },
+      "gocart": {
+        "synced": true,
+        "hash": "ea9af87c226605c1dc1563a8e66dadc238aa8e96"
+      },
+      "nike": {
+        "synced": true,
+        "hash": "f3d15fc3eb34a59737cc989060d8253a6f28301c"
+      },
+      "topmate": {
+        "synced": true,
+        "hash": "df10b4120a1d379f4959e38fc400e9d159335e17"
+      },
+      "zenda": {
+        "synced": true,
+        "hash": "2859c68591830a76e402154516c26f7022afbd91"
+      },
+      "ziara": {
+        "synced": true,
+        "hash": "f12effcead0e01730f99a5f8f378562289af9384"
+      },
+      "almersal": {
+        "synced": true,
+        "hash": "6d85a4afecd2efc4755e8d4edeaf16b38ac3eabf"
+      },
+      "maid": {
+        "synced": true,
+        "hash": "d4e954ffa741e58d0c83bd2bc57f0f07c3ecc50f"
+      },
+      "heirs": {
+        "synced": true,
+        "hash": "d3b46b87f768e160b8ef0d3dfde19a5ba71184a3"
+      },
+      "nmbd": {
+        "synced": true,
+        "hash": "7640956adfb23692882939a3772d2477abcb67d5"
+      },
+      "loreal": {
+        "synced": true,
+        "hash": "0f6c8ebcd3e09e12f73746b69f8a301e7738d3d5"
+      },
+      "noor": {
+        "synced": true,
+        "hash": "4af7cdbd8b51519bc941c82b9aa319aaab71323e"
+      },
+      "thmanyah": {
+        "synced": true,
+        "hash": "34e744dcd901001f5d6fe04357cd8838047f6385"
+      },
+      "mazin": {
+        "synced": true,
+        "hash": "276001c008d502698bea9e549f3cba2a0c71b3ea"
       }
     }
   },
