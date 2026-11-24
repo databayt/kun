@@ -534,6 +534,23 @@ function running() {
   }).filter(Boolean);
 }
 
+// ── token pool: scripts/harvest/harvest.mjs writes ~/.claude/state/harvest.json every 30 min ──
+function pool() {
+  const h = readJSON(path.join(HOME, ".claude", "state", "harvest.json"), null);
+  if (!h) return null;
+  const free = (h.providers || []).filter((p) => p.enabled && ["keyless", "free", "free-capped"].includes(p.tier));
+  return {
+    gateway: h.gateway?.status,
+    ready: !!h.pool_ready,
+    age_min: Math.round((Date.now() - Date.parse(h.updated)) / 60000),
+    on: free.filter((p) => ["connected", "direct-ok"].includes(p.status)).map((p) => p.id),
+    dry: free.filter((p) => p.status === "exhausted").map((p) => p.id),
+    keys: free.filter((p) => p.status === "needs-key").map((p) => p.id),
+    requests: h.totals?.requests ?? 0,
+    tokens: h.totals?.tokens ?? 0,
+  };
+}
+
 // ── alerts: transitions, confirmed twice, capped per day ───────────────────
 function candidates(s) {
   const c = {};
@@ -547,6 +564,8 @@ function candidates(s) {
     if (sup.age_min == null || sup.age_min > 20) c.supervisor_silent = `Job supervisor silent${sup.age_min == null ? "" : ` for ${sup.age_min} min`} — launchctl print gui/$(id -u)/com.databayt.supervisor`;
   } else for (const j of s.jobs?.red || []) c[`job_red:${j.job}`] = `Job red: ${j.job}${j.why ? ` — ${j.why.slice(0, 80)}` : ""}`;
   if (s.surfaces?.hermes_installed && s.surfaces.hermes_up === false) c.hermes_down = "Hermes gateway is not running";
+  if (s.pool && (s.pool.gateway !== "ok" || !s.pool.ready)) c.pool_down = `Token pool ${s.pool.gateway !== "ok" ? `gateway ${s.pool.gateway}` : "not ready"} — free runs fall back to Claude; Machine → Brain → Providers`;
+  if (s.pool && s.pool.age_min > 120) c.pool_stale = `Token pool ledger ${s.pool.age_min} min old — com.databayt.harvest not running`;
   if (m.rc_armed && m.rc_up === false) c.rc_down = "Remote Control server is down (the phone can't reach the Mac)";
   if (m.power?.source === "battery") c.on_battery = `The Mac is on battery (${m.power.pct ?? "?"}%) — mains power is gone`;
   if (m.power?.hot) c.running_hot = "The Mac is throttling from heat — give it air";
@@ -639,6 +658,10 @@ function markdown(s) {
   if (e.bench_age_d != null) eng.push(`bench ${e.bench_age_d}d old`);
   if (e.findings_open) eng.push(`${e.findings_open} improvement finding(s) open`);
   if (eng.length) L.push(`Engine: ${eng.join(" · ")}`);
+  if (s.pool) {
+    const p = s.pool;
+    L.push(`Token pool: ${p.gateway === "ok" && p.ready ? "ready" : "DOWN"} · on ${p.on.join(", ") || "none"}${p.dry.length ? ` · dry ${p.dry.join(", ")}` : ""}${p.keys.length ? ` · ${p.keys.length} keys missing` : ""} · ${fmtTok(p.tokens)} tokens served`);
+  }
   if (s.surfaces?.hermes_installed) L.push(`Hermes: ${s.surfaces.hermes_up ? "up" : "DOWN"} · Slack reconnects 24h ${s.surfaces.slack_reconnects_24h ?? "?"} · bridge runs today ${s.surfaces.bridge_runs_today ?? 0}`);
   if (s.running?.length) {
     const by = {};
@@ -671,6 +694,7 @@ async function refresh() {
     surfaces: surfaces(),
     wip: wip(),
     running: running(),
+    pool: pool(),
   };
   s.alerts = deliver(prev, s);
   writeAtomic(SNAP, JSON.stringify(s, null, 1));

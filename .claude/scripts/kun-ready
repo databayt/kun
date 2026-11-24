@@ -204,6 +204,36 @@ p_agy_eligible() {
 }
 p_fcc_cli() { has fcc-server && ok "fcc-server installed" || bad "fcc-server not installed"; }
 p_omniroute_cli() { has omniroute && ok "$(omniroute --version 2>/dev/null | head -1)" || bad "omniroute not installed"; }
+# token pool (scripts/harvest/, providers.json) — OmniRoute + the harvest ledger
+p_omniroute_service() { has omniroute || return 2; local s; s="$(bash "$KUN_ROOT/.claude/scripts/harvest/omniroute.sh" status 2>/dev/null)"; [ "$s" = ok ] && ok "OmniRoute up on 127.0.0.1:20128" || bad "OmniRoute $s"; }
+p_pool_job() { launchctl list 2>/dev/null | grep -q "com.databayt.harvest" && ok "harvest job loaded (30 min)" || bad "harvest job not installed"; }
+p_pool_ready() {
+    local f="$HOME/.claude/state/harvest.json"
+    [ -f "$f" ] || { bad "no harvest ledger yet"; return; }
+    python3 - "$f" <<'PY'
+import json, sys, time, datetime
+d = json.load(open(sys.argv[1]))
+age = time.time() - datetime.datetime.fromisoformat(d["updated"].replace("Z", "+00:00")).timestamp()
+ready = d.get("pool_ready") and d.get("combos", {}).get("kun-code", {}).get("ready")
+if not ready: print("pool not ready (no connected free provider or empty kun-code)"); sys.exit(1)
+if age > 7200: print(f"ledger is {int(age/3600)}h old"); sys.exit(1)
+print(f"pool ready · kun-code {len(d['combos']['kun-code']['members'])} models"); sys.exit(0)
+PY
+}
+p_pool_keys() {
+    local f="$HOME/.claude/state/harvest.json"
+    [ -f "$f" ] || return 2
+    python3 - "$f" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1]))
+free = [p for p in d["providers"] if p["enabled"] and p["via"] == "omniroute" and p["tier"] in ("keyless", "free", "free-capped")]
+on = [p for p in free if p["status"] == "connected"]
+miss = [p["id"] for p in free if p["status"] == "needs-key"]
+msg = f"{len(on)} of {len(free)} free providers connected" + (f" — add keys: {', '.join(miss)}" if miss else "")
+print(msg); sys.exit(0 if len(on) >= 3 else 1)
+PY
+}
+p_launcher_f() { launcher_probe f; }
 p_opencode_cli() { has opencode && ok "$(opencode --version 2>/dev/null | head -1)" || bad "opencode not installed"; }
 p_opencode_allow() { _ag_opencode_bypass && ok "permission allow" || bad "opencode.json lacks permission: allow"; }
 p_codex_cli() { has codex && ok "$(codex --version 2>/dev/null | head -1)" || bad "codex not installed"; }

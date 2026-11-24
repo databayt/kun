@@ -1,10 +1,17 @@
 #!/bin/bash
-# kun-free.sh — the `f` lane: Claude Code on Nous Portal's free models, $0.
+# kun-free.sh — the `f` lane: Claude Code on free models, $0 — through the token pool when it
+# is ready, straight to Nous when it is not.
 #
 #   f [claude args…]     run Claude Code on the free lane, with kun's config
+#   f --pool [combo]     force the pool (OmniRoute, combo kun-code unless named: kun-fast, kun-long…)
+#   f --direct           force Nous direct, skipping the pool
 #   f --setup            create the lane's own config dir (~/.claude-free)
 #   f --print-env        show what would be exported (token hidden) and stop
-#   f --key              print a fresh Nous key (the apiKeyHelper; never run it into a log)
+#   f --key              print the key for the current route (the apiKeyHelper; never into a log)
+#
+# Route (auto): the pool when ~/.claude/state/harvest.json says pool_ready and the gateway is up
+# (scripts/harvest/harvest.mjs, every 30 min) — OmniRoute serves combo kun-code and moves to the
+# next model when one is exhausted; Nous direct otherwise. KUN_FREE_ROUTE=pool|direct pins it.
 #
 # Why Nous: its inference API speaks the Anthropic Messages format at /v1/messages (probed
 # 2026-11-24), so Claude Code talks to it directly — no proxy. Hermes already holds the Nous
@@ -28,6 +35,15 @@ HERMES_DIR="${HERMES_HOME:-$HOME/.hermes}/hermes-agent"
 SELF="$HOME/.claude/bin/kun-free.sh"
 MODEL="${KUN_FREE_MODEL:-meituan/longcat-2.5:free}"
 SMALL="${KUN_FREE_SMALL_MODEL:-tencent/hy4-flash:free}"
+POOL_URL="${KUN_POOL_URL:-http://127.0.0.1:20128}"
+COMBO="${KUN_FREE_COMBO:-kun-code}"
+SMALL_COMBO="${KUN_FREE_SMALL_COMBO:-kun-fast}"
+
+pool_ready() {
+    python3 -c "import json,sys;d=json.load(open('$HOME/.claude/state/harvest.json'));sys.exit(0 if d.get('pool_ready') and d.get('combos',{}).get('$COMBO',{}).get('ready') else 1)" 2>/dev/null \
+        && curl -s -m 2 -o /dev/null "$POOL_URL/api/health"
+}
+pool_key() { security find-generic-password -s org.databayt.kun.machine -a OMNIROUTE_API_KEY -w 2>/dev/null; }
 
 key() {
     [ -x "$HERMES_DIR/venv/bin/python" ] || { echo "f lane: Hermes is not installed ($HERMES_DIR)" >&2; return 1; }
@@ -62,25 +78,40 @@ PY
 
 case "${1:-}" in
     --setup) setup; exit 0 ;;
-    --key) key; exit $? ;;
+    --key) if [ "${KUN_FREE_ROUTE:-direct}" = pool ]; then pool_key; else key; fi; exit $? ;;
+    --pool) shift; KUN_FREE_ROUTE=pool; case "${1:-}" in kun-*) COMBO="$1"; shift ;; esac ;;
+    --direct) shift; KUN_FREE_ROUTE=direct ;;
 esac
 
 [ -f "$CONFIG/settings.json" ] || setup >/dev/null
-key >/dev/null || { echo "f lane: no Nous login — run: f --setup" >&2; exit 78; }
+ROUTE="${KUN_FREE_ROUTE:-auto}"
+if [ "$ROUTE" = auto ]; then if pool_ready; then ROUTE=pool; else ROUTE=direct; fi; fi
+export KUN_FREE_ROUTE="$ROUTE"
 
 export CLAUDE_CONFIG_DIR="$CONFIG"
-export ANTHROPIC_BASE_URL="https://inference-api.nousresearch.com"
 export CLAUDE_CODE_API_KEY_HELPER_TTL_MS=600000
-export ANTHROPIC_MODEL="$MODEL"
-export ANTHROPIC_DEFAULT_OPUS_MODEL="$MODEL"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="$MODEL"
-export ANTHROPIC_DEFAULT_HAIKU_MODEL="$SMALL"
-export CLAUDE_CODE_SUBAGENT_MODEL="$SMALL"
+if [ "$ROUTE" = pool ]; then
+    pool_key >/dev/null || { echo "f lane: no OmniRoute key — Machine → Providers, or .claude/scripts/harvest/omniroute.sh install" >&2; exit 78; }
+    export ANTHROPIC_BASE_URL="$POOL_URL"
+    export ANTHROPIC_MODEL="$COMBO"
+    export ANTHROPIC_DEFAULT_OPUS_MODEL="$COMBO"
+    export ANTHROPIC_DEFAULT_SONNET_MODEL="$COMBO"
+    export ANTHROPIC_DEFAULT_HAIKU_MODEL="$SMALL_COMBO"
+    export CLAUDE_CODE_SUBAGENT_MODEL="$SMALL_COMBO"
+else
+    key >/dev/null || { echo "f lane: no Nous login — run: f --setup" >&2; exit 78; }
+    export ANTHROPIC_BASE_URL="https://inference-api.nousresearch.com"
+    export ANTHROPIC_MODEL="$MODEL"
+    export ANTHROPIC_DEFAULT_OPUS_MODEL="$MODEL"
+    export ANTHROPIC_DEFAULT_SONNET_MODEL="$MODEL"
+    export ANTHROPIC_DEFAULT_HAIKU_MODEL="$SMALL"
+    export CLAUDE_CODE_SUBAGENT_MODEL="$SMALL"
+fi
 export CLAUDE_CODE_AUTO_COMPACT_WINDOW=120000
 unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN CLAUDE_CODE_USE_BEDROCK CLAUDE_CODE_USE_VERTEX
 
 if [ "${1:-}" = "--print-env" ]; then
-    env | grep -E '^(CLAUDE_CONFIG_DIR|ANTHROPIC_|CLAUDE_CODE_(API_KEY_HELPER_TTL_MS|AUTO_COMPACT_WINDOW|SUBAGENT_MODEL)=)' | sort
+    env | grep -E '^(KUN_FREE_ROUTE|CLAUDE_CONFIG_DIR|ANTHROPIC_|CLAUDE_CODE_(API_KEY_HELPER_TTL_MS|AUTO_COMPACT_WINDOW|SUBAGENT_MODEL)=)' | sort
     echo "apiKeyHelper=$(python3 -c "import json;print(json.load(open('$CONFIG/settings.json')).get('apiKeyHelper'))")"
     exit 0
 fi

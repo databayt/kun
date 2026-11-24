@@ -134,7 +134,7 @@ The sweep reads for about an hour, longer than Hermes' default 1 h script limit,
 
 Hermes runs a **free Nous Portal model**: `meituan/longcat-2.5:free` since 2026-11-24, with `fallback_model` → `tencent/hy4-flash:free` → `upstage/solar-mini4:free`. The 2026-11-24 bench (a tool-use bug fix: edit a file, run the test) scored longcat 26 s PASS, hy4-flash 28 s PASS, solar-mini4 50 s PASS, `stepfun/step-3.7-flash:free` timed out; solar-mini4 had also been stalling 20+ minutes on the heartbeat's long context. The four free models the account sees: `GET /v1/models` on `inference-api.nousresearch.com` and keep the `:free` ids. `lane test h` re-runs the bench. When the default changes, re-pin every agent cron job (below) or Hermes skips it as "config drifted"; both agent jobs (`databayt-4h-heartbeat`, `databayt-daily-ops-review`) are pinned to longcat.
 
-The same Nous login also powers the **`f` lane** — Claude Code on these free models (`kun-free.sh`); see [lanes](/docs/lanes#off-pool-agents).
+The same Nous login also feeds the **token pool** and the **`f` lane** (Claude Code on free models) — see [Token harvest](/docs/harvest).
 
 The Nous login expires now and then (`No access token found for Nous Portal login`): run `hermes model`, pick **Nous Portal**, sign in in the browser.
 

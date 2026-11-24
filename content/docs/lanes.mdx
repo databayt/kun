@@ -99,36 +99,9 @@ One call can still ask for more: naming a model on a single agent call overrides
 
 **Skills (2):** `funnel`, `scrape`
 
-## Off-pool agents
-
-The lanes above route work *inside* Claude Code. These are the other agent CLIs: each has a
-one-letter launcher in the shell (`.claude/machine/launchers.json` → the managed
-`# BEGIN databayt agents` block, rewritten by `kun-ready --fix-launchers`) and in **Machine →
-Terminal**, the app's built-in terminal, which opens any of them in a tab.
-
-| Launcher | Agent | Model (best free, bench 2026-11-24) | Cost |
-| --- | --- | --- | --- |
-| `c` | Claude Code | Opus 5.5 / the lanes above | Max plan |
-| `f` | Claude Code free (`kun-free.sh`) | `meituan/longcat-2.5:free` on Nous, haiku/subagents `tencent/hy4-flash:free` | $0 |
-| `o` | opencode | `opencode/deepseek-v4.1-flash-free`, small `nemotron-3.5-super-vl-free` | $0 (no key) |
-| `h` | Hermes | `meituan/longcat-2.5:free` → hy4-flash → solar-mini4 | $0 |
-| `a` | Antigravity | Gemini 3.8 Flash (High); Opus 4.6 Thinking by `--model` | $0 (Google) |
-| `d` | Claude Code on DeepSeek (`kun-d.sh`) | deepseek pro / flash | own key |
-
-- **`f`** points Claude Code at Nous Portal's Anthropic-format `/v1/messages`, no proxy. It
-  borrows Hermes's Nous login: the key lives one hour, so `apiKeyHelper` (`kun-free.sh --key`)
-  asks Hermes's resolver for a fresh one every 10 minutes. Its own config dir `~/.claude-free`
-  never touches the claude.ai login. Slower than Claude, rate-limited — easy work only.
-- **`o`** works with no Zen key at all; an *expired* key in `~/.local/share/opencode/auth.json`
-  blocks the free models (`api_key_expired`) — remove it rather than renew it.
-- **Scripted:** `lane <c|a|o|h|f|d> "prompt"` runs one prompt headless; `lane test` runs the
-  same bug-fix task through every lane (PASS/FAIL + seconds); `lane models` prints each lane's
-  model. stdin is closed on purpose: opencode reads a non-tty stdin as prompt and hangs.
-
 ## Checks
 
 ```bash
-lane test                                        # every off-pool agent fixes a bug, PASS/FAIL
 node .claude/scripts/compile-lanes.mjs --check   # every file matches its lane
 node .claude/scripts/compile-lanes.mjs --list    # file → lane → how it runs
 node .claude/scripts/lint-contracts.mjs --check  # no missing lane, no hand-set model

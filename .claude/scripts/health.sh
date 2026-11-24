@@ -143,6 +143,27 @@ if [ -f "$AGENTS_LIB" ]; then
     fi
 fi
 
+# ── Token pool (scripts/harvest/ — OmniRoute + providers.json) ─
+POOL_STATE="$CLAUDE_DIR/state/harvest.json"
+if command -v omniroute &> /dev/null; then
+    if [ -f "$POOL_STATE" ] && command -v python3 &> /dev/null; then
+        POOL_LINE=$(python3 - "$POOL_STATE" <<'PY'
+import json, sys, time, datetime
+d = json.load(open(sys.argv[1]))
+age = int((time.time() - datetime.datetime.fromisoformat(d["updated"].replace("Z", "+00:00")).timestamp()) / 60)
+free = [p for p in d["providers"] if p["enabled"] and p["tier"] in ("keyless", "free", "free-capped")]
+on = [p["id"] for p in free if p["status"] in ("connected", "direct-ok")]
+dry = [p["id"] for p in free if p["status"] == "exhausted"]
+level = "pass" if d["gateway"]["status"] == "ok" and d.get("pool_ready") and age <= 120 else "warn"
+print(f"{level}|gateway {d['gateway']['status']}, {len(on)}/{len(free)} free sources on" + (f", dry: {','.join(dry)}" if dry else "") + f", ledger {age} min old")
+PY
+)
+        check "${POOL_LINE%%|*}" "token pool" "${POOL_LINE#*|}"
+    else
+        check warn "token pool" "no ledger — node .claude/scripts/harvest/omni.mjs setup, then job.sh --install"
+    fi
+fi
+
 # ── Maintain heartbeat (the machine supervises itself) ──────────
 MAINTAIN_STATE="$CLAUDE_DIR/.kun-maintain.json"
 if [ -f "$MAINTAIN_STATE" ] && command -v python3 &> /dev/null; then

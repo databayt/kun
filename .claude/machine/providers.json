@@ -1,0 +1,349 @@
+{
+  "$comment": "The token harvest catalog (2026-11-24): every model source a databayt machine may draw on, classified. One source of truth: Machine -> Providers lists these rows and runs their readiness steps (provider.<id>), scripts/harvest/combos.mjs builds the OmniRoute combos from `roles`, harvest.mjs reads their quota back into ~/.claude/state/harvest.json, and the `lane` dispatcher tests them. Per person: every key is the teammate's OWN account, stored in their OS credential store under Machine's service `org.databayt.kun.machine`, account = `keychain` (an env-style name, the same item Machine → Brain writes), never shared. tier: keyless (no account) | free (account, no card) | free-capped (free with a hard daily/request cap) | paid (needs money; off until `enabled` and a /decide record) | plan (a subscription — never pooled). privacy: free providers may read prompts — `public` work only (no client data, no secrets). `limits` are what the provider publishes, checked 2026-11-24 (OmniRoute docs/reference/PROVIDER_REFERENCE.md + the provider's page); OmniRoute's live quota is the truth at runtime.",
+  "version": 1,
+  "gateway": {
+    "id": "omniroute",
+    "url": "http://localhost:20128",
+    "openai": "http://localhost:20128/v1",
+    "keychain": "OMNIROUTE_API_KEY",
+    "package": "omniroute@3.8.54",
+    "docs": "https://github.com/cheaper-inference/OmniRoute",
+    "admin_keychain": "OMNIROUTE_ADMIN_PASSWORD"
+  },
+  "providers": [
+    {
+      "id": "nous",
+      "name": "Nous Portal (free models)",
+      "tier": "free",
+      "via": "omniroute",
+      "omniroute": "nous-research",
+      "signup": "https://portal.nousresearch.com",
+      "login": "Hermes holds the Nous Portal login. Its agent key lives one hour, so omni.mjs reads a fresh one from Hermes (kun-free.sh --key) and harvest.mjs pushes it into the OmniRoute connection every run (30 min). f --direct and Hermes itself use Nous without the pool.",
+      "limits": {
+        "note": "free models: longcat-2.5, hy4-flash, solar-mini4, step-3.7-flash"
+      },
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "meituan/longcat-2.5:free",
+          "tencent/hy4-flash:free"
+        ],
+        "fast": [
+          "tencent/hy4-flash:free",
+          "meituan/longcat-2.5:free"
+        ],
+        "long": [
+          "meituan/longcat-2.5:free"
+        ]
+      },
+      "bench": "2026-11-24 tool task: longcat 26s PASS, hy4-flash 28s PASS, solar-mini4 50s PASS, step-3.7-flash timeout",
+      "enabled": true,
+      "key_from": "hermes",
+      "context": {
+        "meituan/longcat-2.5:free": 1048576,
+        "tencent/hy4-flash:free": 1048576
+      }
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA NIM",
+      "tier": "free",
+      "via": "omniroute",
+      "omniroute": "nvidia",
+      "signup": "https://build.nvidia.com/settings/api-keys",
+      "keychain": "NVIDIA_NIM_API_KEY",
+      "limits": {
+        "rpm": 40
+      },
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "nvidia/nemotron-3-ultra-550b-a55b",
+          "moonshotai/kimi-k2.5"
+        ],
+        "long": [
+          "nvidia/nemotron-3-ultra-550b-a55b"
+        ]
+      },
+      "source": "sharbel way 1 — Nemotron 3 Ultra 550B; also feeds fcc (launcher n)",
+      "enabled": true
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter (:free models)",
+      "tier": "free-capped",
+      "via": "omniroute",
+      "omniroute": "openrouter",
+      "signup": "https://openrouter.ai/settings/keys",
+      "keychain": "OPENROUTER_API_KEY",
+      "limits": {
+        "rpm": 20,
+        "req_day": 50,
+        "req_day_after_topup": 1000
+      },
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "deepseek/deepseek-v4-flash:free"
+        ],
+        "fast": [
+          "deepseek/deepseek-v4-flash:free"
+        ]
+      },
+      "source": "sharbel way 2 — also feeds fcc (launcher n)",
+      "enabled": true
+    },
+    {
+      "id": "openrouter-topup",
+      "name": "OpenRouter $10 one-time top-up",
+      "tier": "paid",
+      "via": "omniroute",
+      "omniroute": "openrouter",
+      "signup": "https://openrouter.ai/settings/credits",
+      "keychain": "OPENROUTER_API_KEY",
+      "limits": {
+        "req_day": 1000
+      },
+      "cap_usd": {
+        "once": 10
+      },
+      "decide": "approved by Abdout 2026-11-24 (token harvest plan) — switch on when funded",
+      "privacy": "public",
+      "roles": {},
+      "note": "Raises the :free models from 50 to 1,000 requests/day; the credit itself need not be spent.",
+      "enabled": false
+    },
+    {
+      "id": "gemini",
+      "name": "Google AI Studio (Gemini)",
+      "tier": "free",
+      "via": "omniroute",
+      "omniroute": "gemini",
+      "signup": "https://aistudio.google.com/apikey",
+      "keychain": "GEMINI_API_KEY",
+      "limits": {
+        "note": "per-model free quotas, region-dependent"
+      },
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "gemini-3.8-flash"
+        ],
+        "fast": [
+          "gemini-3.8-flash-lite"
+        ],
+        "vision": [
+          "gemini-3.8-flash"
+        ],
+        "long": [
+          "gemini-3.8-flash"
+        ]
+      },
+      "source": "sharbel way 3",
+      "enabled": true
+    },
+    {
+      "id": "groq",
+      "name": "Groq",
+      "tier": "free",
+      "via": "omniroute",
+      "omniroute": "groq",
+      "signup": "https://console.groq.com/keys",
+      "keychain": "GROQ_API_KEY",
+      "limits": {
+        "tokens_day_per_model": 200000
+      },
+      "privacy": "public",
+      "roles": {
+        "fast": [
+          "openai/gpt-oss-120b",
+          "moonshotai/kimi-k2-instruct"
+        ]
+      },
+      "source": "sharbel way 3",
+      "enabled": true
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral (Experiment tier)",
+      "tier": "free",
+      "via": "omniroute",
+      "omniroute": "mistral",
+      "signup": "https://console.mistral.ai/api-keys",
+      "keychain": "MISTRAL_API_KEY",
+      "limits": {
+        "note": "rate-limited Experiment tier, no card"
+      },
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "devstral-latest",
+          "codestral-latest"
+        ],
+        "fast": [
+          "mistral-small-latest"
+        ]
+      },
+      "source": "sharbel way 3",
+      "enabled": true
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare Workers AI",
+      "tier": "free-capped",
+      "via": "omniroute",
+      "omniroute": "cloudflare-ai",
+      "signup": "https://dash.cloudflare.com/profile/api-tokens",
+      "keychain": "CLOUDFLARE_API_TOKEN",
+      "needs": [
+        "account_id"
+      ],
+      "limits": {
+        "neurons_day": 10000
+      },
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "@cf/openai/gpt-oss-120b",
+          "@cf/zai-org/glm-4.7-flash",
+          "@cf/qwen/qwen2.5-coder-32b-instruct"
+        ],
+        "fast": [
+          "@cf/zai-org/glm-4.7-flash",
+          "@cf/openai/gpt-oss-120b"
+        ],
+        "long": [
+          "@cf/openai/gpt-oss-120b"
+        ],
+        "vision": [
+          "@cf/google/gemma-4-26b-a4b-it"
+        ]
+      },
+      "enabled": true,
+      "note": "kimi-k2.6 was deprecated on Cloudflare 2026-11-20 (410) — a 410 on ONE model makes OmniRoute lock the whole connection for 24h, so keep dead models out of roles.",
+      "account_keychain": "CLOUDFLARE_ACCOUNT_ID"
+    },
+    {
+      "id": "opencode-zen",
+      "name": "OpenCode Zen (free models)",
+      "tier": "keyless",
+      "via": "opencode",
+      "omniroute": "opencode-zen",
+      "signup": "https://opencode.ai/console/account#api-keys",
+      "keychain": "OPENCODE_ZEN_API_KEY",
+      "login": "Keyless only inside the opencode client (launcher o). A Zen API key adds it to OmniRoute; an expired key in opencode's auth.json blocks the keyless path.",
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "deepseek-v4.1-flash-free"
+        ],
+        "vision": [
+          "nemotron-3.5-super-vl-free"
+        ]
+      },
+      "bench": "2026-11-24 tool task: deepseek-v4.1-flash 14s, nemotron-3.5-super-vl 13s, big-pickle 20s, mimo-v2.6-flash 26s — all PASS",
+      "enabled": true
+    },
+    {
+      "id": "antigravity",
+      "name": "Google Antigravity",
+      "tier": "free",
+      "via": "agy",
+      "signup": "https://antigravity.google",
+      "login": "Google account in agy; needs the account-eligibility check (readiness agy.eligible).",
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "claude-opus-4-6-thinking",
+          "gemini-3.8-flash-high"
+        ]
+      },
+      "enabled": true
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek API",
+      "tier": "paid",
+      "via": "omniroute",
+      "omniroute": "deepseek",
+      "signup": "https://platform.deepseek.com/api_keys",
+      "keychain": "DEEPSEEK_API_KEY",
+      "limits": {
+        "note": "5M free tokens on signup, then pay-as-you-go"
+      },
+      "cap_usd": {
+        "week": 10
+      },
+      "decide": "approved by Abdout 2026-11-24 (token harvest plan) — switch on when funded, weekly cap",
+      "privacy": "public",
+      "roles": {
+        "coding": [
+          "deepseek-v4-pro"
+        ],
+        "fast": [
+          "deepseek-v4-flash"
+        ]
+      },
+      "also": "launcher d (kun-d.sh) uses the same key directly",
+      "enabled": false
+    },
+    {
+      "id": "cerebras",
+      "name": "Cerebras",
+      "tier": "paid",
+      "via": "omniroute",
+      "omniroute": "cerebras",
+      "signup": "https://cloud.cerebras.ai",
+      "keychain": "CEREBRAS_API_KEY",
+      "limits": {
+        "note": "one-time $5 credit, 30 days, card required — not a recurring free tier"
+      },
+      "privacy": "public",
+      "roles": {
+        "fast": [
+          "gpt-oss-120b"
+        ]
+      },
+      "enabled": false
+    },
+    {
+      "id": "claude-max",
+      "name": "Claude Max (Abdout's plan)",
+      "tier": "plan",
+      "via": "claude",
+      "login": "Native Claude Code only (launcher c). NEVER added to OmniRoute or any third-party tool — Anthropic bans the consumer login there.",
+      "privacy": "private",
+      "roles": {},
+      "enabled": true
+    }
+  ],
+  "combos": {
+    "$comment": "The classes. combos.mjs builds each OmniRoute combo from the enabled providers' `roles` in this order, strategy priority (best member first; OmniRoute moves to the next when one is exhausted, rate-limited or failing), paid rungs last and only when enabled. Re-rank after `lane test --pool`. Ranking today (2026-11-24 bench): Nous longcat 25s, Cloudflare gpt-oss-120b 206s through Claude Code; re-rank when NVIDIA/OpenRouter/Gemini/Groq/Mistral keys are in.",
+    "kun-code": {
+      "role": "coding",
+      "strategy": "priority",
+      "paid": false
+    },
+    "kun-fast": {
+      "role": "fast",
+      "strategy": "priority",
+      "paid": false
+    },
+    "kun-vision": {
+      "role": "vision",
+      "strategy": "priority",
+      "paid": false
+    },
+    "kun-long": {
+      "role": "long",
+      "strategy": "priority",
+      "paid": false
+    },
+    "kun-thrifty": {
+      "role": "coding",
+      "strategy": "priority",
+      "paid": true
+    }
+  }
+}

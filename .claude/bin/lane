@@ -4,6 +4,8 @@
 #   lane <c|a|o|h|f|d> "prompt"   one-shot, prints the answer, runs in the current folder
 #   lane test [c a o h f]         same bug-fix task through each lane in a temp folder → PASS/FAIL + seconds
 #   lane models                   which model each lane is set to
+#   lane pool                     the token pool: each source's status, use and quota (harvest.mjs)
+#   lane --pool [combo] <f|o> …   run f or o on a pool combo (kun-code default; kun-fast, kun-long…)
 #
 # Interactive use is the shell launchers (c a o h f, from .claude/machine/launchers.json) or
 # Machine → Terminal. This is the scripted door. Lanes: c Claude Code (Max plan) · a Antigravity
@@ -16,15 +18,21 @@
 set -u
 
 TIMEOUT="${LANE_TIMEOUT:-300}"
+POOL=""
+if [ "${1:-}" = --pool ]; then
+    shift; POOL=kun-code
+    case "${1:-}" in kun-*) POOL="$1"; shift ;; esac
+fi
 
 run() { # run <lane> <prompt>
     local l="$1" p="$2"
     case "$l" in
         c) claude -p --dangerously-skip-permissions "$p" ;;
         a) agy --dangerously-skip-permissions -p "$p" ;;
-        o) opencode run "$p" ;;
+        o) if [ -n "$POOL" ]; then opencode run -m "omniroute/$POOL" "$p"; else opencode run "$p"; fi ;;
         h) hermes chat -Q --yolo --max-turns 30 --source lane -q "$p" ;;
-        f) kun-free.sh -p --dangerously-skip-permissions "$p" ;;
+        f) if [ -n "$POOL" ]; then KUN_FREE_ROUTE=pool KUN_FREE_COMBO="$POOL" kun-free.sh -p --dangerously-skip-permissions "$p"
+           else kun-free.sh -p --dangerously-skip-permissions "$p"; fi ;;
         d) kun-d.sh -p --dangerously-skip-permissions "$p" ;;
         *) echo "lane: unknown lane '$l' (c a o h f d)" >&2; return 64 ;;
     esac </dev/null
@@ -45,7 +53,7 @@ smoke() { # smoke <lane> → one row
     printf 'function sum(xs) { let t = 0; for (let i = 1; i < xs.length; i++) t += xs[i]; return t; }\nmodule.exports = sum;\n' > "$dir/sum.js"
     printf "const sum = require('./sum'); if (sum([1,2,3]) !== 6) { console.log('FAIL'); process.exit(1) } console.log('PASS')\n" > "$dir/test.js"
     s=$(date +%s)
-    (cd "$dir" && timeout "$TIMEOUT" "$0" "$l" "In this folder test.js fails. Fix the bug in sum.js, then run 'node test.js' and report its output." >"$dir/out.txt" 2>&1)
+    (cd "$dir" && timeout "$TIMEOUT" "$0" ${POOL:+--pool "$POOL"} "$l" "In this folder test.js fails. Fix the bug in sum.js, then run 'node test.js' and report its output." >"$dir/out.txt" 2>&1)
     e=$(( $(date +%s) - s ))
     r=$(cd "$dir" && node test.js 2>/dev/null)
     [ "$r" = PASS ] || r="FAIL  ($(grep -m1 -iE 'error|not eligible|expired|limit' "$dir/out.txt" | cut -c1-90))"
@@ -54,11 +62,12 @@ smoke() { # smoke <lane> → one row
 }
 
 case "${1:-}" in
-    ""|-h|--help) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    ""|-h|--help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     models) models ;;
+    pool) node "$HOME/kun/.claude/scripts/harvest/harvest.mjs" ;;
     test)
         shift
-        set -- "${@:-c a o h f}"
+        if [ -n "$POOL" ]; then set -- "${@:-f o}"; else set -- "${@:-c a o h f}"; fi
         [ $# -eq 1 ] && set -- $1
         echo "lane  time  result"
         for l in "$@"; do smoke "$l"; done

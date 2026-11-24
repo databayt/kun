@@ -1909,11 +1909,161 @@
       },
       "fix": {
         "kind": "auto",
-        "cmd": "npm i -g omniroute"
+        "cmd": "npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute@3.8.54"
       },
       "uninstall": {
         "kind": "auto",
         "cmd": "npm rm -g omniroute"
+      }
+    },
+    {
+      "id": "launcher.f",
+      "stage": "agents",
+      "title": {
+        "ar": "اختصار f — Claude Code مجاناً",
+        "en": "`f` launcher — Claude Code free"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "hermes.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "launcher.f",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/kun-ready --fix-launchers"
+      }
+    },
+    {
+      "id": "omniroute.service",
+      "stage": "agents",
+      "title": {
+        "ar": "بوابة مجمّع الرموز تعمل",
+        "en": "Token pool gateway running"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "omniroute.cli"
+      ],
+      "human": false,
+      "check": {
+        "probe": "omniroute.service",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/harvest/omniroute.sh install"
+      }
+    },
+    {
+      "id": "pool.ready",
+      "stage": "agents",
+      "title": {
+        "ar": "مجمّع الرموز جاهز",
+        "en": "Token pool ready"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "omniroute.service"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pool.ready",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/harvest/omni.mjs setup && node .claude/scripts/harvest/harvest.mjs --quiet"
+      }
+    },
+    {
+      "id": "pool.keys",
+      "stage": "agents",
+      "title": {
+        "ar": "مفاتيح النماذج المجانية متصلة",
+        "en": "Free model keys connected"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "pool.ready"
+      ],
+      "human": true,
+      "check": {
+        "probe": "pool.keys",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "request",
+        "message": "Open Machine → Brain → Providers and add your own free keys (NVIDIA, OpenRouter, Google AI Studio, Groq, Mistral) — each has a Get key link; every key stays on this computer."
+      }
+    },
+    {
+      "id": "pool.job",
+      "stage": "agents",
+      "title": {
+        "ar": "سجل مجمّع الرموز كل 30 دقيقة",
+        "en": "Token pool ledger every 30 min"
+      },
+      "os": [
+        "mac"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "pool.ready"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pool.job",
+        "timeoutS": 10
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "bash .claude/scripts/harvest/job.sh --install"
       }
     },
     {

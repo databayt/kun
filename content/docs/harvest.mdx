@@ -1,0 +1,102 @@
+---
+title: Token harvest
+description: Every free and paid model source in one pool — classified, ranked, swapped when one runs dry, run by the Kun app
+---
+
+# Token harvest
+
+> Claude on the Max plan does the judging. Everything easy runs on free tokens, and when one free
+> source runs dry the next one takes over — without anyone noticing.
+
+Each person's Mac runs one **token pool**: [OmniRoute](https://github.com/cheaper-inference/OmniRoute)
+(MIT) on `127.0.0.1:20128`, holding that person's own free accounts. kun decides which sources exist
+and how they rank; the Kun app installs it, takes the keys and shows its health.
+
+## The three ways, all used
+
+From [sharbel.com — Claude Code on a free 550B model](https://sharbel.com/articles/claude-code-free-550b-model) (2026-11-08):
+
+| Way | What | Where it lives here |
+| --- | --- | --- |
+| 1 · Free Claude Code + NVIDIA | Nemotron 3 Ultra 550B, ~40 req/min, free key at build.nvidia.com | NVIDIA is a pool provider; Machine → Brain also offers the NVIDIA route through `fcc-server` |
+| 2 · OpenRouter `:free` | 50 req/day, 1,000/day after a one-time $10 top-up | A pool provider; the top-up is an approved paid rung, off until funded |
+| 3 · OmniRoute | One endpoint over 150+ free providers, falls over when one runs out | The pool itself |
+
+## The catalog — `.claude/machine/providers.json`
+
+One row per source: tier, sign-up link, the credential-store name of its key, published limits,
+privacy class, and the best models for each **role** (`coding`, `fast`, `vision`, `long`).
+
+| Tier | Meaning | Today |
+| --- | --- | --- |
+| keyless | no account | OpenCode Zen (inside opencode only) |
+| free | account, no card | Nous (via Hermes), NVIDIA, Google AI Studio, Groq, Mistral, Antigravity |
+| free-capped | free with a hard cap | OpenRouter, Cloudflare Workers AI |
+| paid | money; off until funded + `/decide` | OpenRouter $10 top-up, DeepSeek (weekly cap), Cerebras |
+| plan | a subscription — **never pooled** | Claude Max (only in native Claude Code) |
+
+**Per person.** Free-tier terms bind the account holder, so every key is the teammate's own and
+lives only in their credential store (service `org.databayt.kun.machine`, the same items Machine →
+Brain writes). Free providers may read prompts: client data and secrets stay on Claude.
+
+## The classes — OmniRoute combos
+
+`scripts/harvest/combos.mjs` builds one combo per class from the connected providers' roles, in
+catalog order (the catalog order *is* the ranking). Strategy `priority`: the first healthy model
+serves; when it is exhausted, rate-limited or failing, OmniRoute moves to the next.
+
+| Combo | Role | Used by |
+| --- | --- | --- |
+| `kun-code` | coding | `f` (default), `o -m omniroute/kun-code` |
+| `kun-fast` | fast | `f`'s haiku and subagents |
+| `kun-long` | long context | `f --pool kun-long` |
+| `kun-vision` | images | `f --pool kun-vision` |
+| `kun-thrifty` | coding, then paid rungs | only when a paid rung is on |
+
+## The agents on it
+
+| Launcher | Runs on |
+| --- | --- |
+| `c` | Claude Max — native, never pooled |
+| `f` | the pool (`kun-code`) when the ledger says ready, else Nous direct; `f --direct`, `f --pool <combo>` |
+| `o` | OpenCode Zen keyless by default; the pool with `-m omniroute/kun-code` |
+| `h` | Hermes on Nous longcat-2.5 → hy4-flash → solar-mini4 |
+| `a` | Antigravity (Google account) |
+| `d` | DeepSeek, own key |
+
+Scripted: `lane <c|a|o|h|f|d> "prompt"`, `lane --pool [combo] <f|o> "prompt"`, `lane test`,
+`lane --pool test`, `lane pool` (the ledger table), `lane models`.
+
+## The ledger — what is left, what is dry
+
+`scripts/harvest/harvest.mjs` runs every 30 minutes (launchd `com.databayt.harvest`, through
+`job-run.sh`, job `harvest`) and writes `~/.claude/state/harvest.json`: per source its status
+(`connected`, `needs-key`, `exhausted`, …), requests, tokens, success rate and quota when the
+provider reports one. It also pushes Hermes's one-hour Nous key into the pool and unlocks
+connections a dead model locked. Read by `aware.md` (Token pool line + alert), `health.sh`
+(token pool check), `f` (pool or direct) and Machine (Brain → Providers, health).
+
+## Setup — Machine drives it
+
+Readiness steps (`.claude/machine/readiness.json`, stage *agents*), each with an automatic fix:
+
+1. `omniroute.cli` — `npm install -g … omniroute@3.8.54`
+2. `omniroute.service` — `scripts/harvest/omniroute.sh install`: launchd, loopback only, an API key
+   required, a random admin password (the shipped one is the public `CHANGEME`)
+3. `pool.ready` — `omni.mjs setup`: mint the client key, connect every source that has a key, build
+   the combos
+4. `pool.job` — `job.sh --install`
+5. `pool.keys` — **the human step**: Machine → Brain → Providers → *Get key* on each free source,
+   paste, done (≥ 3 connected turns it green)
+
+## Lessons (2026-11-24)
+
+- OmniRoute assumes a **32,768-token** window for any model its catalog lacks, and Claude Code's
+  prompt alone is ~34k — so such models were skipped. `providers.json` `context` carries the real
+  window; `omni.mjs` writes it into OmniRoute's `model_context_overrides` table.
+- A 410 on **one** model (Cloudflare retired `kimi-k2.6` on 2026-11-20) locks the **whole**
+  connection for 24 h. Keep dead models out of `roles`; `harvest.mjs` unlocks and names the model.
+- OmniRoute's `auto/*` models also route to keyless providers it pre-registers (some reverse-engineered).
+  kun clients never ask for `auto` — only `kun-*` combos over sources the person connected.
+- `opencode run` reads a non-tty stdin as prompt and waits forever: scripts close stdin.
+- Nous's Anthropic endpoint wants `Authorization: Bearer`, not `x-api-key`.
