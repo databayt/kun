@@ -355,7 +355,7 @@ FINAL_MSG+="Mobile: install Claude on iPhone/Android with the same Anthropic acc
 ask_choice "$FINAL_MSG" "Done" "View Docs" >/dev/null
 
 if [[ "$(ask_choice "Open onboarding docs?" "Open" "Skip")" == "Open" ]]; then
-    open "https://github.com/databayt/kun/blob/main/content/docs/onboarding.mdx"
+    open "https://kun.databayt.org/en/docs/machine/onboard"
 fi
 
 state_set lastStep "done"

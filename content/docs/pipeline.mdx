@@ -1,6 +1,6 @@
 ---
 title: Video pipeline
-description: How a film starts in the Kun app, step by step. Phase 1 covers everything from the home screen to an accepted plan on GitHub, including how the prompt is filled
+description: How a film starts in Machine, step by step. Phase 1 covers everything from the home screen to an accepted plan on GitHub, including how the prompt is filled
 ---
 
 ## Phase 1 — the flow
@@ -79,7 +79,7 @@ need a new version.
 
 **Health check.** At the same time, the app checks that the video tools on this computer work. It
 runs one command, `produce.mjs readiness`, which tests 14 things: ffmpeg, Blender, FilmCraft,
-the speech-to-text model, the recording browsers, free disk space, mains power, the Kun app itself,
+the speech-to-text model, the recording browsers, free disk space, mains power, Machine itself,
 the Blender and FilmCraft connections, and the Gemini key. The check may take up to two minutes. Its answer sets the colour of the
 light:
 
@@ -268,7 +268,7 @@ flowchart TD
 
 ---
 
-A film on the databayt video line is made in the **Kun desktop app** ([Machine](/docs/machine)).
+A film on the databayt video line is made in [Machine](/docs/machine).
 The terminal does not render it. The app drives [produce](/docs/produce), the ledger that keeps
 the 14 stages and the human gates.
 
@@ -844,7 +844,7 @@ epidemic    not set up  subscription                                           h
 `ready` means the tool's key is in the macOS Keychain, or its MCP server is registered, or its own sign-in works.
 `status <tool>` answers for one tool and exits 0 when it is ready.
 
-In the Kun app, a paid tool has a **Set up** button. It sends the quick fix to the agent. The agent subscribes on your
+In Machine, a paid tool has a **Set up** button. It sends the quick fix to the agent. The agent subscribes on your
 behalf with the `behalf` skill, then runs `node ~/kun/.claude/scripts/video-tools.mjs setup <tool>`. That opens the
 signup page, stores the key in the Keychain (read from stdin, never printed), registers the MCP server and records your
 opt-in in `~/.kun/machine/paid-tools.json`. A hosted MCP finishes its OAuth sign-in on first use (`/mcp`).
@@ -859,8 +859,8 @@ Facebook run only after the publish gate.
 
 | Part | Role | Where it lives |
 | --- | --- | --- |
-| Kun app (UI) | Home, the three options, the gear and its tabs, the sparkle button, the plan card, Accept, the stage discussions, silent route, the stream on screen | `~/machine/src/components/chat/` |
-| Kun app (Rust) | `ask` and `refine` commands; `board`, `fill` and `match_text`, which run the station script; builds and starts each run | `~/machine/src/components/chat/rust.rs`, `~/machine/src/components/pack/station.rs` |
+| Machine (UI) | Home, the three options, the gear and its tabs, the sparkle button, the plan card, Accept, the stage discussions, silent route, the stream on screen | `~/machine/src/components/chat/` |
+| Machine (Rust) | `ask` and `refine` commands; `board`, `fill` and `match_text`, which run the station script; builds and starts each run | `~/machine/src/components/chat/rust.rs`, `~/machine/src/components/pack/station.rs` |
 | Station script | Chooses the three options, fills a formula, matches typed text, composes the tabs' picks, shows a stage. No model | `kun/.claude/scripts/station.mjs` |
 | Settings and stages | The tabs and their choices; the 14 stages and the tool ladder | `kun/departments/video/settings.json`, `stages.json` |
 | Formulas | The prompts written in advance, one file each | `kun/departments/video/formulas/` |

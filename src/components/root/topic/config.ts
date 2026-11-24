@@ -660,7 +660,7 @@ export const topicDetails: Record<string, TopicDetail> = {
       "~/.claude/scripts/dispatch.sh",
       "Apple Notes / Dispatch folder",
     ],
-    kunDocs: "/docs/dispatch",
+    kunDocs: "/docs/machine/dispatch",
   },
 
   voice: {

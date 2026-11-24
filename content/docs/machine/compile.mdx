@@ -1,0 +1,61 @@
+---
+title: Compile
+description: One kun source, every agent's native config — Claude Code, Codex, opencode, Antigravity, free Claude Code and Hermes
+---
+
+# Compile
+
+> Edit kun once. `kun compile` writes each agent's own config from it, so every agent knows the same skills, agents, MCP servers and org memory.
+
+## Use it
+
+```bash
+kun compile --all                      # every agent (hermes stays a dry-run)
+kun compile --only codex,opencode      # just those
+kun compile --check --all              # write nothing; list drift; exit 1 on drift
+kun compile --dry-run                  # print the planned writes
+kun compile --only hermes --write      # hermes is a dry-run unless told to write
+```
+
+Agents: `claude fcc codex opencode agy hermes`. `--quiet` prints one line per agent. A second run changes nothing. The source of truth is `.claude/targets.json` plus the kun source tree. `kun` is `~/.claude/bin/kun`; `KUN_ROOT` overrides the checkout.
+
+Today's `--check --all`:
+
+```
+claude    ok of 2
+fcc       ok of 2
+codex     ok of 351
+opencode  ok of 163
+agy       ok of 5
+hermes    ok of 1
+```
+
+## What each agent receives
+
+| Agent | Writes | Never touched |
+| --- | --- | --- |
+| `claude` (`c`) | `~/.claude` via `setup.sh`: agents, rules, skills, hooks, bin, MCP. One marked block in `~/.claude/CLAUDE.md` points at [Memory](/docs/machine/memory) | the rest of your personal `CLAUDE.md` |
+| `fcc` (`f`) | nothing to translate: `~/.claude-free` links to `~/.claude`. It verifies the launcher, `kun-free.sh` and the Pool provider. Fix: `kun-free.sh --setup` | your claude.ai login |
+| `codex` (`x`) | `AGENTS.md`, `skills/<name>/`, `agents/<name>.toml`, and a marked `[mcp_servers.*]` block in `config.toml` | model, auth, plugins, notify, features, hand-made MCP tables with headers or secrets |
+| `opencode` (`o`) | `mcp`, `agent`, `command`, `instructions` in `opencode.json`, plus `kun/AGENTS.md`, `kun/agents/*.md` and skill symlinks | `"permission": "allow"`, model, small model, the `omniroute` provider, every key kun does not own |
+| `agy` (`a`) | `~/.gemini`: `mcp_config.json`, skills and `AGENTS.md` symlinks, `GEMINI.md` with the memory pointer | servers kun does not own |
+| `hermes` (`h`) | `SOUL.md` and cron jobs (`.claude/hermes/jobs.json`, merged by name) | `config.yaml`, `auth.json`, channels and tokens: never read for writing |
+
+Hooks for Codex are repo-scoped (`kun/.codex/hooks.json`) and are not compiled.
+
+## Safety
+
+- **Secrets stay put.** MCP entries reference environment variables; no value is written.
+- **Backups.** Before a compile overwrites a file it did not fully own, it saves the old one to `~/.kun/backup/<agent>/<timestamp>/`. The drift line names it.
+- **Hermes is a dry-run** in `--all`. Real writes need `--only hermes --write`.
+- **Control-room switches survive.** A skill or agent you switched off in Machine stays off; it is not drift.
+
+## When it runs
+
+| When | How |
+| --- | --- |
+| Heal | the `compile.claude`, `compile.codex`, `compile.opencode`, `compile.agy` and `compile.hermes` readiness steps |
+| Every day | the heartbeat runs `setup.sh`, which compiles after refreshing `~/.claude` |
+| By hand | `kun compile --check --all`, then `--all` if it reports drift |
+
+Change kun, not `~/.codex` or `~/.hermes`: the next compile overwrites what kun owns.

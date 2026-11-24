@@ -5,7 +5,7 @@ description: The connectors, plugins and local MCP servers the team works with, 
 
 # Connectors
 
-Claude reaches outside services in three ways. The Machine app lists all three on one page,
+Claude reaches outside services in three ways. Machine lists all three on one page,
 **Connectors** in the mega menu, laid out like the
 [claude.com marketplace](https://claude.com/marketplace/connectors-plugins): a logo, a name, a
 badge and one line per card, filtered by category.
@@ -14,7 +14,7 @@ badge and one line per card, filtered by category.
 |---|---|---|
 | **Connector** | A remote MCP server signed in through claude.ai | Claude desktop → Settings → Connectors. It then reaches Claude Code too, as `claude.ai <Name>` |
 | **Plugin** | A Claude Code bundle: skills, agents, and usually an MCP server | `/plugin` in Claude Code, from a marketplace such as `claude-plugins-official` |
-| **Local MCP** | A server kun registers on the machine | `.claude/mcp.json` is the catalog. `setup.sh` runs `claude mcp add` for each one, and the Machine app switches them on and off under `.claude → mcp` |
+| **Local MCP** | A server kun registers on the machine | `.claude/mcp.json` is the catalog. `setup.sh` runs `claude mcp add` for each one, and Machine switches them on and off under `.claude → mcp` |
 
 The list in the app lives in `machine/src/components/plugins/registry.ts`. Edit it there and
 update this page with it. "Installed" on a card means one of its names shows up in `claude mcp list`.

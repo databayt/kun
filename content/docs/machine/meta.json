@@ -1,0 +1,14 @@
+{
+  "title": "Machine",
+  "pages": [
+    "index",
+    "onboard",
+    "chat",
+    "agents",
+    "pool",
+    "compile",
+    "memory",
+    "dispatch",
+    "readiness"
+  ]
+}

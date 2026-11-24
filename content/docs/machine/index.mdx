@@ -1,0 +1,64 @@
+---
+title: Machine
+description: The Kun desktop app on a teammate's computer — onboard with the latest kun config, chat with the org, and keep every coding agent working
+---
+
+# Machine
+
+> Machine is the Kun desktop app (repo [databayt/machine](https://github.com/databayt/machine)) and the computer it runs on. Rust + Tauri 2, no server of its own: it talks to kun.databayt.org and GitHub, and starts the unmodified `claude` binary on your own sign-in.
+
+## What it gives you
+
+| # | Outcome | Where |
+| --- | --- | --- |
+| 1 | **Onboard a machine** with the latest kun config and intelligence | [Onboard](/docs/machine/onboard), [Readiness](/docs/machine/readiness), [Compile](/docs/machine/compile), [Memory](/docs/machine/memory) |
+| 2 | **Chat with the org**: the app, Hermes in Slack or WhatsApp, the terminal | [Chat](/docs/machine/chat) |
+| 3 | **Every coding agent working**, and the free one to use when the Claude limit runs out | [Agents](/docs/machine/agents), [Pool](/docs/machine/pool), [Dispatch](/docs/machine/dispatch) |
+
+## Quick start
+
+1. Mac or Linux: `curl -fsSL https://kun.databayt.org/install | bash`. Windows: see [Onboard](/docs/machine/onboard#windows).
+2. Do the three manual steps: Claude sign-in, GitHub sign-in, pick your agents.
+3. Open Machine, then **Setup**, then **Heal**. It finishes the rest.
+4. Open a terminal and type `c`. You are on Claude Code with the org's config.
+5. Claude limit reached? Type `o`. See [the ladder](/docs/machine/agents#claude-limit-reached-the-ladder).
+
+## The sidebar
+
+The sidebar is the whole navigation: no title bar, no toolbar. Click a link and its children open under it; click a line above to go back up.
+
+| Link | Open it to |
+| --- | --- |
+| **Sessions** | Reopen, rename or delete a past chat |
+| **Terminal** | Open `c x a o h f` in tabs (inside the app only) |
+| **Plugins**, **Library** | Install, switch off or update skills, agents, rules, hooks, MCP, department packs |
+| **Machines** | See every machine: OS, department, online dot, resources, readiness |
+| **Setup** | The readiness stages, with `done/total` each, and **Heal** |
+| **Settings** | General, Config, Health, Engine, Model, Agents |
+
+The number beside **Setup** is how ready the computer is; it disappears at 100%.
+
+## Names used in these docs
+
+| Name | Means |
+| --- | --- |
+| **Machine** | the app and the computer it runs on |
+| **Readiness** | the step catalogue, its check and its fixes |
+| **Heal** | the one button or command that lets an agent fix what readiness finds |
+| **Pool** | the free and paid token pool (OmniRoute underneath) |
+| **Agents** | the coding CLIs by letter: `c x a o h f d` |
+| **Compile** | kun source to each agent's native config |
+| **Memory** | the org's public shared memory in kun |
+| **Dispatch** | the work bus on GitHub issues |
+
+## Share when idle
+
+Heavy jobs can run on a teammate's idle machine. It is opt-in on both ends: turn on **Share when idle** on your machine card and pick the kinds you accept (`transcribe`, `render`, `encode`). A job is claimed only on mains power, after 10 idle minutes, with the RAM, disk and tool the job needs. Claude runs are never shared. Files go through presigned links under `pool/<jobId>/` and expire after 7 days.
+
+## Work orders and films
+
+Tasks reach Machine as GitHub issues; the home screen and the **Submit** button are described in [Station](/docs/station) and the [video pipeline](/docs/pipeline).
+
+## Develop
+
+Build, test and CI instructions are in the [machine README](https://github.com/databayt/machine).

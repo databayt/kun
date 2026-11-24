@@ -1,0 +1,45 @@
+---
+title: Memory
+description: The org's public shared memory — one fact per file in kun, read and written by every agent on every machine
+---
+
+# Memory
+
+> Facts the org knows live in `kun/.claude/memory`, public and plain. Every coding agent reads them first and writes new ones there. Nothing secret goes in.
+
+The folder is a git folder in the `kun` repo, so every machine and every agent ([Agents](/docs/machine/agents)) sees the same facts after a pull. [Compile](/docs/machine/compile) puts a one-line pointer to it in each agent's instructions: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` and Hermes's `SOUL.md`.
+
+## Layout
+
+| Path | Holds |
+| --- | --- |
+| `.claude/memory/facts/MEMORY.md` | The index: one line per fact, `- [Title](file.md) — hook` |
+| `.claude/memory/facts/<slug>.md` | One fact: frontmatter `name`, `description`, `type` (user, feedback, project, reference) and a bold TL;DR |
+| `.claude/memory/facts/README.md` | The write rules |
+| `.claude/memory/*.json` | Structured state: team, pipeline, OKRs, repositories |
+
+## Write rules
+
+1. One fact per file, a short kebab-case slug.
+2. Add a one-line pointer to `MEMORY.md`.
+3. Update a fact instead of writing a duplicate; delete one that turned out wrong.
+4. Link related facts with `[[name]]`.
+5. **No keys, tokens or passwords, ever.** Those live in the Keychain.
+
+## Sync
+
+```bash
+node ~/kun/.claude/scripts/memory/memory.mjs status                # what changed locally
+node ~/kun/.claude/scripts/memory/memory.mjs sync                  # pull, commit memory paths only, push to main
+node ~/kun/.claude/scripts/memory/memory.mjs sync --no-push        # pull and commit, keep it local
+```
+
+`sync` pulls with rebase, commits only the paths under `.claude/memory` (never anything else you have modified), and pushes. It never forces. With nothing changed it prints `memory: up to date`.
+
+## What never goes in
+
+Keys, tokens, passwords, and anything a client or person would not want public. The repo is public. Personal preferences stay in your own `~/.claude/projects/.../memory`; org facts go here.
+
+## Related
+
+The older per-user memory (`MEMORY.md` plus component registries such as `atom.json`) is described in [Engine memory](/docs/memory).

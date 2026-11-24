@@ -292,7 +292,7 @@ FINAL_MSG+="Mobile: install Claude on iPhone/Android with the same account."
 ask_choice "$FINAL_MSG" "Done" "View Docs" >/dev/null
 
 if [[ "$(ask_yesno "Open onboarding docs in browser?")" == "Yes" ]]; then
-    open_url "https://github.com/databayt/kun/blob/main/content/docs/onboarding.mdx"
+    open_url "https://kun.databayt.org/en/docs/machine/onboard"
 fi
 
 state_set lastStep "done"

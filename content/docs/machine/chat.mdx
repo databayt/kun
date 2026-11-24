@@ -1,0 +1,46 @@
+---
+title: Chat
+description: Talk to the org from Machine, from Hermes in Slack or WhatsApp, or from the terminal — real work becomes a Dispatch task
+---
+
+# Chat
+
+> Ask in Arabic or English, wherever you are. Answers come from the org's [Memory](/docs/machine/memory) and live state; real work becomes a [Dispatch](/docs/machine/dispatch) task.
+
+## Three doors
+
+| Door | Use it for | Runs on |
+| --- | --- | --- |
+| **Machine chat** (Sessions) | Your own work, by text or voice, with your department's skills | Claude Code on your sign-in (or [the Pool](/docs/machine/pool) when the limit is hit) |
+| **Hermes** in Slack or WhatsApp | A quick question or a task from your phone | Gabriel, the Hermes gateway (`h`), on a free Nous model |
+| **Terminal** | Full agent sessions | `c x a o h f` ([Agents](/docs/machine/agents)) |
+
+Chatting with the org and every repo is never blocked by readiness. Only claiming a task is, and only when the gate is red ([Readiness](/docs/machine/readiness)).
+
+## What the org knows
+
+Every agent reads `~/kun/.claude/memory` first, then live state: `~/.claude/state/aware.md` (jobs, disk, spend, queue, CI; refreshed every 30 minutes) and the open `dispatch` issues. Gabriel answers "where is X" from those, names the source of every claim, and says "unchecked" when it did not check. No source, no claim.
+
+## From chat to work
+
+Hermes is the ears; Claude Code is the hands. Anything that builds, fixes or deploys is handed over, not imitated:
+
+```bash
+kun-dispatch "Fix the failing test in the billing block" --to claude --repo hogwarts
+```
+
+The result lands as a comment on the issue and Gabriel relays it in the thread. See [Dispatch](/docs/machine/dispatch).
+
+## Machine chat
+
+- **Voice**: press the microphone; a small speech model downloads once (about 142 MB) and runs on the CPU. Nothing leaves the computer.
+- **Home options**: the home screen offers at most three prompts from your department's board; tapping one fills the box and sends nothing. Details in [Station](/docs/station).
+- **Plan, then Accept**: a plan changes nothing until you press **Accept**.
+
+## Hermes setup
+
+Hermes is optional: install it, then `hermes gateway setup` and pick Slack. The Slack manifest, tokens and WhatsApp pairing are in [Hermes](/docs/hermes).
+
+## Rule
+
+Private material (customers, money, people) never goes in a group chat. Anything with client data waits for `c`, not a free model.

@@ -30,7 +30,7 @@ export function InstallCommand() {
         One paste — the wizard scans your machine and installs only the delta.
         Windows and the full walkthrough live in{" "}
         <Link
-          href="/docs/onboarding"
+          href="/docs/machine/onboard"
           className="text-foreground font-medium underline underline-offset-4"
         >
           Onboarding

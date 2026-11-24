@@ -1,0 +1,82 @@
+---
+title: Dispatch
+description: The cross-machine work bus — a GitHub issue is a task, and any coding agent on any machine can claim and run it
+---
+
+# Dispatch
+
+> One bus for every coding agent on every machine. A task is an issue in `databayt/kun`. A small runner on each machine claims the issues addressed to it, runs the agent headless and posts the result on the issue. GitHub is the queue; there is no server.
+
+Not to be confused with Anthropic's Dispatch app, which sends a task from the phone to Claude Desktop (see [Cowork](/docs/cowork)).
+
+## Send a task
+
+```bash
+kun-dispatch "Reply with PONG" --to claude --machine abdout
+kun-dispatch "Refactor the table atom" --to codex --repo codebase --lane build --timeout 45
+```
+
+`kun-dispatch` is `~/.claude/bin/kun-dispatch`. It ensures the labels exist and prints the issue URL. Hermes does the same when you ask for real work in chat ([Chat](/docs/machine/chat)).
+
+## The protocol
+
+A task is an issue with these labels.
+
+| Label | Meaning |
+| --- | --- |
+| `dispatch` | Marks a bus task (required) |
+| `to:<agent>` | `claude`, `codex`, `opencode`, `agy`, `hermes`, `fcc` or `any` |
+| `machine:<login>` | Only this machine's GitHub login may run it. Absent means any machine |
+| `lane:<name>` | Optional (`build`, `research`, `mechanical`, ...): picks the model |
+| `claimed:<host>` | A runner took it |
+| `done` / `failed` | Final state |
+
+The body is the brief in Markdown plus an optional fenced `yaml` block:
+
+````md
+Fix the failing test in the billing block and push to main.
+
+```yaml
+repo: hogwarts        # a folder under ~, ~/oss or ~/Documents, or an absolute path
+cwd: /abs/path        # used when repo is absent; default is the kun checkout
+timeout_min: 30
+model: sonnet
+```
+````
+
+**States.** `open`, then `claimed:<host>`, then `done` (issue closed) or `failed` (issue stays open). The result is one comment: status, agent, host, the last 3,500 characters of output and the ledger run id. A timeout, a missing repo or a refused model is a `failed` with the reason.
+
+**Claiming.** Runners race safely without a lock service: a runner adds `claimed:<host>` and assigns itself, then reads the issue's label events. The earliest `claimed:*` event wins; the loser removes its own label. Each machine runs at most one task per agent at a time (a lock file in `~/.kun/dispatch/`).
+
+**Billing.** Subscription only. A task whose model or lane is `fable`, `mythos` or `escalate` is refused with a `failed` comment. With no model, the lane's model from `engine.json` is used (default lane `build`).
+
+## What runs
+
+| Agent | Headless command |
+| --- | --- |
+| `claude` | `kun-claude.sh -p <brief> --dangerously-skip-permissions --model <lane model>` |
+| `fcc` | `kun-free.sh -p <brief>` (Claude Code on the [Pool](/docs/machine/pool)) |
+| `codex` | `codex exec --dangerously-bypass-approvals-and-sandbox -C <cwd> <brief>` |
+| `opencode` | `opencode run --dir <cwd> <brief>` |
+| `agy` | `agy -p <brief> --dangerously-skip-permissions` |
+| `hermes` | `hermes -z <brief>` |
+
+A runner offers only the agents installed on its machine (`launchers.json` plus `which`).
+
+## Run the runner
+
+```bash
+kun-dispatch install     # write the launchd plist (macOS) or systemd user timer (Linux); does not load it
+kun-dispatch run         # one runner pass, by hand
+kun-dispatch heartbeat   # write this machine's status
+```
+
+`install` writes `~/Library/LaunchAgents/com.databayt.dispatch-runner.plist` (every 120 seconds, log at `~/.kun/dispatch/runner.log`) and prints the command to load it. Load it yourself:
+
+```bash
+launchctl load ~/Library/LaunchAgents/com.databayt.dispatch-runner.plist
+```
+
+`heartbeat` writes `.claude/state/machines/<login>.json`: agents and versions, the last pass and the queue depth. The [Memory](/docs/machine/memory) sync lane picks it up.
+
+Code: `.claude/scripts/dispatch/` (`send`, `runner`, `install`, `heartbeat`, `lib`, tests) and `.claude/bin/kun-dispatch`.

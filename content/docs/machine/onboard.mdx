@@ -1,0 +1,83 @@
+---
+title: Onboard
+description: Fresh computer to a fully working kun environment — three manual steps, then Heal does the rest
+---
+
+# Onboard
+
+> Install Machine (or paste the one-liner), do three steps that need you, press **Heal**. The scan runs first and only the missing parts are installed.
+
+## 1. Install
+
+| OS | Command |
+| --- | --- |
+| macOS, Linux | `curl -fsSL https://kun.databayt.org/install \| bash` |
+| Windows | `powershell -ExecutionPolicy Bypass -Command "iwr https://kun.databayt.org/install.ps1 \| iex"` |
+
+Or install the Machine `.dmg` / `.msi` from the [latest release](https://github.com/databayt/machine/releases/latest). The installer is unsigned: on Windows press **More info**, then **Run anyway** once.
+
+Re-run any time; it resumes from its state file. Read-only forms, to see before you install:
+
+```bash
+bash ~/kun/.claude/scripts/onboarding-mac.sh --detect-only   # the scan table
+bash ~/kun/.claude/scripts/onboarding-mac.sh --dry-run       # what a run would install
+bash ~/kun/.claude/scripts/onboarding-mac.sh --doctor        # scan + health audit + fix hints
+```
+
+### Windows
+
+With a `.msi` you were handed, clone kun first (Git opens a browser sign-in), then run from the clone:
+
+```powershell
+cd $env:USERPROFILE\kun; powershell -ExecutionPolicy Bypass -File .\.claude\scripts\setup.ps1 -Machine <login> -MsiPath $env:USERPROFILE\Downloads\Kun.msi
+```
+
+`-Machine <login>` writes `%USERPROFILE%\.kun\machine\settings.json` from `machines\<login>.json`. It does not run the full engine install; Heal does that.
+
+## 2. The three steps that need you
+
+| Step | What you do |
+| --- | --- |
+| Claude sign-in | Run `claude` once and sign in with **your own** account. Nobody signs in for you |
+| GitHub sign-in | `gh auth login`, then accept the databayt organization invite |
+| Pick agents | Choose which of `c x a o h f` to install (default: all). See [Agents](/docs/machine/agents) |
+
+## 3. Heal finishes it
+
+Open **Setup** and press **Heal**. An agent runs the [readiness](/docs/machine/readiness) steps that need no person:
+
+| Stage | Heal installs |
+| --- | --- |
+| Foundation | brew, git, Node, pnpm, jq, uv, ffmpeg, tmux, Chrome |
+| Repos | the repos folder, the `kun` clone, product `.env` files |
+| Agents | Claude Code, Codex, Antigravity, opencode, Hermes, and the [Pool](/docs/machine/pool) |
+| Engine | `~/.claude` config, MCP servers, hooks, the daily heartbeat |
+| Engine, `compile.*` | each agent's native config, from kun ([Compile](/docs/machine/compile)) |
+
+[Memory](/docs/machine/memory) needs no step: it is the `.claude/memory` folder of the `kun` clone. The [Dispatch](/docs/machine/dispatch) runner is one command you run once: `kun-dispatch install`.
+
+Steps that need a person (a sign-in, a code, a payment) are marked, each with one button: **Sign in** opens Terminal with the command, **Open** opens the page. Heal never works around them.
+
+Done when **Setup** shows 100%, or at least the gate is not red:
+
+```bash
+bash ~/kun/.claude/scripts/kun-ready --gate    # GREEN, ORANGE (extras missing) or RED (core missing)
+```
+
+## Day 2
+
+A daily heartbeat (09:17 local) keeps the machine current without you:
+
+1. Pull `~/kun` (main only; aborts cleanly on a conflict).
+2. Refresh `~/.claude` with `setup.sh`, which recompiles every agent's config: a new skill or MCP server reaches `x a o h f` too.
+3. Run the health audit and post the result to the Config Health issue.
+
+`bash ~/.claude/scripts/maintain.sh --status` shows the last run. If the heartbeat is stale for 48 hours, or health is red, every session warns you at its start.
+
+## Uninstall
+
+**Setup** shows what depends on a step before it removes anything, and refuses while something installed needs it. Repos and `.env` files go to the Trash; a repo with unpushed work is refused. Homebrew, Node, `kun` and Claude Code are keystones: Machine opens Terminal with the command instead of running it. What you remove stays removed.
+
+## Report a problem
+
+Use **Report an issue** in the footer of any [kun.databayt.org](https://kun.databayt.org) page. It files a GitHub issue; see the [issue pipeline](/docs/issue).

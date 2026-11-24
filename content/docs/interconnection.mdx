@@ -205,7 +205,7 @@ Machines never connect to each other directly. The arrows all point at the share
 
 ## Layer 1 — Kun engine: a repo, not a service
 
-Kun is the shared brain, and it propagates through **git**. The `.claude/` tree (skills, agents, rules, vocabulary, memory, hooks) *is* the engine; any machine that clones `databayt/kun` and runs [onboarding](/docs/onboarding) becomes an engine node.
+Kun is the shared brain, and it propagates through **git**. The `.claude/` tree (skills, agents, rules, vocabulary, memory, hooks) *is* the engine; any machine that clones `databayt/kun` and runs [onboarding](/docs/machine/onboard) becomes an engine node.
 
 ```
 databayt/kun (.claude/ config)
@@ -273,7 +273,7 @@ Business state flows back into the engine through a human-paced loop: Aseel keep
 | **Remote Control** | Every host session, plus the always-on `kun-rc` server ("Mac · kun") | Drive running Mac sessions, or start new ones, from the phone | The Claude app's Code tab · claude.ai/code |
 | **Cloud sessions** | The Code tab, claude.ai/code, routines (`/schedule`) | Work that must keep going with the Mac off | GitHub repos |
 | **Claude chat** | claude.ai + mobile app | Thinking anywhere; the cheapest surface | — |
-| **Cowork** | Claude Desktop | The *planning* lane — two shells (cloud + on-device), Dispatch, computer use; no Claude Code hooks | Shares `~/.claude/` by filesystem MCP; hands off via `bridge.md` + issues |
+| **Cowork** | Claude Desktop | The *planning* lane — two shells (cloud + on-device), Anthropic's Dispatch app, computer use; no Claude Code hooks | Shares `~/.claude/` by filesystem MCP; hands off via `bridge.md` + issues |
 | **Phone** | iPhone | Receive, steer, start | Built-in push (held while you're at the Mac) · `SendUserFile` · private Artifacts · Code tab · Slack → Hermes |
 
 The host Mac keeps this layer alive with `.claude/scripts/devices.sh`: a presence service (pushes wait while you're at the Mac), the `kun-rc` Remote Control server in tmux, and a session-start brief that speaks up when disk, swap or the server need attention. `bash ~/.claude/scripts/devices.sh --status` shows all of it; policy lives in `engine.json` → `devices`.
@@ -284,7 +284,7 @@ The host Mac keeps this layer alive with `.claude/scripts/devices.sh`: a presenc
 
 | Bus | Carries |
 | --- | ------- |
-| **GitHub** | Code, kun config, work queue (issues), heartbeat dashboard — the durable bus everything settles onto |
+| **GitHub** | Code, kun config, work queue (issues), heartbeat dashboard — the durable bus everything settles onto. Tasks for any coding agent on any machine: [Machine → Dispatch](/docs/machine/dispatch) |
 | **Slack** | The human bus — team talk, Hermes inbound gateway, Claude's MCP egress |
 | **Cloudflare** | The deploy plane since 2026-09 — Workers + Containers for hogwarts, mkan and kun (`scripts/deploy-cloudflare.sh` in each repo); Vercel's free account is paused for Hobby usage and still serves the databayt.org DNS until the zone moves |
 | **bridge.md** | Local Cowork ↔ Code handoff on the same machine |
@@ -296,7 +296,7 @@ Everything above is configuration, not product. To stand up the same topology:
 
 1. **Fork [`databayt/kun`](https://github.com/databayt/kun)** — the `.claude/` tree is the engine. Strip `docs/` and `.claude/memory/` of databayt-specific state; keep the structure.
 2. **Pick your fabric** — a GitHub org (code + issues + config bus), a Slack workspace (human bus), a Vercel team (deploy plane). Free tiers cover a small team.
-3. **Run onboarding on each machine** — clone, `setup.sh`, and every laptop becomes an engine node. See [Onboarding](/docs/onboarding).
+3. **Run onboarding on each machine** — clone, `setup.sh`, and every laptop becomes an engine node. See [Onboarding](/docs/machine/onboard).
 4. **Optional lanes** — wire [Hermes](/docs/hermes) on one always-on machine if you want chat-to-machine access; self-host a CRM if you have a sales pipeline. Neither is required for the core loop.
 5. **Adopt the heartbeat** — a daily pull + health report per machine keeps a distributed team's config from drifting. The scripts live in `.claude/scripts/`.
 
@@ -315,7 +315,7 @@ What's genuinely databayt-specific: the vocabulary (our keywords), the memory (o
 ## Related
 
 - [Architecture](/docs/architecture) — the 5-layer engine model this map runs on
-- [Onboarding](/docs/onboarding) — become an engine node
+- [Onboarding](/docs/machine/onboard) — become an engine node
 - [Hermes](/docs/hermes) — the gateway lane, full Slack wiring
 - [CRM](/docs/crm) — workspaces, identity, pipeline hygiene
 - [Cowork](/docs/cowork) — the planning lane + bridge protocol

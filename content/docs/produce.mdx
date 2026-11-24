@@ -56,7 +56,7 @@ A gate is a point where the work stops until a person says yes. Each is recorded
 `approve --gate <name>`, in this order:
 
 1. **Script sign-off** (`script`) — light, before the expensive stages (visual, audio, edit, render refuse without it, and refuse again without a lock; see [Lock the line](#lock-the-line)).
-2. **Look approval** (`look`) — after the visual stage: a person reviews the film's look, the keyframes or the animatic. The Kun app shows it as waiting until it is approved. `produce` records the approval and does not block a later stage on it.
+2. **Look approval** (`look`) — after the visual stage: a person reviews the film's look, the keyframes or the animatic. Machine shows it as waiting until it is approved. `produce` records the approval and does not block a later stage on it.
 3. **Exact-version approval** (`version`) — tied to one `Vnnn` and the sha of its master. A re-render voids it.
 4. **Publish approval** (`publish`) — a separate yes that names the destination. Approving a version is not approving a post.
 
@@ -69,7 +69,7 @@ order**: a separate issue with one request, for one person, with one deliverable
 lists them all, so a film is no longer a single issue with a checklist and nothing else.
 
 Nothing reaches GitHub by accident. Each command below prints a **draft** first: what it would
-create, upload or post. Only `--create` writes. When a film plan is accepted in the Kun app, the
+create, upload or post. Only `--create` writes. When a film plan is accepted in Machine, the
 Video department's lead runs these commands itself: the film issue first, then a work order for
 each piece the plan gives to another person.
 
@@ -87,7 +87,7 @@ $P submit <issue> <file>…                                  # draft: the upload
 | `issue <ID> --create` | Creates it in `databayt/kun` (or the repo given with `--repo`) and stores it in `project.json`. When it exists, `--create` or `--sync` rewrites its body from the current state |
 | `order <ID> <formula> --to <login>` | Fills the formula for this film and prints the title, the labels, the reference files it would upload and the body. It refuses while a slot is missing, or when the formula is not a work order |
 | `order … --create` | Needs the film issue first. Uploads the references to the CDN, creates the work order in the film issue's repository, adds its line to the film issue and records it in `project.json → orders` |
-| `submit <issue> <file>…` | For a machine that holds the CDN keys. With `--create` it uploads the files to `work/<film>/<issue number>/<file>`, posts the receipt as a comment and sets `status:review`. In the Kun app the Submit button does the same and needs no keys |
+| `submit <issue> <file>…` | For a machine that holds the CDN keys. With `--create` it uploads the files to `work/<film>/<issue number>/<file>`, posts the receipt as a comment and sets `status:review`. In Machine the Submit button does the same and needs no keys |
 | `advance`, `approve` | These record themselves. When the project has a film issue, each one ticks its stage or its approval on the film issue and adds a comment: `advance: <stage> · <deliverable> · sha <hash> · by <login>` or `approved: <gate> · <version> · by <login>`. If GitHub cannot be reached, the command warns and the ledger is still updated |
 | `status <ID>` | Also lists the work orders and the contributors: who did what, and when |
 
@@ -516,7 +516,7 @@ The wav is the timing master. Its record sits in `project.json → voice.<varian
 
 A file with no audio is refused. A failed transcription keeps the copy and the wav.
 
-Two commands feed the Kun app. Both print JSON.
+Two commands feed Machine. Both print JSON.
 
 | Command | Prints |
 | --- | --- |
@@ -540,7 +540,7 @@ The video department works in English. Questions, plans and replies are English.
 
 ## From Machine
 
-In the Machine app, the home of the **Video** department shows at most three options. They are
+In Machine, the home of the **Video** department shows at most three options. They are
 chosen by the station's board from the formulas in `departments/video/formulas/` and from this
 ledger's state: an open project, the stage it has reached, an approval that waits. With a Hogwarts
 film in production, the options on 2026-11-22 were:
@@ -586,5 +586,5 @@ app opens and after every update. See [Machine](/docs/machine).
    approval; the app never approves. Between gates, **Continue production** on the board fills the
    next stage.
 5. **Heavy steps** (a Blender render, transcription, the encode) run on this computer, or as a
-   [pool](/docs/machine#pool) job on a teammate's idle machine.
+   [shared job](/docs/machine#share-when-idle) on a teammate's idle machine.
 6. Files land under `~/media/<line>/<film>/`, and approved masters go to the CDN as described above.

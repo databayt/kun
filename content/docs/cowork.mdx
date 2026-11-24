@@ -176,6 +176,6 @@ The bridge only works while the desktop app is open. When it isn't, previously s
 | To keep going on work that is already open  | Remote Control: every interactive session registers itself (`remoteControlAtStartup`)                           | Mac awake                              |
 | To start new work on the Mac from the phone | **Mac · kun** in the Claude app's Code tab: the `kun-rc` server (`devices.sh`, tmux, auto mode, 3 sessions max) | Mac awake: on power (lid open or shut in server mode) |
 | Work that must continue with the Mac off    | A cloud session or project in the Code tab (GitHub repos), or a routine (`/schedule`)                           | GitHub connected                       |
-| A GUI-only task in a Mac app                | Dispatch → a Desktop Code session with computer use (Dispatch is closed to new users, so treat it as legacy)    | Desktop app open, computer use enabled |
+| A GUI-only task in a Mac app                | Anthropic's Dispatch app → a Desktop Code session with computer use (closed to new users, so treat it as legacy; not kun's [Dispatch](/docs/machine/dispatch) bus)    | Desktop app open, computer use enabled |
 
 The Mac is the bottleneck, not the plan: it has 16 GB of RAM and each open session holds about 10 MCP processes. Close sessions when their work is done; the `kun-rc` server keeps the phone's way in. `bash ~/.claude/scripts/devices.sh --status` shows the whole lane.

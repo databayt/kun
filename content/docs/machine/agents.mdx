@@ -1,0 +1,65 @@
+---
+title: Agents
+description: The coding CLIs by letter — what each runs on, when to use which, and the free agent to switch to when the Claude limit runs out
+---
+
+# Agents
+
+> One letter per coding agent. Claude Code (`c`) does the judging and the real work; the others are fallbacks and cheap lanes. All of them are [compiled](/docs/machine/compile) from the same kun source.
+
+## The letters
+
+Live values from `lane models` (2026-11-24). The letters come from one file, `.claude/machine/launchers.json`.
+
+| Letter | Agent | Runs on | Use it for |
+| --- | --- | --- | --- |
+| `c` | Claude Code | Opus, on your Claude plan | Everything serious, anything with client data |
+| `x` | Codex | `codex-cli` 0.171.0 | A second opinion, parallel work |
+| `a` | Antigravity (`agy`) | Gemini 3.8 Flash (High), your Google account | Fallback and cheap one-file tasks |
+| `o` | opencode | `deepseek-v4.1-flash-free`, no key | Easy coding when Claude is out |
+| `h` | Hermes | `meituan/longcat-2.5:free` | Chat gateway (Slack, WhatsApp), not a coding CLI |
+| `f` | Claude Code on the Pool | LongCat 2.5 via the [Pool](/docs/machine/pool) | Claude Code's skills and agents, free |
+| `d` | Claude Code, DeepSeek | Your own DeepSeek key | Paid, small, yours; not a managed launcher |
+
+`c`, `a`, `x`, `o` run with permissions bypassed. For `o` that is config-level (`"permission": "allow"` in `opencode.json`), as it has no flag. A machine profile can narrow the set with `"launchers": ["c","a"]`.
+
+## Claude limit reached: the ladder
+
+Try in order. State of the Pool today: ready; Nous 100% ok, Cloudflare 90% ok, opencode Zen keyless.
+
+| # | Agent | What you get |
+| --- | --- | --- |
+| 1 | **`o`** opencode | DeepSeek v4.1 Flash, free, no key. The best free coder right now. `o -m omniroute/kun-code` runs it on the Pool instead |
+| 2 | **`f`** Claude Code on the Pool | The same skills and agents on LongCat 2.5, then Hunyuan Flash, then Cloudflare gpt-oss-120b, then GLM and Qwen coder. `f --pool kun-long` for long context |
+| 3 | **`a`** Antigravity | Gemini 3.8 Flash on your Google account. Needs a one-time sign-in |
+| 4 | **Strengthen the Pool** | Add NVIDIA (Nemotron 550B), Groq and Gemini keys, two minutes each. They are `needs-key` today. See [Pool](/docs/machine/pool#add-a-source) |
+
+**Rule: anything with client data or secrets waits for `c`.** Free providers can read what you send.
+
+In a Machine chat the switch is automatic: when Claude hits its limit and the Pool is ready, the run moves to it and the model chip says *fallback*.
+
+## Commands
+
+| You type | You get |
+| --- | --- |
+| `lane <c\|x\|a\|o\|h\|f\|d> "prompt"` | One prompt through any agent, answer printed, no session |
+| `lane models` | Which model each agent is set to |
+| `lane pool` | Every Pool source and combo: status, requests, success rate |
+| `lane --pool [combo] <f\|o> "prompt"` | One prompt on a named Pool combo (`kun-code` default) |
+| `lane test [c a o h f]` | The same bug-fix task through each agent, PASS/FAIL and seconds. **Spends tokens**: run it on purpose |
+| `f --print-env` | Show what `f` would export (token hidden) and stop |
+
+## In Machine
+
+| Where | What |
+| --- | --- |
+| **Terminal** (sidebar) | Pick a letter; it opens in a tab. Several tabs at once. Inside the app only |
+| **Settings → Agents** | The launcher block in your shell; edits keep a backup, and lines outside the markers are never touched |
+| **Settings → Model** | Who runs Claude Code in the app: Claude, NVIDIA, OpenRouter or the Pool |
+| **Setup** | One readiness step per letter (`launcher.c`, `launcher.a`, `launcher.x`, `launcher.o`, `launcher.h`, `launcher.f`) |
+
+The launchers live in one managed block in `~/.zshrc` or `~/.bashrc` (`# BEGIN databayt agents` to `# END databayt agents`), and in `$PROFILE` on Windows.
+
+## Headless, across machines
+
+To run an agent on another machine, or from chat, send it as a task: [Dispatch](/docs/machine/dispatch) takes `--to claude|codex|opencode|agy|hermes|fcc`.

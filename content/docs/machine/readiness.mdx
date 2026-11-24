@@ -1,0 +1,77 @@
+---
+title: Readiness
+description: The step catalogue that says whether a computer is ready — check, fix, Heal, the gate, and the opt-outs
+---
+
+# Readiness
+
+> One catalogue says what "ready" means. The Setup page, the one-liner and the terminal all read it, so they never disagree. **Heal** hands whatever is still failing to an agent.
+
+The catalogue is `.claude/machine/readiness.json`: 94 steps in 7 stages. Each step has a check (a probe), a fix and, when it matters, an uninstall.
+
+## The stages
+
+| Stage | Covers |
+| --- | --- |
+| identity | GitHub CLI, sign-in, organization membership, SSH key, git name and email |
+| accounts | Claude sign-in, Slack, company mailbox, secrets, CRM keys, Figma, and for tech Cloudflare, Vercel, AWS, Neon |
+| foundation | brew, git, jq, uv, ffmpeg, tesseract, tmux, Node, pnpm, Chrome, Colima |
+| repos | the repos folder, the `kun`, `hogwarts`, `codebase` clones, each product's `.env` |
+| agents | Claude Code and Desktop, Antigravity, opencode, Codex, Hermes, a `launcher.<letter>` per [agent](/docs/machine/agents), the [Pool](/docs/machine/pool) |
+| engine | manifest, MCP, hooks, rules, the heartbeat, devices, and `compile.claude`, `compile.codex`, `compile.opencode`, `compile.agy`, `compile.hermes` ([Compile](/docs/machine/compile)), department packs `pack.<department>` |
+| tools | your department's apps: WebStorm and VS Code for tech; Blender, FilmCraft, OBS and ComfyUI for video |
+
+## Fix kinds
+
+| Kind | What happens |
+| --- | --- |
+| `auto` | Heal runs it |
+| `terminal` | Opens Terminal with the command: a sign-in, a code |
+| `link` | Opens the page, for example the organization invite |
+| `request` | Sends the request to a person, for example **Ask Abdout** for the Pool keys |
+
+Heal never runs the last three, never prints a secret and never uses `sudo`, a force-push or a database reset.
+
+## Check and fix in the terminal
+
+```bash
+node ~/kun/.claude/skills/provision/scripts/provision.mjs --check --json      # read only
+node ~/kun/.claude/skills/provision/scripts/provision.mjs --complete --json   # check, fix auto steps, re-check (3 passes)
+node ~/kun/.claude/skills/provision/scripts/provision.mjs --maintain --json   # complete + due updates
+```
+
+`--only id,id` narrows it, `--dry-run` prints the fixes it would run, and no `--json` prints a table. The skill is called `provision`; **Heal** is its name in Machine. It writes `~/.claude/state/readiness.json`.
+
+## The gate
+
+Each step carries a tier: `core` (20 steps) or `extra` (16). The gate is the tiered steps that apply to the machine's departments.
+
+| Level | Meaning | Claiming tasks |
+| --- | --- | --- |
+| **Red** | a core step is missing | blocked until fixed |
+| **Orange** | core complete, extras missing | allowed, with a warning |
+| **Green** | every step passes | allowed |
+
+```bash
+bash ~/kun/.claude/scripts/kun-ready --gate            # GREEN, ORANGE (n extras) or RED (n core)
+bash ~/kun/.claude/scripts/kun-ready --gate --fix      # run the automatic fixes, then check again
+bash ~/kun/.claude/scripts/kun-ready --gate --json     # what Machine reports
+```
+
+Exit code 0 is green or orange; 1 is red. Core steps: identity (`gh.auth`, `github.org`, `git.identity`), `claude.cli`, `anthropic.login`, `launcher.c`, the engine (`engine.manifest`, `engine.fresh`, `engine.hooks`, `engine.rules`), the repos and your department's pack.
+
+**What red blocks.** Claiming a task or a pool job, and only that. Machine sends its verdict with every heartbeat; kun refuses a claim when the last verdict is red, or when a non-green one is older than 48 hours. Chat, Git pushes and reading the org are never blocked. The gate runs by itself at first launch and after every update.
+
+## In Machine
+
+| Where | What |
+| --- | --- |
+| **Setup** | Stages with `done/total`, **Heal**, the exact command per step, **Uninstall** |
+| **Settings → Health** | The engine's health check, app updates, and the Pool line (green ready, yellow a source dry, red the gateway down) |
+| Machines | Every machine's readiness percent and gate verdict |
+
+## Opt-outs
+
+**Uninstall** records the step in `~/.claude/state/readiness-optout.json`. From then on it reads *removed by you*, leaves the percentage, and neither Heal nor the daily heartbeat reinstalls it. Press **Install** to bring it back. Keystones (`brew`, `node`, `repo.kun`, `claude.cli`) are never removed by the app: it opens Terminal with the command.
+
+To uninstall from the terminal: `provision.mjs --uninstall --only tool.vscode --json` (add `--dry-run` first). It refuses a step another installed step needs.
