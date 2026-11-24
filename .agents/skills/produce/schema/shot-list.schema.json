@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "produce/shot-list.schema.json",
+  "title": "Storyboard shot list (04-storyboard/shot-list.json)",
+  "type": "object",
+  "required": ["scenes"],
+  "properties": {
+    "id": { "type": "string" },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "durationS", "narration", "visual", "camera", "source", "transition", "sound"],
+        "properties": {
+          "id": { "type": "string" },
+          "durationS": { "type": "number" },
+          "narration": { "type": "object", "properties": { "ar": { "type": "string" }, "en": { "type": "string" } } },
+          "visual": { "type": "string" },
+          "camera": { "type": "string" },
+          "source": {
+            "type": "object",
+            "required": ["type", "ref"],
+            "properties": {
+              "type": { "type": "string", "enum": ["capture", "ai", "3d", "graphic", "stock"] },
+              "ref": { "type": "string" }
+            }
+          },
+          "flow": { "type": "string" },
+          "transition": { "type": "string" },
+          "sound": { "type": "string" },
+          "productClaim": { "type": "boolean", "$comment": "true = the scene states what the product does; only source.type=capture (real UI) may carry it" },
+          "illustrative": { "type": "boolean", "$comment": "generated property / concept scenes; must be flagged so the video can say so" },
+          "shot": {
+            "type": "object",
+            "$comment": "optional cinematography for the scene; every field is optional",
+            "properties": {
+              "size": { "type": "string" }, "lens": { "type": "string" }, "move": { "type": "string" }, "light": { "type": "string" }, "mood": { "type": "string" },
+              "beats": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "string" }, "action": { "type": "string" } } } },
+              "audio": { "type": "object", "properties": { "line": { "type": "string" }, "sfx": { "type": "string" }, "ambient": { "type": "string" } } },
+              "refs": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

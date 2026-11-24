@@ -1,8 +1,10 @@
 ---
 name: check
 description: Quality gate — typecheck + build + visual verify before shipping
-when_to_use: "Use when work is about to ship and needs the pre-ship quality gate — run tsc, production build, optional browser visual verification, and existing tests, with auto-fix loops, then emit a READY TO SHIP / BLOCKED verdict and cache the pass in the session sentinel; unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
+when_to_use: "Use when work is about to ship and needs the pre-ship gate — tsc, production build, optional visual verify and existing tests with auto-fix loops, ending READY TO SHIP or BLOCKED. Unlike /handover or /qa (deep UI/block verification), this is the fast mechanical green-check. Triggers on: check, pre-ship quality gate, typecheck + build + visual verify, \"is it green\"."
 argument-hint: "[feature] [--visual <route>]"
+lane: build
+effort: medium
 ---
 
 # Check — Quality Gate
@@ -107,7 +109,7 @@ Output a structured report:
 
 ### 6. SENTINEL — Cache the pass
 
-On verdict `READY TO SHIP`, write to the shared session sentinel at `.Codex/session-state.json`:
+On verdict `READY TO SHIP`, write to the shared session sentinel at `.claude/session-state.json`:
 
 ```json
 {

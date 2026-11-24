@@ -1,8 +1,10 @@
 ---
 name: qa
-description: Autonomous block QA — detect, adversarially verify, fix safe tiers, hand the residual to a human
-when_to_use: 'Use when a feature block needs autonomous QA — detect across every route + the block source, adversarially verify every FAIL, auto-fix the safe (tier A) and build-gated (tier B) tiers, persist the verdict to blocks.json, and open one human-signoff issue carrying only the residual — triggering on qa <block> (e.g. "qa admission" in prose, no slash needed), "QA this block", pre-release verification, or a code-complete-but-unverified block; block-scope only — a single URL spot-check is handover''s job, the typecheck/build gate alone is check''s, and a user-reported bug is report''s.'
+description: Autonomous block QA with one human signoff on the residual
+when_to_use: 'Use when a feature block needs autonomous QA across every route — detect, verify each FAIL, auto-fix the safe tiers, open one human-signoff issue for the rest — triggering on qa <block> (e.g. "qa admission"), "QA this block", pre-release verification, or a code-complete but unverified block. Block scope only: a single-URL spot-check is handover''s job, the typecheck/build gate check''s, a user-reported bug report''s.'
 argument-hint: <block> [--env staging] [--audit] [--rounds N]
+lane: judge
+effort: high
 ---
 
 # QA — Autonomous Block Verification
@@ -14,7 +16,7 @@ the verdict**, and **opens one GitHub issue** carrying only the minimal residual
 
 This is the gate between building and shipping — heavier than `/handover` (which reports), lighter on the
 human than a manual QA pass. It composes, it does not redefine: `/check` for the static gate, the 17 niche
-keywords (`.Codex/agents/quality.md`), the rules' Fix sections (`.Codex/rules/`), and `handover.js`'s
+keywords (`.claude/agents/quality.md`), the rules' Fix sections (`.claude/rules/`), and `handover.js`'s
 adversarial RECHECK.
 
 ## Usage
@@ -30,7 +32,7 @@ adversarial RECHECK.
 
 ### Phase 1 — Resolve
 
-Parse `<block>` and flags from `$ARGUMENTS`. Confirm the block exists in `.Codex/blocks.json`; if not,
+Parse `<block>` and flags from `$ARGUMENTS`. Confirm the block exists in `.claude/blocks.json`; if not,
 stop and list near matches. The workflow itself resolves the block's `path` + pre-computed `routes` (with a
 `find src/app` + strip fallback), so the command stays thin.
 
@@ -57,7 +59,7 @@ Workflow({ name: "qa", args: "<block>" })
 For `--env`/`--audit`/`--rounds`, pass the object form:
 `Workflow({ name: "qa", args: { block: "<block>", base: "https://ed.databayt.org", audit: true, rounds: 2 } })`.
 
-The workflow runs six phases (`.Codex/workflows/qa.js`):
+The workflow runs six phases (`.claude/workflows/qa.js`):
 
 | Phase   | What it does                                                                                      |
 | ------- | ------------------------------------------------------------------------------------------------- |
@@ -68,7 +70,7 @@ The workflow runs six phases (`.Codex/workflows/qa.js`):
 | Handoff | open ONE `qa-signoff` issue (or update the existing one) with the matrix + fixes + residual       |
 | Persist | write the verdict to `blocks.json[block].qa` + the block README frontmatter                       |
 
-The fix-tier matrix and the honesty doctrine live in `.Codex/agents/quality.md` — the detector and fixer
+The fix-tier matrix and the honesty doctrine live in `.claude/agents/quality.md` — the detector and fixer
 agents read them. Tier C (subjective UX, business-logic correctness, data accuracy) is **never** auto-fixed;
 it always flows to the human residual.
 
@@ -91,7 +93,7 @@ file:line, and the `qa-blocked` issue link.
 
 ### Phase 4 — Sentinel
 
-On a completed run, write the shared session sentinel `.Codex/session-state.json` (merge, don't overwrite):
+On a completed run, write the shared session sentinel `.claude/session-state.json` (merge, don't overwrite):
 
 ```json
 {
@@ -114,7 +116,7 @@ The workflow's Handoff agent fills this template. Labels: `qa-signoff` (CLEAN) o
 ```markdown
 ## QA Signoff — <block> — <CLEAN | BLOCKED>
 
-**Verified by**: qa.js (Opus 4.8) · **Run**: <ISO> · **Rounds**: <N> · **Base**: localhost:3000
+**Verified by**: qa.js (<model>) · **Run**: <ISO> · **Rounds**: <N> · **Base**: localhost:3000
 **Auto-fixed**: <K> · **Residual for human**: <M>
 
 Autonomous QA fixed the safe + verifiable surface and adversarially confirmed every reported failure.

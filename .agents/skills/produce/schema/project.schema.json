@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "produce/project.schema.json",
+  "title": "Video production project (project.json)",
+  "type": "object",
+  "required": ["id", "brand", "category", "subject", "title", "langs", "version", "status", "owner", "reviewer", "stages", "assets", "cost", "approvals", "cdn"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^(hogwarts|mkan|databayt)-[a-z0-9]+(-[a-z0-9]+)*-v\\d{3}$" },
+    "brand": { "type": "string", "enum": ["hogwarts", "mkan", "databayt"] },
+    "identity": { "type": "string", "$comment": "optional brand-kit key shown on film; defaults to brand" },
+    "category": { "type": "string" },
+    "subject": { "type": "string" },
+    "title": { "type": "string" },
+    "langs": { "type": "array", "minItems": 1, "items": { "type": "string", "enum": ["ar", "en"] } },
+    "version": { "type": "string", "pattern": "^V\\d{3}$" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)?$", "$comment": "optional stable CDN slug <type>/<subject>: <cdn>/video/<slug>/<variant>/…; default = <type>/<subject>" },
+    "markets": { "type": "array", "minItems": 1, "items": { "type": "string" }, "$comment": "optional market ids from content/media/markets.json (sa ae eg sd); presence switches the project to per-variant stages" },
+    "variants": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["id", "lang"], "properties": { "id": { "type": "string" }, "market": { "type": ["string", "null"] }, "lang": { "type": "string", "enum": ["ar", "en"] } } }, "$comment": "<market>-<lang>; without markets, one per language with market null and id = lang" },
+    "variantStages": { "type": "object", "properties": {}, "$comment": "variant id -> {audio|edit|render|qa|approval|cdn|publish: {status,file,at,sha?,inputsHash?}}" },
+    "status": { "type": "string", "enum": ["draft", "in-production", "in-review", "approved", "shipped", "published", "rejected"] },
+    "createdAt": { "type": "string" },
+    "issue": { "type": ["string", "null"], "$comment": "the FILM issue (tracker) as <owner/repo>#<n>; null until `produce issue <ID> --create`" },
+    "locks": { "type": "object", "properties": {}, "$comment": "stage key -> {by, at, sha, source: plan|default|set|spec, backfill?, changed?}: a stage whose spec is written to 00-plan/ (`produce lock`)" },
+    "orders": {
+      "type": "array",
+      "$comment": "work orders created by `produce order … --create`; each is its own issue made for one person",
+      "items": {
+        "type": "object",
+        "required": ["issue", "formula", "to", "createdAt", "by"],
+        "properties": {
+          "issue": { "type": "string", "pattern": "^[\\w.-]+/[\\w.-]+#\\d+$" },
+          "formula": { "type": "string" },
+          "to": { "type": "string" },
+          "label": { "type": "string" },
+          "createdAt": { "type": "string" },
+          "by": { "type": "string" }
+        }
+      }
+    },
+    "owner": { "type": "string" },
+    "reviewer": { "type": ["string", "null"] },
+    "stages": {
+      "type": "object",
+      "properties": {},
+      "$comment": "stage key -> {status: done|passed|failed, file, at, verdict?}. Stage keys: request research brief script storyboard assets visual audio edit render qa approval cdn publish"
+    },
+    "assets": {
+      "type": "array",
+      "items": { "type": "object", "required": ["kind", "path"], "properties": { "kind": { "type": "string" }, "path": { "type": "string" }, "source": { "type": "string" }, "illustrative": { "type": "boolean" } } }
+    },
+    "cost": {
+      "type": "array",
+      "items": { "type": "object", "required": ["item", "usd", "note"], "properties": { "item": { "type": "string" }, "usd": { "type": "number" }, "note": { "type": "string" } } }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gate", "version", "by", "at"],
+        "properties": {
+          "gate": { "type": "string", "enum": ["script", "look", "version", "publish"] },
+          "version": { "type": "string", "pattern": "^V\\d{3}$" },
+          "by": { "type": "string" },
+          "at": { "type": "string" },
+          "issue": { "type": "string" },
+          "masterSha": { "type": "string" },
+          "destination": { "type": "string" },
+          "variants": { "type": "object", "properties": {}, "$comment": "variant id -> pinned master sha (version gate, markets projects)" },
+          "variant": { "type": "string" }
+        }
+      }
+    },
+    "cdn": { "type": "object", "properties": {} }
+  }
+}

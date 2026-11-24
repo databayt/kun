@@ -1,8 +1,12 @@
 ---
 name: convert
-description: Convert a file or URL to Markdown via MarkItDown (PDF, Office, images, audio, web)
-when_to_use: "Use when a file or URL needs to become clean Markdown — PDFs, Office docs (DOCX/PPTX/XLSX), images, audio, web pages, YouTube transcripts — via the MarkItDown MCP, landing in docs/, a knowledge base, or printed to the session. Triggers on: convert <file|url>, markitdown, markdown this PDF, pull this page into docs, transcribe this video."
+description: Convert a file or URL to Markdown via MarkItDown
+when_to_use: "Use when a file or URL should become clean Markdown — PDF, Office docs, images, audio, web pages, YouTube transcripts — landing in docs/, a knowledge base or the session. Triggers on: convert <file|url>, markitdown, markdown this PDF, pull this page into docs, transcribe this video."
 argument-hint: "<file-or-url> [out.md | -]"
+lane: mechanical
+model: haiku
+effort: low
+context: fork
 ---
 
 # Convert to Markdown
@@ -52,11 +56,18 @@ a knowledge base, or the content pipeline as Markdown the model can read.
 
 ## Notes
 
-- Runs via `uvx markitdown-mcp` (no API key). First invocation in a session may
-  pause while `uv` provisions the cached environment.
+- Runs the `markitdown-mcp` uv tool (no API key). setup.sh installs it once with
+  `uv tool install`; on a machine without the install, `uvx markitdown-mcp` builds
+  a fresh environment and the first call in a session may pause while it does.
 - Plain-language requests like "convert this PDF to markdown: <path>" route to
   the same `markitdown` tool without typing `/convert`.
 - Audio transcription needs `ffmpeg`; image EXIF needs `exiftool` (`brew install`).
+- **Arabic / RTL PDFs come out unusable raw** — pdfminer emits Arabic in visual
+  order (every word letter-reversed), presentation-form glyphs, and `(cid:NN)` tokens
+  for fonts without a Unicode map. For textbooks use the `textbook` skill, whose
+  script wraps MarkItDown with the RTL repair, a measured quality grade and a
+  tesseract OCR fallback (`~/.claude/skills/textbook/scripts/textbook-md.py`).
+  Never push a whole book through the MCP — the result lands in the session.
 - Image-only/scanned PDFs: upstream ships a `markitdown-ocr` plugin
   (`--use-plugins --llm-client … --llm-model …`) — it needs an OpenAI-compatible
   API key, which the subscription-only billing posture forbids; adopting it

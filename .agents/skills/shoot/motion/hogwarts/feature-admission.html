@@ -1,0 +1,267 @@
+<!doctype html>
+<!-- Feature hero, animated: admission — /<lang>/features/admission.
+     No screenshots: the module's story drawn as live UI. A campaign card sends applications into a
+     Submitted → Review → Accepted pipeline, documents and interviews get checked, and each accepted
+     applicant lands on a merit list that re-ranks by score. Composed for the page's band
+     (100vw × 50svh ≈ 3.2–3.6:1) at 2400x720; the transparent header sits over the top ~28%, so
+     the content starts below it, and phones crop to the centre strip, where the pipeline runs.
+     hero.mjs injects ANIM = { dir, s: {strings}, people: [{ name, init, grade, score }] }.
+     Every motion is a function of t mod T with per-applicant phases, so frame(0) === frame(T). -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Ar; src: url("file:///Users/abdout/hogwarts/public/fonts/thmanyah/thmanyah-sans-500.woff2"); font-weight: 500; }
+  @font-face { font-family: Ar; src: url("file:///Users/abdout/hogwarts/public/fonts/thmanyah/thmanyah-sans-700.woff2"); font-weight: 700; }
+  @font-face { font-family: Ar; src: url("file:///Users/abdout/hogwarts/public/fonts/thmanyah/thmanyah-sans-900.woff2"); font-weight: 900; }
+  @font-face { font-family: En; src: url("file:///Users/abdout/hogwarts/node_modules/geist/dist/fonts/geist-sans/Geist-Medium.woff2"); font-weight: 500; }
+  @font-face { font-family: En; src: url("file:///Users/abdout/hogwarts/node_modules/geist/dist/fonts/geist-sans/Geist-Bold.woff2"); font-weight: 700; }
+  @font-face { font-family: En; src: url("file:///Users/abdout/hogwarts/node_modules/geist/dist/fonts/geist-sans/Geist-Black.woff2"); font-weight: 900; }
+  :root { --green: #00bc6e; --green-soft: #dcf5e9; --ink: #0a0a0a; --mute: #6b6b66; --line: #e4e4df; --paper: #f6f6f3; }
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 2400px; height: 720px; overflow: hidden; color: var(--ink); font-weight: 500; }
+  body { background: radial-gradient(1200px 520px at 50% 62%, #ffffff 0%, var(--paper) 70%); }
+  body.ar { font-family: Ar; } body.en { font-family: En; }
+  .dots { position: absolute; inset: 0; background-image: radial-gradient(#d9d9d3 1.4px, transparent 1.6px); background-size: 28px 28px; opacity: .55;
+          -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 85%, transparent 100%); }
+  .abs { position: absolute; left: 0; top: 0; will-change: transform, opacity; }
+  .panel { background: #fff; border-radius: 26px; box-shadow: 0 24px 60px rgba(0,0,0,.07), 0 2px 6px rgba(0,0,0,.05); }
+
+  /* campaign */
+  .camp { padding: 30px 34px; display: flex; flex-direction: column; gap: 16px; }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .icon { width: 54px; height: 54px; border-radius: 15px; background: var(--green); display: grid; place-items: center; flex: none; }
+  .ctitle { white-space: nowrap; font-size: 30px; font-weight: 700; line-height: 1.1; }
+  .pill { margin-inline-start: auto; display: flex; align-items: center; gap: 9px; padding: 8px 16px; border-radius: 999px; background: var(--green-soft); color: #00804b; font-size: 19px; font-weight: 700; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); }
+  .meta { font-size: 20px; color: var(--mute); }
+  .big { font-size: 74px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+  .chip { white-space: nowrap; padding: 6px 13px; border-radius: 999px; background: #f0f0ec; font-size: 18px; color: var(--mute); }
+  .chip.g { background: var(--green-soft); color: #00804b; font-weight: 700; }
+  .bars { display: flex; align-items: flex-end; gap: 9px; height: 96px; }
+  .bars i { flex: 1; border-radius: 6px 6px 3px 3px; background: #e6e6e1; }
+  .bars i.on { background: var(--green); }
+  .toast { padding: 12px 20px; border-radius: 16px; background: var(--ink); color: #fff; font-size: 20px; font-weight: 700; display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+  .toast b { color: var(--green); }
+
+  /* pipeline */
+  .col { background: rgba(236,236,231,.72); border-radius: 26px; }
+  .colh { position: absolute; top: 20px; inset-inline: 22px; display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; }
+  .colh .n { margin-inline-start: auto; min-width: 34px; height: 34px; padding: 0 10px; border-radius: 999px; background: #fff; display: grid; place-items: center; font-size: 18px; }
+  .colh .sw { width: 12px; height: 12px; border-radius: 50%; }
+  .card { width: 236px; height: 108px; padding: 16px 18px; background: #fff; border-radius: 20px; box-shadow: 0 10px 26px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.06);
+          display: flex; flex-direction: column; justify-content: space-between; border-inline-start: 5px solid transparent; }
+  .av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 17px; font-weight: 700; flex: none; }
+  .nm { font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ft { position: relative; display: flex; align-items: center; gap: 8px; }
+  .ft .chip { font-size: 15px; padding: 4px 10px; }
+  .ck { width: 28px; height: 28px; border-radius: 9px; background: #f0f0ec; display: grid; place-items: center; }
+  .ck svg { width: 17px; height: 17px; }
+  .ck.ok { background: var(--green); }
+  .acc { position: absolute; inset-inline-end: 0; padding: 5px 11px; border-radius: 999px; background: var(--green-soft); white-space: nowrap; font-size: 16px; font-weight: 700; color: #00804b; }
+
+  /* merit */
+  .merit { padding: 24px 26px; }
+  .mh { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 700; height: 44px; }
+  .mh .chip { margin-inline-start: auto; }
+  .mrow { width: 508px; height: 60px; padding: 0 14px; border-radius: 16px; display: flex; align-items: center; gap: 14px; }
+  .rk { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 17px; font-weight: 700; background: #f0f0ec; flex: none; }
+  .mrow .nm { width: 170px; font-size: 19px; }
+  .sbar { flex: 1; height: 10px; border-radius: 5px; background: #eeeeea; overflow: hidden; }
+  .sbar i { display: block; height: 100%; border-radius: 5px; background: var(--green); }
+  .sc { width: 48px; text-align: end; font-size: 21px; font-weight: 900; }
+</style>
+</head>
+<body>
+<div class="dots"></div>
+<svg id="wires" class="abs" width="2400" height="720" style="overflow:visible"></svg>
+<script>
+const ANIM = /*ANIM*/ null;
+
+const W = 2400, H = 720, T = 12;
+window.DURATION = T;
+const { s, people } = ANIM;
+const rtl = ANIM.dir === "rtl";
+document.body.className = rtl ? "ar" : "en";
+document.body.dir = ANIM.dir;
+const N = people.length, PH = T / N; // one new application every PH seconds
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const ease = (p) => 0.5 - 0.5 * Math.cos(Math.PI * clamp(p, 0, 1));
+const back = (p) => { p = clamp(p, 0, 1); const c = 1.6; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+const lerp = (a, b, p) => a + (b - a) * p;
+const mod = (v, m) => ((v % m) + m) % m;
+// logical x (LTR) → screen x, mirrored for RTL
+const X = (x, w = 0) => (rtl ? W - x - w : x);
+const el = (html, cls = "abs") => { const d = document.createElement("div"); d.className = cls; d.innerHTML = html; document.body.appendChild(d); return d; };
+const place = (d, x, y, w, extra = "") => { d.style.transform = `translate(${X(x, w)}px, ${y}px) ${extra}`; };
+
+const CHECK = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+const DOC = (c) => `<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>`;
+const TALK = (c) => `<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>`;
+const CAP = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>`;
+const HUES = ["#ffd9c2", "#d6e4ff", "#ffe3a3", "#e3d7ff", "#c8f0e0", "#ffd0dc", "#d2f1ff", "#f1e3c8"];
+
+// ── layout (logical LTR px) ──
+const TOP = 205;
+const CAMP = { x: 110, y: TOP, w: 540, h: 430 };
+const COLS = [{ x: 790, w: 270 }, { x: 1080, w: 270 }, { x: 1370, w: 270 }];
+const COLH = 450, CARD_W = 236, CARD_H = 108, Y0 = TOP + 76, DRIFT = 62;
+const MERIT = { x: 1720, y: TOP, w: 560, h: 450 };
+const ROW_H = 64, ROW_Y0 = MERIT.y + 86;
+
+// lifecycle of one application, seconds after it is sent
+const L = { fly: 0.9, sub: 2.8, mv1: 3.5, doc: 4.1, talk: 4.7, rev: 5.5, mv2: 6.2, acc: 8.0, out: 8.8 };
+
+// ── wires: campaign → submitted, accepted → merit (marching dashes, period-exact) ──
+const wires = document.getElementById("wires");
+const path = (pts) => "M" + pts.map(([x, y]) => `${X(x)} ${y}`).join(" L");
+wires.innerHTML = [
+  path([[CAMP.x + CAMP.w, CAMP.y + 300], [COLS[0].x + 14, Y0 + 40]]),
+  path([[COLS[2].x + COLS[2].w - 14, Y0 + 40], [MERIT.x, MERIT.y + 120]]),
+].map((d) => `<path d="${d}" fill="none" stroke="#bdbdb6" stroke-width="3" stroke-dasharray="10 14" stroke-linecap="round"/>`).join("");
+const wirePaths = [...wires.querySelectorAll("path")];
+
+// ── campaign card ──
+const camp = el(`
+  <div class="row"><div class="icon">${CAP}</div><div class="ctitle">${s.campaign}</div>
+    <div class="pill"><span class="dot"></span>${s.open}</div></div>
+  <div class="meta">${s.meta}</div>
+  <div class="row" style="align-items:flex-end;gap:16px;margin-top:6px"><div class="big" id="big">${s.total}</div>
+    <div style="padding-bottom:8px;display:flex;flex-direction:column;gap:8px"><span class="meta" style="color:var(--ink)">${s.applications}</span><span class="chip g">${s.trend}</span></div></div>
+  <div class="bars" id="bars">${"<i></i>".repeat(16)}</div>`, "abs panel camp");
+camp.style.width = CAMP.w + "px"; camp.style.height = CAMP.h + "px";
+place(camp, CAMP.x, CAMP.y, CAMP.w);
+const bars = [...camp.querySelectorAll(".bars i")];
+const dot = camp.querySelector(".dot");
+const toast = el(`<span>+1</span><span>${s.newApp}</span><b>●</b>`, "abs toast");
+
+// ── columns ──
+const COLC = ["#9a9a93", "#f0a200", "#00bc6e"];
+const colEls = COLS.map((c, i) => {
+  const d = el(`<div class="colh"><span class="sw" style="background:${COLC[i]}"></span>${s.cols[i]}<span class="n">0</span></div>`, "abs col");
+  d.style.width = c.w + "px"; d.style.height = COLH + "px";
+  place(d, c.x, TOP, c.w);
+  return d.querySelector(".n");
+});
+
+// ── application cards + merit rows ──
+const cards = people.map((p, i) => {
+  const d = el(`
+    <div class="row" style="gap:12px"><div class="av" style="background:${HUES[i % HUES.length]}">${p.init}</div><div class="nm">${p.name}</div></div>
+    <div class="ft"><span class="chip">${p.grade}</span><span class="ck">${DOC("#8a8a84")}</span><span class="ck">${TALK("#8a8a84")}</span><span class="acc">✓ ${s.accepted}</span></div>`, "abs card");
+  const [ckDoc, ckTalk] = d.querySelectorAll(".ck");
+  return { d, ckDoc, ckTalk, acc: d.querySelector(".acc") };
+});
+const merit = el(`<div class="mh">${s.merit}<span class="chip">${s.meritSub}</span></div>`, "abs panel merit");
+merit.style.width = MERIT.w + "px"; merit.style.height = MERIT.h + "px";
+place(merit, MERIT.x, MERIT.y, MERIT.w);
+const rows = people.map((p, i) => {
+  const d = el(`<div class="rk"></div><div class="av" style="width:34px;height:34px;font-size:14px;background:${HUES[i % HUES.length]}">${p.init}</div>
+    <div class="nm">${p.name}</div><div class="sbar"><i></i></div><div class="sc"></div>`, "abs mrow");
+  return { d, rk: d.querySelector(".rk"), bar: d.querySelector(".sbar i"), sc: d.querySelector(".sc") };
+});
+
+// ── merit list state: a row is on the list from ROW_IN to ROW_IN + ROW_LIFE after its send ──
+const ROW_IN = 8.6, ROW_LIFE = 10.2;
+const ageOnList = (i, t) => mod(t - i * PH - ROW_IN, T);
+const present = (i, t) => ageOnList(i, t) < ROW_LIFE;
+function rankAt(i, t) { // rank among rows present at t, counting i itself
+  let r = 0;
+  for (let j = 0; j < N; j++) if (j !== i && present(j, t) && people[j].score > people[i].score) r++;
+  return r;
+}
+// triangle-filtered over the last `span` seconds: a deterministic, seamless ease for list moves
+function smooth(fn, t, span = 0.55, n = 16) {
+  let acc = 0, wsum = 0;
+  for (let k = 0; k < n; k++) { const w = Math.min(k + 1, n - k); acc += w * fn(t - (span * k) / (n - 1)); wsum += w; }
+  return acc / wsum;
+}
+
+window.render = function (t) {
+  t = mod(t, T);
+
+  // campaign: live dot pulse, breathing bars, a toast at every send
+  dot.style.boxShadow = `0 0 0 ${6 * (0.5 + 0.5 * Math.sin((2 * Math.PI * t) / 1.5))}px rgba(0,188,110,.25)`;
+  bars.forEach((b, j) => {
+    const v = 0.35 + 0.28 * Math.sin((2 * Math.PI * 2 * t) / T + j * 0.8) + 0.2 * Math.sin((2 * Math.PI * t) / T * 3 + j * 1.7) + j * 0.012;
+    b.style.height = clamp(v, 0.12, 1) * 96 + "px";
+    b.className = j >= bars.length - 3 ? "on" : "";
+  });
+  const sinceSend = mod(t, PH);
+  const tIn = back(sinceSend / 0.45), tOut = 1 - ease((sinceSend - 1.3) / 0.35);
+  toast.style.opacity = Math.min(clamp(sinceSend / 0.2, 0, 1), tOut);
+  place(toast, CAMP.x + CAMP.w - 270, CAMP.y - 22 - 18 * (1 - tIn), 270, `scale(${0.85 + 0.15 * tIn})`);
+
+  wirePaths.forEach((p) => (p.style.strokeDashoffset = -(t * 48) % 24));
+
+  // cards through the pipeline
+  const counts = [0, 0, 0];
+  cards.forEach((c, i) => {
+    const u = mod(t - i * PH, T);
+    let x, y, op = 1, sc = 1, lift = 0;
+    const cx = (k) => COLS[k].x + (COLS[k].w - CARD_W) / 2;
+    if (u < L.fly) { // sent from the campaign card
+      const p = ease(u / L.fly);
+      x = lerp(CAMP.x + CAMP.w - CARD_W - 20, cx(0), p); y = lerp(CAMP.y + 270, Y0, p);
+      op = clamp(u / 0.3, 0, 1); sc = lerp(0.8, 1, p); lift = Math.sin(Math.PI * p);
+      counts[0]++;
+    } else if (u < L.sub) { x = cx(0); y = Y0 + (u - L.fly) * DRIFT; counts[0]++; }
+    else if (u < L.mv1) {
+      const p = ease((u - L.sub) / (L.mv1 - L.sub));
+      x = lerp(cx(0), cx(1), p); y = lerp(Y0 + (L.sub - L.fly) * DRIFT, Y0, p); lift = Math.sin(Math.PI * p); counts[p < 0.5 ? 0 : 1]++;
+    } else if (u < L.rev) { x = cx(1); y = Y0 + (u - L.mv1) * DRIFT; counts[1]++; }
+    else if (u < L.mv2) {
+      const p = ease((u - L.rev) / (L.mv2 - L.rev));
+      x = lerp(cx(1), cx(2), p); y = lerp(Y0 + (L.rev - L.mv1) * DRIFT, Y0, p); lift = Math.sin(Math.PI * p); counts[p < 0.5 ? 1 : 2]++;
+    } else if (u < L.acc) { x = cx(2); y = Y0 + (u - L.mv2) * DRIFT; counts[2]++; }
+    else if (u < L.out) { // folds into the merit list
+      const p = ease((u - L.acc) / (L.out - L.acc));
+      x = lerp(cx(2), MERIT.x + 30, p); y = lerp(Y0 + (L.acc - L.mv2) * DRIFT, ROW_Y0 + rankAt(i, t) * ROW_H, p);
+      sc = lerp(1, 0.7, p); op = 1 - ease((p - 0.4) / 0.4); lift = Math.sin(Math.PI * p);
+      if (p < 0.5) counts[2]++;
+    } else op = 0;
+
+    c.d.style.opacity = op;
+    c.d.style.zIndex = 10 + Math.round(lift * 10);
+    c.d.style.boxShadow = `0 ${10 + 18 * lift}px ${26 + 30 * lift}px rgba(0,0,0,${0.08 + 0.06 * lift}), 0 1px 3px rgba(0,0,0,.06)`;
+    if (op > 0) place(c.d, x, y - 10 * lift, CARD_W, `scale(${sc * (1 + 0.04 * lift)})`);
+
+    const pop = (at) => { const p = clamp((u - at) / 0.35, 0, 1); return p > 0 ? back(p) : 0; };
+    const docOk = u >= L.doc, talkOk = u >= L.talk;
+    c.ckDoc.className = "ck" + (docOk ? " ok" : ""); c.ckDoc.innerHTML = docOk ? CHECK : DOC("#8a8a84");
+    c.ckTalk.className = "ck" + (talkOk ? " ok" : ""); c.ckTalk.innerHTML = talkOk ? CHECK : TALK("#8a8a84");
+    c.ckDoc.style.transform = `scale(${docOk ? 0.6 + 0.4 * pop(L.doc) : 1})`;
+    c.ckTalk.style.transform = `scale(${talkOk ? 0.6 + 0.4 * pop(L.talk) : 1})`;
+    const accP = clamp((u - (L.rev + 0.5)) / 0.4, 0, 1);
+    c.acc.style.opacity = accP;
+    c.acc.style.transform = `scale(${0.8 + 0.2 * back(accP)})`;
+    c.ckDoc.style.opacity = c.ckTalk.style.opacity = 1 - accP;
+    c.d.style.borderInlineStartColor = `rgba(0,188,110,${accP})`;
+  });
+  counts.forEach((n, k) => (colEls[k].textContent = n));
+
+  // merit list: rows enter at their rank, the rest make room, the oldest leaves
+  rows.forEach((r, i) => {
+    const a = ageOnList(i, t);
+    const op = smooth((tt) => (present(i, tt) ? 1 : 0), t, 0.4);
+    r.d.style.opacity = op;
+    if (op <= 0.001) return;
+    const rk = smooth((tt) => rankAt(i, tt), t);
+    const rkNow = rankAt(i, t);
+    const enter = a < ROW_LIFE ? clamp(a / 0.5, 0, 1) : 1;
+    place(r.d, MERIT.x + 26 - 24 * (1 - ease(enter)), ROW_Y0 + rk * ROW_H, 508);
+    const glow = a < ROW_LIFE ? 1 - clamp((a - 0.6) / 1.4, 0, 1) : 0;
+    r.d.style.background = `rgba(0,188,110,${0.14 * glow})`;
+    r.rk.textContent = rkNow + 1;
+    r.rk.style.background = rkNow < 3 ? "var(--green)" : "#f0f0ec";
+    r.rk.style.color = rkNow < 3 ? "#fff" : "var(--ink)";
+    const sp = a < ROW_LIFE ? ease(a / 0.9) : 1;
+    r.sc.textContent = Math.round(people[i].score * sp);
+    r.bar.style.width = ((people[i].score - 50) / 50) * 100 * sp + "%";
+  });
+};
+window.render(0);
+</script>
+</body>
+</html>

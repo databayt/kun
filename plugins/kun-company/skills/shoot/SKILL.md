@@ -15,9 +15,31 @@ no browser MCP. It logs into the demo by itself, so it can run while Abdout keep
 ```
 node ~/.claude/skills/shoot/scripts/shoot.mjs /ar/students /ar/teachers   # stills, one login
 node ~/.claude/skills/shoot/scripts/shoot.mjs --flow add-student          # scripted flow
+node ~/.claude/skills/shoot/scripts/shoot.mjs --flow a,b,c                 # several, one browser
   [--role admin|teacher|student|guardian|accountant|staff] [--host <url>] [--repo hogwarts]
   [--full] [--zoom 1.25] [--name <stem>] [--out <dir>] [--cleanup]
 ```
+
+## Refresh the help center — one command
+
+```
+node ~/.claude/skills/shoot/scripts/shoot.mjs --support --stale --lang ar,en --publish           # stills
+node ~/.claude/skills/shoot/scripts/shoot.mjs --support --stale --lang ar,en --publish --video   # + tutorials
+```
+
+- `--support` = every flow a help guide names (`content/docs-en/support/*.mdx` → `flow:`); `--stale`
+  keeps those `record.sh stale --flows` lists plus any never shot. Nothing stale → exits at once.
+- One browser for the batch, one context per (device, language, role): twenty flows log in once per
+  language, not twenty times. A failing flow is reported in the closing table; the rest still run
+  and publish. Only flows that ran clean publish.
+- A clean run deletes the flow's older stills it did not re-take, and publish drops their manifest
+  entries — a renumbered or removed step never lingers in the docs or the chat.
+- `--video`: each flow with a sim re-films its take and tutorial, re-directs the cuts its sim
+  module lists (`export const reel = true`, `export const clips = { details: "3-3" }` — caption
+  steps), re-renders the story cuts already on disk (voice cached by text), then publishes them.
+- Stamped commit: local HEAD for a localhost host; otherwise the last commit on `origin/main` (the
+  demo never runs unpushed work). A flow whose `paths` have unpushed commits gets a warning — the
+  stills show the UI before them. Pushed is not deployed: re-shoot after a deploy.
 
 ## The frame — his manual screenshot
 
@@ -45,6 +67,7 @@ Drive by `record.sh sync`; nothing is captured into a repo's `public/`).
 | phone still | `<flow>/iphone-16/NN-<step>-<locale>.png` | `<flow>/iphone-16/<step>-<locale>` | `<locale>/<route>/iphone-16/<step>.avif` |
 | tutorial | `<flow>/<flow>-<locale>.{mp4,av1.mp4,poster.webp,vtt}` | `<flow>/video-<locale>` | `<locale>/<route>/video.mp4` (+ `video.av1.mp4` `video.poster.webp` `video.vtt`) |
 | reel | `<flow>/<flow>-<locale>.reel.mp4` | `<flow>/reel-<locale>` | `<locale>/<route>/reel.mp4` |
+| feature hero | `feature-<id>/feature-<id>-<locale>.{mp4,av1.mp4,poster.webp}` | `feature-<id>/video-<locale>` | `<locale>/features/<id>/video.mp4` (+ `video.av1.mp4` `video.poster.webp`) |
 | support clip | `<flow>/<flow>-<clip>-<locale>.*` | `<flow>/<clip>-<locale>` | `<locale>/<route>/<clip>.mp4` |
 | story cut | `<flow>/<flow>-<cut>-<device>-<locale>.*` | `<flow>/<cut>-<device>-<locale>` | `<locale>/<route>/<cut>-<device>.mp4` |
 | block media | (an ad, a block reel) | your id | `<locale>/<route>/<file>.mp4` — `media.sh publish --key <locale>/<route>/<file>` |
@@ -122,7 +145,10 @@ export default async ({ page, go, shot, settle }) => {
 };
 ```
 
-- `go(path)` navigates and logs in if asked; with `--lang` it rewrites the `/ar|/en` prefix.
+- Per flow: `export const role` (`"teacher"`, `"guardian"`, … or `"guest"` = never log in, e.g. the
+  login page) and `export const device` (`"iphone-16"` for a phone-only flow); explicit `--role` /
+  `--device` win. Every help-center flow is runnable (no metadata-only modules since 2026-10-19).
+- `go(path)` navigates and logs in if asked (an absolute URL films another host, e.g. the main login); with `--lang` it rewrites the `/ar|/en` prefix.
   `shot(step)` settles, then saves the next numbered still: network idle, fonts, visible images
   decoded, BlurImage `data-loaded`, no skeleton on screen (capped at 10 s, then a warning).
   `t(ar, en)` returns the run's label. `page` is Playwright.
@@ -261,6 +287,39 @@ node ~/.claude/skills/shoot/scripts/story.mjs --flow add-student --device iphone
   model** — a whole cut goes in ONE request, split at long pauses; lines cache by text, so
   mac + iphone share a cut's voice and re-renders cost nothing. Diacritics steer it: بِالقَلَم, اخترْ.
 - The voice sets the clock (beat = line + breath); no captions, a `.vtt` sidecar for accessibility.
+
+## Feature hero — the loop at the top of /<lang>/features/<id>
+
+Each marketing feature page opens on a full-width band playing its module, shot from the real
+product in both languages. One command per feature, from stills to CDN:
+
+```
+node ~/.claude/skills/shoot/scripts/hero.mjs --feature student[,admission…] [--lang ar,en] [--preview 1,5,11] [--publish]
+node ~/.claude/skills/shoot/scripts/hero.mjs --stale --publish     # only heroes whose UI changed or never published
+node ~/.claude/skills/shoot/scripts/hero.mjs --status              # feature × language: published v=<sha> / missing → story
+```
+
+- **One flow per feature**: `flows/<repo>/feature-<id>.mjs`, `route = "features/<id>"` (the marketing
+  URL, so the CDN key mirrors it), `block` + `paths` (the dashboard source it films — `record.sh stale`
+  flags the hero when that UI changes), and 3–4 steps via `_feature.mjs` (`[step, path, action]`;
+  `press`, `pick`, `clickText`, `tab`, `clickFirst`, `scrollTo`; a 4th element is a `ready`
+  selector for data that loads after first paint). Pick screens FULL of real data — a "coming soon"
+  card, an empty state or a page caught mid-load makes a dead loop; read every still before rendering.
+  `_feature.mjs`'s initScript blurs live-range phones and any email outside the house domains, and
+  drops rows naming the demo's "Harry Potter" student.
+- **The loop**: `motion/<repo>/feature-hero.html` — flat full-frame screens, a slow sine camera
+  (≤1.1×) toward each shot's focus, 0.8 s crossfades, the last shot fading back into the first, so
+  frame 0 = the last frame. No text, no cards, no audio. Rendered 1920x1080, 4 s a shot; delivered
+  1600x900 at 24 fps (UI text stays as crisp as 1080p30; AV1 ~1 MB, H.264 ~2 MB a loop).
+- **Ratio**: the page shows it as `min(50svh, 16:9 of the width)` edge to edge — a true 16:9 on phones,
+  a wide band (up to ~3.5:1) on desktop that keeps only the centre strip. Keep the action in the
+  middle: the default focus is the content beside the sidebar, a little above centre; tune per step
+  with `export const hero = { zoom, focus: { <step>: [x, y] } }` (LTR fractions, mirrored for RTL).
+- **Encodes**: `media.sh encode loop --box 1600x900 --fps 24` (H.264 + AV1, no audio track) and a poster of frame 0;
+  `publish.mjs --only video` sends them to `<locale>/features/<id>/video.*`, manifest id
+  `feature-<id>/video-<locale>`. Same name = overwrite; the page picks the new `?v=` up on its own.
+- **The page**: hogwarts `features/feature-video.ts` resolves the id and falls back to `story`;
+  commit the manifest on hogwarts `main` after publishing.
 
 ## Close
 

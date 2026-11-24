@@ -1,7 +1,9 @@
 ---
 name: auth
-description: Autonomously authenticate to any web service or CLI on Abdout's behalf using the macOS-Keychain-stored databayt identities, then reach protected pages and fetch original assets behind the login wall. Use whenever a page redirects to a login wall, a CLI reports "not authenticated", the user says "log into X / sign me into X / auth", or a clone/asset-fetch task needs content behind a paywall or dashboard. Minimizes interaction — only pauses for a one-time code when no non-interactive path exists.
-when_to_use: "Use when a login wall blocks progress — a page redirects to sign-in, a CLI reports not authenticated, or an asset sits behind a paywall or dashboard. Uses Keychain-stored identities; never asks for a password in chat. Triggers on: log into X, sign me in, not authenticated, behind a login wall, session expired."
+description: Sign in to any web service or CLI with the Keychain-stored databayt identities and reach what sits behind the login wall
+when_to_use: "Use when a login wall blocks progress — a sign-in redirect, a CLI not authenticated, assets behind a dashboard. New accounts are /behalf. Triggers on: log into X, sign me in, not authenticated, session expired."
+lane: build
+effort: medium
 ---
 
 # auth — self-service login for the kun engine
@@ -11,7 +13,7 @@ in files, never committed) and can log itself into services as needed. Go autono
 the login without asking; only stop for a 2FA/OTP code when there is genuinely no other path.
 
 This capability is global. It lives in the kun source of truth at
-`kun/.Codex/skills/auth/` and is installed to `~/.Codex/skills/auth/`, so **every project
+`kun/.claude/skills/auth/` and is installed to `~/.claude/skills/auth/`, so **every project
 inherits it** — not just mkan.
 
 ## The permanent path — the session vault (greenlist)
@@ -21,21 +23,21 @@ Facebook, Oracle, Google consoles, hogwarts, …). Automated password login from
 trips CAPTCHAs and OTP because it looks like a bot. The fix is session reuse, not credentials:
 
 - A single **persistent Chrome** (the "session vault") runs in the background on
-  `127.0.0.1:9222`, kept alive by a LaunchAgent (`~/.Codex/bin/chrome-session-agent.sh`,
-  label `com.databayt.chrome-session`). Its profile is `~/.Codex/chrome-debug-profile`.
-- The chrome-devtools MCP command is the wrapper `~/.Codex/bin/chrome-devtools-mcp.sh`, which
-  **auto-attaches** to that vault. So Codex drives the same browser Abdout logs into by hand.
-- **Greenlisting a site** = `bash ~/.Codex/bin/greenlist.sh add <url>` opens it in the vault;
+  `127.0.0.1:9222`, kept alive by a LaunchAgent (`~/.claude/bin/chrome-session-agent.sh`,
+  label `com.databayt.chrome-session`). Its profile is `~/.claude/chrome-debug-profile`.
+- The chrome-devtools MCP command is the wrapper `~/.claude/bin/chrome-devtools-mcp.sh`, which
+  **auto-attaches** to that vault. So Claude drives the same browser Abdout logs into by hand.
+- **Greenlisting a site** = `bash ~/.claude/bin/greenlist.sh add <url>` opens it in the vault;
   Abdout logs in **once** (CAPTCHA + OTP included, as a human); the session persists for
-  weeks/months. Codex reuses it with zero re-login. `greenlist.sh list` shows the set;
-  `greenlist.sh probe` shows live tabs; the manifest is `~/.Codex/greenlist.json` (URLs only,
+  weeks/months. Claude reuses it with zero re-login. `greenlist.sh list` shows the set;
+  `greenlist.sh probe` shows live tabs; the manifest is `~/.claude/greenlist.json` (URLs only,
   never cookies/passwords).
 
-So the flow for "Codex, do X on <site>": check `greenlist.sh probe` / just navigate — if the
+So the flow for "Claude, do X on <site>": check `greenlist.sh probe` / just navigate — if the
 session is live, proceed. If it 302s to a login wall, run `greenlist.sh add <url>` and ask
 Abdout to log in that once. Never re-run an automated login on a site the vault already holds.
 
-Restart Codex after first enabling the vault so the MCP picks up the wrapper; after that
+Restart Claude Code after first enabling the vault so the MCP picks up the wrapper; after that
 it's automatic. If the vault is down, the wrapper falls back to a throwaway profile (login walls
 return) — bring it back with `chrome-session-agent.sh install` or `chrome-debug.sh`.
 
@@ -53,7 +55,7 @@ Fetch (never echo the value into chat/logs/files):
 ```bash
 EMAIL=$(security find-generic-password -s databayt-primary 2>/dev/null | sed -n 's/.*"acct"<blob>="\(.*\)"/\1/p')
 PASS=$(security find-generic-password -s databayt-primary -w)   # → password, use immediately
-# or via the helper: PASS=$(bash ~/.Codex/bin/keychain-mcp.sh find-generic databayt-primary)
+# or via the helper: PASS=$(bash ~/.claude/bin/keychain-mcp.sh find-generic databayt-primary)
 # secondary: swap databayt-primary → databayt-secondary
 ```
 
@@ -114,7 +116,7 @@ lasts the whole session/profile**. Steps:
 ### Persistent profile — log in once, stay logged in
 
 The chrome-devtools MCP uses a **persistent** user-data-dir by default
-(`~/.cache/chrome-devtools-mcp/chrome-profile`), so cookies survive across Codex
+(`~/.cache/chrome-devtools-mcp/chrome-profile`), so cookies survive across Claude Code
 sessions. A successful login therefore only has to happen **once per service** — after that,
 navigating to a protected page just works. Check for an existing session before ever filling a
 login form.
@@ -126,17 +128,17 @@ CAPTCHA — and often an email OTP ("Confirm it's you") — when an automation p
 **Never try to solve a CAPTCHA.** Instead let the login happen once in a real Chrome, then reuse
 its session automatically:
 
-1. `bash ~/.Codex/bin/chrome-debug.sh` launches Chrome with remote debugging on `:9222` using a
-   dedicated persistent profile (`~/.Codex/chrome-debug-profile`), opening the target's login.
+1. `bash ~/.claude/bin/chrome-debug.sh` launches Chrome with remote debugging on `:9222` using a
+   dedicated persistent profile (`~/.claude/chrome-debug-profile`), opening the target's login.
 2. Abdout completes the login **by hand, once** — including any CAPTCHA and the email OTP (the
    code goes to `osmanabdout@hotmail.com` for the primary identity, which is not machine-readable
    here). This is his normal manual login; the persistent profile keeps the session.
-3. The chrome-devtools MCP command is the wrapper `~/.Codex/bin/chrome-devtools-mcp.sh`, which
+3. The chrome-devtools MCP command is the wrapper `~/.claude/bin/chrome-devtools-mcp.sh`, which
    **auto-attaches** to `:9222` whenever that Chrome is running (else falls back to the default
-   profile). So after logging in, just restart Codex — no `mcp.json` edit needed — and the
+   profile). So after logging in, just restart Claude Code — no `mcp.json` edit needed — and the
    automation drives the authenticated site directly.
 
-You (Codex) can pre-fill the email/password over CDP with Playwright
+You (Claude) can pre-fill the email/password over CDP with Playwright
 (`chromium.connectOverCDP('http://127.0.0.1:9222')`, credentials from Keychain via env) to save
 Abdout typing, but the CAPTCHA + OTP still need him. Detect the OTP screen ("Confirm it's you"),
 report which identity's inbox holds the code, and stop for it.
@@ -150,8 +152,10 @@ code — then continue. Never loop on a CAPTCHA; report it and move on.
 
 ### Signup
 
-Same fill technique on the signup form, default identity, the shared password. Stop and report
-if it requires email/phone verification, a CAPTCHA, or payment — those need Abdout.
+A new account is an errand, not a login → run **`/behalf`**. It signs up with the default
+identity, confirms the email itself (`.claude/scripts/mail-code.sh` reads the hotmail code or
+link), finishes the task and records the account in `~/.claude/accounts.json`. Only a CAPTCHA,
+an SMS code, payment or KYC still need Abdout.
 
 ## Fetching assets & content behind the login wall
 
@@ -206,8 +210,8 @@ commit credentials or cookies, and respect that this is for Abdout's own account
 | --------- | --------------------------------------------------------------------------- |
 | `gh`      | authed as `abdout` (keyring). Re-auth: `gh auth login`                       |
 | `vercel`  | authed as `abdout`. Re-auth: `vercel login`                                 |
-| `neonctl` | authed. `neonctl auth` to refresh                                            |
-| `gcloud`  | OAuth: `bash ~/.Codex/bin/gcloud-mcp.sh auth-login` (gmail identity) — URL+code flow |
+| `neon`    | authed. `neon auth` to refresh (`neonctl` is the old compat alias)            |
+| `gcloud`  | OAuth: `bash ~/.claude/bin/gcloud-mcp.sh auth-login` (gmail identity) — URL+code flow |
 | `stripe`  | `stripe login` (browser OAuth) — or set `STRIPE_API_KEY` from Keychain       |
 | API-key MCPs (neon/stripe/ref/algolia/posthog/airtable) | resolve `${VAR}` from the repo `.env` or a Keychain generic password of the same name |
 
@@ -220,6 +224,6 @@ commit credentials or cookies, and respect that this is for Abdout's own account
   `security add-generic-password -s <service> -a <account> -w <pwd> -U` — never a tracked file.
 - Cookies and session tokens harvested for asset-fetching are transient — use them in the same
   turn, never persist them to the repo.
-- This capability is global (`~/.Codex/`), so every repo inherits it; the same Keychain is
-  machine-wide. Source of truth: `kun/.Codex/skills/auth/`. Helpers: `kun/.Codex/bin/`
-  (installed to `~/.Codex/bin/`).
+- This capability is global (`~/.claude/`), so every repo inherits it; the same Keychain is
+  machine-wide. Source of truth: `kun/.claude/skills/auth/`. Helpers: `kun/.claude/bin/`
+  (installed to `~/.claude/bin/`).

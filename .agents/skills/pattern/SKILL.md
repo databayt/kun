@@ -3,6 +3,8 @@ name: pattern
 description: Look up a canonical cross-repo pattern (form, table, auth, ...)
 when_to_use: "Use when looking up a canonical cross-repo pattern (form, table, modal, auth, validation, action, columns, wizard, sidebar, header, e2e) — reads the pattern card + registry adoption status and applies the canonical file structure. Triggers on: pattern <keyword>, how do we do forms, canonical pattern, follow the card."
 argument-hint: <name> [product]
+lane: build
+effort: medium
 ---
 
 # Pattern — Cross-Repo Pattern Reference
@@ -31,7 +33,7 @@ Extract `keyword` and optional flags from `$ARGUMENTS`:
 
 ### No args — Pattern Index
 
-Read `.Codex/patterns/registry.json`. Show a summary table:
+Read `.claude/patterns/registry.json`. Show a summary table:
 
 ```
 Cross-Repo Pattern Registry
@@ -53,7 +55,7 @@ Use: /pattern <keyword> for full details
 
 ### Keyword arg — Show Card
 
-Read `.Codex/patterns/cards/{keyword}.md` and display the full card content.
+Read `.claude/patterns/cards/{keyword}.md` and display the full card content.
 
 If the keyword is not found in the registry, suggest the closest match.
 

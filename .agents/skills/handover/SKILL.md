@@ -1,8 +1,10 @@
 ---
 name: handover
 description: UI verification — runs niche quality keywords on a URL or block
-when_to_use: 'Use when Abdout wants a UI verification pass before a demo, merge, or client handoff — polymorphic on argument, where URL mode (argument starts with /) runs all 12 per-URL niche quality keywords (browser 6 + code 6) on one route, and block mode (bare word) runs the per-route subset (debug, flow, responsive, lang) on every route in the block. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, "is this URL clean", "is the whole block ready to show".'
+when_to_use: 'Use when Abdout wants a UI verification pass before a demo, merge or client handoff — a URL (starts with /) gets all 12 per-URL niche quality keywords; a bare block name gets debug, flow, responsive and lang on every route. Triggers on: handover <url|block>, pre-demo quality pass, run the niche quality keywords, "is this URL clean", "is the whole block ready to show".'
 argument-hint: <url>|<block> [--env staging] [--fix]
+lane: judge
+effort: high
 ---
 
 # Handover — UI Verification
@@ -34,9 +36,9 @@ Otherwise → block mode. Continue to Phase 2B.
 
 **Deterministic fan-out (preferred)**: run the saved workflow — `Workflow({ name: "handover", args: "<url>" })` (or `args: { url, base }` for `--env` targets). It covers all 12 keywords with 7 model-tiered subagents — one browser session assessing all 6 browser keywords, plus one per code keyword — and batch-verifies every FAIL adversarially before it can block, then returns the verdict table to render. This `/handover` invocation is the multi-agent opt-in. Fall back to the in-session pass below only if the Workflow tool is unavailable.
 
-**In-session fallback (token-expensive — prefer the workflow).** If you must run it here, batch the 6 browser keywords into a **single** browser session (one navigate + auth, then all 6 assessed against that same loaded page) and obey **§Token Discipline** in `.Codex/agents/quality.md`: snapshot over screenshot, ≤1 screenshot total, nothing written to disk. Running the keywords serially with a reload each is what exhausts the session's context.
+**In-session fallback (token-expensive — prefer the workflow).** If you must run it here, batch the 6 browser keywords into a **single** browser session (one navigate + auth, then all 6 assessed against that same loaded page) and obey **§Token Discipline** in `.claude/agents/quality.md`: snapshot over screenshot, ≤1 screenshot total, nothing written to disk. Running the keywords serially with a reload each is what exhausts the session's context.
 
-Run the 12 per-URL niche keywords (browser 6 + code 6) defined in `.Codex/agents/quality.md`:
+Run the 12 per-URL niche keywords (browser 6 + code 6) defined in `.claude/agents/quality.md`:
 
 - Browser: `see`, `flow`, `debug`, `responsive`, `lang`, `fast`
 - Code: `guard`, `architecture`, `structure`, `pattern`, `design`, `stack`
@@ -69,7 +71,7 @@ Stop here. URL mode does not write a sentinel — it's a spot-check.
 
 **Discover routes** in the block — prefer the pre-computed registry:
 
-Read `.Codex/blocks.json` and use `blocks[<block>].routes` (populated by `generate-blocks.mjs`). If that key
+Read `.claude/blocks.json` and use `blocks[<block>].routes` (populated by `generate-blocks.mjs`). If that key
 is absent or empty, fall back to deriving them:
 
 ```bash
@@ -84,7 +86,7 @@ Stop and ask if zero routes match.
 **Pre-flight:**
 
 - Ensure dev server is running on port 3000 (default) or `--env` target is reachable
-- Create the report directory: `.Codex/handover-reports/<block>-<YYYYMMDD-HHmm>/`
+- Create the report directory: `.claude/handover-reports/<block>-<YYYYMMDD-HHmm>/`
 
 **For each route, run the per-route niche subset — ONE subagent per route, not one per pass:**
 
@@ -96,7 +98,7 @@ Stop and ask if zero routes match.
 | 4    | `lang` (RTL portion)         | `/ar/` variant — verify logical-property flip, LTR exemptions    |
 | 5    | `lang` (translation portion) | Hardcoded-string scan + dictionary key resolution                |
 
-These keywords are defined in `.Codex/agents/quality.md`. Block mode invokes each keyword per route — it does not redefine the check logic here.
+These keywords are defined in `.claude/agents/quality.md`. Block mode invokes each keyword per route — it does not redefine the check logic here.
 
 **Execution shape (token-critical).** Dispatch **one `sonnet` subagent per route** that assesses all
 five passes from a **single** browser session — one navigate + auth + modal-dismiss, then every pass
@@ -107,7 +109,7 @@ one subagent per pass:
   the session before the report is written. Subagent results come back as compact verdicts.
 - Per-pass subagents reload the same route 5×, paying the navigate + auth cost 5 times over.
 
-Each route subagent obeys **§Token Discipline** in `.Codex/agents/quality.md` (snapshot over
+Each route subagent obeys **§Token Discipline** in `.claude/agents/quality.md` (snapshot over
 screenshot, ≤1 screenshot per route, nothing written to disk). Collect the returned verdicts and
 build the report table from them.
 
@@ -148,7 +150,7 @@ After fixes, re-run the affected passes only. Append a "Fix round N" section to 
 
 ### Phase 5 — Sentinel (block mode only)
 
-On overall PASS or WARN (no FAIL), write to `.Codex/session-state.json`:
+On overall PASS or WARN (no FAIL), write to `.claude/session-state.json`:
 
 ```json
 {

@@ -1,8 +1,10 @@
 ---
 name: publish
-description: Deliver approved full drafts to the channels — the review queue decides, the lanes deliver
-when_to_use: "Use when an APPROVED full draft (copy + media) must reach its channels, now or on a schedule — via the review queue on /social/publish (Approve = publish right away or delegate to the cron drain, per its settings), the signed approval link, or the copy-out block for WhatsApp. This publishes CONTENT, not code: /ship and /deploy put software in production and /release ships a feature block, and none of them touch a brand page. It refuses without a recorded /approve yes, never writes copy (/draft), never creates from blank (the queue only fine-tunes), and never reads numbers back (/measure). Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
+description: Deliver approved full drafts to the brand channels
+when_to_use: "Use when an APPROVED full draft must reach its channels, now or on a schedule — via the review queue, the signed approval link, or the WhatsApp copy-out block. Content, not code (/ship, /deploy). Refuses without a recorded /approve yes; not /draft or /measure. Triggers on: publish the post, send it out, post it now, schedule it for tomorrow, broadcast it, review and publish, انشر المنشور, ابعت المنشور, راجع وانشر."
 argument-hint: "<brand> [--channels ...] [--at <iso>] [--dry-run]"
+lane: judge
+effort: high
 ---
 
 # Publish — the last mile
@@ -33,7 +35,7 @@ Arguments: $ARGUMENTS — brand, channels, optional `--at` for a scheduled time.
    (request `consumed`), the variant is `pending` with a live signed link, or a
    human said yes in-session. No recorded yes, no send.
 2. **Partition by lane**, from `src/components/root/social/config.ts`:
-   - `DRAIN_CHANNEL_IDS` — telegram, facebook, instagram. kun delivers these
+   - `DRAIN_CHANNEL_IDS` — facebook, instagram. kun delivers these
      itself. Instagram is in the allow-list so it goes live the moment its
      `wired` flag flips; today only **facebook** is both wired and in scope.
    - `HERMES_CHANNEL_IDS` — the gateway pulls them from `/api/social/queue`.

@@ -3,6 +3,8 @@ name: profile
 description: Load a selective config profile by role (engineer/business/content/ops)
 when_to_use: "Use when loading a selective config profile by role — engineer, business, content, or ops — trimming the active agent/MCP surface to what that role needs. Triggers on: profile <role>, load the business profile, switch to content mode."
 argument-hint: <role>
+lane: build
+effort: medium
 ---
 
 # Profile — Selective Config Loading
@@ -33,7 +35,7 @@ Parse arguments:
 
 A profile is a named subset of the Kun engine configuration. Instead of loading all 44 agents, 40+ skills, and all rules, a profile selects only what's relevant for a specific role, task, or person.
 
-Profiles are stored in `~/.Codex/profiles/` as YAML files.
+Profiles are stored in `~/.claude/profiles/` as YAML files.
 
 ### Built-in Profiles
 
@@ -42,7 +44,7 @@ Profiles are stored in `~/.Codex/profiles/` as YAML files.
 The essentials for any developer on any repo.
 
 ```yaml
-# ~/.Codex/profiles/core.yaml
+# ~/.claude/profiles/core.yaml
 name: core
 description: Essential tools for daily development
 agents:
@@ -142,12 +144,12 @@ For Ali, Samia, Sedon — business operations via Cowork.
 name: business
 description: Business operations — no code agents
 agents:
-  - captain
-  - revenue
-  - growth
+  - business
+  - sales
+  - marketing
   - support
   - product
-  - analyst
+  - rnd
 commands:
   - weekly
   - monitor
@@ -211,9 +213,9 @@ extends: full
 name: ali
 extends: qa
 agents_add:
-  - revenue
+  - sales
   - support
-  - analyst
+  - rnd
 commands_add:
   - report
   - monitor
@@ -226,7 +228,7 @@ commands_add:
 name: samia
 extends: business
 agents_add:
-  - tech-lead
+  - tech
   - learn
   - analyze
 commands_add:
@@ -257,7 +259,7 @@ commands_add:
 1. Ask: "What's the role? (developer, business, security, custom)"
 2. Ask: "Which agents? (list, or 'like <existing-profile>')"
 3. Ask: "Which commands?"
-4. Generate YAML file in `~/.Codex/profiles/<name>.yaml`
+4. Generate YAML file in `~/.claude/profiles/<name>.yaml`
 5. Report: "Profile <name> created with N agents, M commands."
 
 ### Showing a Profile
@@ -272,7 +274,7 @@ Extends: qa
 
 Agents (12):
   quality, report, test, guardian, build, sse,
-  revenue, support, analyst
+  sales, support, rnd
 
 Commands (10):
   test, build, check, security, performance, screenshot,

@@ -1,8 +1,10 @@
 ---
 name: approve
-description: The human gate — the review queue on /social/publish, or a signed link for a remote approver
-when_to_use: "Use when a full draft (copy and/or media) is ready for a human to say yes before anything reaches a public brand page. Two lanes: the PRIMARY is the Hub's review queue at /social/publish — the next answered draft waits there, a contributor fine-tunes and approves (now, or scheduled to the cron drain); the SECONDARY stages a signed single-use link (it opens a confirm page; only its button publishes) for an approver outside the Hub. This is the gate, not the send: it never writes copy (/draft), never makes media (/higgs), and never delivers to a platform (/publish, which refuses to run without the yes this stage records). Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
+description: The human gate — the /social/publish review queue, or a signed link for a remote approver
+when_to_use: "Use when a full draft needs a human yes before it reaches a public brand page — in the review queue or via a signed link for an outside approver. The gate only — not /draft, /higgs or /publish. Triggers on: review the queue, approve the next draft, stage for review, send for approval, get sign-off, ready for review, اعتماد, راجع الطابور, اعتمد المسودة, أرسل للمراجعة."
 argument-hint: "<brand> [--channels ...] [--media <url,url>] [--reviewer <name>]"
+lane: judge
+effort: high
 ---
 
 # Approve — the gate

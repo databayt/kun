@@ -5,13 +5,17 @@ when_to_use: When creating, listing, previewing, or rebuilding a template in /Us
 argument-hint: "<name|list|preview|build> [name]"
 allowed-tools:
   ["Bash(pnpm *)", "Read", "Write", "Edit", "Glob", "Grep", "mcp__shadcn__*"]
+lane: build
+effort: medium
 ---
 
 # Template Skill
 
 Create and manage templates in `/Users/abdout/codebase` — full-page layouts
 mirroring shadcn's blocks, plus our per-template MDX docs layer.
-Deep expertise: the `template` agent (`.Codex/agents/template.md` in the repo).
+Deep expertise: the `template` agent (`.claude/agents/template.md` in the repo).
+
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
 
 ## Usage
 

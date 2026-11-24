@@ -1,15 +1,19 @@
 ---
 name: record
-description: Screen-record demo videos and screenshot sets of real product flows, filed by repo/block/route and mirrored to Google Drive
-when_to_use: "Use when a REAL product flow or block needs capturing off the screen — demo/walkthrough videos or route screenshot sets, re-records after UI changes, Drive sync. Handles login walls + email OTPs. Not /screenshot (views an existing capture) or /higgs (generates media). Triggers on: record video for <flow>, record <block>, demo video, walkthrough, screen recording, re-record, sync media to drive, سجل فيديو, تسجيل الشاشة."
-argument-hint: "[block|flow|url] [--repo <repo>] [--locale ar|en] [--shots-only]"
+description: Screen-record demo videos of real product flows, mirrored to Google Drive
+when_to_use: "Use when a product flow must be captured as VIDEO — demo videos, ad cuts, walkthroughs, re-records, Drive sync. Stills are /shoot. Triggers on: record, record <flow|block>, demo video, walkthrough, screen recording, re-record, سجل فيديو."
+argument-hint: "[block|flow|url] [--repo <repo>] [--locale ar|en]"
+lane: build
+effort: medium
 ---
 
-# Record — capture the real product
+# Record — film the real product
+
+> Screenshots moved to `/shoot` (2026-10-06): `shoot` = stills, `record` = video.
 
 Film and photograph databayt products as they actually run — signup flows, onboarding
 wizards, block features — and file every asset into one organized library that mirrors
-to Google Drive. The library is the **product-truth archive** keyed by repo/block/route;
+to Google Drive. The library is the **product-truth archive** keyed by repo/flow (`~/media/<repo>/<flow>/`);
 anything destined for marketing or social goes through `/higgs` + the showroom
 (`/social/media`) as before — never file generated media here.
 
@@ -18,20 +22,20 @@ Technique proven 2026-08-08 recording the hogwarts school-onboarding flow on pro
 
 ## The machinery
 
-CLI: `bash ~/.Codex/scripts/record.sh <cmd>` (canonical copy in kun).
+CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
 
 | Command           | Does                                                                    |
 | ----------------- | ----------------------------------------------------------------------- |
 | `init` / `status` | Create/inspect the library (`~/media/`)                                 |
 | `frame`           | Size Chrome to 1512x982, dismiss the automation infobar                 |
-| `start [name]`    | Begin a recording SEGMENT (`screencapture -v`, backgrounds itself)      |
+| `start [name] [--page]` | Begin a recording SEGMENT (`screencapture -v -k`: clicks highlighted; `--page` = Chrome's page area only, the `/shoot` frame) |
 | `stop`            | End the segment with SIGINT + `ffprobe` verify                          |
 | `shot <name>`     | Full-screen still (browser-viewport shots: use the browser MCP instead) |
 | `otp`             | Screenshot the Outlook desktop inbox → Read the image for the code      |
 | `assemble <name>` | Concat pending segments into one .mov                                   |
 | `file <src> …`    | Normalize name → move into library → update `manifest.json`             |
 | `sync`            | Mirror library → Google Drive (rsync → Finder → printed fix)            |
-| `stale [repo]`    | List assets whose block source gained commits since capture             |
+| `stale [repo]`    | One line per stale flow (source `paths` changed since capture); `-v` files, `--flows` names, `--prune` drops entries whose file is gone |
 
 ## Identity, credentials, OTP
 
@@ -51,7 +55,7 @@ CLI: `bash ~/.Codex/scripts/record.sh <cmd>` (canonical copy in kun).
   Codes are **4 digits** (30-min expiry) — don't wait for 6.
 - **Gmail OTP** — for flows using a Gmail identity: the Gmail MCP
   (`search_threads` newest-first → `get_message`) reads codes without any screen work.
-  Note it's a Codex.ai connector — absent in headless runs; fall back to the browser.
+  Note it's a claude.ai connector — absent in headless runs; fall back to the browser.
 - **Any other login wall** → `/auth` (Keychain identities, Safari autofill) and
   `/credentials`. Never type a password into chat or a recorded frame.
 
@@ -62,12 +66,14 @@ CLI: `bash ~/.Codex/scripts/record.sh <cmd>` (canonical copy in kun).
   `tell application "Google Chrome" to set bounds of window 1 to {0,0,1512,982}`
   (`System Events set size` throws -1719 here). Screenshots with relative filenames
   land in the REPO ROOT — always pass absolute paths into `_work/`.
-- **browser-headed MCP** (Playwright, `~/.playwright-auth` profile) — carries SAVED
-  logins; use for flows that need an existing session (dashboards, admin).
+- **Flows that need an existing session** (dashboards, admin) also use chrome-devtools on
+  the session-vault Chrome: it is the one browser that holds saved logins. The separate
+  `browser-headed` server and its profile were removed on 2026-11-14. A take is the one time
+  the vault is brought to the front on purpose (`chrome-debug.sh 9222 <url>`).
 - **`browser` MCP is HEADLESS — it CANNOT be recorded.** Nothing renders on screen. It is
   excellent for VERIFYING a flow end to end (e.g. confirming a deployed fix), never for a take.
 - **If a browser MCP dies mid-session, the take is over.** MCP servers cannot be restarted
-  from inside a session — restart Codex, then resume. To kill a stuck browser, match
+  from inside a session — restart Claude Code, then resume. To kill a stuck browser, match
   the browser BINARY (`pkill -f "Chrome for Testing"`, `pkill -f chrome-devtools-mcp`) and
   clear `SingletonLock`/`SingletonCookie`/`SingletonSocket` in its profile dir.
   **Never `pkill -f <profile-path>`** — that also matches the MCP _server_ process and takes
@@ -84,7 +90,7 @@ CLI: `bash ~/.Codex/scripts/record.sh <cmd>` (canonical copy in kun).
 ### 1. Prep
 
 1. Resolve scope: a named flow (`record video for school onboarding`), a block
-   (`record admission` → routes from the repo's `.Codex/blocks.json` `blocks[b].routes`,
+   (`record admission` → routes from the repo's `.claude/blocks.json` `blocks[b].routes`,
    discover via `src/app/**/page.tsx` stripping `[lang]`/`s/[subdomain]`/groups if
    missing), or one URL. Default locale **ar**; capture en too when the flow is bilingual.
 2. Target prod for client-facing demos (balqalam.com, ed.databayt.org); dev for
@@ -113,49 +119,52 @@ record.sh otp                # NOT recording now; Read the image → extract 4-d
 record.sh start verify      # segment 2: enter code → continue the wizard
 … drive …
 record.sh stop
-record.sh assemble onboarding-flow--ar
+record.sh assemble onboarding-ar
 ```
 
 `stop` uses SIGINT — a plain kill leaves the .mov unfinalized. `otp` refuses to run
 while recording, by design.
 
-**Screenshots (blocks/routes)** — for each route: navigate, wait for settle, capture
+**Stills** are `/shoot` (headless, Abdout's laptop frame). Only a still taken INSIDE a video
+take, or one needing a saved MCP session, comes from here — for each route: navigate, wait for settle, capture
 via the browser MCP (`browser_take_screenshot` / `take_screenshot`) with an ABSOLUTE
 path into `~/media/_work/`, both locales when relevant. `record.sh shot` is
 only for desktop-context stills.
 
-### 3. File — the naming convention
+### 3. File — the shoot grammar
 
-`record.sh file <src> --repo <repo> --block <block> --url <real-url> [--kind flow] [--locale ar] [--note …]`
+`record.sh file <src> --repo <repo> --block <block> --flow <flow> [--part <part>] [--url <real-url>] [--locale ar] [--note …]`
 
-Every asset lands as:
+Raw footage lands in the flow's `raw/` folder, beside the finished media, under the same words
+as everything else (the table in `/shoot` → Naming):
 
 ```
-~/media/<repo>/<block>/<repo>--<block>--<url-slug>--<kind>--<locale>--v<N>.<ext>
-   hogwarts/onboarding/hogwarts--onboarding--onboarding-title--shot--ar--v1.png
-   hogwarts/students/hogwarts--students--students--flow--ar--v2.mov
+~/media/<repo>/<flow>/raw/<flow>[-<part>]-<locale>.<ext>
+   hogwarts/add-student/raw/add-student-ar.mov          the take
+   hogwarts/onboarding/raw/onboarding-otp-ar.mov        --part otp
+   hogwarts/onboarding/raw/03-verify-ar.png             a still: --part NN-<step> is required
 ```
 
-The repo + block ride IN the filename on purpose — the designation survives when the
-file leaves its folder (Drive links, chat attachments, client handoffs).
-
-- **url-slug** derives from the URL path — scheme/host, locale prefix, and
-  `/s/<subdomain>` are stripped (`https://balqalam.com/ar/onboarding/x/title` →
-  `onboarding-x-title`); root = `home`. Directories are repo (= brand) then block.
-- **kind**: `shot` (still) | `clip` (segment worth keeping alone) | `flow` (assembled
-  walkthrough). Extension decides the default.
-- **vN** auto-increments; old versions stay in place (the manifest carries dates —
-  no archive dirs).
-- The manifest records repo, block, url, sha (repo HEAD at capture), capturedAt, note
-  — that sha is what staleness is measured against.
+- **flow** = `<verb>-<entity>` (`add-student`, `bulk-teacher`), the `/shoot` flow name when one
+  exists. No `--flow`: the URL slug stands in (`/ar/onboarding/x/title` → `onboarding-x-title`).
+- **Same name = replaced**, with the manifest entry (repo, block, flow, url, sha, capturedAt, note)
+  replaced too; no `-vN` siblings. **block** is the repo's blocks.json key: it is what `stale`
+  measures the sha against.
+- `raw/` is footage. The **deliverable** goes where the sim's does —
+  `~/media/<repo>/<flow>/<flow>-<locale>.mp4` (ad cut or edit, one file, overwritten; the sim, a
+  motion composition and an ad cut all write this one name — the last render wins) — and reaches
+  the product with `node ~/.claude/skills/shoot/scripts/publish.mjs --flow <flow>`, at
+  `cdn.databayt.org/hogwarts/<locale>/<route>/video.mp4` (the flow's `export const route`, e.g.
+  `ar/students/add/video.mp4`; English under `en/`). Route-wide cuts (an ad, a block reel) go to
+  `hogwarts/<locale>/<route>/<file>.mp4` with `media.sh publish --ns hogwarts --key ar/students/marketing …`.
 
 ### 3½. Ad cut — flows ship blazing fast
 
 Raw captures are minutes; **the deliverable is an ad: 15-45 seconds**. Render with
-`record.sh adcut <raw> <out> [--target 30] [--tail 3]` — it speeds the body to hit
+`record.sh adcut <raw> <out> [--target 30] [--tail 3]` — delivered through the shared `media.sh encode web` (1080p, constant 30 fps, tv-range BT.709, faststart) — it speeds the body to hit
 the target and keeps the last seconds real-time so the payoff (the new row, the
-success state) is readable. File the AD as the flow asset; keep the raw only if a
-slower walkthrough was explicitly requested. Instant field-fills are FINE for ads —
+success state) is readable. Render the ad straight to `~/media/<repo>/<flow>/<flow>-<locale>.mp4`; keep the
+raw in the archive only if a slower walkthrough was explicitly requested. Instant field-fills are FINE for ads —
 at ad speed they read as snappy, so prefer the fast fill lane over human typing.
 
 ### 4. Sync to Google Drive
@@ -181,10 +190,13 @@ sync loses nothing.
 
 - **Staleness is automatic**: the `session-media-stale` SessionStart hook nudges when a
   repo's filed blocks gained commits since capture; `record.sh stale [repo]` lists the
-  detail. Re-recording files the same slug as vN+1.
+  stale flows and prints the re-shoot command. Re-recording files the same name and replaces the old take.
+- **Help-center media refreshes in one command**: `shoot.mjs --support --stale --lang ar,en --publish --video`
+  (see `/shoot` → Refresh the help center). Screen recording here is only for what the headless sim cannot
+  film: OTP inboxes, native apps, multi-app flows.
 - **Fine-tune a video without a retake**: trim/splice segments with ffmpeg
-  (`ffmpeg -i in.mov -ss 0:04 -to 1:32 -c copy out.mov`), then `file` the result as the
-  next version. Fine-tune a SCREENSHOT by recapturing the route — never edit pixels of
+  (`ffmpeg -i in.mov -ss 0:04 -to 1:32 -c copy out.mov`), then `file` the result under
+  the same name. Fine-tune a SCREENSHOT by recapturing the route — never edit pixels of
   product truth.
 - **Sweep a whole brand**: loop the repo's blocks.json blocks, screenshots per route,
   flow videos for the journeys that matter (onboarding, admission, checkout). Sweeps
@@ -222,3 +234,7 @@ sync loses nothing.
 - Screen-recording permission is already granted to the terminal host; Drive-folder
   writes are TCC-blocked until one of the two sync fixes above is applied.
 - The dev-server route table goes stale after hours up — restart before recording dev.
+
+## Polish and delivery
+
+A raw take is footage, not a deliverable. Cut it with `/edit` (transcript-driven, or `auto-editor` for silences), make a reel with `reel.sh`, then `media.sh qa-pack` → `media-qa`, and publish to the CDN with `shoot/scripts/publish.mjs --flow <flow>` (ids `<flow>/video-<locale>`, `<flow>/reel-<locale>`). Media never goes into git. For web flows, the `/shoot` sim lane gives cleaner tutorials than a screen recording: a scripted take, brand look, camera, captions and narration. Use `/record` for what only the real screen can show: OTP inboxes, native apps, multi-app flows.

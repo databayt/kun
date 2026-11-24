@@ -1,13 +1,15 @@
 ---
 name: analyze
-description: Analyze a repo's patterns and generate a tailored Codex config
-when_to_use: "Use when a repo needs its patterns extracted into a tailored Codex config — AGENTS.md, agents, rules, and skills generated and committed straight to main — the config-generator lane, distinct from /learn which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
+description: Analyze a repo's patterns and generate a tailored Claude Code config
+when_to_use: "Use when a repo needs its patterns turned into a tailored Claude Code config (CLAUDE.md, agents, rules, skills) committed to main — distinct from /learn, which mines org-wide conventions into memory. Triggers on: analyze <repo>, generate config for this repo, repo config generator."
 argument-hint: "[repo-path] [--dry-run]"
+lane: build
+effort: medium
 ---
 
 # Analyze — Repo Config Generator
 
-Analyze any repo's patterns and generate a complete `.Codex/` configuration, committed straight to `main`.
+Analyze any repo's patterns and generate a complete `.claude/` configuration, committed straight to `main`.
 
 ## Usage
 
@@ -26,7 +28,7 @@ Parse arguments:
 
 - First arg = repo (name, path, or GitHub URL)
 - `--dry-run` = output to stdout, no commit
-- `--update` = diff against existing `.Codex/`, update stale config
+- `--update` = diff against existing `.claude/`, update stale config
 - `--profile <name>` = generate for specific profile (core, security, developer, full)
 
 ### The Clean GitHub Cycle
@@ -56,10 +58,10 @@ fi
 gh issue create \
   --repo databayt/$REPO \
   --title "chore: generate repo config from pattern analysis" \
-  --body "Automated analysis of repository patterns to generate \`.Codex/\` configuration.
+  --body "Automated analysis of repository patterns to generate \`.claude/\` configuration.
 
 ## What will be generated
-- \`AGENTS.md\` — project instructions
+- \`CLAUDE.md\` — project instructions
 - \`agents/\` — relevant agent subset
 - \`rules/\` — extracted conventions
 - \`commands/\` — mapped skills
@@ -147,9 +149,9 @@ git log --oneline --since="2 weeks ago"
 
 ### Step 5: Generate Config
 
-Create `.Codex/` directory and files:
+Create `.claude/` directory and files:
 
-#### AGENTS.md
+#### CLAUDE.md
 
 ```markdown
 # <Repo Name>
@@ -215,17 +217,17 @@ Commit straight to `main` — no branch, no PR. Put the analysis summary in the 
 
 ```bash
 # Stage all generated config
-git add .Codex/
+git add .claude/
 
 # Commit (summary lives in the body)
 git commit -m "chore: generate repo config from pattern analysis
 
-Auto-generated .Codex/ configuration from repository pattern analysis.
+Auto-generated .claude/ configuration from repository pattern analysis.
 
 Analysis scope: <N> commits analyzed, <M> files sampled, <P> conventions extracted.
 
 Generated config:
-- AGENTS.md — project instructions (<lines> lines)
+- CLAUDE.md — project instructions (<lines> lines)
 - agents/ — <N> agents selected (of 44 available)
 - rules/ — <N> rules from observed patterns
 - commands/ — <N> skills mapped to workflow
@@ -233,11 +235,10 @@ Generated config:
 Recommended profiles: core (<list>) / security (<list>) / full (<list>).
 Review each file — a starting point, not gospel.
 
-Closes #<issue-number>
+Closes #<issue-number>"
+# (end with the harness-supplied attribution trailer — it names the running model; never hardcode one)
 
-Co-Authored-By: Codex Opus 4.8 (1M context) <noreply@anthropic.com>"
-
-# Push to main (Vercel/CI deploys automatically)
+# Push to main (CI / the repo's deploy lane takes it from there)
 git push origin main
 ```
 
@@ -247,7 +248,7 @@ Skip steps 2 and 6. Output generated config to stdout with clear section headers
 
 ### --update Mode
 
-1. Read existing `.Codex/` config
+1. Read existing `.claude/` config
 2. Run analysis pipeline
 3. Diff generated vs existing
 4. Commit only the changes to `main` (new conventions, removed stale rules, updated agents)
@@ -261,7 +262,7 @@ Filter generated config to only include agents, rules, and commands relevant to 
 
 Before committing to `main`:
 
-- [ ] AGENTS.md is valid markdown, under 500 lines
+- [ ] CLAUDE.md is valid markdown, under 500 lines
 - [ ] Agent frontmatter has name, description, model
 - [ ] Rules reference actual observed patterns (not aspirational)
 - [ ] No secrets in generated config (scan for tokens, keys, passwords)

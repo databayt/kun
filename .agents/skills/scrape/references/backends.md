@@ -163,3 +163,18 @@ and do not loosen the pattern to make documentation easier.
 "MUST USE when the user wants to research/search anything, or mentions any platform or URL" — a
 fleet-wide dispatch collision, and the listing budget has roughly 80 characters of headroom. Call
 its CLI from this runbook instead.
+
+## TikTok (mkan Kigali lane, measured 2026-10-12)
+
+| Step | Tool | Measured |
+| --- | --- | --- |
+| Account videos | `yt-dlp --flat-playlist -J tiktokuser:<secUid>` | ~2.5 s/account, no login. The `@handle` page broke ~10-13 ("Unable to extract secondary user ID"); the secUid comes from any one video's `channel_id`. `tiktok:tag` and `tiktok:sound` are **broken** in yt-dlp 2026.08.19 |
+| Profile bio | plain fetch of `tiktok.com/@h` | **Blocked** — a 1.4 KB Slardar WAF page (2026-10-20). Phones come from the caption, the handle, the transcript and the broker's other posts instead |
+| Photo-mode posts | `yt-dlp -J` | Only an `audio` format, no video stream — ffmpeg fails on it. The lane takes the cover `thumbnails` as frames |
+| Find accounts | DuckDuckGo html → Brave html | DDG serves its bot "anomaly" page (HTTP 202) after 2–3 queries, Brave 429s after a few more; Bing/Yahoo/Startpage/Mojeek return no TikTok URLs to a plain fetch. So 3 rotating phrases run per day |
+| Video + frames | `yt-dlp -f b[ext=mp4]` + ffmpeg, 8 evenly spaced frames | ~5 s/video; the mp4 is deleted after |
+| Speech | mlx-whisper large-v3-turbo (`~/.claude/skills/edit/scripts/media/asr_batch.py`) | Kinyarwanda isn't a Whisper language, and over background music it hallucinates. Place names survive; the caption and the on-screen text carry the facts |
+| Read | Groq `qwen/qwen3.8-27b` vision (≤3 images/request, ITPM 7k, TPD 200k), `openai/gpt-oss-120b` for captions with price + rooms | Frames go as 3-up strips at 360 px (~2,050 tokens each). One strip first, the second only when price and rooms are both unread. ~33 vision reads/day before the quota; `--reader=claude` (Sonnet, `claude -p`) is the fallback |
+
+First run: 12 broker accounts proposed by search and 334 videos discovered. 30% of search hits are older than 120 days and skipped.
+`@rentzen.co` is a competing Kigali rental marketplace (seed ignored).

@@ -1,8 +1,10 @@
 ---
 name: feature
 description: Full pipeline — idea to production (chains every stage)
-when_to_use: "Use when Abdout asks to build a feature end to end, take an idea all the way to production, or names a new feature to ship — this is the compound orchestrator that chains every pipeline stage (idea → spec → human approval → plan → tasks → schema → code → wire → check → ship → watch) with progress appended to a GitHub issue, unlike the single-stage neighbors (/idea, /spec, /schema, /code, /wire, /check, /ship, /watch) which each run one stage, and product scope resolves data-driven from .Codex/memory/repositories.json (planned products get naming/spec only). Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
+when_to_use: "Use when Abdout asks to build a feature end to end, take an idea to production, or names a new feature to ship — the orchestrator that chains every stage on one GitHub issue, pausing once for spec approval, unlike the single-stage /idea, /spec, /schema, /code, /wire, /check, /ship and /watch. Triggers on: feature <name> [product], build <feature> end to end, full pipeline idea→production."
 argument-hint: <name> [product] [--from <stage>]
+lane: judge
+effort: high
 ---
 
 # Feature Pipeline — Idea to Production
@@ -23,7 +25,7 @@ The compound orchestrator. Chains all pipeline stages to take a feature from ide
 Parse arguments:
 
 - First word = feature name (or `#N` for existing issue)
-- Second word = product scope — optional. Valid ids = any product in `.Codex/memory/repositories.json` (currently hogwarts, souq, mkan, shifa, sijillee, moallimee); products with `status: "planned"` have no repo yet, so scope them for naming/spec only and say so.
+- Second word = product scope — optional. Valid ids = any product in `.claude/memory/repositories.json` (currently hogwarts, souq, mkan, shifa, sijillee, moallimee); products with `status: "planned"` have no repo yet, so scope them for naming/spec only and say so.
 - `--from <stage>` = skip to a specific stage (idea, spec, plan, tasks, schema, code, wire, check, ship, watch)
 
 ### Pipeline
@@ -33,6 +35,22 @@ Execute stages in order. Each stage appends progress to the GitHub issue. Stop o
 ```
 IDEA → SPEC → [human approval] → PLAN → TASKS → READY → SCHEMA → CODE → WIRE → CHECK → SHIP → WATCH
 ```
+
+Each stage runs on a lane (`engine.json → lanes`). This skill is the orchestrator and stays in the main loop; it hands a stage's heavy work to that lane's agent with a written brief, and keeps the decisions:
+
+| Stage | Lane | How it runs |
+| --- | --- | --- |
+| IDEA | build | main loop, medium effort — a structured issue |
+| SPEC, PLAN | judge | main loop, high effort — the decisions, then the one human gate |
+| TASKS | build | the breakdown; it tags every task with its own lane |
+| READY | judge | the cross-artifact check |
+| SCHEMA | judge | a migration touches live data: decide in the main loop, then a build agent writes the model and Zod |
+| CODE, WIRE | build | build agents (sonnet, medium), one written brief per task from the breakdown |
+| CHECK | build | `pnpm tsc` and the build are scripts; the fix loop is build work |
+| SHIP | judge | a production deploy — main loop, and it waits for Abdout's word |
+| WATCH | research | a sonnet fork that reads the live page and reports |
+
+When a breakdown exists, dispatch by each task's tag (`[build]`, `[judge]`, `[lookup]`, `[script]`) rather than by its stage. A brief for a build agent names the files, the mirror target, the pattern card and the verify step — it knows nothing else. Review what comes back before the next task depends on it.
 
 PLAN, TASKS, and READY are **optional as a trio** — they add architecture rigor for non-trivial features, but a typo fix or single-field change should skip straight to SCHEMA (or be a `/report`, not a `/feature`). For a small change, note "trivial — skipping plan/tasks/ready" on the issue and continue.
 
@@ -58,7 +76,7 @@ Check if the issue already has a spec comment (look for `## Technical Spec` in c
 
 If no spec exists, execute the `spec` workflow:
 
-1. Read the target product's schema, page structure, and AGENTS.md
+1. Read the target product's schema, page structure, and CLAUDE.md
 2. Generate: data model sketch, file plan, acceptance criteria
 3. Append spec as comment on the issue
 
@@ -68,17 +86,17 @@ If denied, stop. The issue has the spec for later.
 
 ### Stage 2.5: PLAN — Architecture (optional)
 
-For non-trivial features, execute the `plan` workflow (`.Codex/skills/plan/SKILL.md`):
+For non-trivial features, execute the `plan` workflow (`.claude/skills/plan/SKILL.md`):
 
 1. Read the approved spec from the issue
-2. Delegate architecture judgment to `tech-lead` + `architecture`
+2. Delegate architecture judgment to `tech` + `architecture`
 3. Append an `## Implementation Plan` comment (pattern choices, decisions, mirror target, tradeoffs, risks)
 
 Skip for trivial changes — note "trivial — skipping plan" on the issue.
 
 ### Stage 2.6: TASKS — Breakdown (optional)
 
-For non-trivial features, execute the `tasks` workflow (`.Codex/skills/tasks/SKILL.md`):
+For non-trivial features, execute the `tasks` workflow (`.claude/skills/tasks/SKILL.md`):
 
 1. Read the plan from the issue
 2. Decompose into dependency-ordered tasks mapped to stages
@@ -92,7 +110,7 @@ A **read-only** consistency check before any code — spec-kit's `analyze` seman
 
 1. **Coverage** — every acceptance criterion maps to ≥1 task; every task traces back to the spec (no orphans, no gaps)
 2. **Conflict** — plan and tasks against the approved spec; silent drift is a finding
-3. **Constitution** — any conflict with the `.Codex/rules/` corpus or the product's AGENTS.md constraints is automatically **CRITICAL**; fix the artifact, never dilute the rule
+3. **Constitution** — any conflict with the `.claude/rules/` corpus or the product's CLAUDE.md constraints is automatically **CRITICAL**; fix the artifact, never dilute the rule
 4. **Verdict** — `PASS` → continue silently · `CONCERNS` → list findings on the issue, continue · `FAIL` (any CRITICAL) → stop, label `pipeline:blocked`, report
 
 Never edit artifacts during READY — remediation happens in the stage that owns the artifact (spec/plan/tasks), then READY re-runs.
@@ -149,13 +167,13 @@ Append to issue: "Check stage complete. Build: pass. Visual: verified."
    git add <all files created in stages 3-5>
    git commit -m "feat: add <feature-name>
 
-   Closes #<issue-number>
-
-   Co-Authored-By: Codex Fable 5 <noreply@anthropic.com>"
+   Closes #<issue-number>"
    ```
 
+   End the message with the attribution trailer the harness supplies (it names the model actually running) — never hardcode a model name.
+
 2. Push to main
-3. Deploy to Vercel: `npx vercel --prod --yes`
+3. Deploy via `/deploy` — it routes by platform (a repo with `wrangler.jsonc` takes the Cloudflare lane; Vercel is legacy)
 4. Poll deployment status until Ready (max 10 minutes)
 5. If deployment fails: read logs, fix, re-deploy (max 3 attempts)
 
@@ -192,10 +210,10 @@ If any stage fails after max retries:
 
 ### Product Context
 
-Product scope is data-driven — resolve it from `.Codex/memory/repositories.json`:
+Product scope is data-driven — resolve it from `.claude/memory/repositories.json`:
 
 1. Look up the product id under `repositories.products`.
-2. If it has a `local` path, read `<local>/AGENTS.md` and use the matching product agent (hogwarts → multi-tenant/subdomain patterns, souq → multi-vendor marketplace, mkan → rental marketplace, shifa → medical platform).
+2. If it has a `local` path, read `<local>/CLAUDE.md` and use the matching product agent (hogwarts → multi-tenant/subdomain patterns, souq → multi-vendor marketplace, mkan → rental marketplace, shifa → medical platform).
 3. If `status: "planned"` (no repo yet — e.g. sijillee, moallimee), there is no codebase to touch: run the idea/spec stages against the kun repo, note the pending repo in the issue, and stop before schema.
 
 Adding a future product = one entry in `repositories.json`; this command needs no edits.

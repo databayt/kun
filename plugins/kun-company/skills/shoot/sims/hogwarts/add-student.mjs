@@ -5,6 +5,11 @@
 
 import { cleanup as archiveTestStudent, initScript as BLUR_PHONES } from "../../flows/hogwarts/add-student.mjs"
 
+// The cuts a batch re-film (shoot.mjs --video) re-directs from the fresh take, beside the tutorial:
+// the 9:16 reel and the support clips, by caption step («أدخل بيانات الطالب» is caption 3).
+export const reel = true
+export const clips = { details: "3-3" }
+
 export const meta = {
   title: "إضافة <mark>طالب جديد</mark>",
   sub: "دليل خطوة بخطوة لإدارة المدرسة في منصة بالقلم",

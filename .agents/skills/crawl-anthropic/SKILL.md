@@ -1,8 +1,12 @@
 ---
 name: crawl-anthropic
 description: Crawl and snapshot Anthropic docs/assets
-when_to_use: "Use when snapshotting Anthropic docs or assets into the local mirror — crawling code.Codex.com and platform.Codex.com pages for offline reference and rule harvesting. Triggers on: crawl anthropic, snapshot the docs, refresh the anthropic mirror."
+when_to_use: "Use when snapshotting Anthropic docs or assets into the local mirror — crawling code.claude.com and platform.claude.com pages for offline reference and rule harvesting. Triggers on: crawl anthropic, snapshot the docs, refresh the anthropic mirror."
 argument-hint: "[url] [--section S]"
+lane: research
+model: sonnet
+effort: low
+context: fork
 ---
 
 # Crawl Anthropic Assets
@@ -36,7 +40,7 @@ Canonical source of truth: **`databayt/codebase → scripts/cdn/harvest-rules.ts
 | sub-brand / model / section marks (in `brand`) | `opus-icon`, `opus-wordmark`, `sonnet-*`, `haiku-*`, `news-icon`, `research-icon` | model/section marks, not artwork |
 
 **KEEP-ALLOWLIST** — the brand's own canonical identity, even though it lives in `brand`:
-`wordmark.svg`, `anthropic-wordmark.svg`, `Codex-wordmark.svg`, `anthropic.svg`, `Codex.svg`, `starburst.svg`.
+`wordmark.svg`, `anthropic-wordmark.svg`, `claude-wordmark.svg`, `anthropic.svg`, `claude.svg`, `starburst.svg`.
 
 Rule of thumb: **if it is a logo, favicon, partner mark, or social glyph → drop; if it is an illustration, diagram, concept graphic, or functional UI icon → keep.** Keep exactly one canonical wordmark + the starburst per brand.
 
@@ -60,8 +64,8 @@ Examples:
 - https://www.anthropic.com/news (new blog posts = new illustrations)
 - https://www.anthropic.com/engineering (new engineering articles = new SVGs)
 - https://www.anthropic.com/research (new papers = new images)
-- https://www.anthropic.com/Codex/opus (model updates — keep illustrations, NOT the opus wordmark/icon)
-- https://www.anthropic.com/Codex/sonnet (model updates)
+- https://www.anthropic.com/claude/opus (model updates — keep illustrations, NOT the opus wordmark/icon)
+- https://www.anthropic.com/claude/sonnet (model updates)
 - https://www.anthropic.com/events (new events — keep event art, DROP partner logos)
 
 ## CDN Pattern Reference

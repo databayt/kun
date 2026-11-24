@@ -5,13 +5,17 @@ when_to_use: When creating, listing, previewing, or documenting an atom in /User
 argument-hint: "<name|list|preview|docs> [name]"
 allowed-tools:
   ["Bash(pnpm *)", "Read", "Write", "Edit", "Glob", "Grep", "mcp__shadcn__*"]
+lane: build
+effort: medium
 ---
 
 # Atom Skill
 
 Create and manage atoms in `/Users/abdout/codebase` — compositions of 2+
 shadcn/ui primitives, mirrored on shadcn's "components" docs pattern.
-Deep expertise: the `atom` agent (`.Codex/agents/atom.md` in the repo).
+Deep expertise: the `atom` agent (`.claude/agents/atom.md` in the repo).
+
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
 
 ## Usage
 

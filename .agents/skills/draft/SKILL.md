@@ -1,14 +1,16 @@
 ---
 name: draft
-description: Write the full draft — copy (Arabic crafted first, English mirrored) and/or its media set
-when_to_use: "Use when a topic needs to become a FULL draft for a databayt brand — the core piece plus one platform-native variant per channel, Arabic written natively and English mirrored, with UTM on every link, AND the draft's media half: library picks attached by URL, or a generation hand-off. ALSO the answering half of the Hub's agent window: with no topic, or on any phrasing about the draft queue, it drains the briefs contributors submitted on /social — picking media from the library as it answers. This is the drafting stage only: it does not decide what to write about (/calendar), does not render new images or video itself (/higgs, /carousel — it attaches their output), does not approve (/approve), and never sends anything to a platform (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
+description: Full brand draft — Arabic-first copy, English mirrored, plus media
+when_to_use: "Use when a topic must become a full brand draft — every channel's copy plus media — or, with no topic, to drain the /social brief queue. Drafting only: never picks topics (/calendar), renders media (/higgs, /carousel), approves (/approve) or sends (/publish). Triggers on: draft a post, write the copy, write the caption, post about <topic>, attach media to the draft, drain the draft queue, answer the social asks, any drafts waiting, اكتب منشور, صياغة المنشور, طابور الصياغة, أرفق وسائط للمسودة."
 argument-hint: "[<brand> <topic>] [--channels facebook,telegram] [--locale ar|en|both] [--media urls|type] · no args = drain the queue"
+lane: build
+effort: medium
 ---
 
 # Draft — the full draft, Arabic first
 
 One core piece, then one platform-native variant per channel — plus the draft's
-media half. Codex writes the copy (never a gateway LLM, never a translation
+media half. Claude writes the copy (never a gateway LLM, never a translation
 pass) and picks or commissions the media.
 
 **A full draft is copy AND/OR media.** The valid shapes: text only · text +
@@ -25,7 +27,7 @@ the work is whatever the team submitted from `/social`.
 
 ## Doctrine (inherits /social)
 
-- **Codex writes the copy.** Hermes is a relay, not a brain.
+- **Claude writes the copy.** Hermes is a relay, not a brain.
 - **Arabic is crafted first, English mirrors it** — never a literal translation in
   either direction. Correct Arabic or it does not ship.
 - **Moral gate**: truthful claims, no invented metrics or customers, cultural fit,
@@ -38,7 +40,7 @@ the work is whatever the team submitted from `/social`.
    **`moalimee`** and map to the registry id `moalimee` — the double-L spelling is
    canonical in prose and everywhere in the docs, the single-L is the env-var
    suffix and the stored `SocialPiece.brand` value. Refuse an unknown brand by
-   listing the five.
+   listing the six.
 2. **Read the voice** — `content/docs/brand.mdx` for the tone doctrine and the
    per-brand tagline, then `content/docs/social/<brand>.mdx` for audience, channel
    mix, and content pillars, then **`content/docs/social/copy.mdx`** for the craft
@@ -87,7 +89,7 @@ the work is whatever the team submitted from `/social`.
 ## Queue mode — answering the Hub's agent window
 
 The Social Agent on `/social` lets any contributor describe a post without a
-Codex session. It cannot write the copy: kun's billing is subscription-only,
+Claude Code session. It cannot write the copy: kun's billing is subscription-only,
 so no API key has credits (D-20260730). The window records the ask as a
 `SocialDraftRequest` and polls; **this skill is the half that answers it**, on the
 Max pool, so the copy comes out of the same doctrine as a hand-run `/draft`
@@ -176,7 +178,7 @@ The rules of this lane:
 
 ```bash
 node scripts/social-drafts.mjs answer <id> --ar ar.txt --en en.txt \
-  --media "https://cdn…/hero.png" --note "Codex:<who>"
+  --media "https://cdn…/hero.png" --note "claude-code:<who>"
 # later, from a full session that generated something better:
 node scripts/social-drafts.mjs attach <id> --media "url1,url2"   # pending or answered; REPLACES the set
 ```
@@ -262,7 +264,7 @@ were writing is caught in the same run; every `list` (yours included) beats the
 `draft-drain` heartbeat the Hub shows.
 
 **A run answers only the ids it was given.** The drain groups the pending queue
-by `model` and makes one `Codex -p --model` call per group, because `--model` is
+by `model` and makes one `claude -p --model` call per group, because `--model` is
 a property of the session and one call cannot honour a queue that chose two. If
 your prompt names ids, another session is answering the rest — leave them alone.
 

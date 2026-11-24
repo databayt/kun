@@ -1,11 +1,60 @@
 ---
 name: jobs
-description: Abdout's + Databayt's income lane — jobs, gigs, tenders, client requests and funding programs across Rwanda, Kenya, Nigeria, Gulf, Sudan; tracked on sales.databayt.org
-when_to_use: "Any opportunity someone POSTED that pays Abdout or Databayt: Kigali/Nairobi/Lagos roles, remote dev, AI-training gigs, freelance, electrical/protection work, tenders, RFPs, client project requests, and funding — incubators, accelerators, grants, credits, angels. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
+description: Abdout's instance of seek — his + Databayt's income lane (jobs, gigs, tenders, client requests, funding) across Rwanda, Kenya, Nigeria, Gulf, Sudan; on sales.databayt.org
+when_to_use: "Opportunities someone POSTED that pay Abdout or Databayt. Triggers on: jobs, find work, apply, opportunities, gigs, tenders, RFP, client request, incubator, accelerator, grant, credits, investor, angel, fundraising, funding, did anyone reply, وظائف, فرص, مناقصات, حاضنة, مسرعة, منحة, تمويل. NOT /scrape (outbound leads we go find)."
 argument-hint: "[status|scrape|wave|send|inbox|hold|funding|requests|learn|pause|resume]"
+lane: build
+effort: medium
 ---
 
 # Jobs — the self-running loop: fetch → wave → send → read → follow up → learn
+
+> **Abdout's instance of `seek`.** The loop is generic now (`seek` skill, `scripts/seek/`, public
+> page `/seek`); this runbook is how _his_ instance runs — data in `jobs/` (his profile, CVs,
+> ledger), the Twenty board, Kigali lanes, #jobs. `scripts/jobs` is a link to `scripts/seek` and
+> `pnpm jobs:*` aliases `pnpm seek:*`, so every command below still works. His dashboard moved to
+> `/seek/board` (login).
+
+## Mode: CONTRACTS since 2026-11-16, so read this first
+
+`"mode": "contracts"` is set in `jobs/loop.config.json` (D-20261116, `.claude/memory/decisions/2026-11-16-jobs-lane-to-contracts.md`).
+
+**Why:** in 51 days the loop sent 66 job applications and got 0 interviews and 0 positive human replies. It sends **no job applications** now. Instead:
+
+- Databayt Ltd bids on **tenders**. Its activities are 6201, 6202, 6311 and 8549, and its TIN is in `jobs/profile.json` → `company`.
+- Client requests come in from the databayt.org wizard.
+
+**What runs:**
+
+- console pull and push
+- discover (tender + client campaigns only, including the **`umucyo`** adapter for Rwanda e-procurement) → ingest → resolve
+- **`jobs:bid`** once a day
+- requests
+- inbox
+- the contracts digest
+- followup (it only archives silent old applications)
+- week (it leads with bids)
+- discuss
+
+**What is skipped:** google, wave, send, ATS prepare and submit, tailor-packets.
+
+**`pnpm jobs:bid [--dry-run] [--id <crmId>]`:**
+
+1. Triage each open TENDER or ENGINEERING_CONTRACT card against the registered activities. An out-of-scope card goes to HOLD with the reason.
+2. Write a packet in `jobs/packets/bids/<deadline>-<slug>/`: a `README.md` eligibility checklist, then `proposal.md` → `.pdf`.
+3. Set the card to HOLD with the reason "bid ready — submit by …".
+
+A person submits the bid, then runs `pnpm jobs:mark <id> applied`.
+
+**Hard wall:** `send-gate.ts` refuses any TENDER, ENGINEERING_CONTRACT or CLIENT_PROJECT card as a letter. Approval does not override this, and neither does `--now`.
+
+**Company gates** (listed in the digest): RRA tax clearance, RSSB, an Umucyo bidder account, bid security.
+
+**Archived 11-16:** the AI-training platform cards (Mercor, micro1, Meridial: his platform steps were dropped) and 230 unsent job cards (`pnpm jobs:archive`).
+
+**To restore the job loop:** set `"mode": "jobs"`. Everything below describes jobs mode.
+
+---
 
 **The measured truth this runbook exists to enforce: the bottleneck is SENDING, not finding.**
 On 2026-09-26 all 26 board records had sat at TO_APPLY for a month. Since 2026-09-27 the loop sends
@@ -18,7 +67,7 @@ AI_TRAINING 0 (Mercor — confirms Rwanda, weekly Stripe pay — micro1, Mindrif
 Tutor" on Greenhouse) → WEB_DEVELOPER 1 → FREELANCE 2 ("Arabic/RTL-ready Next.js in 72h" on Mostaql +
 Upwork) → REMOTE_WORLDWIDE / electrical / protection / marine 3 → tenders + CLIENT_PROJECT 4 →
 engineering contracts 5. **Never retry (refuse Rwanda):** Alignerr, Outlier, DataAnnotation, Prolific
-(`BLOCKED_PLATFORMS` in discover.mjs). **Markets:** Rwanda, Kenya, Nigeria (Africa = remote AND on-site) · Gulf = **remote only,
+(`BLOCKED_PLATFORMS` in discover.mjs). **Markets:** Rwanda (remote AND on-site) · Kenya, Nigeria **remote-only since 2026-11-07** (0/17 on-site: no permit for a foreign national; on-site only when the employer funds the move) · Gulf = **remote only,
 never on-site** · Sudan. **Two tracks on one board:** `track` FOUNDER (Abdout earns) / DATABAYT (the
 company earns: TENDER, CLIENT_PROJECT). **Funding** lives on its own board, "Funding & Programs".
 **Boundary with `/scrape`:** jobs = opportunities someone posted (jobs, gigs, RFPs, wizard requests,
@@ -28,17 +77,22 @@ portals, platforms, tenders and bids stay packets Abdout submits. **Learning ado
 
 ## The loop (launchd `com.databayt.jobs-loop`, every 30 min — `pnpm jobs:loop --status`)
 
-| When (Kigali) | Step | Script | Tokens |
-|---|---|---|---|
-| ≥07:00 daily | discover (10 adapters, incl. MyJobMag KE/NG) + ingest (one retry) | `jobs:discover`, `jobs:ingest` | 0 |
-| every tick | databayt.org wizard requests → CLIENT_PROJECT card on HOLD + Slack | `jobs:requests --apply` | 0 |
-| ≥07:00 Mon–Fri | wave: tailor letters, gate → QUEUED / HOLD | `jobs:facts`, `jobs:wave` | claude -p |
-| after wave | digest → Slack DM via `hermes send` (+ funding closing ≤14 days) | `jobs:digest --send` | 0 |
-| ≥10:00–17:00 Mon–Fri | send QUEUED (after a 2h veto) + APPROVED | `jobs:send --apply` | 0 |
-| 08:00–22:00 | read hotmail replies → move cards, alert | `jobs:inbox` | 0 |
-| ≥16:00 Mon–Fri | templated follow-ups day 7/14, archive day 21 | `jobs:followup --apply` | 0 |
-| Fri ≥17:00 | **week**: learn → Claude decides → adopt → report + thread in #jobs (≤3 tries) | `jobs:week` | claude -p |
-| every tick | **discuss**: answer Abdout in #jobs, apply/revert what he asks | `jobs:discuss` | claude -p only if he wrote |
+| When (Kigali)        | Step                                                                                                                                                                                      | Script                         | Tokens                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | -------------------------- |
+| ≥07:00 daily         | discover (10 adapters, incl. MyJobMag KE/NG) + ingest (one retry)                                                                                                                         | `jobs:discover`, `jobs:ingest` | 0                          |
+| ≥07:00 daily         | **google**: `claude -p` WebSearch sweep for Rwanda electrical + software postings (New Times, career pages, LinkedIn — boards the adapters can't fetch) → `jobs/inbox/<date>-google.json` | `jobs:google`                  | claude -p                  |
+| every tick           | databayt.org wizard requests → CLIENT_PROJECT card on HOLD + Slack                                                                                                                        | `jobs:requests --apply`        | 0                          |
+| ≥07:00 Mon–Fri       | wave: tailor letters, gate → QUEUED / HOLD                                                                                                                                                | `jobs:facts`, `jobs:wave`      | claude -p                  |
+| after wave           | digest → Slack DM via `hermes send` (+ funding closing ≤14 days)                                                                                                                          | `jobs:digest --send`           | 0                          |
+| ≥10:00–17:00 Mon–Fri | send QUEUED (after a 2h veto) + APPROVED                                                                                                                                                  | `jobs:send --apply`            | 0                          |
+| 08:00–22:00          | read hotmail replies → move cards, alert                                                                                                                                                  | `jobs:inbox`                   | 0                          |
+| ≥16:00 Mon–Fri       | templated follow-ups day 7/14, archive day 21                                                                                                                                             | `jobs:followup --apply`        | 0                          |
+| Fri ≥17:00           | **week**: learn → Claude decides → adopt → report + thread in #jobs (≤3 tries)                                                                                                            | `jobs:week`                    | claude -p                  |
+| every tick, first    | **console pull**: apply what kun.databayt.org/seek queued (approve/hold/veto/move, send switch, lane pause, cap, pasted posting)                                                          | `seek:pull --apply`            | 0                          |
+| every tick           | **discuss**: answer Abdout in #jobs, apply/revert what he asks                                                                                                                            | `jobs:discuss`                 | claude -p only if he wrote |
+| every tick, last     | **console push**: mirror both boards, ledger (60d), week report, switches to Neon for the web console                                                                                     | `seek:push --apply`            | 0                          |
+
+**Focus mode:** `focus: {lanes, countries, until}` in `jobs/loop.config.json` — until the date, wave / send / ATS / digest touch only those lanes in those countries; other QUEUED cards wait, Abdout's APPROVED cards still go; `anywhereLanes` (e.g. AI_TRAINING) pass in any country. Lapses on its own (`inFocus()` in config.ts).
 
 **Board states:** TO_APPLY → QUEUED (sends next window) → APPLIED → RESPONSE/INTERVIEW/OFFER/REJECTED;
 gate fail / needs input → HOLD (`holdReason` says what) → Abdout fixes + moves to APPROVED → sends.
@@ -69,6 +123,7 @@ Discover writes `jobs/learn/yield-<date>.json` per adapter.
 ## ATS lane — portal forms (since 2026-09-27, goal ~100/day)
 
 `pnpm jobs:ats prepare` (daily, in the loop) → `pnpm jobs:ats submit --apply` (per tick, 09–20).
+
 - **Greenhouse: auto-submitted.** Answers from `jobs/profile.json` via `src/lib/jobs/ats-answers.ts`;
   Greenhouse emails an 8-char code to hotmail — Abdout approved reading it (Mail.app) and entering it.
 - **Ashby + Lever: never auto-submitted** — Ashby's spam filter and Lever's hCaptcha block bots, and the
@@ -102,18 +157,18 @@ Discover writes `jobs/learn/yield-<date>.json` per adapter.
 
 ## Pieces
 
-| Thing | Where |
-|---|---|
-| Board | Twenty `kigaliOpportunity` ("Jobs & Opportunities") · sales.databayt.org · REST `localhost:3100` · Keychain `databayt-twenty`/`databayt` · client `scripts/jobs/board.ts` · fields `scripts/crm-kigali-object.mjs` |
-| Funding board | Twenty `fundingProgram` ("Funding & Programs") · `scripts/crm-funding-object.mjs` · seed `jobs/funding.seed.json` → `pnpm jobs:funding` |
-| Mail | Mail.app, account **osmanabdout@hotmail.com** — `scripts/jobs/mail-send.applescript`, `mail-read.applescript`. No account → send/inbox refuse, never fall back to another sender |
-| Letters | `jobs/templates/letters/<lane>@<n>.md` · follow-ups `follow-up-{1,2}@<n>.md` |
-| CVs | `jobs/cv/*.html` → `pnpm jobs:cv` (playwright PDF) · registry `jobs/variants.json` |
-| Variants | `pnpm jobs:variant` (list, sends) · `activate <id>` / `deactivate <id>` — two active per lane split 50/50 |
-| Ledger | `jobs/ledger.jsonl` — every queued/hold/sent/followup/reply/error line; learn's raw data |
-| Reports | `jobs/learn/<date>.md` · packets `jobs/packets/` |
-| Alerts | `scripts/jobs/notify.ts` → `hermes send` (no model needed) + macOS notification; `whatsappBrief` → his WhatsApp |
-| Phone | `pnpm jobs:brief [queue\|replies]` (what `/jobs*` runs) · `pnpm jobs:hermes` · `pnpm jobs:whatsapp-pair` |
+| Thing         | Where                                                                                                                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Board         | Twenty `kigaliOpportunity` ("Jobs & Opportunities") · sales.databayt.org · REST `localhost:3100` · Keychain `databayt-twenty`/`databayt` · client `scripts/jobs/board.ts` · fields `scripts/crm-kigali-object.mjs` |
+| Funding board | Twenty `fundingProgram` ("Funding & Programs") · `scripts/crm-funding-object.mjs` · seed `jobs/funding.seed.json` → `pnpm jobs:funding`                                                                            |
+| Mail          | Mail.app, account **osmanabdout@hotmail.com** — `scripts/jobs/mail-send.applescript`, `mail-read.applescript`. No account → send/inbox refuse, never fall back to another sender                                   |
+| Letters       | `jobs/templates/letters/<lane>@<n>.md` · follow-ups `follow-up-{1,2}@<n>.md`                                                                                                                                       |
+| CVs           | `jobs/cv/*.html` → `pnpm jobs:cv` (playwright PDF) · registry `jobs/variants.json`                                                                                                                                 |
+| Variants      | `pnpm jobs:variant` (list, sends) · `activate <id>` / `deactivate <id>` — two active per lane split 50/50                                                                                                          |
+| Ledger        | `jobs/ledger.jsonl` — every queued/hold/sent/followup/reply/error line; learn's raw data                                                                                                                           |
+| Reports       | `jobs/learn/<date>.md` · packets `jobs/packets/`                                                                                                                                                                   |
+| Alerts        | `scripts/jobs/notify.ts` → `hermes send` (no model needed) + macOS notification; `whatsappBrief` → his WhatsApp                                                                                                    |
+| Phone         | `pnpm jobs:brief [queue\|replies]` (what `/jobs*` runs) · `pnpm jobs:hermes` · `pnpm jobs:whatsapp-pair`                                                                                                           |
 
 `jobs/` is gitignored — personal documents. Never commit, upload or paste the CVs.
 
@@ -156,3 +211,4 @@ Discover writes `jobs/learn/yield-<date>.json` per adapter.
 - Prod Neon enum lacks 9 statuses (kun#152) — the board is the loop's truth; Neon is best-effort.
 - `rwandajob.com`, We Work Remotely block bots; ReliefWeb API needs an approved appname.
 - The matcher scores from software + CV evidence; AI-training/tender rows score low by construction.
+- **Platform steps are human gates (2026-11-07):** Mercor login is behind reCAPTCHA Enterprise, micro1's "application is incomplete" means its AI interview, and Meridial's onboarding ends in a typed-name e-signature. Code prepares everything else; the checklist is `jobs/packets/2026-11-07-platform-hour.md`. A "next steps / complete your application" email is a RESPONSE (classifier, 11-07), never an ack.

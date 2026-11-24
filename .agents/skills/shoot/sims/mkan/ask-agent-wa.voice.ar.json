@@ -1,0 +1,13 @@
+{
+  "engine": "gemini",
+  "voice": "Charon",
+  "style": "Warm, calm and clear, like a helpful guide. Modern Standard Arabic, natural pace.",
+  "lang": "ar",
+  "$comment": "Part B of the ask-agent film: the WhatsApp screen recording (~/media/mkan/ask-agent/raw/ask-agent-whatsapp-ar.mov, cut to ask-agent-whatsapp-ar.cut.mp4). One line per cue, in order (4). Stock Google voice (AI) — no consent needed (feedback_voice_consent).",
+  "lines": [
+    "وعلى واتساب، اكتب طلبك لرقم مكان كما تكتبه لصديق.",
+    "يرد الوكيل خلال ثوانٍ بمنازل مطابقة، مع صورة ورابط لكل منزل.",
+    "ورابط واحد يفتح كل المنازل وتكلفة الانتقال في المتصفح.",
+    "أرسل رقم المنزل الذي يعجبك، فيسأل الوكيل الوسيط إن كان ما زال متاحاً، ثم يرتب لك المعاينة."
+  ]
+}

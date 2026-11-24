@@ -1,8 +1,10 @@
 ---
 name: release
 description: One spell — handover, check, ship, watch, then comment + close the issue
-when_to_use: "Use when a feature block is code-complete on main and Abdout wants it shipped to the client in one move — the full local-to-production-and-verified chain, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only), or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
+when_to_use: "Use when a code-complete block on main should reach the client in one move — the full chain to verified production, not a single stage like /check (tight loop), /ship (deploy only), /handover (QA only) or /watch (verify only). Triggers on: release <block>, send to client, one-spell handoff (handover→check→ship→watch→close issue), give away to client, ship it and tell the client."
 argument-hint: <block> [--issue #N] [--notify-slack #channel]
+lane: judge
+effort: high
 ---
 
 # Release — Give Away to Client
@@ -47,7 +49,7 @@ Refuse to proceed if any of these fail. Each check should print the offending st
    If any check fails: stop with the specific reason (behind, ahead, or wrong branch). Suggest the fix.
 
 3. **Sentinel cache** (shared session state)
-   Read `.Codex/session-state.json` if it exists. Each gate command writes its own key (`handover`, `check`) on PASS. For each stage, if its sentinel is `PASS` and the timestamp is within the last 10 minutes, mark it `SKIP`. This makes re-runs idempotent after fixing one stage — and lets `/ship` and `/check` invoked alone earlier in the session contribute their results here.
+   Read `.claude/session-state.json` if it exists. Each gate command writes its own key (`handover`, `check`) on PASS. For each stage, if its sentinel is `PASS` and the timestamp is within the last 10 minutes, mark it `SKIP`. This makes re-runs idempotent after fixing one stage — and lets `/ship` and `/check` invoked alone earlier in the session contribute their results here.
 
    Sentinel shape:
 
@@ -95,7 +97,7 @@ Capture `$ISSUE_NUMBER` for Phase 6.
 
 ### Phase 3 — Stage 1: /handover
 
-Delegate to `.Codex/skills/handover/SKILL.md` in block mode:
+Delegate to `.claude/skills/handover/SKILL.md` in block mode:
 
 - Skip if sentinel says `handover.status == PASS` and `block` matches and `at` is within 10 min
 - Otherwise run `/handover <block>` against localhost:3000 (default) or `--env staging` if passed
@@ -105,7 +107,7 @@ Delegate to `.Codex/skills/handover/SKILL.md` in block mode:
 
 ### Phase 4 — Stage 2: /check
 
-Delegate to `.Codex/skills/check/SKILL.md`:
+Delegate to `.claude/skills/check/SKILL.md`:
 
 - Skip if sentinel says `check.status == PASS` and `at` is within 10 min
 - Otherwise run `/check` (inherits the auto-fix loop, max 5 attempts)
@@ -115,7 +117,7 @@ Delegate to `.Codex/skills/check/SKILL.md`:
 
 ### Phase 5 — Stage 3: /ship
 
-Delegate to `.Codex/skills/ship/SKILL.md`:
+Delegate to `.claude/skills/ship/SKILL.md`:
 
 - Run `/ship` (inherits the auto-fix retry loop, max 5)
 - Capture the production URL + commit SHA from the ship report
@@ -123,7 +125,7 @@ Delegate to `.Codex/skills/ship/SKILL.md`:
 
 ### Phase 6 — Stage 4: /watch
 
-Delegate to `.Codex/skills/watch/SKILL.md`:
+Delegate to `.claude/skills/watch/SKILL.md`:
 
 - Run `/watch <production-url>` with the URL from Stage 3
 - If `ISSUES FOUND` (console errors, network failures, smoke test fail): stop, do **not** auto-revert — surface for human judgment
@@ -206,7 +208,7 @@ Total elapsed: <duration>
 - All four stages report PASS
 - Issue comment posted, issue closed
 - Optional Slack post dispatched (if `--notify-slack`)
-- Sentinel keys for this release cleared from `.Codex/session-state.json` (other gates' sentinels untouched)
+- Sentinel keys for this release cleared from `.claude/session-state.json` (other gates' sentinels untouched)
 
 ## When to use
 
@@ -217,6 +219,5 @@ Total elapsed: <duration>
 ## When NOT to use
 
 - Mid-implementation — use `/check` for the tight loop instead
-- Hotfix from a non-main branch — use `/ship` directly
 - Just want to QA a build, not ship — use `/handover` alone
 - Investigating a pre-existing production issue — use `/watch` + `/incident`

@@ -1,8 +1,10 @@
 ---
 name: carousel
-description: Multi-slide bilingual brand carousels — Codex writes the deck, kun renders Anthropic-styled slides at exact platform sizes, a human approves, channels receive
-when_to_use: "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook carousel, a LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client on Telegram/WhatsApp. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
+description: Multi-slide bilingual brand carousels — deck written, slides rendered at exact platform sizes, human-approved
+when_to_use: "Use when a databayt brand needs a multi-slide social post — an Instagram/Facebook or LinkedIn PDF carousel, a story-sized slide set, or a slide album to DM a client. Triggers on: carousel, multi-slide post, swipe post, slides for instagram, carousel for <brand|block>, كاروسيل, سلايدات, منشور متعدد الشرائح."
 argument-hint: "[brand|block] [topic] [--slides 8] [--sizes 1080x1350] [--dm <chat>] [--publish]"
+lane: build
+effort: medium
 ---
 
 # Carousel — multi-slide brand storytelling, Anthropic-styled, AR-first
@@ -12,18 +14,18 @@ per-channel captions → **human gate** → feed channels and client DMs.
 
 ```
 TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playwright)
-  ─► VISUAL VERIFY ─► [Figma / Codex Design art-direction] ─► STAGE (STOP)
+  ─► VISUAL VERIFY ─► [Figma / Claude Design art-direction] ─► STAGE (STOP)
   ─► PUBLISH (IG/FB export · LinkedIn PDF · Telegram album DM) ─► LOG
 ```
 
 ## Doctrine (inherits /social)
 
-- **Codex writes the copy** — never the gateway LLM. Arabic is **crafted first**, English
+- **Claude writes the copy** — never the gateway LLM. Arabic is **crafted first**, English
   mirrors it; never literal translation in either direction.
 - **Human gate**: no approval → no publish, no DM. Staging = deliver files + captions, STOP.
 - **Text lives in HTML** — that is the point of this lane. The `/social` "no text inside
   visuals" rule binds AI-generated raster art (`/higgs`), not these deterministic renders.
-- **Anthropic illustration style only** — never Anthropic/Codex logomarks or wordmarks
+- **Anthropic illustration style only** — never Anthropic/Claude logomarks or wordmarks
   inside slides (no implied endorsement).
 - UTM on every link (`utm_source=<channel>&utm_medium=social&utm_campaign=<slug>`) → PostHog.
 
@@ -31,7 +33,7 @@ TOPIC ─► COPY (AR-first) ─► DECK (zod JSON) ─► RENDER (route + Playw
 
 **The craft bar, the Arabic register ladder, and the reject list are
 `content/docs/social/copy.mdx`** — the same bar `/draft` writes to. Read it before drafting
-the deck; calibration examples are `.Codex/skills/draft/references/golden-set.md`. Deck
+the deck; calibration examples are `.claude/skills/draft/references/golden-set.md`. Deck
 specifics below.
 
 - **Cover hook = check 1 at slide granularity** — ≤ 12 words, pain or promise, never a
@@ -132,15 +134,15 @@ render constraint — `/publish` enforces it; 10 = Telegram album cap.
   hand.
 - **Never assume the carousels page is all ours** — inventory before any delete (Abdout's
   own layers, e.g. `logo 2`, live there too).
-- **Codex Design** (Max-covered; one-time `/design-login`): `create_project`
+- **Claude Design** (Max-covered; one-time `/design-login`): `create_project`
   "carousel-templates-<brand>" → `write_files` a self-contained HTML/CSS mirror of the six
-  archetypes → `render_preview` → iterate on the Codex.ai/design canvas → `read_file` and
+  archetypes → `render_preview` → iterate on the claude.ai/design canvas → `read_file` and
   hand-translate back. The mirror lives only in the design project — git carries the TSX
   truth. Skip gracefully when unauthenticated.
 
 ## Batch lane (per-block carousels)
 
-`.Codex/workflows/carousel.js` — fan out over a product's `blocks.json`, draft one deck per
+`.claude/workflows/carousel.js` — fan out over a product's `blocks.json`, draft one deck per
 block, adversarial copy QA, render, stage. Always ends staged; never publishes.
 
 ## Reality notes

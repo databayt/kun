@@ -1,8 +1,10 @@
 ---
 name: report
-description: List the open user reports across databayt repos, let a human take or reject each, then fix the accepted ones end to end
-when_to_use: "Use when the open reports need a human decision or a fix — list the queue of `report`-labeled issues across the databayt repos (hogwarts, kun, mkan, souq, shifa) as one numbered table, take Abdout's take/reject choices in prose, label the accepted ones and close the rejected ones with a reason, then run the report agent (read, verify, fix, build, push, close) on what was accepted; also a single repo or a single issue. Distinct from /qa (block-wide QA), /check (pre-ship gate) and /issue (file a new issue). Triggers on: report, reports, fix reports, list the reports, show the reports, what did the team report, the team reported, Ali reported, open issues from the dialog, take/reject the reports, verified-report queue, البلاغات, بلاغات الفريق, المشاكل المبلغ عنها, أصلح البلاغات."
+description: Triage and fix the open user reports across databayt repos
+when_to_use: "Use when the open `report`-labeled issues need a human decision or a fix — Abdout takes or rejects each from one table, accepted ones get fixed. Distinct from /qa (block-wide QA), /check (pre-ship gate) and /issue (file a new issue). Triggers on: report, reports, fix reports, list the reports, show the reports, what did the team report, the team reported, Ali reported, open issues from the dialog, take/reject the reports, verified-report queue, البلاغات, بلاغات الفريق, المشاكل المبلغ عنها, أصلح البلاغات."
 argument-hint: "[--status | <repo> | <repo>#N | take 1,3 reject 2]"
+lane: build
+effort: medium
 ---
 
 # Report — list, choose, fix
@@ -80,7 +82,7 @@ For every issue now labeled `accepted` (or `verified-report`), oldest first, run
 
 1. **READ** — `gh issue view N` → description, page URL, reporter, score-block
 2. **LOCATE** — URL → route directory + component directory (mirror pattern)
-3. **CONTEXT** — AGENTS.md, README.md, ISSUE.md in the feature directory
+3. **CONTEXT** — CLAUDE.md, README.md, ISSUE.md in the feature directory
 4. **VALIDATE** — accepted means "fix it if it is a bug"; if it turns out to be a feature request, a data/onboarding gap, or unsafe (schema/auth/middleware), comment and leave it open for him — don't fake a fix
 5. **SEE** + **DEBUG** — screenshot the page, console + network
 6. **IDENTIFY** — root cause

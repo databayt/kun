@@ -1,8 +1,10 @@
 ---
 name: spec
 description: Technical spec — data model, file plan, refined acceptance criteria
-when_to_use: "Use when a captured feature idea (GitHub issue) needs to become a technical specification — Prisma data model sketch, file plan, refined acceptance criteria, and dependencies — published as an issue comment and paused for the single human approval gate of the pipeline; this is the Specify stage between /idea and /plan or /schema, not architecture planning (/plan) or task breakdown (/tasks). Triggers on: spec the <feature>, write the spec, technical specification, pipeline Specify stage (human approval gate)."
+when_to_use: "Use when a captured feature idea (GitHub issue) needs a technical spec — data model sketch, file plan, refined acceptance criteria — posted for the pipeline's one human approval gate. The Specify stage between /idea and /plan or /schema; not architecture (/plan) or task breakdown (/tasks). Triggers on: spec the <feature>, write the spec, technical specification, pipeline Specify stage (human approval gate)."
 argument-hint: <feature>|#N [product]
+lane: judge
+effort: high
 ---
 
 # Spec — Technical Specification
@@ -82,7 +84,7 @@ Look for:
 
 **Product context:**
 
-- Read the product's AGENTS.md for domain constraints
+- Read the product's CLAUDE.md for domain constraints
 - Read the product's README.md for architecture overview
 
 ### 3. DESIGN — Generate the spec

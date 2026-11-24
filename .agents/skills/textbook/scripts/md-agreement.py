@@ -18,6 +18,8 @@ the mean — decide what the repair loop does next.
   md-agreement.py <book> --sample 12 [--seed 7] [--risk-json lint.json] [--risk-cap 12] [--json]
   md-agreement.py <book> --score [--run-dir pages-md] [--audit-dir pages-md-audit] [--pages 5,42]
                          [--json] [--queue-out queue.json]
+  md-agreement.py <book> --witness textlayer [--threshold 0.98] [--out witness.json] [--json]
+                         free witness over EVERY page from the PDF text layer — see textlayer_witness()
 
 Classes (primary, by priority): structure > omission > numeric > latin > illegible > ordering > wording > clean.
 Only `structure`, `omission`, `numeric`, `latin`, `illegible` and `wording` pages enter the repair queue;
@@ -121,6 +123,80 @@ def page_metrics(a_text: str, b_text: str) -> dict:
             'queue': primary in ('structure', 'omission', 'numeric', 'latin', 'illegible', 'wording')}
 
 
+AR_LETTER = re.compile(r'[ء-ي]')
+ALT = re.compile(r'!\[([^\]]*)\]\([^)]*\)')
+
+
+def skeleton(t: str) -> list:
+    """Arabic words reduced to what a mis-encoded PDF text layer still gets right.
+
+    Many sd PDFs embed fonts whose glyph map is wrong: lam-ligatures are stored reversed
+    («املتحدة» for «المتحدة»), letters arrive as junk ('5س', '{ص', 'y'). Measured on the 21
+    landed g12 twins (2026-10-24): stripping non-letters, dropping ل/ا and comparing each
+    word's letter MULTISET recovers agreement where the raw text layer scored bow ≈ 0.45.
+    What this cannot see: ل/ا errors, word order, numerals, structure.
+    """
+    t = unicodedata.normalize('NFKC', ALT.sub(r' \1 ', t))  # a caption kept as alt text is still printed text
+    t = DIACRITICS.sub('', t)
+    out = []
+    for w in t.split():
+        if not AR_LETTER.search(w):
+            continue
+        w = ''.join(c for c in w if AR_LETTER.match(c))
+        w = (w.replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ى', 'ي')
+               .replace('ة', 'ه').replace('ؤ', 'و').replace('ئ', 'ي').replace('ل', '').replace('ا', ''))
+        if len(w) >= 2:
+            out.append(''.join(sorted(w)))
+    return out
+
+
+def textlayer_witness(book: Path, run_dir: str, threshold: float, min_words: int = 20) -> dict:
+    """A free, non-model witness for every page: the PDF's own text layer.
+
+    It CLEARS a page only when the skeletons agree at >= threshold AND the page carries nothing
+    the skeleton is blind to (<= 2 numerals, no table, no figure labels). On gold page 39 of
+    biology a 0.987 skeleton agreement hid a numeric error, which is why numerals never clear.
+    It FLAGS an omission suspect when the text layer holds markedly more words than the twin —
+    the defect a second model read sharing the first one's blind spot would miss.
+    Measured 2026-10-24 on landed g12: strict clearance 0–10 % of pages per book — a detector
+    first, a cost saver second.
+    """
+    import fitz  # PyMuPDF
+    doc = fitz.open(book / 'textbook.pdf')
+    layer = [skeleton(doc[i].get_text()) for i in range(len(doc))]
+    # Running heads and folios are printed on most pages and dropped from the twin as furniture;
+    # a word on >= 30 % of the text-layer pages is furniture, not content.
+    seen = Counter(w for words in layer for w in set(words))
+    furniture = {w for w, c in seen.items() if c >= max(5, 0.3 * len(doc))}
+    rows, cleared, suspects, unusable = [], [], [], []
+    for i in range(len(doc)):
+        n = i + 1
+        f = book / run_dir / f'{n}.md'
+        if not f.exists():
+            continue
+        t = f.read_text(encoding='utf-8')
+        a = [w for w in skeleton(t) if w not in furniture]
+        b = [w for w in layer[i] if w not in furniture]
+        if len(a) < min_words and len(b) < min_words:
+            unusable.append(n)
+            continue
+        w = f1(Counter(a), Counter(b))
+        sig = STRUCT.signature(t)
+        blind = len(NUMERAL.findall(IMG.sub(' ', t))) > 2 or bool(sig.get('tables')) or bool(sig.get('labels'))
+        row = {'page': n, 'skeleton': w, 'twinWords': len(a), 'layerWords': len(b), 'blindSpots': blind}
+        if w >= threshold and not blind:
+            cleared.append(n)
+        if len(b) >= min_words and len(b) > 1.15 * len(a) and w < 0.90:
+            suspects.append(n)
+            row['omissionSuspect'] = True
+        rows.append(row)
+    doc.close()
+    usable = [r for r in rows if r['layerWords'] >= min_words]
+    healthy = round(sum(r['skeleton'] >= 0.90 for r in usable) / len(usable), 3) if usable else 0.0
+    return {'witness': 'textlayer', 'threshold': threshold, 'pagesCompared': len(rows), 'layerHealth': healthy,
+            'cleared': cleared, 'omissionSuspects': suspects, 'noText': unusable, 'pages': rows}
+
+
 def score(book: Path, run_dir: str, audit_dir: str, pages=None) -> dict:
     run, audit = book / run_dir, book / audit_dir
     if not audit.is_dir():
@@ -165,8 +241,24 @@ def main():
     ap.add_argument('--pages', help='comma list — score only these pages')
     ap.add_argument('--json', action='store_true')
     ap.add_argument('--queue-out', help='write the repair queue (page → classes) to this JSON file')
+    ap.add_argument('--queue-all', action='store_true',
+                    help='full coverage: queue EVERY non-clean page, ordering included (default skips ordering)')
+    ap.add_argument('--witness', choices=['textlayer'], help='free non-model witness over EVERY page (needs textbook.pdf)')
+    ap.add_argument('--threshold', type=float, default=0.98, help='skeleton agreement a page needs to be cleared by the witness')
+    ap.add_argument('--out', help='with --witness: also write the result JSON here')
     a = ap.parse_args()
     book = Path(a.book).resolve()
+
+    if a.witness:
+        res = textlayer_witness(book, a.run_dir, a.threshold)
+        if a.out:
+            Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding='utf-8')
+        if a.json:
+            print(json.dumps({k: v for k, v in res.items() if k != 'pages'}, ensure_ascii=False)); return
+        print(f"compared {res['pagesCompared']} · layer health {res['layerHealth']:.0%} · cleared {len(res['cleared'])} · "
+              f"omission suspects {len(res['omissionSuspects'])} · no text {len(res['noText'])}")
+        print(f"cleared: {res['cleared'] or 'none'}\nomission suspects: {res['omissionSuspects'] or 'none'}")
+        return
 
     if a.sample:
         nums = sorted(int(p.stem) for p in (book / 'pages').glob('*.webp'))
@@ -189,6 +281,10 @@ def main():
         sys.exit('pass --sample N or --score')
     pages = [int(x) for x in a.pages.split(',') if x.strip()] if a.pages else None
     res = score(book, a.run_dir, a.audit_dir, pages)
+    if a.queue_all:
+        for r in res['pages']:
+            r['queue'] = r['primary'] != 'clean'
+        res['queue'] = [r['page'] for r in res['pages'] if r['queue']]
     if a.queue_out:
         Path(a.queue_out).write_text(json.dumps([{'page': r['page'], 'classes': r['classes'], 'primary': r['primary'],
                                                   'structMismatches': r.get('structMismatches', []), 'spans': r.get('spans', []),

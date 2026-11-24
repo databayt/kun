@@ -1,14 +1,17 @@
 ---
 name: clone
 description: Clone a pattern/component from a source repo OR mirror a live URL section pixel-exact
-when_to_use: "Use when reproducing something that already exists somewhere else — a live site section to mirror pixel-exact into the house stack (url-mode: deterministic Playwright capture → tiered Workflow), a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
+when_to_use: "Use when reproducing something that already exists — a live site section mirrored pixel-exact into the house stack, a Figma frame to implement, or code to adapt from github:/shadcn:/codebase:/pattern: sources. Triggers on: clone <url>, clone this section, make ours look like <site>, clone the figma design, clone shadcn:<component>, pattern:<keyword>. Distinct from /atom or /template (net-new components) — clone always starts from an existing source."
 argument-hint: "<url|figma|github:|shadcn:|codebase:|pattern:> [section|target] [--pick] [--devtools] [--into atom|template|block]"
-model: opus
+lane: build
+effort: medium
 ---
 
 # Clone
 
 Polymorphic. Two families of source:
+
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
 
 - **Live URL** (any non-Figma `http(s)://`) → **url-mode**: deterministically capture a section's
   DOM + exact computed styles and mirror it **pixel-exact** into the house stack. Replaces the
@@ -34,6 +37,9 @@ Polymorphic. Two families of source:
 /clone https://linear.app "hero" --into atom   # land as an atom
 /clone https://app.example.com/dash --devtools # logged-in page via real Chrome
 ```
+
+Need the **behavior** behind the section — the requests it fires, routes, API shape — not
+just its pixels? That is `/reverse <url>` (REA teardown); clone stays visual.
 
 ### Figma (pixel-perfect design-to-code)
 
@@ -91,10 +97,10 @@ Parse: the URL; an optional **section name** (heading/copy text to target); flag
 
 Run the capture script. Playwright resolves from the global `@playwright/mcp` (zero install on
 the kun default); on a bare machine run the one-time bootstrap first:
-`(cd ~/.Codex/skills/clone/scripts && npm run bootstrap)`.
+`(cd ~/.claude/skills/clone/scripts && npm run bootstrap)`.
 
 ```bash
-node ~/.Codex/skills/clone/scripts/clone-capture.mjs \
+node ~/.claude/skills/clone/scripts/clone-capture.mjs \
   --url "<url>" --out "<repoRoot>/.clone/<slug>" \
   [--section "<heading/copy text>"] [--pick] [--devtools] \
   --breakpoints 375,768,1440
@@ -133,7 +139,7 @@ mechanism that controls both) so the blanket Opus-max tax is gone:
 
 ```
 Workflow({
-  scriptPath: "~/.Codex/skills/clone/scripts/clone.workflow.mjs",
+  scriptPath: "~/.claude/skills/clone/scripts/clone.workflow.mjs",
   args: { snapshotDir: "<abs path to .clone/<slug>>", into: "<atom|template|block|auto>", repoRoot: "<abs repo root>" }
 })
 ```
@@ -197,10 +203,10 @@ adopting later, and any unresolved diffs. The `.clone/<slug>` snapshot stays as 
 
 ### If source starts with `pattern:`:
 
-1. Read `.Codex/patterns/registry.json`
+1. Read `.claude/patterns/registry.json`
 2. Look up the keyword (e.g., `pattern:form` → keyword `form`)
 3. Resolve to canonical repo + path (e.g., hogwarts → `src/components/form/`)
-4. Read the pattern card at `.Codex/patterns/cards/{keyword}.md` for context
+4. Read the pattern card at `.claude/patterns/cards/{keyword}.md` for context
 5. Clone from the canonical local path: `/Users/abdout/{repo}/{path}`
 6. Adapt imports: replace canonical repo paths with current project paths
 7. Generalize tenant-specific code (e.g., `schoolId` → parameterized)

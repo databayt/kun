@@ -3,7 +3,10 @@ name: costs
 description: API spend breakdown and cost-optimization analysis
 when_to_use: "Use when Abdout asks where the money goes — API and infra spend breakdown with cost-optimization analysis across Vercel, Neon, AWS, and the Anthropic plan, honoring the subscription-only posture. Triggers on: costs, spend, how much are we paying, cost optimization, budget check."
 argument-hint: "[monthly|<service>]"
+lane: research
 model: sonnet
+effort: low
+context: fork
 ---
 
 API spend breakdown and cost optimization analysis.
@@ -13,7 +16,7 @@ Arguments: $ARGUMENTS (optional: "monthly" for full report, or specific service 
 Steps:
 
 1. Gather cost data:
-   - Codex Max subscription: $200/mo (fixed)
+   - Claude Max subscription: fixed plan cost — see .claude/CLAUDE.md → Billing (subscription-only, no API spend)
    - Vercel: Check usage tier and bandwidth (vercel MCP)
    - Neon: Check branch count, compute hours (neon MCP)
    - Stripe: Calculate transaction fees from recent volume (stripe MCP)
@@ -24,9 +27,9 @@ Steps:
    - Can any Vercel project stay on free tier?
    - Are there stale Neon branches to delete?
    - Can Stripe fees be reduced with annual billing?
-   - Are we using Codex API efficiently?
+   - Are we using Claude API efficiently?
 5. Project next month's costs based on trends
 6. Output: cost table, trend, optimizations, recommendation
 
-Reference: .Codex/agents/ops.md for cost structure
-Reference: .Codex/agents/revenue.md for revenue context
+Reference: .claude/agents/ops.md for cost structure
+Reference: .claude/agents/sales.md for revenue context

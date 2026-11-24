@@ -1,8 +1,10 @@
 ---
 name: calendar
 description: The content calendar — which brand publishes what, on which day
-when_to_use: "Use when deciding or reviewing WHAT to publish and WHEN — mapping topics to weeks, allocating slots per brand, checking what actually shipped against what was planned. This is the planning stage that feeds /draft: it never writes post copy (/draft), never renders media (/higgs), never stages for sign-off (/approve), never delivers (/publish), and never reads numbers back (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
+when_to_use: "Use when deciding or reviewing WHAT to publish and WHEN — topics to weeks, slots per brand, shipped vs planned. The planning stage feeding /draft: never writes copy (/draft), renders media (/higgs), stages sign-off (/approve), delivers (/publish) or reads numbers (/measure). Triggers on: content calendar, plan the content, what are we publishing, which brand is due, what slipped this week, التقويم, خطة المحتوى."
 argument-hint: "[plan|review] [brand] [date-range]"
+lane: build
+effort: medium
 ---
 
 # Calendar — what publishes, for which brand, when
@@ -13,16 +15,18 @@ Arguments: $ARGUMENTS — `plan` (allocate the coming period) or `review` (diff 
 last one against what shipped), optionally scoped to a brand and a date range.
 Default: `plan` for next week.
 
-**SCOPE (2026-08-06) — one slice: `hogwarts` × `facebook` × Sudan.** Plan for
-hogwarts only, and allocate Facebook slots only. `content/social/pillars.json`
-carries hogwarts' 8 briefs and nothing else, so a five-brand plan would invent
-slots no stage can fill. Say the other four are deferred by decision rather than
-planning empty rows for them. Two inversions apply because the country is Sudan:
-**static Arabic cards lead over video** (intermittent connectivity favors light
+**SCOPE (2026-09-27) — one slice: `balqalam` × `facebook`.** The school product publishes only
+as Balqalam (hogwarts is retired and hidden, with no briefs). Plan for balqalam only, and allocate
+Facebook slots only. Balqalam is not on the weekly seeder: its plan is the editorial queue —
+90 drafts in `content/social/queue/balqalam/` (plan.json + NNN-*.md), dated since 2026-10-18 —
+week 1 = Mon 2026-10-19, one slot a day (`PLANS` in `src/components/root/social/plan.ts`), drawn as
+a month grid on `/social/calendar` — described in `content/docs/social/balqalam.mdx`. A five-brand plan would invent slots no stage can fill, so say
+the others are deferred by decision rather than planning empty rows for them. Two inversions still
+apply because the proof track is Sudan: **static Arabic cards lead over video** (intermittent connectivity favors light
 formats), and **the Aug 23 Saudi school-year window is not the clock**. Reasoning
 
 - expansion gate:
-  `.Codex/memory/decisions/2026-08-06-social-one-slice-hogwarts-facebook-sudan.md`.
+  `.claude/memory/decisions/2026-08-06-social-one-slice-hogwarts-facebook-sudan.md`.
 
 ## Doctrine (inherits /social)
 
@@ -36,7 +40,7 @@ formats), and **the Aug 23 Saudi school-year window is not the clock**. Reasonin
 ## Steps
 
 1. **Read the strategy** — `content/docs/social/strategy.mdx` for per-brand cadence
-   and the kill criteria; `.Codex/agents/growth.md` for the content pillars
+   and the kill criteria; `.claude/agents/marketing.md` for the content pillars
    (Arabic-first tech · product marketing per vertical · dev relations · founder
    story). The standing week-by-week allocation lives in `content/social/pillars.json`
    — the seed lane (`scripts/seed-drafts.sh`, Mondays 07:00) files it into the draft
@@ -46,9 +50,11 @@ formats), and **the Aug 23 Saudi school-year window is not the clock**. Reasonin
    math), a queue chip per brief, and a **Queue now** button that files a brief as a
    draft ask on the spot — calendar → draft is a click, not a wish.
 2. **Read the brands** — `content/docs/social/<brand>.mdx` for each brand's channel
-   mix and audience. The five are `databayt`, `hogwarts`, `mkan`, `sijillee`,
-   `moalimee` (registry ids in `src/components/root/social/products.ts`; the
-   canonical public spelling of the last is _Moallimee_).
+   mix and audience. The six are `databayt`, `hogwarts`, `balqalam`, `mkan`,
+   `sijillee`, `moalimee` (registry ids in
+   `src/components/root/social/products.ts`; the canonical public spelling of the
+   last is _Moallimee_). Only the first four have a Facebook Page — `sijillee`
+   and `moalimee` carry `facebook: false` and cannot be scheduled against it.
 3. **Diff against reality** — read `SocialPiece` joined to `SocialVariant` for the
    period and compare `published` rows against the previous plan. A plan never
    checked against what shipped is a wish list.
@@ -69,5 +75,5 @@ A dated table in which every row carries brand, topic, channel set, and owner �
 and every slipped slot from the previous period is either rescheduled or
 explicitly dropped with a reason.
 
-Reference: `.Codex/agents/growth.md` (Samia is the primary content creator) ·
+Reference: `.claude/agents/marketing.md` (Samia is the primary content creator) ·
 `content/docs/social/strategy.mdx`.

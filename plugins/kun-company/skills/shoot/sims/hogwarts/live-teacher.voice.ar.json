@@ -1,0 +1,14 @@
+{
+  "engine": "gemini",
+  "voice": "Sulafat",
+  "lang": "ar",
+  "style": "Speak in Sudanese Arabic, Khartoum dialect, with a natural Sudanese accent. Warm, friendly, clear and unhurried, like a kind teacher explaining to parents.",
+  "$comment": "Sudanese narration for teachers — one line per sim.caption in the 11-11 take (5), spoken a beat after its caption. Google stock voice (AI).",
+  "lines": [
+    "يا أستاذة، يا أستاذ: في زمن الحصة حتلقى شريط أخضر في أوّل الصفحة، وفيهو حصتك.",
+    "دُوس «انضم»، وحتفتح ليك بطاقة الحصة.",
+    "بعداك دُوس «انضمام»، وتدخل الغرفة طوّالي. ممكن تلقى طلابك سبقوك وقاعدين منتظرنك.",
+    "تحت في الشاشة حتلقى السبورة، والشرائح، ومشاركة الشاشة: من اللابتوب، أو من تطبيق بالقلم في الأندرويد.",
+    "ولمّا الحصة تنتهي، دُوس «مغادرة». الغرفة بتتقفل براها بعد الزمن، والحضور بيتكتب براهو."
+  ]
+}

@@ -1,13 +1,15 @@
 ---
 name: social
 description: One spell — calendar, draft, media, approve, publish, measure for a brand post
-when_to_use: "Use when a databayt brand needs a social post taken the whole way — pick the slot, write the bilingual copy, render the media, get a human sign-off, deliver to the channels, and read the numbers back. This is the compound orchestrator; run a single stage directly when that is all you need (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
+when_to_use: "Use when a databayt brand post should be taken the whole way — slot, bilingual copy, media, human sign-off, delivery, numbers. The compound orchestrator; for one stage run it directly (/calendar, /draft, /higgs, /approve, /publish, /measure). Triggers on: social post, post about <topic>, publish to social, social automation, broadcast the announcement, منشور تواصل, انشر عن."
 argument-hint: "<brand> <topic> [--channels ...] [--media [type]] [--at <iso>] [--from <stage>]"
+lane: build
+effort: medium
 ---
 
 # Social — one post, all the way through
 
-**Codex drafts a FULL draft (copy + media), a human approves in the review
+**Claude drafts a FULL draft (copy + media), a human approves in the review
 queue, the egress layer relays.**
 
 ```
@@ -25,19 +27,20 @@ Attach, library auto-pick, or a generation), and `/social/publish` is the
 review queue where the next full draft waits for the human yes — publish now or
 schedule for the cron drain.
 
-Arguments: $ARGUMENTS — brand (`databayt|hogwarts|mkan|sijillee|moalimee`), the
+Arguments: $ARGUMENTS — brand (`databayt|hogwarts|balqalam|mkan|sijillee|moalimee`), the
 idea or news, optional `--channels`, `--media`, `--at`, and `--from <stage>` to
 resume mid-chain.
 
-**SCOPE (2026-08-06) — one slice: `hogwarts` × `facebook` × Sudan.** Default to
-that brand and that channel; the other four brands have no filled brand kit
-(`compileBrief` throws) and no pillars, and Facebook is the only live transport.
+**SCOPE (2026-09-27) — one slice: `balqalam` × `facebook`.** Default to
+that brand and that channel (hogwarts is retired and hidden; its posts go out as balqalam).
+Brand voice, pillars and claims: `content/docs/social/balqalam.mdx`. Brands other than
+balqalam, mkan and databayt have no filled brand kit (`compileBrief` throws) and no pillars, and Facebook is the only live transport.
 If asked for another brand or channel, say it is deferred by decision and name
 the expansion gate — do not widen on your own. The multiplier is dormant: with
 one channel live, the core piece **is** the post. Register stays rung 2 and the
 moral code's Sudan clause binds every post (humility in tone; never exploit
 crisis for engagement). Reasoning + gate:
-`.Codex/memory/decisions/2026-08-06-social-one-slice-hogwarts-facebook-sudan.md`.
+`.claude/memory/decisions/2026-08-06-social-one-slice-hogwarts-facebook-sudan.md`.
 
 Autonomy is **L1/L2** — a human signs off before any brand post. L4 is gated
 behind `/decide` plus an automated guardrail layer (LLM-judge content and
@@ -46,7 +49,7 @@ the ladder: `content/docs/social/` · `docs/SOCIAL-AUTOMATION.md`.
 
 ## Doctrine (non-negotiable)
 
-1. **Codex writes the copy** — never the gateway's LLM. Hermes is a relay, not a
+1. **Claude writes the copy** — never the gateway's LLM. Hermes is a relay, not a
    brain.
 2. **Arabic first, English second** — crafted, not translated. Correct Arabic or it
    does not ship. See `content/docs/brand.mdx`.
@@ -82,9 +85,9 @@ no wired channel (usually: no Facebook Page yet). If Slack was requested, refuse
 and say why — approvals and notices go there automatically.
 
 **Phase 2 — Stage 1: `/calendar`.** Skip when the topic arrived as an argument.
-Otherwise delegate to `.Codex/skills/calendar/SKILL.md` to pick the slot.
+Otherwise delegate to `.claude/skills/calendar/SKILL.md` to pick the slot.
 
-**Phase 3 — Stage 2: `/draft`.** Delegate to `.Codex/skills/draft/SKILL.md`.
+**Phase 3 — Stage 2: `/draft`.** Delegate to `.claude/skills/draft/SKILL.md`.
 Blocking — there is nothing to approve without copy.
 
 **Phase 4 — Stage 3: media.** Pick before you generate: search
@@ -94,20 +97,20 @@ showroom Attach). On `--media [type]`, or when nothing matches, generate: the
 type comes from the showroom taxonomy
 (`src/components/root/social/showroom/taxonomy.ts`, default `hero`) and picks
 the lane — text-free photography (`hero`, `product`, `lifestyle`, `mockup`,
-`reel`, `story`) delegates to `.Codex/skills/higgs/SKILL.md`; text-bearing
+`reel`, `story`) delegates to `.claude/skills/higgs/SKILL.md`; text-bearing
 formats (`og`, `banner`, `infographic`, `split`, `testimonial`) render as a deck
-on `.Codex/skills/carousel/SKILL.md` — a single card is a 1-slide deck.
+on `.claude/skills/carousel/SKILL.md` — a single card is a 1-slide deck.
 Register the output in the library, then attach. Non-blocking: a media failure
 downgrades to a text post rather than stopping the chain. A multi-slide deck is
 `/carousel` either way.
 
 **Phase 5 — Stage 4: `/approve` — HARD STOP.** Delegate to
-`.Codex/skills/approve/SKILL.md`. The primary lane is the Hub's review queue at
+`.claude/skills/approve/SKILL.md`. The primary lane is the Hub's review queue at
 `/social/publish` (the answered full draft waits there; a contributor fine-tunes
 and decides); the signed-link lane covers a remote approver. Unlike `/release`'s
 advisory QA gate, this one blocks unconditionally.
 
-**Phase 6 — Stage 5: `/publish`.** Delegate to `.Codex/skills/publish/SKILL.md`,
+**Phase 6 — Stage 5: `/publish`.** Delegate to `.claude/skills/publish/SKILL.md`,
 only once Phase 5 returned an approval — the review queue's Approve (now or
 scheduled to the drain) or a consumed signed link.
 
@@ -121,7 +124,7 @@ in which state, and what is waiting.
 
 | Stage      | Failure                             | What `/social` does                                 |
 | ---------- | ----------------------------------- | --------------------------------------------------- |
-| Pre-flight | Unknown brand                       | Stop; print the five valid ids                      |
+| Pre-flight | Unknown brand                       | Stop; print the six valid ids                       |
 | Pre-flight | No wired channel for the brand      | Stop; name the missing Page or token                |
 | Pre-flight | Slack requested as a destination    | Refuse it, explain the tier, continue with the rest |
 | Draft      | Arabic reads as translation         | Stop; rewrite natively — never ship it              |
@@ -140,5 +143,5 @@ A multi-slide deck → `/carousel`. Media alone → `/higgs`. Planning alone →
 `/calendar`. Shipping _code_ → `/ship` or `/release`. Posting into `#social` as a
 human → just post; this is the audience lane.
 
-Reference: `.Codex/agents/growth.md` · `content/docs/social/` ·
+Reference: `.claude/agents/marketing.md` · `content/docs/social/` ·
 `content/docs/brand.mdx` · `docs/SOCIAL-AUTOMATION.md`.

@@ -35,7 +35,7 @@ CLI: `bash ~/.claude/scripts/record.sh <cmd>` (canonical copy in kun).
 | `assemble <name>` | Concat pending segments into one .mov                                   |
 | `file <src> …`    | Normalize name → move into library → update `manifest.json`             |
 | `sync`            | Mirror library → Google Drive (rsync → Finder → printed fix)            |
-| `stale [repo]`    | List assets whose block source gained commits since capture             |
+| `stale [repo]`    | One line per stale flow (source `paths` changed since capture); `-v` files, `--flows` names, `--prune` drops entries whose file is gone |
 
 ## Identity, credentials, OTP
 
@@ -190,7 +190,10 @@ sync loses nothing.
 
 - **Staleness is automatic**: the `session-media-stale` SessionStart hook nudges when a
   repo's filed blocks gained commits since capture; `record.sh stale [repo]` lists the
-  detail. Re-recording files the same name and replaces the old take.
+  stale flows and prints the re-shoot command. Re-recording files the same name and replaces the old take.
+- **Help-center media refreshes in one command**: `shoot.mjs --support --stale --lang ar,en --publish --video`
+  (see `/shoot` → Refresh the help center). Screen recording here is only for what the headless sim cannot
+  film: OTP inboxes, native apps, multi-app flows.
 - **Fine-tune a video without a retake**: trim/splice segments with ffmpeg
   (`ffmpeg -i in.mov -ss 0:04 -to 1:32 -c copy out.mov`), then `file` the result under
   the same name. Fine-tune a SCREENSHOT by recapturing the route — never edit pixels of

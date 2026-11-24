@@ -1,8 +1,10 @@
 ---
 name: learn
 description: Extract organizational patterns and conventions from repos + history
-when_to_use: "Use when extracting organizational intelligence — patterns, conventions, and team dynamics mined from git history and the databayt repos into memory; feeds the conventions/patterns/drift surfaces. Distinct from /analyze which generates a repo's Codex config. Triggers on: learn, what are our conventions, extract patterns from history."
+when_to_use: "Use when mining organizational patterns, conventions and team dynamics from git history and the databayt repos into memory. Distinct from /analyze, which generates a repo's Claude config. Triggers on: learn, what are our conventions, extract patterns from history."
 argument-hint: "[repo] [--since DATE]"
+lane: build
+effort: medium
 ---
 
 # Learn — Organizational Intelligence
@@ -48,7 +50,7 @@ Parse arguments:
    - Which repos have drifted in conventions?
    - Where is activity concentrated?
 
-4. Store insights in memory: `~/.Codex/memory/learn_org_<date>.md`
+4. Store insights in memory: `~/.claude/memory/learn_org_<date>.md`
 
 5. Report key findings to the user.
 
@@ -88,7 +90,7 @@ Parse arguments:
    # Key files
    cat package.json | jq '{name, dependencies, devDependencies}'
    ls -la prisma/schema.prisma 2>/dev/null
-   ls .Codex/ 2>/dev/null
+   ls .claude/ 2>/dev/null
    ```
 
 4. Convention extraction — read 5-10 representative files:
@@ -98,7 +100,7 @@ Parse arguments:
    - A form — how forms handle validation
    - The middleware — how auth works
 
-5. Store in memory: `~/.Codex/memory/learn_<repo>.md`
+5. Store in memory: `~/.claude/memory/learn_<repo>.md`
 
 6. Report: conventions found, drift from org patterns, health metrics.
 
@@ -120,7 +122,7 @@ Parse arguments:
    - Commit frequency trends
    - Expertise areas (most-touched directories)
 
-3. Store in memory: `~/.Codex/memory/learn_team.md`
+3. Store in memory: `~/.claude/memory/learn_team.md`
 
 ### Mode: Conventions (`/learn conventions`)
 
@@ -139,7 +141,7 @@ Parse arguments:
    → Candidate rule: rules/server-actions.md
 
    Observed: 100% use conventional commits
-   → Already documented in AGENTS.md ✓
+   → Already documented in CLAUDE.md ✓
 
    Observed: 3 repos use barrel imports, 1 doesn't
    → Candidate rule: rules/no-barrel-imports.md (with migration note)
@@ -155,7 +157,7 @@ Parse arguments:
    | Repo      | Commits/30d | Fix:Feat | Hotspot File            | Last Push  |
    |-----------|-------------|----------|-------------------------|------------|
    | hogwarts  | 89          | 0.3      | src/app/admission/...   | 2 hours    |
-   | kun       | 34          | 0.1      | .Codex/agents/_index   | 1 day      |
+   | kun       | 34          | 0.1      | .claude/agents/_index   | 1 day      |
    | souq      | 12          | 0.5      | src/components/cart/...  | 1 week     |
    ```
 
@@ -165,7 +167,7 @@ Parse arguments:
 
 ## Memory Storage
 
-All learn outputs go to `~/.Codex/memory/` with type `project`:
+All learn outputs go to `~/.claude/memory/` with type `project`:
 
 ```markdown
 ---
@@ -182,7 +184,6 @@ Update existing memory files rather than creating duplicates. Check MEMORY.md fi
 ## What Learn Never Does
 
 - Modifies code (read-only)
-- Creates PRs (that's analyze's job)
 - Makes decisions (that's captain's job)
 - Generates config (that's analyze's job)
 

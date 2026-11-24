@@ -1,0 +1,12 @@
+{
+  "engine": "gemini",
+  "voice": "Sulafat",
+  "lang": "ar",
+  "style": "Speak in Sudanese Arabic, Khartoum dialect, with a natural Sudanese accent. Warm, friendly, clear and unhurried, like a kind teacher explaining to parents.",
+  "$comment": "Sudanese narration for students and the parent helping them — one line per caption (3). Google stock voice (AI).",
+  "lines": [
+    "يا وليّ الأمر، ساعد ولدك أو بِتّك في أوّل مرة: افتحوا «الجدول»، وحتلقوا حصة اليوم عليها زرار «انضمام».",
+    "دُوسوا «انضمام»، وحتفتح ليكم بطاقة الحصة.",
+    "ودُوسوا «انضمام» تاني، وتدخلوا الحصة. المايك والكاميرا بيكونوا مقفولين في الأول، وعشان تتكلم ارفع يدك."
+  ]
+}

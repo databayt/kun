@@ -1,0 +1,79 @@
+<!doctype html>
+<!-- Feature hero: a seamless 16:9 loop of a feature's real screens for /<lang>/features/<id>.
+     hero.mjs fills HERO below and renders it with motion.mjs (1920x1080). No captions, no cards,
+     no audio: flat full-frame screens, a slow camera toward each shot's focus, crossfades, and the
+     last shot fading back into the first — frame(0) === frame(DURATION). The page shows it as a
+     wide band on desktop (centre strip only) and a full 16:9 on phones, so focus points sit in
+     the middle of the frame. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #fff; }
+  .shot { position: absolute; inset: 0; overflow: hidden; will-change: opacity; }
+  .shot img { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+</style>
+</head>
+<body>
+<script>
+// Injected by hero.mjs: { dir, shots: [{ src, w, h, focus: [fx, fy], zoom }], shotDur, fade }
+const HERO = /*HERO*/ null;
+
+const W = 1920, H = 1080;
+const { shots, shotDur: D = 4, fade: X = 0.8 } = HERO;
+const N = shots.length;
+const T = N * D;
+window.DURATION = T;
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const sine = (p) => 0.5 - 0.5 * Math.cos(Math.PI * clamp(p, 0, 1)); // ease in-out
+const lerp = (a, b, p) => a + (b - a) * p;
+
+const layers = shots.map((s) => {
+  const el = document.createElement("div");
+  el.className = "shot";
+  const img = document.createElement("img");
+  img.src = s.src;
+  el.appendChild(img);
+  document.body.appendChild(el);
+  return { el, img, s };
+});
+
+// Camera for one shot at local progress p (0..1 across its window): from the whole screen
+// (cover-fit, centred) to `zoom` x centred on `focus`, never showing past the image edge.
+function camera(s, p) {
+  const cover = Math.max(W / s.w, H / s.h);
+  const z = lerp(1, s.zoom, sine(p));
+  const sc = cover * z;
+  const [fx, fy] = s.focus;
+  const cx0 = s.w / 2, cy0 = s.h / 2;
+  let cx = lerp(cx0, fx * s.w, sine(p));
+  let cy = lerp(cy0, fy * s.h, sine(p));
+  const hw = W / sc / 2, hh = H / sc / 2; // half the view, in image px
+  cx = clamp(cx, hw, s.w - hw);
+  cy = clamp(cy, hh, s.h - hh);
+  return `translate(${W / 2 - cx * sc}px, ${H / 2 - cy * sc}px) scale(${sc})`;
+}
+
+// Shot i owns the window [i*D - X, (i+1)*D]: it fades in over the first X seconds on top of
+// the previous shot, then holds while the next one fades in over it. Shot 0's window wraps
+// round the loop's end, so the loop has no seam.
+window.render = function (t) {
+  t = ((t % T) + T) % T;
+  const span = D + X;
+  layers.forEach(({ el, img, s }, i) => {
+    let local; // seconds into this shot's window, or null when off
+    if (i === 0) local = t >= T - X ? t - (T - X) : t + X;
+    else local = t >= i * D - X && t <= (i + 1) * D ? t - (i * D - X) : null;
+    if (local === null || local > span) { el.style.opacity = 0; return; }
+    el.style.opacity = local < X ? sine(local / X) : 1;
+    el.style.zIndex = i === 0 && t >= T - X ? N + 1 : i + 1;
+    img.style.width = s.w + "px";
+    img.style.height = s.h + "px";
+    img.style.transform = camera(s, local / span);
+  });
+};
+window.render(0);
+</script>
+</body>
+</html>

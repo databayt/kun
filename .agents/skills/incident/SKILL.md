@@ -3,6 +3,8 @@ name: incident
 description: Incident response workflow for production issues
 when_to_use: "Use when production is broken and needs structured response — classify severity (P0-P3), diagnose via Sentry traces + Vercel logs, fix or roll back, verify recovery, write the postmortem on a GitHub issue. Triggers on: incident, production is down, outage, P0, users can't log in."
 argument-hint: <description>
+lane: judge
+effort: high
 ---
 
 Incident response workflow for production issues.
@@ -26,7 +28,7 @@ Steps:
    - Determine if rollback is needed
 4. Respond based on severity:
    - P0: Alert Abdout via Slack immediately, recommend rollback
-   - P1: Create Linear issue, delegate to tech-lead
+   - P1: Create Linear issue, delegate to tech
    - P2: Log for next sprint, inform support agent
 5. Track:
    - Create Linear issue with all context
@@ -38,5 +40,5 @@ Steps:
    - How to prevent recurrence
    - Update guardian agent's checklist if needed
 
-Reference: .Codex/agents/ops.md for incident workflow
-Reference: .Codex/agents/guardian.md for security implications
+Reference: .claude/agents/ops.md for incident workflow
+Reference: .claude/agents/guardian.md for security implications

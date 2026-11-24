@@ -1,8 +1,10 @@
 ---
 name: scrape
 description: Lead acquisition — contact gap first, discovery last
-when_to_use: "Finding, enriching, tiering or reaching leads in the Twenty CRM. Triggers on: scrap, scrape, scrap facebook, scrap whatsapp, scrap facebook for hogwarts, scrap for mkan, leads, prospect, contact gap, enrich, outreach, pipeline health, who should we contact, find schools, اسحب, جمع بيانات, عملاء محتملين. NOT /health (engine drift), /measure (social numbers), /report (a bug)."
-argument-hint: "[facebook|whatsapp|website] [for <product>] [--apply]"
+when_to_use: "Finding, enriching, tiering or reaching leads in the Twenty CRM. Triggers on: scrap, scrape, scrap facebook, scrap whatsapp, scrap facebook for hogwarts, scrap for mkan, scrap for databayt, website leads, old websites, rebrand leads, leads, prospect, contact gap, enrich, outreach, pipeline health, who should we contact, find schools, اسحب, جمع بيانات, عملاء محتملين. NOT /health (engine drift), /measure (social numbers), /report (a bug)."
+argument-hint: "[facebook|whatsapp|website|tiktok] [for <product>] [--apply]"
+lane: crm
+effort: medium
 ---
 
 # Scrape — the lead acquisition runbook
@@ -28,7 +30,7 @@ card is the one place a live snapshot lives; everything else reads the artifact.
   Dhabi private schools at 100% phone/email/website; exact-name matching alone reaches **48**
   unreachable AE rows. That is 48× the entire OSM lane. Build §5 before anything paid or scraped.
 
-Full numbers and the hard rules: `.Codex/agents/lead.md`. Code lives in the product repos —
+Full numbers and the hard rules: `.claude/agents/lead.md`. Code lives in the product repos —
 `hogwarts/scripts/crm/` and `mkan/scripts/crm/` (canonical). **kun holds no scraper code.**
 
 ## Argument: $ARGUMENTS
@@ -41,12 +43,14 @@ Polymorphic on argument, like `/handover`:
 | `facebook`                            | The FB Page About/Intro lane. §2               |
 | `whatsapp`                            | Harvest numbers + hand to the sender. §3       |
 | `website`                             | Fetch + extract from a domain. §4              |
+| `tiktok` (mkan, Kigali)               | Rental videos → CRM homes at VETTING. §4b      |
+| `facebook for mkan` (Kigali)          | Rental group posts → the same pipeline. §4c    |
 | `for <product>` / `<x> for <product>` | Resolve scope, then run the above. §0          |
 | `--apply`                             | Write. Absent = dry run. Always dry-run first. |
 
 ## §0 — Resolve product scope
 
-Resolve the product from `.Codex/memory/repositories.json` (`repositories.*[].id` → `.local`).
+Resolve the product from `.claude/memory/repositories.json` (`repositories.*[].id` → `.local`).
 Default: **hogwarts**. `mkan`'s lead is the property **host**, not a school — same machinery,
 different object.
 
@@ -56,6 +60,30 @@ export TWENTY_API_KEY=$(security find-generic-password -s databayt-twenty -a <pr
 ```
 
 Off this Mac: `https://crm-api.databayt.org` (Hetzner since 2026-11-14; `localhost:3100` is an SSH tunnel to it).
+
+### `databayt` — Website Leads (the software house's outbound lane, 2026-10-03)
+
+The lead is a **business whose website is missing, old, slow or not mobile-ready**: hotels,
+restaurants, schools, clinics, NGOs, offices in Kigali, Nairobi, Lagos, Khartoum and Port Sudan.
+It lives in its own object, **Website Leads** (`websiteLead`, Databayt workspace, sales.databayt.org,
+created by `scripts/crm-website-lead-object.mjs`), not in Company/Opportunity. The code is in kun
+(Databayt's own repo), not a product repo:
+
+```bash
+pnpm sales:leads discover --city kigali,nairobi,lagos   # OSM via Overpass — open data, no Google Maps (ToS)
+pnpm sales:leads audit    --city kigali                 # fetch each site → finding + need score 0-100
+pnpm sales:leads gap                                    # tiers and findings per city
+pnpm sales:leads push --tier A,B [--apply]              # → Website Leads, stage AUDITED, dedup osm:<type>/<id>
+```
+
+Findings: NO_WEBSITE · BROKEN · NO_HTTPS · NOT_MOBILE · OUTDATED · SLOW · SOCIAL_ONLY · OK. Tier A =
+need ≥60 and a phone/email; B = need ≥30 and reachable. Offer by sector: food → QR ordering,
+hotels → booking site, schools → Hogwarts, no site → website in a week, else rebrand. Proof URLs for
+the pitch: balqalam.com, mkan.sd, bu.databayt.org, abdoutgroup.com, mr.databayt.org. Outreach
+follows `/funnel` rules (a human approves each first touch; WhatsApp only to mobiles; Arabic first
+for Sudan, English for Kigali/Nairobi/Lagos). Stages: AUDITED → QUALIFIED → CONTACTED → REPLIED →
+CALL → PROPOSAL → WON/LOST, DORMANT after 4 silent touches. Posted client work (RFPs, wizard
+requests) is `/jobs`, not here.
 
 ## §1 — No argument: report the gap, recommend the move
 
@@ -86,7 +114,8 @@ automated lane** — treat a stale number here as a planning error, not a detail
 - Extract from the **About / Intro tab**, not the feed — the feed is why the earlier yield was near
   zero; schools publish phone and WhatsApp on About.
 - Split Pages from Groups. A `/groups/` URL is not a school lead.
-- Reuse the existing phone regex and `extractWhatsApp` in `tier4-enricher.js`; do not write a third.
+- Reuse `contact-extract.ts` (`extractContacts`, `WHATSAPP_NEAR`) and `normalize-contacts.ts`; do not write a third. (`tier4-enricher.js` invented WhatsApp numbers and is retired.)
+- Empty reads are real: 339 of 707 About tabs carry nothing but a Messenger button. `--retry-empty` re-reads pages 14+ days old, but 0 of 20 gained anything on 2026-10-21 — a manual flag, not a schedule.
 - **Checkpoint** (`dorker_checkpoint.json` pattern) so a stop is resumable, and log what the stop dropped.
 
 **Account + throttle rule — read this every time.** Use a **dedicated account**, never Abdout's.
@@ -122,7 +151,7 @@ The account's value is that losing it costs nothing. Four rules preserve that:
    from one egress, or accept a checkpoint.
 3. **Warm up; never burst.** A new account scraping at volume is the classic pattern. Ramp like the
    WhatsApp lane does — ~20 profile reads/day for the first week, then 50, then 100 — and keep
-   `FB_SCRAPE_DELAY_MS` at 4000 or higher. The guard escalates an unthrottled run to a human.
+   `FB_SCRAPE_DELAY_MS` at 8000 (the scripts' default; jitter adds up to 60%). The guard escalates an unthrottled run to a human.
 4. **No evasion, ever.** Scrapling's `StealthyFetcher` stays off Meta. Fingerprint spoofing on a
    platform you hold an account on raises the stakes of detection instead of lowering the odds —
    and evasion is what turns a rate-limit into a ban.
@@ -162,7 +191,7 @@ from school notifications, warm-up ramp 10→20→30/day, randomized 40–180s g
 Read `webQueue` from `contact-gap.json` for the count. Fetch the domain, extract contact from the
 usual pages (`/contact`, `/about`, footer), same regexes as §2. Cheap, no account risk, no ban risk.
 
-**Measured on three real `webQueue` rows:** plain `curl` yielded 1 of 3; the residual is JS-rendered shells and dead hosts, not parsing. Jina Reader is 451-blocked from this machine. Full table and the `tpsdxb.com` diagnosis: `.Codex/skills/scrape/references/backends.md`.
+**Measured on three real `webQueue` rows:** plain `curl` yielded 1 of 3; the residual is JS-rendered shells and dead hosts, not parsing. Jina Reader is 451-blocked from this machine. Full table and the `tpsdxb.com` diagnosis: `.claude/skills/scrape/references/backends.md`.
 
 **The fix is [Scrapling](https://github.com/D4Vinci/Scrapling)'s `DynamicFetcher`** (BSD-3, ~75k★,
 released weekly) — real Playwright Chromium, so the page is rendered before extraction. It also
@@ -180,6 +209,60 @@ attribution is what tells you whether the lane is worth re-running.
 
 Jina Reader stays **unavailable here** — 451 for `example.com` as readily as for a school site, so
 it is an IP/region block on this machine, not the target. Re-test before planning around it.
+
+## §4b — `tiktok`: Kigali rental videos (mkan, 2026-10-12)
+
+Kigali brokers advertise rentals on TikTok, not Airbnb. Code: `mkan/scripts/crm/tiktok.ts`; this skill only routes.
+The lane needs no login (yt-dlp on public videos), so no account is at risk. It is never pointed at the :9222 vault.
+
+```bash
+cd ~/mkan && pnpm crm:tiktok-status                 # ledger by state + skip reason
+pnpm crm:tiktok-seeds                               # accounts: search PROPOSES, a human --promote=h / --ignore=h
+caffeinate -i pnpm crm:tiktok --fetch-limit=10 --read-limit=10          # requeue → discover → fetch → read → upsert (dry)
+caffeinate -i pnpm crm:tiktok --fetch-limit=10 --read-limit=10 --apply  # writes S3 frames + Twenty host/home/note, mirrors /find leads
+pnpm crm:tiktok-requeue                             # caption-skipped rows today's gate passes → back to fetch (run auto)
+pnpm crm:tiktok-settle [--apply]                    # SUSPECTED same-facts homes → DUPLICATE of the first copy
+pnpm crm:tiktok-posts [--apply]                     # one Twenty `tiktokPost` per read video (run does it)
+```
+
+The ad itself lives on its own object, **TikTok posts** (`tiktokPost`): broker/agency name, publish
+date, caption, text in the video (reader `onScreenText`, tiktok-v3+), speech transcript, phones seen,
+status (WAITING / LISTING / JOINED_EXISTING / SKIPPED) — linked to its home and host.
+
+Every video becomes a `home` at **VETTING** (`source TIKTOK`, `sourceId tiktok:<id>`) with the reader's
+property frames as photos. Its poster becomes a `host` with an Opportunity. Nothing publishes.
+The Hermes gateway's cron runs it daily at 06:00: job `mkan-tiktok-sweep` (`--fetch-limit=40 --read-limit=80 --notify`), no agent, silent unless it fails. Install or refresh with `bash scripts/crm/install-tiktok-sweep.sh` in mkan (`--launchd` falls back to the old launchd job). From Slack or WhatsApp, `/tiktok` runs it now and replies with the ledger status. Only posts from the last 7 days are fetched and read (`--max-age=7`, since 2026-10-20, down from 120): an older ad is usually let, and the vision quota goes further on fresh ones. Pass `--max-age=N` to widen a one-off run.
+The reader (since 2026-10-21) is the Claude API — `claude-haiku-5-5`, six whole frames, on the Max plan's
+included API credits, capped per month (`TIKTOK_API_CAP_USD`, default $10; spend in `.data/tiktok/spend.json`).
+The key is the Keychain item `mkan-ANTHROPIC_API_KEY`; without it, or once the cap is hit, Groq's free tier
+reads (`qwen3.8-27b` vision, `gpt-oss-120b` for fact-rich captions), phone+price first, one 3-frame strip before two.
+Fetch is sized to what the last read stage took (`capacity.json`), a video id dates itself (top 32 bits = unix
+seconds) so stale search hits never cost a `yt-dlp -J`, and Whisper is skipped when the caption already gives
+price, rooms and a phone.
+Gates (2026-10-20): the gazetteer decides "in Kigali" before the reader, a read with neither price nor
+rooms is skipped, confidence ≥ 0.6. Out-of-band prices land as `qualificationStatus PRICE_ANOMALY`,
+no phone as `UNREACHABLE_HOST`. A re-post with the same facts joins the existing home as a note.
+Seeds list via `tiktokuser:<secUid>` (the `@handle` extractor is broken); three failed runs pause
+a seed (re-tried weekly); a proposal with ≥3 search hits and a kept home is promoted automatically.
+The volume comes from the seed accounts: web search is blocked after a few queries.
+Traps and numbers: `references/backends.md` → TikTok.
+
+## §4c — `facebook for mkan`: Kigali rental groups (2026-10-21)
+
+Code: `mkan/scripts/crm/facebook-rentals.ts` — `pnpm crm:fb-rentals` (capture → read → upsert),
+dry run unless `--apply`. It reads Facebook's own GraphQL and the JSON embedded in the first page,
+not screen text, on the **dedicated scrape account only** (`cdp-session.ts` refuses 9222). Every read,
+gate, `dupKey` and Twenty body is the TikTok lane's: homes land at VETTING with `source FACEBOOK` and
+`sourceId facebook:<postId>`. A post whose facts match a home already on the board, from TikTok or
+anywhere else, becomes a note on that home instead of a copy.
+
+- **Seeds are human-curated** (`pnpm crm:fb-rentals-seeds --add=<group url>`): Kigali rental groups the
+  scrape account already belongs to. The bot never searches, joins or posts.
+- **Marketplace is closed** to the scrape account ("Marketplace isn't available to you", measured
+  2026-10-21; new accounts are ineligible). It is group posts until that changes.
+- A checkpoint or login wall stops the run with one Slack line; nothing retries a login.
+- Not scheduled yet: there are no seeds. After a human adds them, run it by hand, then schedule a Hermes job
+  modelled on `mkan-tiktok-sweep`, starting at 15 posts a day.
 
 ## §5 — Official directories (build this next)
 
@@ -222,7 +305,7 @@ dedup test, and it is not optional.
 ## §8 — Measure the yield
 
 The `scrape-yield` PostToolUse hook appends the contact-gap delta to
-`.Codex/logs/scrape-runs.log` after every run, so yield is measured rather than assumed. Read it
+`.claude/logs/scrape-runs.log` after every run, so yield is measured rather than assumed. Read it
 back and report the delta — including when it is zero. A run that added nothing is a finding.
 
 ## §9 — Backends: check the reader before blaming the lane
@@ -239,7 +322,7 @@ burning the queue and recording a false zero.
 
 Install commands and their two traps, the measured findings, `agent-reach doctor`'s
 config-vs-liveness boundary, the MCP-vs-library decision, and where Scrapling must NOT go:
-`.Codex/skills/scrape/references/backends.md`. Read it when a reader misbehaves or before
+`.claude/skills/scrape/references/backends.md`. Read it when a reader misbehaves or before
 installing or swapping one — not on every run.
 
 ## Deterministic fan-out
@@ -258,4 +341,4 @@ Dry-run by default; every stage that truncates logs what it dropped.
 ## Not this skill
 
 `/health` = engine config drift · `/measure` = published-social numbers · `/report` = a user-filed
-bug · `/social` = brand publishing. Closing and pricing a deal is the `revenue` agent.
+bug · `/social` = brand publishing. Closing and pricing a deal is the `sales` agent.

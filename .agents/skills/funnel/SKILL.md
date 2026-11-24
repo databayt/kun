@@ -3,26 +3,28 @@ name: funnel
 description: Conversation to conversion — gates, segments, assets, the stall clock
 when_to_use: "Converting a lead that already replied — gate state, segmentation, value before payment, the stall clock, the follow-up drain. Triggers on: funnel, qualify, segment, nurture, follow up, stalled, chatbot, قمع, تأهيل, متابعة. NOT /scrape (finding them), /draft (brand copy), /approve (a social post), /qa (a block)."
 argument-hint: "[qualify|segment|nurture|follow-up|stalled|chatbot] [for <product>] [--apply]"
+lane: crm
+effort: medium
 ---
 
 # Funnel — the conversion runbook
 
 **The measured truth this runbook exists to enforce: nothing here has ever converted.**
-0 funnel sessions, 0 leads moved through a gate, 0 active paying schools against a Q3 2026 target
-of 1. The plumbing landed 2026-08-18 — the gate ladder and 16 fields are live in Twenty, the
-inbound receiver is registered and proven, `promoteToLead()` exists — but **capture does not**, so
-those zeros are *structurally* empty rather than genuinely empty. Say it that way; the difference
-is the whole state of the lane.
+0 active paying schools against a Q3 2026 target of 1 — but as of 2026-08-22 the lane measures
+instead of remembers: `pnpm crm:funnel-gates` (hogwarts) counted **377 reachable, unmessaged
+schools (222 verified-mobile · 155 email)**, the chatbot captures (v1), the outreach workflow is
+**ACTIVE**, and its cards land in private **#hogwarts-funnel** (`C0BRXUREB8W`). Conversion rates
+are still zero and saying so is the point.
 
 Three facts govern the design, and none of them are opinions:
 
-- **hogwarts already has the chatbot** (`src/components/chatbot/`, Groq, bilingual, mounted on both
-  the SaaS site and every tenant site). It answers well and **captures nothing** — `sendMessage`
-  writes to no table. The work is capture, not construction.
-- **The inbound plumbing is built and still unused.** `saas-marketing/actions.ts` holds
-  `requestDemo`, `startFreeTrial`, `captureLead`, all writing `Prospect` via
-  `upsertInboundProspect`, with **zero importers**. `promoteToLead()` now exists and is
-  idempotent — it is waiting on a caller, not on itself.
+- **The chatbot captures — identifiers, not yet sessions.** `sendMessage` (Groq, bilingual, on
+  the SaaS site and every tenant site) is rate-limited and persists typed emails/phones as
+  Prospects, Arabic-Indic digits normalized, `saasMarketing` mode only. Transcripts still are
+  not persisted — `FunnelSession` remains design, not schema.
+- **The inbound plumbing has its first callers.** `scripts/funnel/apply-inbox.ts` turns a WARM
+  drag into `Prospect` capture + `promoteToLead()`; the saas-marketing form actions
+  (`requestDemo`, `startFreeTrial`, `captureLead`) still await UI wiring.
 - **The funnel logic is deterministic; the LLM is asynchronous.** Which question comes next, which
   segment you land in, which asset you get, when a touch fires — scripted, **zero tokens**. Groq
   answers free-form messages (already live, a different budget line) — or, once enabled, Claude Haiku
@@ -30,41 +32,52 @@ Three facts govern the design, and none of them are opinions:
   Personalized follow-up copy is batch-drafted on the Max pool via the launchd drain. **Never a per-lead
   Anthropic call** — a chat answer is not lead work.
 
-Numbers and hard rules: `.Codex/agents/funnel.md`. Acquisition — everything before the first
-reply — belongs to `.Codex/agents/lead.md` and `/scrape`. **kun holds no funnel code.**
+Numbers and hard rules: `.claude/agents/funnel.md`. Acquisition — everything before the first
+reply — belongs to `.claude/agents/lead.md` and `/scrape`. **kun holds no funnel code.**
 
 ## State — built vs not, so nothing is claimed twice
 
-**Live and production-proven:** the inbound receiver (`POST /api/webhooks/twenty` → verify →
-parse → one `TwentyInboundEvent` row, applying nothing) on `company.updated` +
-`opportunity.updated` · `promoteToLead()` · `School.trialEndsAt` · the gate ladder and 16 funnel
-fields seeded into the live workspace · mkan's two-way sync.
+**Live and proven:** the inbound receiver (`POST /api/webhooks/twenty` → verify → parse → one
+`TwentyInboundEvent` row, applying nothing) · `promoteToLead()` · `School.trialEndsAt` · the
+12-stage ladder + 16 funnel fields live in Twenty · mkan's two-way sync · **the outreach
+workflow, ACTIVE** ("School shortlisted → outreach", deployed + tested entirely over the API —
+sequence and traps in `hogwarts/scripts/crm/workflow-spec.ts`; cards land in #hogwarts-funnel) ·
+**the roll scripts** (`hogwarts/scripts/funnel/{gates,tick,apply-inbox}.ts` — census + artifact,
+ramped roll, WARM-drag applier) · **chatbot capture v1 + rate limit** (identifiers → Prospect,
+saasMarketing only) · **waves** (2026-09-28: `tick --wave=<id>` required on `--apply`, variants
+in `scripts/funnel/templates/variants.json`, per-wave ledger in `.data/waves/`, `next-wave` prints
+the tick lines) · **the read-back loop, ARMED** (launchd `com.databayt.funnel-loop`, 30 min,
+read-only: hotmail replies → WARM, Resend delivery, prod chatbot → Twenty, daily gates, Friday
+`learn --propose`) · **the chatbot sells the outreach offer** (Balqalam, 3-month trial copy under
+the school's name, one contact ask gated in code; failures fall back to the ask).
 
-**Missing:** capture · the applier that reads the inbox · the cadence clock, drain and approve
-queue · every URL in the value registry.
+**Missing:** the first real wave (378 reachable, 0 messaged at 2026-09-28) · touch 2+ (drain
+and approve queue) · every URL in the value
+registry · transcript persistence (capture keeps identifiers, not sessions) · `UPSTASH_*` in the
+Vercel env (until then the chatbot throttle is per-invocation in prod).
 
 **Two traps, measured:** never `prisma db push` against hogwarts production (no
 `_prisma_migrations`; a `migrate diff` aimed at `prisma/schema.prisma` rather than the `prisma/`
 folder falsely reports 719 dropped FKs and 328 dropped tables) — and Vercel runs `prisma generate`,
-never `migrate deploy`, so schema reaches the database *before* the code that expects it.
+never `migrate deploy`, so schema reaches the database _before_ the code that expects it.
 
 ## Argument: $ARGUMENTS
 
-| Argument              | Mode                                                              |
-| --------------------- | ----------------------------------------------------------------- |
-| _(none)_              | **Gate report** — where every lead sits, and the biggest stall. §1 |
-| `qualify`             | The gate spine: entry, the ONE question, the field, the asset. §2  |
-| `segment`             | Compute a segment key and the routing it drives. §3               |
-| `nurture`             | The value ladder — and which gate/segment pairs have no gift. §4   |
-| `stalled`             | Who stopped, where, for how long; run the DORMANT sweep. §5        |
-| `follow-up`           | The drain — due, drafted, awaiting approval. §6                    |
-| `chatbot`             | Widget + WhatsApp surface: mount status, capture rate, parity. §7  |
-| `for <product>`       | Resolve scope. Default hogwarts. §0                                |
-| `--apply`             | Write. Absent = dry run. Always dry-run first.                     |
+| Argument        | Mode                                                               |
+| --------------- | ------------------------------------------------------------------ |
+| _(none)_        | **Gate report** — where every lead sits, and the biggest stall. §1 |
+| `qualify`       | The gate spine: entry, the ONE question, the field, the asset. §2  |
+| `segment`       | Compute a segment key and the routing it drives. §3                |
+| `nurture`       | The value ladder — and which gate/segment pairs have no gift. §4   |
+| `stalled`       | Who stopped, where, for how long; run the DORMANT sweep. §5        |
+| `follow-up`     | The drain — due, drafted, awaiting approval. §6                    |
+| `chatbot`       | Widget + WhatsApp surface: mount status, capture rate, parity. §7  |
+| `for <product>` | Resolve scope. Default hogwarts. §0                                |
+| `--apply`       | Write. Absent = dry run. Always dry-run first.                     |
 
 ## §0 — Scope and access
 
-Product from `.Codex/memory/repositories.json`. Default **hogwarts**. **`mkan` is a different
+Product from `.claude/memory/repositories.json`. Default **hogwarts**. **`mkan` is a different
 funnel**: free to hosts, so no sale. Its lead is the property **host**, its ladder ends at a LIVE
 listing, and after that it is a permanent loop — finish the listing, send guides as gaps appear,
 answer support, ask for feedback, and keep availability true. Unconfirmed availability flips a
@@ -83,24 +96,29 @@ task; it never silently writes back. One writer, one truth.
 
 The ladder is the **union of the enums that already exist** — no fourth vocabulary:
 
-| Gate          | `Prospect.status`                | `Lead.status`  | Twenty `stage` | live |
-| ------------- | -------------------------------- | -------------- | -------------- | ---- |
-| COLD          | `new` `enriched` `queued` `contacted` | —         | `COLD`         | 3,119 |
-| PROSPECT      | `queued`                         | —              | `PROSPECT`     | 21   |
-| **WARM**      | `replied`                        | `NEW`          | `WARM`         | 0    |
-| **DISCOVERY** | `promoted`                       | `QUALIFIED`    | `DISCOVERY`    | 0    |
-| **DEMO**      | `promoted`                       | `PROPOSAL`     | `DEMO`         | 0    |
-| **TRIAL**     | `promoted`                       | `NEGOTIATION`  | `TRIAL`        | 0    |
-| **PILOT**     | `promoted`                       | `NEGOTIATION`  | `PILOT`        | 1    |
-| **PAID**      | `promoted`                       | `CLOSED_WON`   | `PAID`         | 0    |
-| DORMANT       | `dead` + tag `dormant:<gate>`    | `ARCHIVED`     | `DORMANT` ➕    | —    |
-| LOST          | `dead`                           | `CLOSED_LOST`  | `LOST`         | 65   |
+| Gate          | `Prospect.status`                     | `Lead.status` | Twenty `stage`   | live (08-22) |
+| ------------- | ------------------------------------- | ------------- | ---------------- | ------------ |
+| COLD          | `new` `enriched` `queued` `contacted` | —             | `COLD`           | 3,795        |
+| PROSPECT      | `queued`                              | —             | `PROSPECT`       | 21           |
+| SHORTLISTED   | `queued`                              | —             | `SHORTLISTED` ➕ | 0            |
+| CONTACTED     | `contacted`                           | —             | `CONTACTED` ➕   | 0            |
+| **WARM**      | `replied`                             | `NEW`         | `WARM`           | 0            |
+| **DISCOVERY** | `promoted`                            | `QUALIFIED`   | `DISCOVERY`      | 0            |
+| **DEMO**      | `promoted`                            | `PROPOSAL`    | `DEMO`           | 0            |
+| **TRIAL**     | `promoted`                            | `NEGOTIATION` | `TRIAL`          | 0            |
+| **PILOT**     | `promoted`                            | `NEGOTIATION` | `PILOT`          | 1            |
+| **PAID**      | `promoted`                            | `CLOSED_WON`  | `PAID`           | 0            |
+| DORMANT       | `dead` + tag `dormant:<gate>`         | `ARCHIVED`    | `DORMANT` ➕     | —            |
+| LOST          | `dead`                                | `CLOSED_LOST` | `LOST`           | 77           |
 
-**Measured 2026-08-18: this ladder was already there.** `company.stage` carries nine options and
-five of them hold zero rows — someone built the ladder and never populated it. So the funnel adopts
-it and adds exactly one genuinely missing state, `DORMANT`. Appending a parallel REPLIED/QUALIFIED/
-CUSTOMER set would have created the duplicate vocabulary this lane exists to avoid: WARM *is*
-replied, DISCOVERY *is* qualified, PAID *is* customer.
+**Measured 2026-08-18: this ladder was already there.** `company.stage` carried nine options and
+five of them held zero rows — someone built the ladder and never populated it. So the funnel adopts
+it and adds only what was genuinely missing: `DORMANT` (08-18), then `SHORTLISTED` + `CONTACTED`
+(08-19, the outreach roll) — **12 options live**. No parallel REPLIED/QUALIFIED/CUSTOMER set: WARM
+_is_ replied, DISCOVERY _is_ qualified, PAID _is_ customer. Ownership split: the
+`funnel-gates.json` artifact carries all 12; this lane reports WARM+; SHORTLISTED/CONTACTED are
+the outreach report's numbers. Counts are re-measured by `pnpm crm:funnel-gates`, never remembered
+from this table.
 
 The existing split of **TRIAL** (self-serve sandbox) from **PILOT** (the committed free 3-month
 engagement) is better than a merged stage, and the GTM needs both. **COLD and PROSPECT are
@@ -164,7 +182,7 @@ runs/hour**. A cadence that silently loses every overnight window looks exactly 
 tick        → rows past their stall timer            [0 tokens]
 touch 1–2   → existing templates, send unattended
 touch 3+    → FunnelDraftRequest (pending)
-drain       → Codex -p on the Max pool, ONE session per tick, answers written
+drain       → claude -p on the Max pool, ONE session per tick, answers written
               through FILES not argv (multi-line Arabic breaks argv)
 human gate  → approve now | schedule | dismiss       ← required for drafted touches
 dispatch    → Evolution WhatsApp | Resend email | human task
@@ -184,9 +202,15 @@ the synthetic namespace that already exists: `inbound:<email>` for web, `inbound
 WhatsApp. On a second identifier, merge **fill-empty-never-replace-populated**, keep the older row,
 never delete.
 
-Capture is a *parallel* deterministic action, never inside the LLM call — so a capture failure
+Capture is a _parallel_ deterministic action, never inside the LLM call — so a capture failure
 cannot block a reply, and a reply cannot fabricate a gate transition. Check EN/AR dictionary parity
 and that **Arabic-Indic digits normalize**; a naive regex silently drops every Sudanese number.
+
+**v1 shipped 2026-08-22** (`hogwarts/src/components/chatbot/capture.ts` + the rate limiter in
+`actions.ts`): identifiers typed into the widget persist as Prospects (`inbound:<email>` /
+`inbound:wa:<e164>`), `saasMarketing` mode only — a tenant school's parents are not our pipeline.
+Sessions/transcripts and the `FunnelSession` cookie remain unbuilt; the WhatsApp surface remains
+unwired.
 
 ## Deterministic fan-out
 
@@ -200,10 +224,10 @@ it must be a deliberate act someone typed.
 - The recommendation names **a gate and a stall count**.
 - Any write ran dry first, then `--apply` twice with an identical count.
 - No drafted touch was sent without a recorded human yes.
-- Whatever was dropped is in `.Codex/logs/funnel-runs.log`.
+- Whatever was dropped is in `.claude/logs/funnel-runs.log`.
 
 ## Not this skill
 
 `/scrape` = finding them, everything before the first reply · `/draft` = brand social copy ·
 `/approve` + `/publish` = a social post · `/qa` = a feature block · `/proposal` + `/pricing` = the
-`revenue` agent's close.
+`sales` agent's close.

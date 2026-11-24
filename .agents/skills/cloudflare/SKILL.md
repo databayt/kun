@@ -1,10 +1,11 @@
 ---
 name: cloudflare
-description: Cloudflare deploy operator — build, smoke, deploy, DNS cutover, cron and log inspection for the Workers + Containers lane
-when_to_use: "Use for anything on the Cloudflare production platform — deploying hogwarts or mkan, checking whether a deploy is live, inspecting Worker logs or cron firings, flipping a hostname's DNS to proxied, diagnosing a connection reset that looks like an outage, or deciding Worker vs Container for a new app. This is the platform operator; /ship and /watch delegate here when the repo has a wrangler.jsonc. Triggers on: cloudflare, wrangler, worker, container, deploy to cloudflare, cutover, is it live on cloudflare, worker logs, cron not firing, ERR_CONNECTION_RESET, orange cloud, proxied."
+description: Cloudflare platform operator — Workers + Containers deploys, DNS cutover, crons and logs
+when_to_use: "Use for anything on the Cloudflare production platform — deploying a hosted repo, checking a deploy is live, Worker logs or crons, flipping DNS to proxied, Worker vs Container for a new app. /ship and /watch delegate here for wrangler.jsonc repos. Triggers on: cloudflare, wrangler, worker, container, deploy to cloudflare, cutover, is it live on cloudflare, worker logs, cron not firing, ERR_CONNECTION_RESET, orange cloud, proxied."
 argument-hint: "[build|smoke|deploy|status|logs|dns|crons] [app]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *), Bash(curl *), Bash(dig *), Bash(docker *), Bash(security *)
-model: opus
+lane: judge
+effort: high
 ---
 
 # Cloudflare — the deploy operator
@@ -13,16 +14,25 @@ The databayt production platform since 2026-09-07. Vercel is disabled on every a
 suggest going back to it without a settled billing method.
 
 Full platform knowledge, traps and rationale live in the **`cloudflare` agent**
-(`~/.Codex/agents/cloudflare.md`). Repo-specific facts for hogwarts live in
-`hogwarts/.Codex/rules/cloudflare-deploy.md` and `hogwarts/DEPLOYMENT.md`. This skill is the
+(`~/.claude/agents/cloudflare.md`). Repo-specific facts for hogwarts live in
+`hogwarts/.claude/rules/cloudflare-deploy.md` and `hogwarts/DEPLOYMENT.md`. This skill is the
 runbook — what to type, in what order, and how to prove it worked.
 
 ## Apps on this platform
 
-| App      | Repo                               | Worker     | Zone                     | Live hosts                                   |
-| -------- | ---------------------------------- | ---------- | ------------------------ | -------------------------------------------- |
-| hogwarts | `~/hogwarts` · `databayt/hogwarts` | `hogwarts` | `balqalam.com` (**Pro**) | apex, `www`, `*.balqalam.com` (every school) |
-| mkan     | `~/mkan` · `databayt/mkan`         | `mkan`     | `mkan.sd` (Free)         | pending the DNS flip                         |
+**Containers lane** — a Worker in front of one Next standalone container:
+
+| App       | Repo                                 | Worker      | Zone                                            | Live hosts                                   |
+| --------- | ------------------------------------ | ----------- | ----------------------------------------------- | -------------------------------------------- |
+| hogwarts  | `~/hogwarts` · `databayt/hogwarts`   | `hogwarts`  | `balqalam.com` (**Pro**)                        | apex, `www`, `*.balqalam.com` (every school) |
+| mkan      | `~/mkan` · `databayt/mkan`           | `mkan`      | `mkan.sd` (Free)                                | apex + `www` (proxied)                       |
+| kun       | `~/kun` · `databayt/kun`             | `kun`       | `databayt.org` (on Cloudflare since 2026-09-18) | `kun.databayt.org` (live since 2026-09-19)   |
+| marketing | `~/marketing` · `databayt/marketing` | `marketing` | `databayt.org`                                  | `www.databayt.org` (apex 301s to `www`)      |
+| codebase  | `~/codebase` · `databayt/codebase`   | `codebase`  | `databayt.org`                                  | `cb.databayt.org`                            |
+
+**Containerless lane** (no container, $0 marginal): co (OpenNext Worker, `co.databayt.org`),
+mazin / nmbd / satellites (vinext + Workers Static Assets), thmanyah (Workers Static Assets only).
+Their deploy recipes differ from the commands below — see the `cloudflare` agent.
 
 Cloudflare account `ce9a5376d149c808a0b97072421ba12f`, workers.dev subdomain `osmanabdout`.
 
@@ -30,26 +40,45 @@ Cloudflare account `ce9a5376d149c808a0b97072421ba12f`, workers.dev subdomain `os
 
 ### `deploy` (default) — ship the current code
 
+The **order of operations is the `deploy` skill** (gate → push `main` → env → schema gap → build →
+smoke → deploy → Neon restore point → prod data steps → real login → memory). This section is the
+platform half of it. The commands, in the order they run:
+
 ```bash
-cd ~/hogwarts                       # or ~/mkan
-vercel env pull /tmp/prod.env --environment=production --scope databayt && rm -f .env.local
-scripts/deploy-cloudflare.sh /tmp/prod.env build     # clean export of HEAD, install, next build (~12 min)
-scripts/deploy-cloudflare.sh /tmp/prod.env deploy    # wrangler builds + pushes the image, swaps the container
+cd ~/hogwarts                       # or ~/mkan, ~/kun, ~/marketing, ~/codebase (Containers lane)
+NODE_OPTIONS=--max-old-space-size=8192 pnpm exec tsc --noEmit                 # default heap SIGABRTs
+git pull --rebase origin main && git push origin main                         # main == what ships
+vercel env pull /tmp/prod.env --environment=production --scope databayt --yes && rm -f .env.local
+CF_SOURCE=worktree scripts/deploy-cloudflare.sh /tmp/prod.env build          # working tree, ~12 min
+scripts/deploy-cloudflare.sh /tmp/prod.env smoke                             # Docker: boot + curl table, read it
+scripts/deploy-cloudflare.sh /tmp/prod.env deploy                            # wrangler pushes the image, swaps the container
 ```
 
 Before building, always:
 
 1. **Check the schema gap.** Deploying code ahead of its DDL breaks live pages.
    ```bash
-   pnpm exec prisma migrate diff --from-url "$PROD_DATABASE_URL" --to-schema-datamodel prisma
+   pnpm exec prisma migrate diff --from-url "$PROD_DIRECT_URL" --to-schema-datamodel prisma
    ```
-   If it lists added columns or tables, apply them out-of-band first (snapshot, then the additive
-   statements only) and say what you skipped.
-2. **Confirm no other Next build is running** — concurrent builds get OOM-killed on this machine.
+   Added columns or tables block the deploy: apply them out-of-band first (restore point, then the
+   additive statements only) and say what you skipped. Index-only and nullability drift that
+   predates the deploy is noted, not fixed.
+2. **Kill `next dev` and confirm no other Next build is running** — either one gets the build
+   OOM-killed on this machine.
+
+After deploying, always:
+
+3. **Run the data steps the script never runs.** `deploy-cloudflare.sh` never seeds and
+   `ensure-demo` short-circuits, so every seed commit in the range is owed a run against prod —
+   behind a Neon restore point, under the **quota rule in the `deploy` skill** (evict the oldest
+   branch when the free tier's 10 are taken; prune `restore-point-*` older than 7 days when done).
+4. **Verify with a real login**, then write the memory line (Worker version id, `main` sha,
+   restore branch).
 
 Variants: `CF_SOURCE=<ref>` pins a commit, `CF_SOURCE=worktree` ships uncommitted work (what the
 user usually means by "deploy everything"), `CF_OVERLAY="a b"` copies working-tree files over the
-export.
+export. codebase ships with `CF_SOURCE=head` — its working tree carries ~1 GB of untracked
+`public/cdn` output that would land in the image.
 
 If the push dies with `Docker command exited with code: 1`, **re-run the deploy** — it is transient
 and completed layers are reused.
@@ -84,8 +113,10 @@ See the agent's regional-IP section; the fix is the zone's Pro plan, not a redep
 
 ### `logs` — Worker and cron observability
 
-`wrangler tail` **does not work from this network**. Use the `cloudflare-observability` MCP, or the
-telemetry API directly:
+Try `pnpm exec wrangler tail <worker> --format=json` first — it has been blocked or flaky on this
+network. When it will not connect, read Workers Logs: the Worker's **Observability** tab in the
+dashboard, or the telemetry API directly (the `cloudflare-observability` MCP is not registered —
+pending a decision):
 
 ```
 POST /accounts/<acct>/workers/observability/telemetry/query
@@ -104,8 +135,9 @@ curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
 ```
 
 Then confirm the app **received** the calls by querying observability for `api/cron` messages.
-Registered-but-silent is normal for up to ~19 hours after a trigger is first added — **do not build
-a workaround**; that mistake was made and reverted once already.
+Cloudflare documents trigger changes propagating in up to 15 minutes. On hogwarts, newly added
+triggers once stayed registered-but-silent for ~19 hours — an observed anomaly, not the documented
+behaviour. **Do not build a workaround**; that mistake was made and reverted once already.
 
 ### `dns` — cutover and rollback
 
@@ -115,9 +147,11 @@ change; the cloud icon is the switch, and toggling it back is the rollback.
 Order: one tenant host first → verify → apex and `www` → then a proxied `*` CNAME so new subdomains
 need no DNS work.
 
-The API token has Workers Routes:Edit but **not** DNS:Edit, so either use the `cloudflare-api` MCP
-(after `/mcp` sign-in) or hand the user the dashboard link:
-`https://dash.cloudflare.com/<acct>/<zone>/dns/records`
+`CLOUDFLARE_API_TOKEN` has Workers Routes:Edit but **not** DNS:Edit. For record writes use the
+Keychain token `cloudflare-zones` (`security find-generic-password -a "$USER" -s cloudflare-zones -w`;
+`kun/scripts/cf-zone.sh` reads it), or hand the user the dashboard link:
+`https://dash.cloudflare.com/<acct>/<zone>/dns/records`. The `cloudflare-api` MCP is not
+registered — pending a decision.
 
 ### `build` — just compile, do not ship
 
@@ -126,9 +160,12 @@ checkout after someone forgets to `git add` a file.
 
 ## Secrets
 
-`scripts/cf-secrets.sh /tmp/prod.env` pushes secret-classified vars to the Worker and **prefers
-macOS Keychain overrides** (`cf-<worker>-<VAR>`) over the dotenv — because the pulled Vercel env
-carries values that are wrong or dead. Deploy again afterwards: a container reads its env at start.
+`scripts/cf-secrets.sh /tmp/prod.env` pushes the secret-classified vars **of that file** to the
+Worker (`wrangler secret bulk`); it reads nothing else. Because the pulled Vercel env carries
+values that are wrong or dead, and Vercel refuses env writes under the fair-use block, the
+durable home for a corrected or new value is the macOS Keychain as `cf-<worker>-<VAR>` — and it
+reaches the Worker only when you append it to the pulled file first (deploy skill, step 3).
+Deploy again afterwards: a container reads its env at start.
 
 Known bad values already fixed and overridden: mkan's `NEXTAUTH_SECRET` shipped as the literal
 string `secret`, and the Resend keys on both apps were revoked.

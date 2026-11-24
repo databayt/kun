@@ -1,0 +1,64 @@
+---
+name: Motion
+description: Add Framer Motion animations to components
+when_to_use: "Use when an existing component needs animation — Framer Motion entrances, transitions, scroll effects or gestures added to JSX that already renders. Triggers on: animate this, add a transition, make it fade in, scroll animation, stagger the list."
+argument-hint: "<hero|list|page|component>"
+allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep"]
+lane: build
+effort: medium
+---
+
+# Animation Setup
+
+Add Framer Motion animations to components.
+
+> **Lane:** build — plan in the main loop, implement through a sonnet build agent with a written brief, then review the diff (rule: delegation.md).
+
+## Usage
+```
+/motion hero      # Add hero animations
+/motion list      # Stagger list items
+/motion page      # Page transitions
+```
+
+## Argument: $ARGUMENTS
+
+## Animation Types
+
+### Page Transitions
+```tsx
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -20 }}
+  transition={{ duration: 0.3 }}
+>
+```
+
+### Stagger Children
+```tsx
+<motion.div variants={container} initial="hidden" animate="show">
+  {items.map(item => (
+    <motion.div key={item.id} variants={item} />
+  ))}
+</motion.div>
+```
+
+### Scroll Animations
+```tsx
+<motion.div
+  initial={{ opacity: 0 }}
+  whileInView={{ opacity: 1 }}
+  viewport={{ once: true }}
+/>
+```
+
+### Gestures
+```tsx
+<motion.div
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  drag="x"
+  dragConstraints={{ left: 0, right: 100 }}
+/>
+```

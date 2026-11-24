@@ -1,10 +1,11 @@
 ---
 name: pwa
-description: Progressive Web App lane — audit installability, build the per-tenant manifest + service worker + offline shell, and wire Web Push on a Next 16 product
-when_to_use: "Use when a product should install to a phone's home screen, keep working without a connection, or push notifications through the browser — auditing whether a URL is installable, building or repairing the manifest / service worker / offline page, or adding the Web Push lane (VAPID, subscriptions, the push cron). Distinct from /performance (Core Web Vitals), the `fast` keyword (one URL's speed), /handover (the UI verification pass), and the `notifications` block (in-app + email + WhatsApp delivery — this skill adds the browser channel to it). Triggers on: pwa, progressive web app, installable, add to home screen, install prompt, manifest, service worker, offline, works offline, web push, push notification, تطبيق, بدون إنترنت, إشعارات."
+description: Progressive Web App lane — install, offline, Web Push
+when_to_use: "Use when a product should install to a home screen, work offline or push browser notifications — auditing installability or building the per-tenant manifest, service worker, offline page or Web Push. Distinct from /performance (Core Web Vitals), /handover (UI verification) and the in-app `notifications` block. Triggers on: pwa, progressive web app, installable, add to home screen, install prompt, manifest, service worker, offline, works offline, web push, push notification, تطبيق, بدون إنترنت, إشعارات."
 argument-hint: "[audit <url>|build|push] [repo]"
 allowed-tools: Bash(node *), Bash(curl *), Bash(pnpm *), Bash(npx *), Bash(git *), Bash(gh *)
-model: opus
+lane: build
+effort: medium
 ---
 
 # PWA — installable, offline, push
@@ -144,11 +145,74 @@ Gate: subscribe in Chrome → insert one Notification with `channels: [push]` �
 - **zsh does not word-split an unquoted variable** — `git commit -- $PATHS` is one pathspec.
   Write the paths out or use `${=PATHS}`.
 - **VAPID values need a durable home.** Vercel refuses env writes under the fair-use block;
-  store `cf-<worker>-<VAR>` in the macOS Keychain and append them to the pulled env before the
-  build (deploy skill step 3). The Worker secret persists; the two config vars re-bake every
-  build.
+  store `cf-<worker>-<VAR>` in the macOS Keychain — `scripts/cf-keychain-env.sh >> <pulled env>`
+  appends the whole set before the build (deploy skill step 3). The Worker secret persists; the
+  two config vars re-bake every build.
+- **A script that prints a secret map on error has already leaked it.** The pre-fix
+  `cf-secrets.sh` counter `require()`d a temp file and echoed 26 production secrets into a
+  transcript; the rotation cost an evening. Count with `JSON.parse`, never `require`, and treat
+  any secret seen in a terminal as burned. The Neon MCP `reset_postgres_role_password` also
+  returns the new password into the transcript — the console keeps it off.
 - **Ask who requests the channel.** A push lane with no dispatcher asking for `"push"` is a queue
   that never fills; the cron schedule must also route to the processor (`cf/crons.json`).
+
+### Learned executing hogwarts (2026-09-13) — speed + offline exploration
+
+- **Measure the RSC, not the TTFB.** The dashboard's document TTFB was 250 ms; the page was slow
+  because every open carried two 1.1 MB Server Action responses, 36 prefetches and 1 MB of CSS.
+  chrome-devtools `evaluate_script` over `performance.getEntriesByType("resource")` (decoded
+  size + duration per URL) is the measurement that finds it.
+- **A cookie set by the proxy on every response makes EVERY Server Action re-render the page.**
+  Next merges `x-middleware-set-cookie` into the request store's mutable cookies; the action
+  handler sees a modified cookie → `x-action-revalidated: 1` → full page re-render in the
+  response + a router-cache purge that re-fires every visible prefetch. Write cookies only when
+  they change.
+- **A container fetch is not a CDN fetch.** Behind a Cloudflare Worker → container, nothing is
+  edge-cached unless the Worker uses `caches.default` itself. `cf-cache-status` absent on a
+  `/_next/static` chunk is the tell; ~0.5 s per chunk from Europe, 70 chunks on a cold dashboard.
+- **No `loading.tsx` = no prefetch.** A dynamic route without one is skipped by `<Link>`
+  prefetching, so the tap shows nothing until the server answers. Every sidebar route needs one;
+  a role-aware skeleton reads the shape from a context the layout provides (the boundary itself
+  cannot await the session).
+- **Signed-in pages may be cached — per session key only.** The proxy sends
+  `x-session-key` (truncated sha256 of userId:AUTH_SECRET); the worker names page caches by it
+  and drops every other namespace when a response carries a different key or none. Network
+  first, saved copy after 4 s or on failure, and TELL the page (`sw-stale`) when the copy is
+  stale — a saved attendance page must not pass for a live one.
+- **A failed RSC fetch must be a 503 response, not an exception.** The router treats a non-RSC
+  answer as "do a full navigation", which lands on the saved HTML or the offline page; a thrown
+  error leaves the router waiting.
+- **`load` may already have fired.** A registration that waits for `window.load` never runs on
+  a page that was complete before the effect — check `document.readyState` first.
+- **Next's `experimental.useOffline` and a page-saving worker do not mix.** With the flag on
+  and the server stopped, a sidebar click sent no request for the page and nothing moved, so
+  the worker was never asked for its saved copy (reproduced twice on hogwarts). While the flag's
+  offline state is set the segment cache's scheduler sends no fetches — the likely cause. Leave
+  it off: every navigation then reaches the worker, which answers from a saved payload or with
+  a 503 the router turns into a full load of the saved HTML. Have the worker say WHY it served a
+  saved copy (`reason: failed | slow`) so the strip can tell "offline" from "slow".
+- **Key saved RSC payloads WITH `_rsc`.** Next derives it from the router-state tree, prefetch
+  flags and next-url, and the payload is a patch against that tree. Stripped, a payload saved on
+  students → teachers was replayed on dashboard → teachers: URL and sidebar said teachers, the
+  content stayed the dashboard, and nothing warned. With it, a miss is a 503 → saved HTML.
+- **Saved HTML, not saved payloads, is what makes a page explorable offline.** An offline click
+  rarely repeats an online navigation's `_rsc`: a prefetched route sends a partial router tree,
+  an offline click (no prefetch) sends the whole tree. Measured on hogwarts: dashboard → students
+  was `Xdsm5spjRVlRmBSs` online and `AwDuXUM9oR_42pvt` offline. Save each page's HTML once a day
+  when it is opened on a good connection (the page tells the worker; one fetch at a time).
+- **The session-key header alone does not protect a shared device on a slow network.** The
+  worker shows a saved copy after its timeout, before any response can carry the new key. The
+  sign-out button and the sign-in/join pages must tell the worker to forget first (a
+  `session-end` message answered on a MessageChannel, capped at 1 s so a broken worker never
+  blocks sign-out).
+- **Chrome's "Offline" emulation does not reach the worker's own fetches.** chrome-devtools
+  `emulate networkConditions: Offline` fails the PAGE's requests, but `fetch()` inside the service
+  worker still succeeds — an "offline" navigation quietly loads from the server. To test offline for
+  real, stop the local server (`next start`) and navigate: saved pages must render, unsaved ones
+  must show the offline page.
+- **The dictionary is the transfer.** 935 KB of a 1.38 MB dashboard HTML (279 of 294 KB gzipped)
+  is the merged dictionary serialised into the flight payload. Moving it to a build-hashed static
+  asset loaded client-side is the next win; it touches every `useDictionary` consumer.
 
 ## After
 

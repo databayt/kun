@@ -1,8 +1,10 @@
 ---
 name: md
-description: The house standard for machine-produced Markdown — the schema, the RTL rules, and grading by agreement
-when_to_use: "Use when judging or repairing the QUALITY of Markdown that a machine produced from a document — 'this conversion is bad', 'the md is garbage', 'grade this transcription', 'why are the tables wrong', 'is this twin trustworthy' — and when writing a transcription contract for a new source. This is the standard, not a converter: /convert turns one file into Markdown via MarkItDown, /textbook orchestrates whole books. Both are held to this. Triggers on: md quality, bad conversion, grade the markdown, transcription contract, agreement score, RTL markdown, mirrored tables."
+description: House standard for machine-produced Markdown — schema, RTL rules, grading by agreement
+when_to_use: "Use when judging or repairing machine-made Markdown — a bad conversion, wrong tables, an untrustworthy twin — or writing a transcription contract. The standard, not a converter (/convert, /textbook). Triggers on: md quality, bad conversion, grade the markdown, transcription contract, agreement score, RTL markdown, mirrored tables."
 argument-hint: "<file-or-dir> [--grade | --contract]"
+lane: judge
+effort: high
 ---
 
 # The Markdown standard
@@ -20,8 +22,8 @@ of it was wrong. Across the same grade, maths scored A at 28 % coverage.
 
 **A character count cannot distinguish clean text from confident nonsense.**
 Re-read a random sample with a fresh agent, diff the normalised text, and report
-the agreement rate. `~/.Codex/skills/textbook/scripts/md-agreement.py` does
-this: `--sample N` picks pages, `--score` diffs them.
+the agreement rate. `~/.claude/skills/textbook/scripts/md-agreement.py` does
+this: `--sample N` picks pages (plus `--risk-json` suspects), `--score` diffs them on six axes.
 
 Then **look at the weakest pages before believing the number**. Disagreement
 from unordered list items is not the same defect as disagreement from invented
@@ -63,6 +65,34 @@ Clauses that earned their place:
   8 of 31 tables were mirrored and 23 were fine, so never blanket-swap.
 - Never put a code sample inside translatable RTL prose — braces and `#`/`/` are
   bidi-neutral and will reorder.
+
+## The metrics — text fidelity and structure fidelity
+
+One agreement number hides the defect it should expose. `md-agreement.py` scores every
+sampled page on six axes and names a **class**; `md-structure.py` parses pages with the
+READER's own grammar (ported from hogwarts `textbook/parse.ts`) so "table" means what a
+student sees:
+
+| axis     | what it measures                                           | typical defect it isolates            |
+| -------- | ---------------------------------------------------------- | ------------------------------------- |
+| `seq`    | word-sequence agreement (the legacy headline)              | everything — the number that is graded|
+| `bow`    | bag-of-words F1, order-insensitive                         | `ordering` when `bow` ≫ `seq`         |
+| `num`    | numeral-token F1, digits as printed                        | `numeric` — misread table values      |
+| `lat`    | Latin-token F1                                             | `latin` — lost binomials, symbols     |
+| `labels` | diagram-label token F1 (chunk-insensitive)                 | interpretation, dropped labels        |
+| `struct` | signature agreement: tables, dims, figures, captions, headings | `structure`, diagram-as-table     |
+
+Plus two flags: a run of ≥ 6 words present in one read only (`omission`), and one read marking a
+span illegible where the other wrote text (`illegible` — a guess suspect). Classes drive the
+repair queue; `ordering` and `clean` do not. The benchmark (`textbook-bench.py`) goes one step
+further and scores **objective assertions** per page — raw `mustContain`/`mustNotContain`,
+numeral/Latin sets, label sets, table dims and the crop-verified rightmost column, `noTable`,
+figure count, `illegibleMin/Max` — because gold text produced by the same model is the same hand.
+
+Two independence rules make any of this a measurement: the second read is **blind** (never opens
+the first read, the gold or the twin — the run transcript is audited), and the headline is the
+**random** sample only; the risk-weighted tail and post-adjudication scores are reported beside
+it, never folded in.
 
 ## Front matter is provenance
 

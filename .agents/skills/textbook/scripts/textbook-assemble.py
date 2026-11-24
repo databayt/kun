@@ -21,6 +21,9 @@ def main():
     ap.add_argument('--agreement', type=float, help='mean agreement from md-agreement.py --score')
     ap.add_argument('--agreement-n', type=int, default=0, help='pages sampled for that score')
     ap.add_argument('--note', action='append', default=[], help='extra front-matter note (repeatable)')
+    ap.add_argument('--coverage', choices=['sample', 'full'], help='full = every page had an independent witness')
+    ap.add_argument('--verified-pages', type=int, help='pages with a witness (model read, text layer or blank)')
+    ap.add_argument('--unsettled', type=int, help='pages left unresolved or still suspect after adjudication')
     a = ap.parse_args()
 
     book = Path(a.book).resolve()
@@ -90,6 +93,13 @@ def main():
         fm['quality'] = ('A' if a.agreement >= 0.95 else
                          'B' if a.agreement >= 0.90 else
                          'C' if a.agreement >= 0.80 else 'D')
+    if a.coverage:
+        # What was WITNESSED, beside the sampled grade: the catalog twin gate reads these three.
+        fm['coverage'] = a.coverage
+        if a.verified_pages is not None:
+            fm['verifiedPages'] = a.verified_pages
+        if a.unsettled is not None:
+            fm['unsettled'] = a.unsettled
     lines = ['---']
     for k, v in fm.items():
         lines.append(f'{k}: {json.dumps(v, ensure_ascii=False) if isinstance(v, str) else v}')

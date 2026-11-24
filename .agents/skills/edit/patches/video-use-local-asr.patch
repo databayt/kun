@@ -1,0 +1,180 @@
+diff --git a/SKILL.md b/SKILL.md
+index f1e9ca5..dd43fdf 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -59,8 +59,8 @@ The skill lives in `video-use/`. User footage lives wherever they put it. All se
+ 
+ First-time install lives in `install.md` (clone, deps, ffmpeg, skill registration, API key). Don't re-run it every session; on cold start just verify:
+ 
+-- `ELEVENLABS_API_KEY` resolves — either in the environment or in `.env` at the video-use repo root. If missing, ask the user to paste one and write it to `.env` (never to the user's `<videos_dir>`).
+-- `ffmpeg` + `ffprobe` on PATH.
++- Transcription: `ELEVENLABS_API_KEY` (env or repo `.env`) uses hosted Scribe. **Without a key, or with `VIDEO_USE_ASR=local`, it runs on-device mlx-whisper** (`helpers/transcribe_local.py`, Apple Silicon, `uv tool install mlx-whisper`) — same JSON shape, no upload, no spend. Never ask for a key when local is set. Pass `--language ar` for Arabic.
++- `ffmpeg` + `ffprobe` on PATH, **built with libass** (`ffmpeg -filters | grep subtitles`); Homebrew's slim `ffmpeg` lacks it — prepend `/opt/homebrew/opt/ffmpeg-full/bin`. Arabic subtitles need an Arabic face: `VIDEO_USE_SUB_FONT` or a full `VIDEO_USE_SUB_STYLE`.
+ - Python deps installed (`uv sync` or `pip install -e .` inside the repo).
+ - Node.js + npm available if the session needs HyperFrames or Remotion slots. HyperFrames currently requires Node.js 22+.
+ - `yt-dlp`, HyperFrames, Remotion, Manim installed only on first use.
+@@ -328,7 +328,7 @@ Things that consistently fail regardless of style:
+ - **Hierarchical pre-computed codec formats** with USABILITY / tone tags / shot layers. Over-engineering. Derive from the transcript at decision time.
+ - **Hand-tuned moment-scoring functions.** The LLM picks better than any heuristic you'll write.
+ - **Whisper SRT / phrase-level output.** Loses sub-second gap data. Always word-level verbatim.
+-- **Running Whisper locally on CPU.** Slow and it normalizes fillers. Use hosted Scribe.
++- **Running Whisper locally on CPU.** Slow and it normalizes fillers. Use hosted Scribe, or mlx-whisper on Apple Silicon (fast; filler-seeded prompt; word starts drift early after long silences — pad cuts).
+ - **Burning subtitles into base before compositing overlays.** Overlays hide them. (Hard Rule 1.)
+ - **Single-pass filtergraph when you have overlays.** Double re-encodes. Use per-segment extract → concat.
+ - **Linear animation easing.** Looks robotic. Always cubic.
+diff --git a/helpers/render.py b/helpers/render.py
+index b1efdcc..90d8b51 100644
+--- a/helpers/render.py
++++ b/helpers/render.py
+@@ -23,6 +23,7 @@ from __future__ import annotations
+ 
+ import argparse
+ import json
++import os
+ import re
+ import subprocess
+ import sys
+@@ -49,8 +50,10 @@ except Exception:
+ # baseline roughly 30% up from the bottom on any aspect — clear of the UI on
+ # every major vertical-video platform. Do not drop this below ~75 without a
+ # specific reason.
+-SUB_FORCE_STYLE = (
+-    "FontName=Helvetica,FontSize=18,Bold=1,"
++# VIDEO_USE_SUB_STYLE replaces the whole style (e.g. an Arabic preset); VIDEO_USE_SUB_FONT
++# swaps only the face — Helvetica has no Arabic glyphs.
++SUB_FORCE_STYLE = os.environ.get("VIDEO_USE_SUB_STYLE") or (
++    f"FontName={os.environ.get('VIDEO_USE_SUB_FONT', 'Helvetica')},FontSize=18,Bold=1,"
+     "PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BackColour=&H00000000,"
+     "BorderStyle=1,Outline=2,Shadow=0,"
+     "Alignment=2,MarginV=90"
+diff --git a/helpers/transcribe.py b/helpers/transcribe.py
+index b474fdf..0f580aa 100644
+--- a/helpers/transcribe.py
++++ b/helpers/transcribe.py
+@@ -34,6 +34,9 @@ SCRIBE_URL = "https://api.elevenlabs.io/v1/speech-to-text"
+ 
+ 
+ def load_api_key() -> str:
++    """Scribe key, or "local" for on-device mlx-whisper (VIDEO_USE_ASR=local, or no key)."""
++    if os.environ.get("VIDEO_USE_ASR") == "local":
++        return "local"
+     for candidate in [Path(__file__).resolve().parent.parent / ".env", Path(".env")]:
+         if candidate.exists():
+             for line in candidate.read_text().splitlines():
+@@ -45,7 +48,8 @@ def load_api_key() -> str:
+                     return v.strip().strip('"').strip("'")
+     v = os.environ.get("ELEVENLABS_API_KEY", "")
+     if not v:
+-        sys.exit("ELEVENLABS_API_KEY not found in .env or environment")
++        print("no ELEVENLABS_API_KEY — transcribing locally with mlx-whisper", file=sys.stderr)
++        return "local"
+     return v
+ 
+ 
+@@ -173,9 +177,15 @@ def transcribe_one(
+             )
+ 
+         size_mb = audio.stat().st_size / (1024 * 1024)
+-        if verbose:
+-            print(f"  uploading {video.stem}.wav ({size_mb:.1f} MB)", flush=True)
+-        payload = call_scribe(audio, api_key, language, num_speakers)
++        if api_key == "local":
++            from transcribe_local import call_local
++            if verbose:
++                print(f"  transcribing {video.stem}.wav locally ({size_mb:.1f} MB)", flush=True)
++            payload = call_local(audio, language)
++        else:
++            if verbose:
++                print(f"  uploading {video.stem}.wav ({size_mb:.1f} MB)", flush=True)
++            payload = call_scribe(audio, api_key, language, num_speakers)
+ 
+     out_path.write_text(json.dumps(payload, indent=2))
+     dt = time.time() - t0
+diff --git a/helpers/transcribe_local.py b/helpers/transcribe_local.py
+new file mode 100644
+index 0000000..bee3490
+--- /dev/null
++++ b/helpers/transcribe_local.py
+@@ -0,0 +1,82 @@
++"""Local transcription with mlx-whisper, shaped like an ElevenLabs Scribe response.
++
++Drop-in for call_scribe(): returns {"language_code", "text", "words"} where words
++are Scribe-style entries — type "word" with start/end/speaker_id, and type
++"spacing" for every inter-word gap — so pack_transcripts, timeline_view and
++render read it unchanged.
++
++Runs the `mlx_whisper` CLI (installed with `uv tool install mlx-whisper`) rather
++than importing it, so the video-use venv stays light. Apple Silicon only.
++
++Env:
++    VIDEO_USE_WHISPER_MODEL  default mlx-community/whisper-large-v3-turbo
++    VIDEO_USE_WHISPER_BIN    default mlx_whisper (on PATH)
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import shutil
++import subprocess
++import tempfile
++from pathlib import Path
++
++DEFAULT_MODEL = "mlx-community/whisper-large-v3-turbo"
++
++# Whisper drops disfluencies unless the prompt shows them. Seeding the decoder with
++# fillers in both languages keeps "umm" / "يعني" in the transcript so they can be cut.
++FILLER_PROMPT = {
++    "ar": "أممم، آآ، يعني، طيب، إيه... أه، خلاص.",
++    "en": "Umm, uh, like, you know, so... uh, okay.",
++}
++
++
++def _bin() -> str:
++    b = os.environ.get("VIDEO_USE_WHISPER_BIN") or shutil.which("mlx_whisper")
++    if not b:
++        raise RuntimeError("mlx_whisper not found — run: uv tool install mlx-whisper")
++    return b
++
++
++def call_local(audio_path: Path, language: str | None = None) -> dict:
++    model = os.environ.get("VIDEO_USE_WHISPER_MODEL", DEFAULT_MODEL)
++    with tempfile.TemporaryDirectory() as tmp:
++        cmd = [
++            _bin(), str(audio_path),
++            "--model", model,
++            "--word-timestamps", "True",
++            "--condition-on-previous-text", "False",
++            "--output-format", "json",
++            "--output-dir", tmp,
++            "--verbose", "False",
++        ]
++        if language:
++            cmd += ["--language", language]
++        prompt = FILLER_PROMPT.get(language) if language else None
++        if prompt:
++            cmd += ["--initial-prompt", prompt]
++        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
++        raw = json.loads((Path(tmp) / f"{audio_path.stem}.json").read_text())
++
++    words: list[dict] = []
++    prev_end: float | None = None
++    for seg in raw.get("segments", []):
++        for w in seg.get("words", []):
++            text = (w.get("word") or "").strip()
++            if not text:
++                continue
++            start, end = float(w["start"]), float(w["end"])
++            if prev_end is not None and start > prev_end:
++                words.append({"text": " ", "start": prev_end, "end": start,
++                              "type": "spacing", "speaker_id": "speaker_0"})
++            words.append({"text": text, "start": start, "end": end, "type": "word",
++                          "speaker_id": "speaker_0", "logprob": w.get("probability")})
++            prev_end = end
++
++    return {
++        "language_code": raw.get("language") or language,
++        "text": (raw.get("text") or "").strip(),
++        "words": words,
++        "asr": f"mlx-whisper:{model}",
++    }

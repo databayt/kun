@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Check Markdown table column order against the printed page (RTL sources).
+"""Check Markdown table column order against the printed page.
 
 Under `dir="rtl"` Markdown column 1 renders at the RIGHT edge, so for an RTL
 book the first Markdown column must be the RIGHTMOST printed column — otherwise
-the rendered table is mirrored against the book.
+the rendered table is mirrored against the book. In an LTR book the LAST
+Markdown column renders rightmost. The direction comes from structure.json
+`lang` (sd-g12-english: an RTL-only check called 16 correct LTR tables mirrored
+and --fix reversed them all).
 
 Ground truth comes from tables-audit/<N>.right.json, produced by reading a CROP
 of the page's right side (see tables-audit/_TASK.md). Cropping is deliberate:
@@ -16,6 +19,7 @@ same confusion that causes the bug in the first place.
 import argparse, difflib, json, re, sys, unicodedata
 from pathlib import Path
 
+RTL_LANGS = {'ar', 'fa', 'ur', 'he', 'ps', 'ku'}   # same set as textbook-contract.py
 DIA = re.compile(r'[ً-ْٰـ]')
 
 
@@ -64,6 +68,11 @@ def main():
     a = ap.parse_args()
     book = Path(a.book).resolve()
     md_dir, audit = book / 'pages-md', book / 'tables-audit'
+    try:
+        lang = json.loads((book / 'structure.json').read_text(encoding='utf-8')).get('lang') or 'ar'
+    except (OSError, json.JSONDecodeError):
+        lang = 'ar'
+    rtl = lang in RTL_LANGS
 
     res = {'ok': [], 'mirrored': [], 'unclear': []}
     fixed = 0
@@ -91,15 +100,23 @@ def main():
             left  = pt.get('nextToItsLeft')
             if not data or right is None:
                 res['unclear'].append((n, 'no printed cell')); continue
-            first = data[0]
-            if len(first) < 2:
+            if len(data[0]) < 2:
                 res['unclear'].append((n, 'single column')); continue
-            # md col 1 renders rightmost -> it should match the printed rightmost cell
-            s_ok  = sim(first[0],  right)
-            s_mir = sim(first[-1], right)
-            if left:                       # corroborate with the neighbour
-                s_ok  = (s_ok  + sim(first[1],  left)) / 2
-                s_mir = (s_mir + sim(first[-2], left)) / 2
+
+            def score(row):
+                # RTL: md col 1 renders rightmost; LTR: the last md col does.
+                # Either way it should match the printed rightmost cell.
+                r0, r1, m0, m1 = (0, 1, -1, -2) if rtl else (-1, -2, 0, 1)
+                ok, mir = sim(row[r0], right), sim(row[m0], right)
+                if left and len(row) >= 2:     # corroborate with the neighbour
+                    ok  = (ok  + sim(row[r1], left)) / 2
+                    mir = (mir + sim(row[m1], left)) / 2
+                return ok, mir
+            # The crop's first cell is the header when the header is ruled inside the grid,
+            # but the first BODY row when the header is printed above it (sd-g12-literary-studies
+            # p93) — compare against whichever of the two rows the crop actually names.
+            s_ok, s_mir = max((score(r) for r in data[:2] if len(r) >= 2),
+                              key=lambda s: max(s))
             # an exact match on one end decides it even when both ends look alike
             # (e.g. "القائمة (أ)" vs "القائمة (ب)" score ~0.89 against each other)
             decisive = (s_ok >= 0.999) != (s_mir >= 0.999)

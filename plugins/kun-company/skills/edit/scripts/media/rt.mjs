@@ -90,7 +90,7 @@ export const CONTENT_TYPE = {
 // Budgets: engine.json → media wins; these defaults mirror the approved plan.
 export function budgets() {
   const d = {
-    h264_mb_per_min: 8, av1_mb_per_min: 5, reel_mb: 15, clip_mb: 6, avif_1600_median_kb: 150,
+    h264_mb_per_min: 8, av1_mb_per_min: 5, reel_mb: 15, clip_mb: 6, loop_mb: 3, avif_1600_median_kb: 150,
     vmaf_h264: 95, vmaf_av1: 93, lufs_web: -16, lufs_social: -14, lufs_tolerance: 1, true_peak_max: -1.5,
     voice_cer_max: 0.1, preview_px: 1600, cache_days: 7, disk_floor_gb: 10,
   }

@@ -1,10 +1,11 @@
 ---
 name: deploy
-description: Production deploy operator — the full cycle on Cloudflare (gate, push, env, schema gap, worktree build, smoke, deploy, Neon restore point, prod data steps, real-login verify), with the Vercel preview lane kept for repos that still use it
-when_to_use: "Use when Abdout says deploy, push to prod, ship it, or deploy everything in a repo — the whole cycle from typecheck to a verified login on the live hostname, not just the upload. Routes by platform: a repo with wrangler.jsonc (hogwarts, mkan, kun) takes the Cloudflare lane below; anything else takes the legacy Vercel lane. Owns the Neon restore-point rule (quota eviction of the oldest branch) and the prod data steps the deploy script never runs. Distinct from /check (pre-ship gate only), /watch (observe production, never fix), /cloudflare (platform operator: DNS, crons, logs), and /quick (commit-lint-push without a build). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
+description: Production deploy — the full Cloudflare cycle to a verified login, plus the legacy Vercel preview lane
+when_to_use: "Use when Abdout says deploy, push to prod or ship it — the whole cycle, Neon restore point and prod data included. Not /check (gate), /watch (observe), /cloudflare (DNS, crons, logs) or /quick (commit-push). Triggers on: deploy, deploy everything, push to production, ship to cloudflare, redeploy, why is the deploy stuck, vercel preview, deploy to staging."
 argument-hint: "[preview|logs|status] [app]"
 allowed-tools: Bash(git *), Bash(pnpm *), Bash(npx *), Bash(gh *), Bash(curl *), Bash(docker *), Bash(vercel *), Bash(scripts/*)
-model: opus
+lane: judge
+effort: high
 ---
 
 # Deploy — the production cycle
@@ -21,6 +22,10 @@ ls wrangler.jsonc 2>/dev/null && echo "CLOUDFLARE" || echo "VERCEL"
 ```
 
 `wrangler.jsonc` present → the Cloudflare lane. Otherwise the legacy Vercel lane at the end.
+The lane below is the **Containers** recipe (hogwarts, mkan, kun, marketing, codebase). The
+containerless repos — co (OpenNext Worker), mazin / nmbd / satellites (vinext + Workers Static
+Assets), thmanyah (static assets) — also carry `wrangler.jsonc` but deploy with their own
+scripts; see the `cloudflare` agent.
 Platform mechanics (DNS, crons, observability, the network-reset trap) live in the `cloudflare`
 skill; this skill is the order of operations and the two things it keeps getting wrong: the Neon
 restore point and the data steps the deploy never runs.
@@ -81,13 +86,14 @@ resurrects the leaked one.
 image (plus its `registry.cloudflare.com/…` tag) and the build cache grows by tens of GB; at 100 % the
 docker build dies with `no space left on device` mid-layer. Before a build: `docker system df`; then
 `docker images --format '{{.Repository}}:{{.Tag}}' | grep hogwarts-hogwartscontainer | xargs docker rmi -f`
-and `docker builder prune -f --keep-storage 8GB` (keeps the newest layers, e.g. the emulated Evolution
-stage). Never prune volumes — `twenty_db-data` is the CRM.
+and `docker builder prune -f --max-used-space 8gb` (keeps the newest layers, e.g. the emulated Evolution
+stage; `--keep-storage` is the old name and this Docker silently prunes nothing with it), then
+`colima ssh -- sudo fstrim -av` so the Mac gets the space back. Never prune volumes — `twenty_db-data` is the CRM.
 **hogwarts ships a second process** (Evolution API, `cf/entry.cjs`): the smoke run must carry
 `EVOLUTION_EMBEDDED=0` (the script adds it) — a second live bridge fights production for the WhatsApp
 session; verify after deploy with `/api/health` → `checks.whatsappBridge.status: pass`.
 **Rotating `AUTH_SECRET` locks out every live session unless the proxy verifies the cookie.** A proxy
-that trusts cookie *presence* bounces `/login` → `/dashboard` → `/login` for every pre-rotation cookie
+that trusts cookie _presence_ bounces `/login` → `/dashboard` → `/login` for every pre-rotation cookie
 (hogwarts, 2026-09-13, fixed in `src/proxy.ts`: decode the JWT with `next-auth/jwt`, expire stale
 cookies on the response). Before rotating on any other repo, confirm its proxy does the same or bump
 the session cookie name in the same deploy; after rotating, curl `/login` with a garbage
@@ -119,6 +125,19 @@ Read the smoke table, not just its exit code: health `200`, `/en` and `/ar` `200
 `Host: demo.<root>` line must `307` to the **school** login with `subdomain=demo`. Read the
 container log tail — env-validation failures surface there. A `Docker command exited with code: 1`
 on deploy is transient: re-run, completed layers are reused.
+
+**Keep the build dir out of `$TMPDIR`, and build → smoke → deploy in one sitting.** macOS purges
+`/var/folders/…/T` overnight, and pnpm's hard-linked / APFS-cloned files keep their old timestamps, so
+a build left overnight silently loses most of `node_modules/next` (mkan, 2026-09-27: 119 of 8,534
+files). The next smoke then dies on boot with `Cannot find module '/app/node_modules/next/dist/server/next.js'`
+and the `--rm` container vanishes before its log can be read — it looks like a Next bug, it is the
+purge. Export `CF_BUILD_DIR=$HOME/.cache/cf-build/<repo>` before `build`.
+
+**A security patch ships the patch, not the backlog.** Before `build`, list the commits since the
+last deploy (`wrangler deployments list` → its date → `git log --since`). When `main` carries
+undeployed product changes, pin the known-good source and overlay only the dependency files:
+`CF_SOURCE=<last-deployed-sha> CF_OVERLAY="package.json pnpm-lock.yaml"`. A clean `HEAD` export also
+races concurrent sessions — it ships whatever landed seconds before the build started.
 
 ### 6. The data steps the deploy never runs
 
@@ -187,14 +206,18 @@ inside it, and never a branch another session named in memory as a restore for u
 
 - `status` — `pnpm exec wrangler deployments list --name <worker>` from the build dir, then the
   `cloudflare` skill's two-way curl (direct and `--resolve`).
-- `logs` — `wrangler tail` does not work from this network; use the `cloudflare-observability`
-  MCP per the `cloudflare` skill.
-- `preview` — Cloudflare has no preview lane yet; the `workers.dev` host serves marketing and
-  login but not tenant dashboards (no wildcard). Say so instead of inventing one.
+- `logs` — `wrangler tail --format=json` when it connects (it has been blocked or flaky on this
+  network), otherwise Workers Logs (dashboard Observability tab or the telemetry API) per the
+  `cloudflare` skill. The `cloudflare-observability` MCP is not registered — pending a decision.
+- `preview` — no preview lane is adopted. Cloudflare Worker Previews exist
+  (`npx wrangler preview`, wrangler ≥ 4.135 — hogwarts, mkan and kun pin 4.129.0; preview URLs
+  are public by default); using them is an option pending a decision, not this procedure. Today
+  the `workers.dev` host serves marketing and login but not tenant dashboards (no wildcard). Say
+  so instead of inventing one.
 
 ## Legacy Vercel lane (repos without `wrangler.jsonc`)
 
 `npx vercel --yes` for preview, `npx vercel --prod --yes` for production; poll
 `npx vercel inspect <url>` every 30 s until `Ready` or `Error`; on `Error` read
 `npx vercel inspect <url> --logs`, fix, commit, push, retry — five attempts, then stop and show
-the trail. Never invent an env var. Do not use this lane for hogwarts, mkan or kun.
+the trail. Never invent an env var. Do not use this lane for any repo with a `wrangler.jsonc`.

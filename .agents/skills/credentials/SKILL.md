@@ -1,8 +1,10 @@
 ---
 name: credentials
-description: Manage databayt credentials — API keys via Keychain, web logins via Safari
-when_to_use: "Use when managing databayt credentials — storing or reading API keys via the macOS Keychain, driving Safari autofill for web logins, exporting keys for env wiring; never prints secrets into files. Triggers on: credentials, api key, log into <service>, store the key, which keys do we have."
+description: Databayt API keys in the macOS Keychain — store, read, export
+when_to_use: "Use when an API key must be stored, read or exported via the Keychain (value on stdin, never printed). Triggers on: credentials, api key, store the key, which keys do we have."
 argument-hint: "[status|setup|login|export] [service]"
+lane: build
+effort: medium
 ---
 
 Manage databayt credentials — API keys via Keychain, web logins via Safari autofill.
@@ -19,12 +21,12 @@ Available subcommands:
 Run the credentials script:
 
 ```bash
-/Users/abdout/kun/.Codex/scripts/credentials.sh $ARGUMENTS
+/Users/abdout/kun/.claude/scripts/credentials.sh $ARGUMENTS
 ```
 
 If no argument given, show status.
 
 After storing new API keys, remind user to:
 
-1. Run `eval $(/Users/abdout/kun/.Codex/scripts/credentials.sh export)` to load into shell
-2. Restart Codex to pick up new MCP connections
+1. Run `eval $(/Users/abdout/kun/.claude/scripts/credentials.sh export)` to load into shell
+2. Restart Claude Code to pick up new MCP connections

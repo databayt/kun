@@ -1,11 +1,24 @@
 ---
 name: ship
 description: Promote a checked build to production (Vercel --prod)
-when_to_use: "Use when a checked build must go live on Vercel production — the pipeline's final commit-to-live step after /check passes — including deploying main to prod, inspecting failed production deployment logs, or listing recent production deploys, as distinct from /deploy (staging/preview), /check (pre-ship gate), and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
+when_to_use: "Use when a checked build must go live on Vercel production — the pipeline's final step after /check passes — or to inspect failed or recent production deploys. Distinct from /deploy (staging/preview), /check (pre-ship gate) and /watch (post-deploy verification). Triggers on: ship, deploy to production, promote checked build (Vercel --prod)."
 argument-hint: "[product]"
+lane: judge
+effort: high
 ---
 
 # Ship — Production Deploy
+
+
+## Platform check — do this first
+
+```bash
+ls wrangler.jsonc 2>/dev/null && echo "CLOUDFLARE" || echo "VERCEL"
+```
+
+If the repo has a **`wrangler.jsonc`**, it deploys to **Cloudflare**, not Vercel — invoke the
+`cloudflare` skill and follow that runbook instead of anything below. hogwarts and mkan are both
+Cloudflare now; every Vercel hostname on the databayt accounts answers HTTP 402.
 
 Promote a `/check`-passed build to **production** on Vercel. The pipeline's final commit-to-live step.
 
@@ -44,7 +57,7 @@ Promote a `/check`-passed build to **production** on Vercel. The pipeline's fina
    - Confirm branch is up to date with `origin/main`
 
 2. **Quality gate** (sentinel-aware)
-   - Read `.Codex/session-state.json`. If `check.status == PASS` and `check.at` is within the last 10 minutes, skip the inline gate.
+   - Read `.claude/session-state.json`. If `check.status == PASS` and `check.at` is within the last 10 minutes, skip the inline gate.
    - Otherwise run `pnpm tsc --noEmit` + `pnpm build` inline. Write the sentinel on PASS.
    - Block on failure — production should never receive a build that does not compile locally.
 
