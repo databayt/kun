@@ -1,0 +1,11 @@
+{
+  "_note": "Source of truth for the pre-commit guard. 'enforced' = a staged plaintext file here BLOCKS the commit. 'pending' = legacy private files still in plaintext: warn only until the encrypt switch (encrypt-plan.md) is run, then move these regexes into 'enforced'.",
+  "enforced": ["^\\.claude/memory/private/(?!README\\.md$).+"],
+  "pending": [
+    "^\\.claude/memory/(captain_journal\\.md|hiring\\.md|crm\\.json|customers(\\.legacy)?\\.json|pipeline\\.json|revenue\\.json|runway\\.json|risks\\.json|team\\.json|capacity\\.json|okrs\\.json|north_star\\.json|feedback\\.jsonl)$",
+    "^\\.claude/memory/(1on1|decisions|weekly)/.+",
+    "^\\.claude/state/.+"
+  ],
+  "docsPaths": ["^docs/", "^content/", "\\.mdx?$"],
+  "skipPaths": ["pnpm-lock\\.yaml$", "^src/generated/", "^\\.claude/memory/(textbook-scores|skill-scores)\\.json$", "\\.enc$", "^\\.claude/scripts/memory/(guard|memory)\\.test\\.mjs$", "^\\.claude/scripts/memory/guard\\.mjs$"]
+}

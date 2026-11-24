@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+# kun pre-commit: block plaintext private memory + committed secrets (staged diff only).
+# Install once per clone:  git config core.hooksPath .githooks
+# Bypass in an emergency (secrets still your problem): KUN_GUARD_SKIP=1 git commit ...
+[ "$KUN_GUARD_SKIP" = "1" ] && exit 0
+ROOT="$(git rev-parse --show-toplevel)"
+G="$ROOT/.claude/scripts/memory/guard.mjs"
+[ -f "$G" ] || exit 0
+exec node "$G"
