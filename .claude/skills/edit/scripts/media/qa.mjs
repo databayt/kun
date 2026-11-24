@@ -85,6 +85,9 @@ for (const file of files) {
   // size budgets
   if (profile === "reel") check("reel_mb", p.bytes / 1e6 <= B.reel_mb, +(p.bytes / 1e6).toFixed(2), `≤${B.reel_mb} MB`)
   else if (profile === "clip") check("clip_mb", p.bytes / 1e6 <= B.clip_mb, +(p.bytes / 1e6).toFixed(2), `≤${B.clip_mb} MB`)
+  // a hero loop (shoot/hero.mjs) is ~12 s of constant camera motion: a per-minute rate misjudges it,
+  // the absolute weight on the page is what matters
+  else if (profile === "loop") check("loop_mb", p.bytes / 1e6 <= B.loop_mb, +(p.bytes / 1e6).toFixed(2), `≤${B.loop_mb} MB`)
   else {
     // per-minute budgets are written for 1080p; screen-sized deliveries (2560x1600, 1080x2340) scale with pixels
     const px = Math.max(1, (p.video.width * p.video.height) / (1920 * 1080))

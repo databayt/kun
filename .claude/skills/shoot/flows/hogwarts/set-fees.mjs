@@ -1,5 +1,6 @@
-// Set fees — the bursar's fees overview and the payments recorded against it. Stills only so far;
-// this module carries what publish.mjs needs: the route, the title and one alt per step.
+// Set fees — the bursar's fees overview and the payments recorded against it.
+import { tour } from "./_tour.mjs"
+export { initScript } from "./_tour.mjs"
 // the app route it films → cdn.databayt.org/hogwarts/<lang>/finance/fees/overview.avif
 export const route = "finance/fees"
 export const block = "finance"
@@ -9,3 +10,7 @@ export const alt = {
   overview: ["نظرة عامة على الرسوم", "The fees overview"],
   payments: ["المدفوعات المسجّلة", "Recorded payments"],
 }
+export default tour([
+  ["overview", "/ar/finance/fees"],
+  ["payments", "/ar/finance/fees/payments"],
+])

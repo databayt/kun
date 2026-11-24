@@ -26,7 +26,9 @@
 #                             the same name), upsert the manifest. No --flow: the url slug is the flow.
 #                             A still needs --part NN-<step> (several stills of one flow never collide)
 #   sync                      mirror the library to Google Drive (rsync → Finder → advice)
-#   stale [repo]              list assets whose block source (or `paths`) changed since capture
+#   stale [repo] [-v] [--flows] [--prune]
+#                             flows whose source (`paths`, else the block) changed since capture;
+#                             -v lists files, --flows prints bare names, --prune drops dead entries
 #   frame                     size Chrome to 1512x982 + dismiss the automation infobar
 #   status                    recording state, pending segments, library size, last sync
 
@@ -311,15 +313,34 @@ EOT
 
 cmd_stale() {
   ensure_lib
-  python3 - "${1:-}" <<'PY'
+  python3 - "$@" <<'PY'
 import json, os, subprocess, sys
+from collections import defaultdict
 
-repo_filter = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else None
+argv = sys.argv[1:]
+want_flows = "--flows" in argv   # bare stale flow names, one per line (shoot.mjs --stale reads this)
+prune = "--prune" in argv        # drop entries whose file is gone (a renumbered or removed step)
+verbose = "-v" in argv or "--files" in argv
+pos = [a for a in argv if not a.startswith("-")]
+repo_filter = pos[0] if pos else None
 lib = os.environ["RECORD_LIB"]
-m = json.load(open(os.path.join(lib, "manifest.json")))
+path = os.path.join(lib, "manifest.json")
+m = json.load(open(path))
 assets = [a for a in m["assets"] if not repo_filter or a["repo"] == repo_filter]
 if not assets:
-    print("no filed assets" + (f" for {repo_filter}" if repo_filter else "")); sys.exit(0)
+    if not want_flows: print("no filed assets" + (f" for {repo_filter}" if repo_filter else ""))
+    sys.exit(0)
+
+# A file that is no longer on disk was superseded (steps renumbered) or removed: it is not
+# stale footage to re-shoot, it is a dead entry. Report it apart; --prune deletes it.
+orphans = [a for a in assets if not os.path.exists(os.path.join(lib, a["file"]))]
+if prune and orphans:
+    dead = {id(a) for a in orphans}
+    m["assets"] = [a for a in m["assets"] if id(a) not in dead]
+    tmp = path + ".tmp"
+    json.dump(m, open(tmp, "w"), indent=1, ensure_ascii=False); open(tmp, "a").write("\n")
+    os.replace(tmp, path)
+live = [a for a in assets if os.path.exists(os.path.join(lib, a["file"]))]
 
 def block_path(repo_path, block):
     try:
@@ -330,7 +351,7 @@ def block_path(repo_path, block):
 
 stale, fresh, unknown = [], [], []
 cache = {}
-for a in assets:
+for a in live:
     key = (a["repo"], a["block"], a["sha"], tuple(a.get("paths") or ()))
     if key not in cache:
         repo_path = os.path.expanduser(f"~/{a['repo']}")
@@ -348,14 +369,37 @@ for a in assets:
     n = cache[key]
     (unknown if n is None else (stale if n > 0 else fresh)).append((a, n))
 
+# One line per flow — the unit a re-shoot works in — not one per file.
+flow_of = lambda a: a.get("flow") or a["block"]
+groups = defaultdict(list)
 for a, n in stale:
-    print(f"STALE  {a['repo']}/{a['block']}  {os.path.basename(a['file'])}  ({n} commits since {a['sha']})")
+    groups[(a["repo"], flow_of(a))].append((a, n))
+
+if want_flows:
+    for (_, f) in sorted(groups):
+        if f != "page": print(f)  # page stills are shot by route, not by --flow
+    sys.exit(0)
+
+for (repo, f), items in sorted(groups.items()):
+    shots = sum(1 for a, _ in items if a.get("kind") == "shot")
+    clips = len(items) - shots
+    most = max(n for _, n in items)
+    since = sorted({a["sha"] for a, _ in items})
+    what = ", ".join(x for x in [f"{shots} still{'s' * (shots != 1)}" if shots else "", f"{clips} video{'s' * (clips != 1)}" if clips else ""] if x)
+    print(f"STALE  {repo}/{f}  {what}  (up to {most} commits since {', '.join(since)})")
+    if verbose:
+        for a, n in items: print(f"         {os.path.basename(a['file'])}  ({n})")
 for a, n in unknown:
-    print(f"?      {a['repo']}/{a['block']}  {os.path.basename(a['file'])}  (no sha or repo not found)")
-print(f"\n{len(stale)} stale / {len(fresh)} fresh / {len(unknown)} unknown of {len(assets)} assets")
-if stale:
-    blocks = sorted({f"{a['repo']}:{a['block']}" for a, _ in stale})
-    print("re-record with the /record skill: " + ", ".join(blocks))
+    print(f"?      {a['repo']}/{flow_of(a)}  {os.path.basename(a['file'])}  (no sha or repo not found)")
+if orphans:
+    print(f"{'pruned' if prune else 'ORPHAN'} {len(orphans)} entr{'y' if len(orphans) == 1 else 'ies'} whose file is gone" + ("" if prune else " — `stale --prune` drops them"))
+print(f"\n{len(groups)} stale flow(s) · {len(stale)} stale / {len(fresh)} fresh / {len(unknown)} unknown of {len(live)} assets")
+if groups:
+    flows = sorted({f for (_, f) in groups if f != "page"})
+    r = repo_filter or sorted({r for (r, _) in groups})[0]
+    if flows: print(f"re-shoot: node ~/.claude/skills/shoot/scripts/shoot.mjs --repo {r} --flow {','.join(flows)} --lang ar,en --publish")
+    if any(f == "page" for (_, f) in groups): print("  page stills: shoot.mjs <route>…, then publish.mjs --flow page")
+    print("  (or --support --stale for just the help-center flows; videos: sim.mjs --flow <f>, then publish.mjs)")
 PY
 }
 

@@ -2,6 +2,8 @@
 // publish.mjs — one flow folder → cdn.databayt.org + the product's media-manifest.json, in one go.
 //   node publish.mjs --flow add-student [--repo hogwarts] [--lang ar,en] [--dry-run] [--only stills|video]
 //   node publish.mjs --flow page                     the page stills (shoot.mjs <path>…)
+//   [--sha <commit>]  what the media shows, for `record.sh stale` — default: the last commit on origin/main
+//                     (shoot, sim and story film the demo host, which never runs unpushed work)
 //
 // Reads ~/media/<repo>/<flow>/ (what shoot.mjs, sim.mjs and story.mjs write) and hands each asset
 // to `media.sh publish --key` (clean stable keys, HEAD-verified, invalidated on overwrite, manifest upsert).
@@ -30,6 +32,8 @@
 // so inserting a step never breaks a page link and the docs still list steps in shot order.
 // Alt text and titles come from the flow module: `export const title = [ar, en]`, `export const alt = { step: [ar, en] }`;
 // `export const block` / `paths` tell `record.sh stale` which source a re-shoot follows.
+// A stills publish also drops the flow's image entries whose step is no longer shot (renumbered or
+// removed), so the docs and the chat never show a screen the flow stopped having.
 
 import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs"
@@ -44,7 +48,7 @@ const opt = (k, d) => { const i = args.indexOf(`--${k}`); return i === -1 ? d : 
 const flag = (k) => args.includes(`--${k}`)
 
 const flow = opt("flow")
-if (!flow) { console.error("usage: publish.mjs --flow <name|page> [--repo hogwarts] [--lang ar,en] [--only stills|video] [--dry-run]"); process.exit(2) }
+if (!flow) { console.error("usage: publish.mjs --flow <name|page> [--repo hogwarts] [--lang ar,en] [--only stills|video] [--sha <commit>] [--dry-run]"); process.exit(2) }
 const repo = opt("repo", "hogwarts")
 const brand = brandOf(opt("brand", REPO_BRAND[repo] || repo))
 if (!brand.cdn || !brand.manifest) throw new Error(`brand-kit production.${brand.id} needs "cdn" and "manifest"`)
@@ -79,6 +83,7 @@ function publish(id, files, extra, key) {
 // (derive never upscales, so a 1179 px phone still carries -1179 rather than -1600/-2400)
 const SKIP = new Set(["derived", "qa", "raw", "_scratch"])
 const underived = {}
+const onDisk = new Set() // every still id the folder holds, derived or not — what the manifest may keep
 function stills(folder, prefix) {
   if (!existsSync(folder)) return
   const derived = join(folder, "derived")
@@ -88,6 +93,7 @@ function stills(folder, prefix) {
     if (statSync(full).isDirectory()) { if (!SKIP.has(f)) stills(full, `${prefix}${f}/`); continue }
     const m = /^(?:(\d+)-)?(.+)-(ar|en)\.png$/.exec(f)
     if (!m || !langs.includes(m[3])) continue
+    onDisk.add(`${flow}/${prefix}${m[2]}-${m[3]}`)
     const stem = f.slice(0, -4)
     const files = have.filter((d) => new RegExp(`^${stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-\\d+\\.(avif|webp)$`).test(d)).map((d) => join(derived, d))
     if (!files.some((x) => x.endsWith(".avif")) || !files.some((x) => x.endsWith(".webp"))) { (underived[folder] ||= []).push(stem); continue }
@@ -118,13 +124,26 @@ function videos() {
   }
 }
 
+// ── drop the flow's image entries whose still is gone (only for a language the folder still has) ──
+function pruneManifest() {
+  if (flow === "page" || !existsSync(manifest)) return
+  const shotLangs = new Set([...onDisk].map((id) => id.slice(-2)))
+  const m = JSON.parse(readFileSync(manifest, "utf8"))
+  const gone = Object.keys(m).filter((id) =>
+    id.startsWith(`${flow}/`) && m[id]?.kind === "image" && shotLangs.has(id.slice(-2)) && langs.includes(id.slice(-2)) && !onDisk.has(id))
+  if (!gone.length) return
+  for (const id of gone) delete m[id]
+  if (!dry) writeFileSync(manifest, JSON.stringify(m, null, 2) + "\n")
+  console.log(`${dry ? "would drop" : "✗ dropped"} ${gone.length} entr${gone.length === 1 ? "y" : "ies"} no longer shot: ${gone.join(" ")}`)
+}
+
 // ── stamp what went out into ~/media/manifest.json, so `record.sh stale` covers shoot + sim output ──
 function stamp() {
   const path = join(MEDIA_HOME, "manifest.json")
   if (!existsSync(path)) return
-  let sha = ""
-  const g = spawnSync("git", ["-C", join(homedir(), repo), "rev-parse", "--short", "HEAD"], { encoding: "utf8" })
-  if (g.status === 0) sha = g.stdout.trim()
+  const git = (...a) => spawnSync("git", ["-C", join(homedir(), repo), ...a], { encoding: "utf8" })
+  const base = opt("sha") || git("merge-base", "HEAD", "origin/main").stdout?.trim() || "HEAD"
+  const sha = git("rev-parse", "--short", base).stdout?.trim() || ""
   const m = JSON.parse(readFileSync(path, "utf8"))
   const masters = [...new Set(published.map((f) => f.includes("/derived/") ? join(dirname(dirname(f)), f.split("/").pop().replace(/-\d+\.(avif|webp)$/, ".png")) : f))].filter((f) => /\.png$|(?<!\.av1)\.mp4$/.test(f))
   const now = new Date().toISOString().replace(/\.\d+Z$/, "Z")
@@ -143,6 +162,7 @@ function stamp() {
 
 if (only !== "video") {
   stills(dir, "")
+  pruneManifest()
   for (const [folder, stems] of Object.entries(underived))
     console.warn(`  ⚠ ${stems.length} still(s) in ${folder.replace(homedir(), "~")} have no derivatives — skipped (media.sh derive <png…> --kind ui, then publish again)`)
 }

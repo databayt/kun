@@ -1,4 +1,5 @@
-// Install app — the school on a phone, shot with --device iphone-16 (stills land in iphone-16/).
+// Install app — the school on a phone. A phone-only flow: `device` makes every run shoot it in
+// WebKit at the iPhone 16 frame (stills land in iphone-16/), batch runs included.
 import { tour } from "./_tour.mjs"
 export { initScript } from "./_tour.mjs"
 
@@ -10,4 +11,5 @@ export const title = ["الجوال والعمل دون اتصال", "Mobile and
 export const alt = {
   dashboard: ["المدرسة على الجوال", "The school on a phone"],
 }
+export const device = "iphone-16"
 export default tour([["dashboard", "/ar/dashboard"]])
