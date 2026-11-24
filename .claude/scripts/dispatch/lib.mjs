@@ -7,6 +7,9 @@ import path from "node:path";
 
 export const REPO = "databayt/kun";
 export const AGENTS = ["claude", "codex", "opencode", "agy", "hermes", "fcc"];
+// Web seats (scripts/web/web.mjs): text only, on the free quota of a chat site in the vault Chrome. `web` = auto (first seat
+// that is free); the others name one seat. Never picked by `to:any`: a person asks for them.
+export const WEB_AGENTS = ["web", "chatgpt", "deepseek", "glm", "gemini"];
 export const KUN_DIR = process.env.KUN_DIR || path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../..");
 export const STATE_DIR = process.env.KUN_DISPATCH_DIR || path.join(os.homedir(), ".kun", "dispatch");
 export const MAX_OUTPUT = 3500;
@@ -115,6 +118,7 @@ export function installedAgents(whichFn = which) {
     const found = whichFn(bin) || (a === "fcc" && fs.existsSync(kunBin) && whichFn("claude") ? kunBin : null);
     if (found && (binOf[bin] || a === "fcc" || launchers.length === 0)) out.push(a);
   }
+  if (fs.existsSync(path.join(KUN_DIR, "scripts/web/web.mjs"))) out.push(...WEB_AGENTS);
   return out;
 }
 
@@ -141,6 +145,8 @@ export function buildCommand(agent, { brief, cwd, model, lane, engine }) {
       return { cmd: "agy", args: ["-p", brief, "--dangerously-skip-permissions", ...(model ? ["--model", model] : [])], env, cwd };
     case "hermes":
       return { cmd: "hermes", args: ["-z", brief, ...(model ? ["-m", model] : [])], env, cwd };
+    case "web": case "chatgpt": case "deepseek": case "glm": case "gemini":
+      return { cmd: process.execPath, args: [path.join(KUN_DIR, "scripts/web/web.mjs"), "ask", agent === "web" ? "auto" : agent, brief], env: { ...env, KUN_JOB: `dispatch:${agent}` }, cwd };
     default:
       return null;
   }
@@ -221,7 +227,7 @@ export function takeLock(agent, dir = STATE_DIR) {
 
 export function busyAgents(dir = STATE_DIR) {
   const s = new Set();
-  for (const a of AGENTS) {
+  for (const a of [...AGENTS, ...WEB_AGENTS]) {
     try { process.kill(Number(fs.readFileSync(path.join(dir, `${a}.lock`), "utf8")), 0); s.add(a); } catch {}
   }
   return s;

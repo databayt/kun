@@ -133,7 +133,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   } else if (mode === "--page") {
     // The public page: the lane table and who is on each lane. Generated, so it cannot go stale.
     const lanes = JSON.parse(fs.readFileSync(path.join(ROOT, ".claude/engine.json"), "utf8")).lanes || {};
-    const order = ["script", "mechanical", "lookup", "research", "build", "work", "judge", "captain", "crm", "free", "escalate"];
+    const order = ["script", "mechanical", "lookup", "research", "build", "work", "judge", "captain", "crm", "free", "web", "escalate"];
     const code = (x) => "`" + x + "`";
     const on = (lane, kind) => rows.filter((r) => r.lane === lane && r.kind === kind).map((r) => r.name);
     const L = ["---", "title: Lanes", "description: One table decides which model and how much effort each kind of work gets", "---", ""];
@@ -164,6 +164,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     L.push("- **Who uses it.** Headless jobs only, through `kun-claude.sh`: any job whose name matches a `free` entry in `jobs.$lanes` (today `seek:google`, `seek:wave`, `seek:week`, `funnel:learn`, `kun:`, `test:`, `bench:`), or whose own `jobs.<job>.lane` says `free`. No agent or skill declares it.");
     L.push("- **Fallback.** A free run that exits non-zero, hits a 429 or rate limit, overflows the context window or comes back empty is retried once on the `fallback` lane (`mechanical`: haiku, low) through the normal Claude path. The ledger gets a row for each attempt, noted `free→fallback`. Fable is never a fallback.");
     L.push("- **The data rule.** Free providers may read prompts. Own data and internal output only: **client data and secrets never go on the free lane.**");
+    L.push("");
+    L.push("## The web lane", "");
+    L.push("`web` is a seat, not a model: `scripts/web/web.mjs` hands a text task to the free daily quota of ChatGPT, DeepSeek, GLM or Gemini, in Abdout's own signed-in Chrome, for $0. No agent or skill declares it; a pipeline calls it for a second opinion and falls back (exit 75) when every seat is capped, signed out or limited. The order, the gap between asks and the daily caps live in `engine.json` under `web`. **Own data and internal output only: client data and secrets never go to a web seat.**");
     L.push("");
     L.push("## What a lane writes", "");
     L.push("| For | It writes | Why |", "| --- | --- | --- |");

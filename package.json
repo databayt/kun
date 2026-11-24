@@ -17,6 +17,7 @@
     "health": "bash scripts/monitoring/health-check.sh",
     "status": "bash scripts/status.sh",
     "carousel:render": "node scripts/render-carousel.mjs",
+    "web": "node scripts/web/web.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
-  REPO, STATE_DIR, realGh, hostId, login, parseBrief, matchIssue, installedAgents, busyAgents, takeLock,
+  REPO, STATE_DIR, WEB_AGENTS, realGh, hostId, login, parseBrief, matchIssue, installedAgents, busyAgents, takeLock,
   claim, billingGuard, buildCommand, execAgent, formatComment, lastLedgerRun, loadEngine, repoCwd, ensureLabels,
 } from "./lib.mjs";
 
@@ -29,7 +29,8 @@ export async function runTask(gh, issue, agent, { host, engine, exec = execAgent
   const res = await exec(spec, (cfg.timeout_min || 30) * 60_000);
   const ok = res.code === 0 && !res.timedOut;
   const runId = agent === "claude" ? lastLedgerRun(`dispatch:claude`, started) : null;
-  comment(formatComment({ agent, host, ok, code: res.code, timedOut: res.timedOut, output: res.output, seconds: Math.round((now() - started) / 1000), runId }));
+  const note = !ok && res.code === 75 && WEB_AGENTS.includes(agent) ? "No web seat could answer: capped today, signed out, limited or a CAPTCHA. Sign in once with `bash ~/.claude/bin/chrome-debug.sh 9222 <site url>`, or send the task to another agent." : undefined;
+  comment(formatComment({ agent, host, ok, code: res.code, timedOut: res.timedOut, output: res.output, seconds: Math.round((now() - started) / 1000), runId, note }));
   finish(ok);
   return { ok, ...res };
 }

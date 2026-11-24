@@ -1,0 +1,78 @@
+---
+title: Web seats
+description: ChatGPT, DeepSeek, GLM and Gemini free daily quotas, driven in your own signed-in Chrome, for text tasks at $0
+---
+
+# Web seats
+
+> The Claude plan is for judging. A second opinion, a critique or a first draft is only text in and text out, and four chat sites give that away for free every day. A web seat is one of them, driven in the Chrome you already signed in to.
+
+A seat is a chat site you are signed in to: ChatGPT, DeepSeek, GLM (chat.z.ai) or Gemini. kun opens it in a hidden page of the vault Chrome (CDP on `127.0.0.1:9222`), types the prompt, waits for the answer and reads it back. The page never shows in the tab strip and never takes focus. This is a ToS grey area; Abdout accepted the risk on 2026-11-24, so it is local, personal and slow on purpose.
+
+**The rule.** Own data and internal output only. Client data and secrets never go to a web seat. It is text in, text out, never a coding agent.
+
+## Use it
+
+```bash
+node scripts/web/web.mjs ask auto "Critique this plan" --file plan.md   # first seat that is free
+node scripts/web/web.mjs ask deepseek "Reply with exactly: ok" --json    # {provider, chat_url, answer}
+node scripts/web/web.mjs ask chatgpt "And shorter" --chat last           # continue the last chat
+node scripts/web/web.mjs status                                          # per seat: signed in, limit, today's count, last ok
+node scripts/web/web.mjs transcript gemini --chat <url>                  # the chat as JSON
+```
+
+With `--file`, the text is the instruction and the file follows it; the file alone is the whole prompt. A new chat is the default; `--chat last` reuses the URL kept in `~/.claude/state/web/<seat>.json`. `pnpm web ...` is the same command.
+
+| Exit | Meaning |
+| --- | --- |
+| `0` | Answer printed |
+| `1` | Error (no Chrome, a page that changed, no answer) |
+| `75` | The seat said no: limit hit, signed out, capped today or a CAPTCHA. Callers fall back |
+
+`auto` walks `engine.json` → `web.order`, skipping seats that are capped today, signed out or at a limit, and prints `answered by <seat>` on stderr. It exits 75 only when every seat said no.
+
+## Sign in once
+
+Each seat needs a one-time sign-in in the vault Chrome. Do it yourself, in front of the browser:
+
+```bash
+bash ~/.claude/bin/chrome-debug.sh 9222 https://chatgpt.com/
+bash ~/.claude/bin/chrome-debug.sh 9222 https://chat.deepseek.com/
+bash ~/.claude/bin/chrome-debug.sh 9222 https://chat.z.ai/
+bash ~/.claude/bin/chrome-debug.sh 9222 https://gemini.google.com/app
+```
+
+kun never signs in for you. A signed-out seat exits 75 with this same line. A guest page is not a seat: `status` reports it as not signed in.
+
+## Guardrails
+
+| Guard | Setting (`engine.json` → `web`) |
+| --- | --- |
+| One ask at a time per seat | A lock file in `~/.claude/state/web/`; a second ask waits for it |
+| Minimum gap between asks | `gap_s` (45) plus 0 to 15 s of jitter |
+| Daily cap per seat | `caps`: chatgpt 25, deepseek 40, glm 40, gemini 25 (local day) |
+| Challenge | A CAPTCHA or slider stops the ask with exit 75 and a line saying so; a person clears it |
+| Ledger | One row per ask in `~/.claude/logs/runs.jsonl`: `kind: "web"`, provider, `status` (`ok`, `limit`, `login`, `fail`), prompt and answer characters, seconds, chat URL |
+
+## The adapter contract
+
+The Machine desktop app loads the same files. `scripts/web/adapters/index.json` lists the seats (`id`, `name`, `url`). Each `scripts/web/adapters/<id>.js` is a self-contained browser script (no imports, no Node) that, evaluated in the site's page, sets:
+
+```js
+window.__kunWeb = {
+  id, ready(), needsLogin(), limitHit(), busy(),
+  send(text),        // fills the composer so the page's framework sees it, then clicks send
+  lastAnswer(),      // the last assistant message as markdown-ish text, code blocks kept
+  transcript(),      // [{ role: 'user' | 'assistant', text }]
+};
+```
+
+Polling lives in the host, not the adapter: after `send`, wait until `busy()` is false and `lastAnswer()` has held still for 3 seconds (180 second timeout). Selectors prefer `data-testid`, aria and role, with fallbacks and the date they were last checked in a comment. A site that redesigns breaks one adapter, never the host.
+
+## Where it is used
+
+- **Spec** has a "second opinion" step: after drafting, `web ask auto --file <draft>` with a critique prompt. Exit 75 skips it.
+- **[Dispatch](/docs/machine/dispatch)** takes `to:web` (auto) and `to:chatgpt|deepseek|glm|gemini`: the issue body is the prompt and the answer is the comment.
+- **Lanes**: `web` is a lane in `engine.json`, a runner (`scripts/web/web.mjs`) with no model.
+
+Code: `scripts/web/web.mjs`, `scripts/web/adapters/`, `scripts/lib/vault-page.mjs`.

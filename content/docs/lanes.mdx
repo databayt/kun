@@ -21,6 +21,7 @@ A lane is a kind of work with a fixed model and a fixed effort. Every agent and 
 | `captain` | opus | xhigh | the main loop, attended |
 | `crm` | sonnet | medium | the lead or funnel agent against Twenty (crm-api.databayt.org); reads and hygiene that a script already does stay on the script lane |
 | `free` | free | — | Claude Code on the free pool (kun-free.sh) — $0, own data and internal output only; never client data or secrets |
+| `web` | none | — | a web seat (ChatGPT/DeepSeek/GLM/Gemini free quota) — text only, $0 |
 | `escalate` | fable | xhigh | by hand, attended only — never unattended |
 
 The table lives in `.claude/engine.json` under `lanes`. Change a row, run `node .claude/scripts/compile-lanes.mjs`, and everything on that lane changes with it.
@@ -46,6 +47,10 @@ The router reads each prompt, matches these words and phrases (whole words, case
 - **Who uses it.** Headless jobs only, through `kun-claude.sh`: any job whose name matches a `free` entry in `jobs.$lanes` (today `seek:google`, `seek:wave`, `seek:week`, `funnel:learn`, `kun:`, `test:`, `bench:`), or whose own `jobs.<job>.lane` says `free`. No agent or skill declares it.
 - **Fallback.** A free run that exits non-zero, hits a 429 or rate limit, overflows the context window or comes back empty is retried once on the `fallback` lane (`mechanical`: haiku, low) through the normal Claude path. The ledger gets a row for each attempt, noted `free→fallback`. Fable is never a fallback.
 - **The data rule.** Free providers may read prompts. Own data and internal output only: **client data and secrets never go on the free lane.**
+
+## The web lane
+
+`web` is a seat, not a model: `scripts/web/web.mjs` hands a text task to the free daily quota of ChatGPT, DeepSeek, GLM or Gemini, in Abdout's own signed-in Chrome, for $0. No agent or skill declares it; a pipeline calls it for a second opinion and falls back (exit 75) when every seat is capped, signed out or limited. The order, the gap between asks and the daily caps live in `engine.json` under `web`. **Own data and internal output only: client data and secrets never go to a web seat.**
 
 ## What a lane writes
 

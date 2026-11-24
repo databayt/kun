@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { matchIssue, billingGuard, formatComment, claim, parseBrief, buildBody, takeLock } from "./lib.mjs";
+import { matchIssue, billingGuard, formatComment, claim, parseBrief, buildBody, takeLock, buildCommand } from "./lib.mjs";
 import { runTask, pass } from "./runner.mjs";
 import { send } from "./send.mjs";
 
@@ -137,4 +137,16 @@ test("lock allows one task per agent", () => {
   assert.equal(takeLock("codex", dir), null);
   a();
   assert.ok(takeLock("codex", dir));
+});
+
+test("web seats: addressed by name, never picked by to:any, run web.mjs ask", () => {
+  const ctx = { login: "abdout", installed: ["web", "chatgpt"] };
+  assert.deepEqual(matchIssue({ labels: L("dispatch", "to:web") }, ctx), { agent: "web" });
+  assert.deepEqual(matchIssue({ labels: L("dispatch", "to:chatgpt") }, ctx), { agent: "chatgpt" });
+  assert.equal(matchIssue({ labels: L("dispatch", "to:glm") }, ctx), null, "seat not offered here");
+  assert.equal(matchIssue({ labels: L("dispatch", "to:any") }, ctx), null, "any never lands on a web seat");
+  const auto = buildCommand("web", { brief: "hi", cwd: "/x", engine: {} });
+  assert.deepEqual(auto.args.slice(1), ["ask", "auto", "hi"]);
+  assert.match(auto.args[0], /scripts\/web\/web\.mjs$/);
+  assert.equal(buildCommand("deepseek", { brief: "hi", cwd: "/x", engine: {} }).args[2], "deepseek");
 });

@@ -25,7 +25,7 @@ A task is an issue with these labels.
 | Label | Meaning |
 | --- | --- |
 | `dispatch` | Marks a bus task (required) |
-| `to:<agent>` | `claude`, `codex`, `opencode`, `agy`, `hermes`, `fcc` or `any` |
+| `to:<agent>` | `claude`, `codex`, `opencode`, `agy`, `hermes`, `fcc`, a [web seat](/docs/machine/web) (`web`, `chatgpt`, `deepseek`, `glm`, `gemini`) or `any` (never a web seat) |
 | `machine:<login>` | Only this machine's GitHub login may run it. Absent means any machine |
 | `lane:<name>` | Optional (`build`, `research`, `mechanical`, ...): picks the model |
 | `claimed:<host>` | A runner took it |
@@ -60,8 +60,10 @@ model: sonnet
 | `opencode` | `opencode run --dir <cwd> <brief>` |
 | `agy` | `agy -p <brief> --dangerously-skip-permissions` |
 | `hermes` | `hermes -z <brief>` |
+| `web` | `web.mjs ask auto <brief>`: the first free [web seat](/docs/machine/web), text only |
+| `chatgpt` `deepseek` `glm` `gemini` | `web.mjs ask <seat> <brief>`: that one seat |
 
-A runner offers only the agents installed on its machine (`launchers.json` plus `which`).
+A runner offers only the agents installed on its machine (`launchers.json` plus `which`); the web seats are offered wherever the kun checkout has `scripts/web/web.mjs` and the vault Chrome is up. A web task's comment is the answer; exit 75 (every seat capped, signed out or limited) is a `failed` with the reason, and the issue stays open so another agent can take it. Own data only: a web seat never gets client data or secrets.
 
 ## Run the runner
 

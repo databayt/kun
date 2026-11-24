@@ -6,6 +6,7 @@
     "chat",
     "agents",
     "pool",
+    "web",
     "compile",
     "memory",
     "dispatch",

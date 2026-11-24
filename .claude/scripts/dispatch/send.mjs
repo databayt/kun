@@ -14,7 +14,7 @@ export function parseArgs(argv) {
 export function send(argv, gh = realGh) {
   const o = parseArgs(argv);
   const brief = o._.join(" ").trim();
-  if (!brief) throw new Error('usage: kun dispatch "<brief>" --to <claude|codex|opencode|agy|hermes|fcc|any> [--machine <login>] [--repo r] [--lane l] [--timeout min] [--model m]');
+  if (!brief) throw new Error('usage: kun dispatch "<brief>" --to <claude|codex|opencode|agy|hermes|fcc|web|chatgpt|deepseek|glm|gemini|any> [--machine <login>] [--repo r] [--lane l] [--timeout min] [--model m]');
   const to = o.to || "any";
   const bad = billingGuard({ model: o.model, lane: o.lane });
   if (bad) throw new Error(bad);
