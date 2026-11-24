@@ -76,11 +76,24 @@ PY
     fi
 }
 
-case "${1:-}" in
-    --setup) setup; exit 0 ;;
-    --key) if [ "${KUN_FREE_ROUTE:-direct}" = pool ]; then pool_key; else key; fi; exit $? ;;
-    --pool) shift; KUN_FREE_ROUTE=pool; case "${1:-}" in kun-*) COMBO="$1"; shift ;; esac ;;
-    --direct) shift; KUN_FREE_ROUTE=direct ;;
+# Our own options may come after the alias's --dangerously-skip-permissions: pick them out of
+# any position and pass everything else to claude.
+MODE=""; PASS=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --setup) MODE=setup ;;
+        --key) MODE=key ;;
+        --print-env) MODE=print-env ;;
+        --direct) KUN_FREE_ROUTE=direct ;;
+        --pool) KUN_FREE_ROUTE=pool; case "${2:-}" in kun-*) COMBO="$2"; shift ;; esac ;;
+        *) PASS+=("$1") ;;
+    esac
+    shift
+done
+set -- ${PASS[@]+"${PASS[@]}"}
+case "$MODE" in
+    setup) setup; exit 0 ;;
+    key) if [ "${KUN_FREE_ROUTE:-direct}" = pool ]; then pool_key; else key; fi; exit $? ;;
 esac
 
 [ -f "$CONFIG/settings.json" ] || setup >/dev/null
@@ -110,7 +123,7 @@ fi
 export CLAUDE_CODE_AUTO_COMPACT_WINDOW=120000
 unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN CLAUDE_CODE_USE_BEDROCK CLAUDE_CODE_USE_VERTEX
 
-if [ "${1:-}" = "--print-env" ]; then
+if [ "$MODE" = print-env ]; then
     env | grep -E '^(KUN_FREE_ROUTE|CLAUDE_CONFIG_DIR|ANTHROPIC_|CLAUDE_CODE_(API_KEY_HELPER_TTL_MS|AUTO_COMPACT_WINDOW|SUBAGENT_MODEL)=)' | sort
     echo "apiKeyHelper=$(python3 -c "import json;print(json.load(open('$CONFIG/settings.json')).get('apiKeyHelper'))")"
     exit 0
