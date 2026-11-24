@@ -1,0 +1,12 @@
+#!/bin/bash
+# kun-dispatch — the work bus door.
+#   kun-dispatch "<brief>" --to codex [--machine <login>] [--repo r] [--lane l]   send a task
+#   kun-dispatch run | heartbeat | install                                         runner pass / status / launchd plist
+D="$(cd "$(dirname "$(readlink "$0" || echo "$0")")/../scripts/dispatch" && pwd)"
+case "${1:-}" in
+  run) shift; exec node "$D/runner.mjs" "$@" ;;
+  heartbeat) shift; exec node "$D/heartbeat.mjs" "$@" ;;
+  install) shift; exec node "$D/install.mjs" "$@" ;;
+  send) shift; exec node "$D/send.mjs" "$@" ;;
+  *) exec node "$D/send.mjs" "$@" ;;
+esac
