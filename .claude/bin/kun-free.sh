@@ -70,10 +70,34 @@ json.dump(out, open(sys.argv[2], "w"), indent=2)
 PY
         chmod 600 "$CONFIG/settings.json"
     fi
-    echo "f lane: config dir $CONFIG is ready."
+    link_memory
+    echo "f lane: config dir $CONFIG is ready (memory shared with ~/.claude)."
     if key >/dev/null; then echo "f lane: Nous login OK (through Hermes)."; else
         echo "f lane: Hermes has no Nous login — run: hermes model   (pick Nous Portal, sign in), then: f"
     fi
+}
+
+# Shared intelligence: every project's auto-memory in the free lane IS the primary's (a symlink, so
+# one store, never a copy that drifts). Runs on every launch: a new project or a wiped config dir
+# re-links itself. A real (non-empty) dir is never deleted — it is moved aside and reported.
+link_memory() {
+    local src name dst
+    for src in "$HOME"/.claude/projects/*/memory; do
+        [ -d "$src" ] || continue
+        name=$(basename "$(dirname "$src")"); dst="$CONFIG/projects/$name/memory"
+        [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ] && continue
+        mkdir -p "$(dirname "$dst")"
+        if [ -L "$dst" ]; then rm "$dst"
+        elif [ -d "$dst" ]; then rmdir "$dst" 2>/dev/null || { mv "$dst" "$dst.local-$(date +%s)"; echo "f lane: moved a lane-only memory aside: $dst.local-*" >&2; }
+        fi
+        ln -s "$src" "$dst"
+    done
+    # A versioned store: snapshot before the session, so a bad edit by a weak model can be undone
+    # (git -C <memory> log / checkout). Local only — the memory is private, never pushed.
+    local m="$HOME/.claude/projects/-Users-abdout-kun/memory"
+    [ -d "$m/.git" ] && git -C "$m" add -A >/dev/null 2>&1 && \
+        git -C "$m" -c user.name=kun -c user.email=noreply@databayt.org commit -qm "snapshot $(date +%F\ %H:%M) before f lane" >/dev/null 2>&1
+    return 0
 }
 
 # Our own options may come after the alias's --dangerously-skip-permissions: pick them out of
@@ -97,6 +121,7 @@ case "$MODE" in
 esac
 
 [ -f "$CONFIG/settings.json" ] || setup >/dev/null
+link_memory
 ROUTE="${KUN_FREE_ROUTE:-auto}"
 if [ "$ROUTE" = auto ]; then if pool_ready; then ROUTE=pool; else ROUTE=direct; fi; fi
 export KUN_FREE_ROUTE="$ROUTE"

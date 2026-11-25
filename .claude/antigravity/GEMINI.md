@@ -30,3 +30,13 @@ say which code path produced it. Commit messages must describe their own diff �
 subject over a diff that changes auth is how a security hole ships unnoticed.
 
 When in doubt, do less and hand the rest to `c`.
+
+## Shared memory — read it first, write back to it
+
+Claude Code's project memory is the operating truth, and it is yours too. Before any task, read
+`~/.claude/projects/<cwd with every "/" turned into "-">/memory/MEMORY.md` (for `~/kun`:
+`~/.claude/projects/-Users-abdout-kun/memory/MEMORY.md`) and open the files its lines point to.
+For Al-Ibda school support, read `project_alabidae_onboarding.md` and the skill `alabidae-support`.
+When you learn a lasting fact, write it in the same place and format (one fact per file, frontmatter,
+one index line in MEMORY.md) — never in your own brain directory. Never put secrets (PINs,
+passwords, keys) in memory.
