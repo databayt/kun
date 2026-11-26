@@ -16,8 +16,15 @@ Each person's computer runs one Pool: [OmniRoute](https://github.com/cheaper-inf
 | `f` | Claude Code on the Pool (class `kun-code`), or Nous direct when the Pool is not ready |
 | `f --pool kun-long` | `f` on a named class |
 | `f --direct` | `f` straight to Nous, skipping the Pool |
-| `o -m omniroute/kun-code` | opencode on the Pool |
+| `o` | opencode on the Pool, class `kun-long` by default (`kun-oc.sh` exports the Keychain key; `/models` picks a Zen model by hand) |
+| `o -m omniroute/kun-code` | opencode on a named class |
 | `lane pool` | Every source: status, requests, success rate, plus the combos |
+
+## Long sessions
+
+One free source is one daily cap: opencode's keyless DeepSeek stops at "You've used today's free messages". A class is a stack of caps. The first healthy member serves, and when it is exhausted or rate-limited the next one serves under the same session, so the context survives the swap. Every source you connect adds its cap to every class it has a role in, so the horizon grows with each key (NVIDIA, Groq, OpenRouter, Mistral). A Zen API key puts DeepSeek Flash into `kun-long` too.
+
+For a run longer than one sitting, don't count on one session. Keep the plan as a checklist in an issue or a file, commit after each step, and loop short runs that each take the next unchecked step: `f --pool kun-long -p "<step>"` (or a job on the `free` lane), or `o run -m omniroute/kun-long "<step>"` with stdin closed. Claude Max reviews what the free runs produced.
 
 ## The classes
 
@@ -37,7 +44,7 @@ One combo per role, built from the connected sources in catalog order. The first
 
 | Tier | Meaning | Status today (`lane pool`) |
 | --- | --- | --- |
-| keyless | no account | OpenCode Zen: `direct-ok` |
+| keyless | no account | OpenCode Zen: `direct-ok` inside opencode only; a Zen API key adds it to the Pool |
 | free | account, no card | Nous: connected, 100% ok. NVIDIA, Gemini, Groq, Mistral: `needs-key`. Antigravity: `needs-sign-in` |
 | free-capped | free with a hard cap | Cloudflare Workers AI: connected, 90% ok. OpenRouter: `needs-key` |
 | paid | off until funded and decided | OpenRouter top-up, DeepSeek, Cerebras: `off` |

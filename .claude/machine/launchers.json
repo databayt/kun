@@ -1,5 +1,5 @@
 {
-  "$comment": "The shell launchers, one letter per agent lane. The single source: onboarding-mac.sh / onboarding-windows.ps1 (lib/agents.sh) write the managed block `# BEGIN databayt agents … # END databayt agents` from this file, `kun-ready --fix-launchers` rewrites it, readiness steps launcher.<id> probe it, and Machine -> Settings -> Agents edits it. `agent` is the onboarding selection token; `needs` is the readiness step that installs the CLI. A machine profile (machines/<login>.json) may narrow the set with `launchers: [\"c\",\"a\"]`.",
+  "$comment": "The shell launchers, one letter per agent lane. The single source: onboarding-mac.sh / onboarding-windows.ps1 (lib/agents.sh) write the managed block `# BEGIN databayt agents \u2026 # END databayt agents` from this file, `kun-ready --fix-launchers` rewrites it, readiness steps launcher.<id> probe it, and Machine -> Settings -> Agents edits it. `agent` is the onboarding selection token; `needs` is the readiness step that installs the CLI. A machine profile (machines/<login>.json) may narrow the set with `launchers: [\"c\",\"a\"]`.",
   "version": 1,
   "launchers": [
     {
@@ -38,12 +38,13 @@
     {
       "id": "o",
       "name": "opencode (tertiary)",
-      "bin": "opencode",
+      "bin": "kun-oc.sh",
       "args": [],
       "bypass": true,
       "bypassNote": "config-level: no flag exists; the step opencode.allow sets \"permission\": \"allow\" in ~/.config/opencode/opencode.json",
       "agent": "opencode",
-      "needs": "opencode.cli"
+      "needs": "opencode.cli",
+      "note": "opencode on the token pool (omniroute/kun-long): the Keychain pool key is exported, then opencode runs; a capped provider hands over to the next (.claude/bin/kun-oc.sh)"
     },
     {
       "id": "h",
@@ -64,7 +65,7 @@
       "bypass": true,
       "agent": "free",
       "needs": "hermes.cli",
-      "note": "Claude Code on Nous Portal's free models through the Hermes login — $0, its own config dir ~/.claude-free (.claude/bin/kun-free.sh)"
+      "note": "Claude Code on Nous Portal's free models through the Hermes login \u2014 $0, its own config dir ~/.claude-free (.claude/bin/kun-free.sh)"
     }
   ]
 }

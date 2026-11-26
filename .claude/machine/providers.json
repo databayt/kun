@@ -242,6 +242,9 @@
         ],
         "vision": [
           "nemotron-3.5-super-vl-free"
+        ],
+        "long": [
+          "deepseek-v4.1-flash-free"
         ]
       },
       "bench": "2026-11-24 tool task: deepseek-v4.1-flash 14s, nemotron-3.5-super-vl 13s, big-pickle 20s, mimo-v2.6-flash 26s — all PASS",
