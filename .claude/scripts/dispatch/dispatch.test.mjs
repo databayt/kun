@@ -93,13 +93,13 @@ test("result comment formatting truncates and carries run id", () => {
 test("success closes the issue, failure leaves it open with failed", async () => {
   let r = fakeGh();
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dsp-"));
-  let res = await pass({ gh: r.gh, installed: ["codex"], stateDir: dir, log() {}, exec: async () => ({ code: 0, output: "PONG", timedOut: false }) });
+  let res = await pass({ gh: r.gh, installed: ["codex"], stateDir: dir, repos: ["databayt/kun"], log() {}, exec: async () => ({ code: 0, output: "PONG", timedOut: false }) });
   assert.equal(res[0].ok, true);
   assert.ok(r.state.closed && r.state.labels.includes("done"));
   assert.match(r.state.comments[0], /PONG/);
 
   r = fakeGh();
-  res = await pass({ gh: r.gh, installed: ["codex"], stateDir: dir, log() {}, exec: async () => ({ code: 3, output: "bad", timedOut: false }) });
+  res = await pass({ gh: r.gh, installed: ["codex"], stateDir: dir, repos: ["databayt/kun"], log() {}, exec: async () => ({ code: 3, output: "bad", timedOut: false }) });
   assert.equal(res[0].ok, false);
   assert.ok(!r.state.closed && r.state.labels.includes("failed"));
 });

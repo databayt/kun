@@ -15,6 +15,7 @@ export function plist({ node, runner, log, kunDir, home, interval = 120 }) {
   <key>ProgramArguments</key><array><string>${node}</string><string>${runner}</string></array>
   <key>StartInterval</key><integer>${interval}</integer>
   <key>RunAtLoad</key><true/>
+  <key>AbandonProcessGroup</key><true/>
   <key>WorkingDirectory</key><string>${kunDir}</string>
   <key>EnvironmentVariables</key><dict>
     <key>PATH</key><string>${home}/.local/bin:${home}/.opencode/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
@@ -26,8 +27,15 @@ export function plist({ node, runner, log, kunDir, home, interval = 120 }) {
 `;
 }
 
+// A Homebrew Cellar path carries the version (node@24/24.22.3_1) and dies on the next bump, so the
+// plist pins a stable symlink when one resolves to a working node, else process.execPath.
+export function stableNode({ candidates = ["/opt/homebrew/bin/node", "/usr/local/bin/node"], execPath = process.execPath, ok = (p) => { try { fs.accessSync(p, fs.constants.X_OK); return /node/.test(path.basename(fs.realpathSync(p))); } catch { return false; } } } = {}) {
+  for (const c of candidates) if (!c.includes("/Cellar/") && ok(c)) return c;
+  return execPath;
+}
+
 export function install({ platform = process.platform, home = os.homedir(), interval = 120 } = {}) {
-  const node = process.execPath;
+  const node = stableNode();
   const runner = path.join(KUN_DIR, ".claude/scripts/dispatch/runner.mjs");
   const dir = path.join(home, ".kun", "dispatch");
   const log = path.join(dir, "runner.log");

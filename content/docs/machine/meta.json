@@ -10,6 +10,7 @@
     "compile",
     "memory",
     "dispatch",
+    "long",
     "readiness"
   ]
 }

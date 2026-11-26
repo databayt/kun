@@ -14,6 +14,12 @@ export const KUN_DIR = process.env.KUN_DIR || path.resolve(path.dirname(new URL(
 export const STATE_DIR = process.env.KUN_DISPATCH_DIR || path.join(os.homedir(), ".kun", "dispatch");
 export const MAX_OUTPUT = 3500;
 
+// Repos the bus reads: the public one, plus engine.json dispatch.private_repo when it is set (private data never lands in REPO).
+export function busRepos(engine = loadEngine()) {
+  const p = engine?.dispatch?.private_repo;
+  return p && p !== REPO ? [REPO, p] : [REPO];
+}
+
 export const LABELS = {
   dispatch: ["dispatch", "0e8a16", "Work-bus task for a coding agent"],
   done: ["done", "0e8a16", "Dispatch task finished"],
@@ -27,7 +33,7 @@ export function realGh(args, { input } = {}) {
 
 function rawHost() {
   if (process.env.KUN_HOST) return process.env.KUN_HOST;
-  if (process.platform === "darwin") { try { return execFileSync("scutil", ["--get", "LocalHostName"], { encoding: "utf8" }).trim(); } catch {} }
+  if (process.platform === "darwin") { try { return execFileSync("/usr/sbin/scutil", ["--get", "LocalHostName"], { encoding: "utf8" }).trim(); } catch {} }
   return os.hostname().split(".")[0];
 }
 export const hostId = () => rawHost().toLowerCase().replace(/[^a-z0-9-]/g, "-");
@@ -49,12 +55,12 @@ export function parseBrief(body = "") {
       if (k) cfg[k[1]] = k[2].replace(/^["']|["']$/g, "");
     }
   }
-  if (cfg.timeout_min !== undefined) cfg.timeout_min = Number(cfg.timeout_min) || undefined;
+  for (const k of ["timeout_min", "hours", "step_timeout_min", "steps_max"]) if (cfg[k] !== undefined) cfg[k] = Number(cfg[k]) || undefined;
   return { brief: brief.trim(), cfg };
 }
 
-export function buildBody(brief, { repo, cwd, timeout_min, model } = {}) {
-  const y = Object.entries({ repo, cwd, timeout_min, model }).filter(([, v]) => v !== undefined && v !== "");
+export function buildBody(brief, { repo, cwd, timeout_min, model, hours, step_timeout_min, steps_max } = {}) {
+  const y = Object.entries({ repo, cwd, timeout_min, model, hours, step_timeout_min, steps_max }).filter(([, v]) => v !== undefined && v !== "");
   return y.length ? `${brief}\n\n\`\`\`yaml\n${y.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\`\`\`\n` : `${brief}\n`;
 }
 
@@ -66,7 +72,7 @@ const val = (issue, prefix) => names(issue).find((n) => n.startsWith(prefix))?.s
 // Returns {agent} or null. `any` takes the first installed agent that is not busy.
 export function matchIssue(issue, { login: me, installed, busy = new Set() }) {
   const n = names(issue);
-  if (!n.includes("dispatch") || n.includes("done") || n.includes("failed")) return null;
+  if (!n.includes("dispatch") || n.includes("done") || n.includes("failed") || n.includes("paused")) return null;
   if (n.some((x) => x.startsWith("claimed:"))) return null;
   const machine = val(issue, "machine:");
   if (machine && machine !== "any" && machine.toLowerCase() !== String(me).toLowerCase()) return null;
@@ -157,6 +163,7 @@ export function execAgent(spec, timeoutMs) {
   return new Promise((resolve) => {
     let out = "", timedOut = false;
     const child = spawn(spec.cmd, spec.args, { cwd: spec.cwd, env: { ...process.env, ...spec.env }, stdio: ["ignore", "pipe", "pipe"] });
+    spec.onSpawn?.(child);
     const t = setTimeout(() => { timedOut = true; child.kill("SIGTERM"); setTimeout(() => child.kill("SIGKILL"), 5000).unref(); }, timeoutMs);
     child.stdout.on("data", (d) => { out += d; if (out.length > 2e6) out = out.slice(-1e6); });
     child.stderr.on("data", (d) => { out += d; if (out.length > 2e6) out = out.slice(-1e6); });
@@ -199,17 +206,17 @@ export function formatComment({ agent, host, ok, code, timedOut, output, seconds
 // ---- claim ----------------------------------------------------------------------------
 // Atomically-ish: add claimed:<host>, then read the label events. The earliest `labeled`
 // event whose label starts with claimed: wins (ties broken by event id). Losers back out.
-export function claim(gh, number, host, me) {
+export function claim(gh, number, host, me, repo = REPO) {
   const label = `claimed:${host}`;
-  try { gh(["label", "create", label, "--repo", REPO, "--color", "fbca04", "--description", "Dispatch task taken by this machine", "--force"]); } catch {}
-  gh(["issue", "edit", String(number), "--repo", REPO, "--add-label", label, "--add-assignee", "@me"]);
-  const events = JSON.parse(gh(["api", `repos/${REPO}/issues/${number}/events`, "--paginate"]) || "[]");
+  try { gh(["label", "create", label, "--repo", repo, "--color", "fbca04", "--description", "Dispatch task taken by this machine", "--force"]); } catch {}
+  gh(["issue", "edit", String(number), "--repo", repo, "--add-label", label, "--add-assignee", "@me"]);
+  const events = JSON.parse(gh(["api", `repos/${repo}/issues/${number}/events`, "--paginate"]) || "[]");
   const claims = events
     .filter((e) => e.event === "labeled" && e.label?.name?.startsWith("claimed:"))
     .sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at) || a.id - b.id);
   const winner = claims[0]?.label.name;
   if (winner === label) return true;
-  try { gh(["issue", "edit", String(number), "--repo", REPO, "--remove-label", label]); } catch {}
+  try { gh(["issue", "edit", String(number), "--repo", repo, "--remove-label", label]); } catch {}
   return false;
 }
 
@@ -233,9 +240,9 @@ export function busyAgents(dir = STATE_DIR) {
   return s;
 }
 
-export function ensureLabels(gh, extra = []) {
+export function ensureLabels(gh, extra = [], repo = REPO) {
   for (const [n, c, d] of [...Object.values(LABELS), ...extra]) {
-    try { gh(["label", "create", n, "--repo", REPO, "--color", c, "--description", d, "--force"]); } catch {}
+    try { gh(["label", "create", n, "--repo", repo, "--color", c, "--description", d, "--force"]); } catch {}
   }
 }
 

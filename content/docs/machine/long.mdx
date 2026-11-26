@@ -1,0 +1,90 @@
+---
+title: Long mode
+description: Start a long job before you sleep. It runs step by step on your Mac until it is done, fails or hits a deadline, and every step is a comment on a GitHub issue
+---
+
+# Long mode
+
+> Give it a goal and go. A loop plans the goal as a checklist, runs one step at a time on an agent, and writes every step on a GitHub issue. The issue is the single source of truth. Long mode is built on [Dispatch](/docs/machine/dispatch).
+
+## Start one
+
+```bash
+long "Add the missing Arabic strings to the timetable block and push" --repo hogwarts --hours 6
+```
+
+`long` is the same command as `kun-long`. It files the issue, starts the loop on this Mac, and prints the issue URL and the log path. Then you can close the lid on the conversation, not on the Mac.
+
+| Flag | Meaning | Default |
+| --- | --- | --- |
+| `--repo R` | Work folder: a name under `~`, `~/oss`, `~/Documents`, or an absolute path | the kun checkout |
+| `--to A` | `fcc`, `opencode`, `claude`, `codex` or `agy` | `fcc` (the free [Pool](/docs/machine/pool), class `long`) |
+| `--hours H` | Deadline from the start | 8 |
+| `--steps-max N` | Most steps the plan may have | 15 |
+| `--step-timeout MIN` | Time limit for one step | 30 |
+| `--private` | Private data. Files in the private repo and runs only on `claude` | off |
+| `--queue` | File the issue only. A runner picks it up | off |
+| `--machine L` | Run on the machine of GitHub login `L`, or `any` | you |
+
+## The evidence trail
+
+Everything is on the issue.
+
+| When | What you see |
+| --- | --- |
+| Start | `long started`: host, agent, deadline, step timeout, power state (informational) |
+| Plan | A comment with the planning run, then a `## Steps` checklist added to the issue body |
+| Each step | `long step k/N done` or `failed (attempt a)`, with the agent, seconds and the tail of the output |
+| Each success | The step's box is ticked in the body (matched by text, so your edits survive) |
+| End | `long done`: steps with durations, total time, the commits made since the start. Labels `done`, issue closed |
+
+Each comment is also appended to a local journal, `~/.kun/dispatch/long-<n>.jsonl`. If the network drops, the loop retries with backoff (10 seconds up to 5 minutes). A comment that still cannot be posted waits in a backlog and is posted, marked "posted late", after the next call that works. A step result is never lost.
+
+## Every door
+
+| Door | How |
+| --- | --- |
+| Terminal | `long "…"` |
+| Any agent CLI (`o`, opencode, codex, agy) | Ask it to run `kun-long "<goal>"` |
+| Claude Code and the Machine chat, by text or voice | Say "long mode: …", "night shift: …", "شغل طويل …". The `long` skill runs the command and answers with the URL |
+| Hermes in Slack or WhatsApp | "long …", "night shift …", "شغل طويل …". Hermes runs `kun-long` and answers with the URL |
+| A GitHub issue from your phone | Open an issue with labels `dispatch` and `long` (and `to:<agent>`). Write the goal in the body. The runner starts it within about 2 minutes |
+
+The runner is the launchd job that wakes every 2 minutes. When it sees a `long` issue for this machine and no long loop running, it starts one. It never runs a `long` issue as a one-shot task.
+
+## Status, stop, resume
+
+```bash
+long status         # open long issues: step k/N, running here or not, time of the last step
+long stop 12        # finish the current step, then pause (or: long stop all)
+long resume 12      # continue a paused or failed issue
+long log 12         # tail ~/.kun/dispatch/long-12.log
+```
+
+A pause adds the label `paused` and a comment that says why: you stopped it, the deadline passed, or the process was interrupted (SIGTERM or Ctrl-C). When one issue finishes, the loop looks for the next open `long` issue for this machine, oldest first, and goes on. One long loop runs per machine.
+
+## The data rule and the private repo
+
+`databayt/kun` is public. Free agents never get private data. So:
+
+- `--private` files the issue in the private repo named by `engine.json` `dispatch.private_repo` (now `databayt/ops`). If that key is empty, the command refuses.
+- Private work runs only on `claude`. The loop refuses a `data:private` issue for any other agent, and refuses one that lives in the public repo.
+- Use `--private` for leads, the CRM, email replies, WhatsApp and the users of schools.
+
+## Keeping the Mac awake
+
+While the loop runs it starts `caffeinate -i -m -s` tied to its own process, so the Mac does not sleep. There is no power or Wi-Fi check: it starts when you say, and if it fails, it fails. The start comment records the battery and `disablesleep` state for reference only.
+
+## When things fail
+
+| Failure | What happens |
+| --- | --- |
+| A step fails | One retry. A second failure on the same step stops the loop: label `failed`, a final comment, the issue stays open |
+| A step times out | Counts as a failure |
+| The agent prints no `STEP:` line but exits 0 | Counts as done, with the note "no STEP line" |
+| Fable, Mythos or `escalate` | Refused up front (subscription only) |
+| Repo not found, agent not installed | `failed` with the reason |
+| gh or the network is down | Retries, journal, backlog (above). The loop does not crash |
+| The Mac restarts | The issue stays claimed by this machine. The runner restarts the loop on its next pass, or run `long resume <n>` |
+
+See also [Pool: long sessions](/docs/machine/pool#long-sessions).

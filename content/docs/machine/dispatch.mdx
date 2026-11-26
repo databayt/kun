@@ -82,3 +82,7 @@ launchctl load ~/Library/LaunchAgents/com.databayt.dispatch-runner.plist
 `heartbeat` writes `.claude/state/machines/<login>.json`: agents and versions, the last pass and the queue depth. The [Memory](/docs/machine/memory) sync lane picks it up.
 
 Code: `.claude/scripts/dispatch/` (`send`, `runner`, `install`, `heartbeat`, `lib`, tests) and `.claude/bin/kun-dispatch`.
+
+## Long jobs
+
+A task that needs hours, not minutes, is [long mode](/docs/machine/long): the same bus, a `long` label, and a loop that runs the goal one step at a time with every step on the issue.

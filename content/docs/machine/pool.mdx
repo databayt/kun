@@ -24,7 +24,7 @@ Each person's computer runs one Pool: [OmniRoute](https://github.com/cheaper-inf
 
 One free source is one daily cap: opencode's keyless DeepSeek stops at "You've used today's free messages". A class is a stack of caps. The first healthy member serves, and when it is exhausted or rate-limited the next one serves under the same session, so the context survives the swap. Every source you connect adds its cap to every class it has a role in, so the horizon grows with each key (NVIDIA, Groq, OpenRouter, Mistral). A Zen API key puts DeepSeek Flash into `long` too.
 
-For a run longer than one sitting, don't count on one session. Keep the plan as a checklist in an issue or a file, commit after each step, and loop short runs that each take the next unchecked step: `f --pool long -p "<step>"` (or a job on the `free` lane), or `o run -m omniroute/long "<step>"` with stdin closed. Claude Max reviews what the free runs produced.
+For a run longer than one sitting, don't count on one session. Keep the plan as a checklist in an issue or a file, commit after each step, and loop short runs that each take the next unchecked step: `f --pool long -p "<step>"` (or a job on the `free` lane), or `o run -m omniroute/long "<step>"` with stdin closed. Claude Max reviews what the free runs produced. `long "<goal>"` does exactly this for you: see [Long mode](/docs/machine/long).
 
 ## The classes
 

@@ -71,10 +71,10 @@
  },
  "counts": {
   "project_agents": 61,
-  "user_agents": 55,
+  "user_agents": 61,
   "commands": 0,
-  "project_skills": 100,
-  "user_skills": 90,
+  "project_skills": 101,
+  "user_skills": 106,
   "pattern_cards": 16,
   "project_rules": 8,
   "domain_rules": 58,
@@ -182,6 +182,10 @@
    "captain": ["pricing", "canon", "strategy", "captain", "hiring", "fundraise", "runway", "what should i do next"],
    "crm": ["crm", "twenty", "lead", "leads", "pipeline", "prospect", "qualify", "follow up", "outreach", "عملاء محتملين", "متابعة"]
   }
+ },
+ "dispatch": {
+  "private_repo": "databayt/ops",
+  "$comment": "Where `data:private` work lives (2026-11-26). databayt/kun is public, so long-mode issues that touch leads, CRM, email replies, WhatsApp or schools' users go to this PRIVATE repo, run only on the claude agent, and the runner and the long loop read both repos. null refuses `kun-long --private`. Never point it at a public repo."
  },
  "board": {
   "$comment": "The department station's departure board (2026-11-22). station.mjs board scores each formula with board:true as the sum of weight × signal and picks one per role (waiting, next, start); these are the weights, read from here. waiting: a human gate is waiting in an open produce project, or an open issue is assigned to the login with the department's label · continue: an open project in the department and repo · sprint: an open issue in the current sprint milestone with the dept label · drive: the formula's own closeness to revenue (0-1) · due: the formula's due rule fires today · habit: recent picks minus dismissals from ~/.kun/machine/station-log.jsonl. Read by .claude/scripts/station.mjs; the Machine app calls it through the pack's station argv. Plan: ~/.claude/plans/let-s-have-a-discussion-immutable-tiger-of-0ce7b055-98c8-4727-9958-5f9d26d39469.md.",
