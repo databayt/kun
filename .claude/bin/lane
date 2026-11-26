@@ -5,7 +5,7 @@
 #   lane test [c a o h f]         same bug-fix task through each lane in a temp folder → PASS/FAIL + seconds
 #   lane models                   which model each lane is set to
 #   lane pool                     the token pool: each source's status, use and quota (harvest.mjs)
-#   lane --pool [combo] <f|o> …   run f or o on a pool combo (kun-code default; kun-fast, kun-long…)
+#   lane --pool [combo] <f|o> …   run f or o on a pool combo (code default; fast, long…)
 #
 # Interactive use is the shell launchers (c a o h f, from .claude/machine/launchers.json) or
 # Machine → Terminal. This is the scripted door. Lanes: c Claude Code (Max plan) · a Antigravity
@@ -20,8 +20,8 @@ set -u
 TIMEOUT="${LANE_TIMEOUT:-300}"
 POOL=""
 if [ "${1:-}" = --pool ]; then
-    shift; POOL=kun-code
-    case "${1:-}" in kun-*) POOL="$1"; shift ;; esac
+    shift; POOL=code
+    case "${1:-}" in code|fast|long|vision|thrifty) POOL="$1"; shift ;; esac
 fi
 
 run() { # run <lane> <prompt>
@@ -45,7 +45,7 @@ models() {
     printf 'x  Codex             %s\n' "$(codex --version 2>/dev/null | head -1)"
     printf 'o  opencode          %s\n' "$(python3 -c "import json;print(json.load(open('$HOME/.config/opencode/opencode.json')).get('model'))" 2>/dev/null)"
     printf 'h  Hermes            %s\n' "$(sed -n '/^model:/,/^[a-z]/s/^  default: //p' "$HOME/.hermes/config.yaml" | head -1)"
-    printf 'f  Claude Code free  %s\n' "${KUN_FREE_MODEL:-meituan/longcat-2.5:free}"
+    printf 'f  Claude Code free  %s\n' "${KUN_FREE_MODEL:-tencent/hy4-flash:free}"
     printf 'd  Claude Code d     %s\n' "deepseek (own key)"
 }
 

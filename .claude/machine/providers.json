@@ -25,24 +25,26 @@
       "privacy": "public",
       "roles": {
         "coding": [
-          "meituan/longcat-2.5:free",
-          "tencent/hy4-flash:free"
+          "tencent/hy4-flash:free",
+          "upstage/solar-mini4:free"
         ],
         "fast": [
           "tencent/hy4-flash:free",
-          "meituan/longcat-2.5:free"
+          "upstage/solar-mini4:free"
         ],
         "long": [
-          "meituan/longcat-2.5:free"
+          "tencent/hy4-flash:free",
+          "upstage/solar-mini4:free"
         ]
       },
       "bench": "2026-11-24 tool task: longcat 26s PASS, hy4-flash 28s PASS, solar-mini4 50s PASS, step-3.7-flash timeout",
       "enabled": true,
       "key_from": "hermes",
       "context": {
-        "meituan/longcat-2.5:free": 1048576,
-        "tencent/hy4-flash:free": 1048576
-      }
+        "tencent/hy4-flash:free": 1048576,
+        "upstage/solar-mini4:free": 524288
+      },
+      "note": "2026-11-26: meituan/longcat-2.5:free removed by Nous (404 'no longer available'); its 404 locked the whole connection."
     },
     {
       "id": "nvidia",
@@ -85,10 +87,15 @@
       "roles": {
         "coding": [
           "nvidia/nemotron-3-ultra-550b-a55b:free",
-          "deepseek/deepseek-v4-flash:free"
+          "google/gemma-4-31b-it:free"
         ],
         "fast": [
-          "deepseek/deepseek-v4-flash:free"
+          "nvidia/nemotron-3.5-lightning:free",
+          "inclusionai/ling-3.2-flash:free"
+        ],
+        "long": [
+          "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "inclusionai/ling-3.2-flash:free"
         ]
       },
       "source": "sharbel way 2 — also feeds fcc (launcher n)",
@@ -325,27 +332,27 @@
   ],
   "combos": {
     "$comment": "The classes. combos.mjs builds each OmniRoute combo from the enabled providers' `roles` in this order, strategy priority (best member first; OmniRoute moves to the next when one is exhausted, rate-limited or failing), paid rungs last and only when enabled. Re-rank after `lane test --pool`. Ranking today (2026-11-24 bench): Nous longcat 25s, Cloudflare gpt-oss-120b 206s through Claude Code; re-rank when NVIDIA/OpenRouter/Gemini/Groq/Mistral keys are in.",
-    "kun-code": {
+    "code": {
       "role": "coding",
       "strategy": "priority",
       "paid": false
     },
-    "kun-fast": {
+    "fast": {
       "role": "fast",
       "strategy": "priority",
       "paid": false
     },
-    "kun-vision": {
+    "vision": {
       "role": "vision",
       "strategy": "priority",
       "paid": false
     },
-    "kun-long": {
+    "long": {
       "role": "long",
       "strategy": "priority",
       "paid": false
     },
-    "kun-thrifty": {
+    "thrifty": {
       "role": "coding",
       "strategy": "priority",
       "paid": true

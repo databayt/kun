@@ -13,30 +13,44 @@ Each person's computer runs one Pool: [OmniRoute](https://github.com/cheaper-inf
 
 | You type | You get |
 | --- | --- |
-| `f` | Claude Code on the Pool (class `kun-code`), or Nous direct when the Pool is not ready |
-| `f --pool kun-long` | `f` on a named class |
+| `f` | Claude Code on the Pool (class `code`), or Nous direct when the Pool is not ready |
+| `f --pool long` | `f` on a named class |
 | `f --direct` | `f` straight to Nous, skipping the Pool |
-| `o` | opencode on the Pool, class `kun-long` by default (`kun-oc.sh` exports the Keychain key; `/models` picks a Zen model by hand) |
-| `o -m omniroute/kun-code` | opencode on a named class |
+| `o` | opencode on the Pool, class `long` by default (`kun-oc.sh` exports the Keychain key; `/models` picks a Zen model by hand) |
+| `o -m omniroute/code` | opencode on a named class |
 | `lane pool` | Every source: status, requests, success rate, plus the combos |
 
 ## Long sessions
 
-One free source is one daily cap: opencode's keyless DeepSeek stops at "You've used today's free messages". A class is a stack of caps. The first healthy member serves, and when it is exhausted or rate-limited the next one serves under the same session, so the context survives the swap. Every source you connect adds its cap to every class it has a role in, so the horizon grows with each key (NVIDIA, Groq, OpenRouter, Mistral). A Zen API key puts DeepSeek Flash into `kun-long` too.
+One free source is one daily cap: opencode's keyless DeepSeek stops at "You've used today's free messages". A class is a stack of caps. The first healthy member serves, and when it is exhausted or rate-limited the next one serves under the same session, so the context survives the swap. Every source you connect adds its cap to every class it has a role in, so the horizon grows with each key (NVIDIA, Groq, OpenRouter, Mistral). A Zen API key puts DeepSeek Flash into `long` too.
 
-For a run longer than one sitting, don't count on one session. Keep the plan as a checklist in an issue or a file, commit after each step, and loop short runs that each take the next unchecked step: `f --pool kun-long -p "<step>"` (or a job on the `free` lane), or `o run -m omniroute/kun-long "<step>"` with stdin closed. Claude Max reviews what the free runs produced.
+For a run longer than one sitting, don't count on one session. Keep the plan as a checklist in an issue or a file, commit after each step, and loop short runs that each take the next unchecked step: `f --pool long -p "<step>"` (or a job on the `free` lane), or `o run -m omniroute/long "<step>"` with stdin closed. Claude Max reviews what the free runs produced.
 
 ## The classes
 
-One combo per role, built from the connected sources in catalog order. The first healthy model serves; when it is exhausted or failing, the next one does.
+A class is one kind of work, served by a ranked chain of free models. Ask for the class by name (`omniroute/long` in opencode, `f --pool long` for Claude Code) and the Pool picks the model: the first healthy member serves, and when it is out of quota, rate-limited or failing, the next one does. `.claude/scripts/harvest/combos.mjs` builds each class from the `roles` of every connected source in `providers.json`, in catalog order, so connecting a source adds it to every class it has a role in.
 
-| Combo | Role | Today's order |
+| Class | Use it for | Members today, in order (2026-11-26) | Context |
+| --- | --- | --- | --- |
+| `code` | Writing and editing code with tools: the default for `f` | Hunyuan Flash, Solar Mini 4 (Nous) → Nemotron 3 Ultra, Gemma 4 31B (OpenRouter) → Gemini 3 Flash, 2.5 Flash → gpt-oss-120b, GLM 4.7 Flash, Qwen2.5 Coder 32B (Cloudflare) | 128K–1M |
+| `fast` | Small steps: subagents, summaries, classification, triage | Hunyuan Flash, Solar Mini 4 → Nemotron 3.5 Lightning, Ling 3.2 Flash → Gemini Flash-Lite → GLM 4.7 Flash, gpt-oss-120b | 128K–1M |
+| `long` | Long sessions and big inputs: whole repos, long threads, a night's work | Hunyuan Flash, Solar Mini 4 → Nemotron 3 Ultra, Ling 3.2 Flash → Gemini 2.5 Flash → gpt-oss-120b | every member ≥128K, most 512K–1M |
+| `vision` | Reading screenshots and images | Gemini 2.5 Flash → Cloudflare Gemma 4 26B | — |
+| `thrifty` | `code` plus paid rungs at the end, for when free runs out and a paid source is switched on | the `code` chain; paid rungs only when enabled in `providers.json` | — |
+
+How they swap, measured on 2026-11-26: Gemini had used its daily quota (cooling until 07:59 UTC), so `vision` was served by its second member. Before LongCat was replaced, `long` was served by its second member too. Nothing restarted; the caller saw an answer.
+
+### What may run on a class
+
+Free sources are public: the privacy class in `providers.json` is `public`, and free tiers may log or train on prompts. So the classes carry **our own work only**: code, docs, research, drafts of internal material, media scripts. Anything holding a person's data (a lead's email, a school's WhatsApp message, a parent's name, a contract, a CRM record) and any secret stays on Claude Max: the `build`, `crm` and `judge` lanes in `engine.json`. This is the same rule as the `free` lane in [Lanes](/docs/lanes).
+
+| Department | On the free classes | On Claude Max |
 | --- | --- | --- |
-| `kun-code` | coding | LongCat 2.5, Hunyuan Flash, Cloudflare gpt-oss-120b, GLM 4.7 Flash, Qwen2.5 coder 32B |
-| `kun-fast` | fast, subagents | Hunyuan Flash, LongCat 2.5, GLM 4.7 Flash, gpt-oss-120b |
-| `kun-long` | long context | LongCat 2.5, gpt-oss-120b |
-| `kun-vision` | images | Cloudflare Gemma 4 26B |
-| `kun-thrifty` | coding, then paid rungs | only when a paid rung is on |
+| tech | features, fixes, refactors, tests, docs (`code`, `long`) | review of what the free runs produced, anything with secrets |
+| video / image | scripts, storyboards, shot lists, captions drafts (`long`, `vision`) | final approval stays human |
+| marketing | public copy drafts, research, calendars (`long`, `fast`) | publishing goes through `/approve` |
+| sales | market research, public company lookups (`fast`) | CRM, follow-ups, warm and cold outreach, email replies (`crm` lane) |
+| support | reading public docs, reproducing a bug on a demo tenant (`code`) | WhatsApp messages, user accounts, replies to schools (`build` lane) |
 
 ## The sources
 
@@ -45,8 +59,8 @@ One combo per role, built from the connected sources in catalog order. The first
 | Tier | Meaning | Status today (`lane pool`) |
 | --- | --- | --- |
 | keyless | no account | OpenCode Zen: `direct-ok` inside opencode only; a Zen API key adds it to the Pool |
-| free | account, no card | Nous: connected, 100% ok. NVIDIA, Gemini, Groq, Mistral: `needs-key`. Antigravity: `needs-sign-in` |
-| free-capped | free with a hard cap | Cloudflare Workers AI: connected, 90% ok. OpenRouter: `needs-key` |
+| free | account, no card | Nous, Gemini: connected. NVIDIA, Groq, Mistral: `needs-key` (Groq refuses hotmail sign-ups: use Google). Antigravity: `needs-sign-in` |
+| free-capped | free with a hard cap | Cloudflare Workers AI: connected. OpenRouter: connected 2026-11-26, key `kun-pool` with a $0 credit limit so it can only reach `:free` models (50 requests/day) |
 | paid | off until funded and decided | OpenRouter top-up, DeepSeek, Cerebras: `off` |
 | plan | a subscription, **never pooled** | Claude Max: only in native Claude Code |
 
@@ -68,7 +82,7 @@ Free-tier terms bind the account holder, so every key is the teammate's own and 
 
 ## Scheduled jobs on the pool
 
-A scheduled job opts in through the `free` lane in `.claude/engine.json`: name it in `jobs.$lanes` (a prefix) or set `jobs.<job>.lane` to `free`. `kun-claude.sh` then runs the job through `kun-free.sh` on combo `kun-long` instead of the Max plan, writes the ledger row with lane `free` and cost 0, and keeps running while the plan is parked. If the free run fails, it retries once on haiku. Same data rule as above: only jobs that touch no client data or secrets belong on it. See [Lanes](/docs/lanes).
+A scheduled job opts in through the `free` lane in `.claude/engine.json`: name it in `jobs.$lanes` (a prefix) or set `jobs.<job>.lane` to `free`. `kun-claude.sh` then runs the job through `kun-free.sh` on combo `long` instead of the Max plan, writes the ledger row with lane `free` and cost 0, and keeps running while the plan is parked. If the free run fails, it retries once on haiku. Same data rule as above: only jobs that touch no client data or secrets belong on it. See [Lanes](/docs/lanes).
 
 ## The ledger
 

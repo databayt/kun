@@ -3,14 +3,14 @@
 # is ready, straight to Nous when it is not.
 #
 #   f [claude args…]     run Claude Code on the free lane, with kun's config
-#   f --pool [combo]     force the pool (OmniRoute, combo kun-code unless named: kun-fast, kun-long…)
+#   f --pool [combo]     force the pool (OmniRoute, combo code unless named: fast, long…)
 #   f --direct           force Nous direct, skipping the pool
 #   f --setup            create the lane's own config dir (~/.claude-free)
 #   f --print-env        show what would be exported (token hidden) and stop
 #   f --key              print the key for the current route (the apiKeyHelper; never into a log)
 #
 # Route (auto): the pool when ~/.claude/state/harvest.json says pool_ready and the gateway is up
-# (scripts/harvest/harvest.mjs, every 30 min) — OmniRoute serves combo kun-code and moves to the
+# (scripts/harvest/harvest.mjs, every 30 min) — OmniRoute serves combo code and moves to the
 # next model when one is exhausted; Nous direct otherwise. KUN_FREE_ROUTE=pool|direct pins it.
 #
 # Why Nous: its inference API speaks the Anthropic Messages format at /v1/messages (probed
@@ -20,7 +20,8 @@
 #
 # Models (free-bench 2026-11-24, tool-use bug fix): meituan/longcat-2.5:free passed in 26 s,
 # tencent/hy4-flash:free in 28 s, upstage/solar-mini4:free in 50 s, stepfun/step-3.7-flash:free
-# timed out. opus + sonnet → longcat, haiku + subagents → hy4-flash. Override with
+# timed out. 2026-11-26: Nous removed longcat (404), so opus + sonnet → hy4-flash, haiku +
+# subagents → solar-mini4. Override with
 # KUN_FREE_MODEL / KUN_FREE_SMALL_MODEL.
 #
 # What to know: Anthropic does not support third-party endpoints — Remote Control, cloud
@@ -33,11 +34,11 @@ set -u
 CONFIG="${KUN_FREE_CONFIG:-$HOME/.claude-free}"
 HERMES_DIR="${HERMES_HOME:-$HOME/.hermes}/hermes-agent"
 SELF="$HOME/.claude/bin/kun-free.sh"
-MODEL="${KUN_FREE_MODEL:-meituan/longcat-2.5:free}"
-SMALL="${KUN_FREE_SMALL_MODEL:-tencent/hy4-flash:free}"
+MODEL="${KUN_FREE_MODEL:-tencent/hy4-flash:free}"
+SMALL="${KUN_FREE_SMALL_MODEL:-upstage/solar-mini4:free}"
 POOL_URL="${KUN_POOL_URL:-http://127.0.0.1:20128}"
-COMBO="${KUN_FREE_COMBO:-kun-code}"
-SMALL_COMBO="${KUN_FREE_SMALL_COMBO:-kun-fast}"
+COMBO="${KUN_FREE_COMBO:-code}"
+SMALL_COMBO="${KUN_FREE_SMALL_COMBO:-fast}"
 
 pool_ready() {
     python3 -c "import json,sys;d=json.load(open('$HOME/.claude/state/harvest.json'));sys.exit(0 if d.get('pool_ready') and d.get('combos',{}).get('$COMBO',{}).get('ready') else 1)" 2>/dev/null \
@@ -109,7 +110,7 @@ while [ $# -gt 0 ]; do
         --key) MODE=key ;;
         --print-env) MODE=print-env ;;
         --direct) KUN_FREE_ROUTE=direct ;;
-        --pool) KUN_FREE_ROUTE=pool; case "${2:-}" in kun-*) COMBO="$2"; shift ;; esac ;;
+        --pool) KUN_FREE_ROUTE=pool; case "${2:-}" in code|fast|long|vision|thrifty) COMBO="$2"; shift ;; esac ;;
         *) PASS+=("$1") ;;
     esac
     shift

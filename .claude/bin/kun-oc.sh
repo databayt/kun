@@ -2,12 +2,12 @@
 # kun-oc.sh — the `o` lane: opencode on kun's token pool, so a long session survives one
 # provider's daily cap.
 #
-#   o [opencode args…]          interactive opencode; default model omniroute/kun-long
-#   o run -m omniroute/kun-code "<task>"   one headless step
+#   o [opencode args…]          interactive opencode; default model omniroute/long
+#   o run -m omniroute/code "<task>"   one headless step
 #
 # Why: opencode's keyless Zen models (DeepSeek Flash Free…) are ONE daily quota, with no rotation.
-# OmniRoute (http://127.0.0.1:20128, .claude/scripts/harvest/) serves combos (kun-long, kun-code,
-# kun-fast…) with strategy `priority`. When a member is exhausted or returns 429, the next one
+# OmniRoute (http://127.0.0.1:20128, .claude/scripts/harvest/) serves combos (long, code,
+# fast…) with strategy `priority`. When a member is exhausted or returns 429, the next one
 # serves, under the same session. Every free provider you connect (Machine → Providers, then
 # combos.mjs) adds its quota to every combo.
 #

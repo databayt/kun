@@ -214,10 +214,10 @@ p_pool_ready() {
 import json, sys, time, datetime
 d = json.load(open(sys.argv[1]))
 age = time.time() - datetime.datetime.fromisoformat(d["updated"].replace("Z", "+00:00")).timestamp()
-ready = d.get("pool_ready") and d.get("combos", {}).get("kun-code", {}).get("ready")
-if not ready: print("pool not ready (no connected free provider or empty kun-code)"); sys.exit(1)
+ready = d.get("pool_ready") and d.get("combos", {}).get("code", {}).get("ready")
+if not ready: print("pool not ready (no connected free provider or empty code)"); sys.exit(1)
 if age > 7200: print(f"ledger is {int(age/3600)}h old"); sys.exit(1)
-print(f"pool ready · kun-code {len(d['combos']['kun-code']['members'])} models"); sys.exit(0)
+print(f"pool ready · code {len(d['combos']['code']['members'])} models"); sys.exit(0)
 PY
 }
 p_pool_keys() {

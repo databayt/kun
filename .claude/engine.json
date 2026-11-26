@@ -172,7 +172,7 @@
   "crm": { "model": "sonnet", "effort": "medium", "skill": "inline", "runs": "the lead or funnel agent against Twenty (crm-api.databayt.org); reads and hygiene that a script already does stay on the script lane" },
   "work": { "model": "opus", "effort": "medium", "skill": "inline", "runs": "a department's lead agent working one stage or one work order" },
   "escalate": { "model": "fable", "effort": "xhigh", "runs": "by hand, attended only — never unattended" },
-  "free": { "model": "free", "effort": null, "runner": "kun-free.sh", "combo": "kun-long", "fallback": "mechanical", "runs": "Claude Code on the free pool (kun-free.sh) — $0, own data and internal output only; never client data or secrets" },
+  "free": { "model": "free", "effort": null, "runner": "kun-free.sh", "combo": "long", "fallback": "mechanical", "runs": "Claude Code on the free pool (kun-free.sh) — $0, own data and internal output only; never client data or secrets" },
   "web": { "model": null, "effort": null, "runner": "scripts/web/web.mjs", "runs": "a web seat (ChatGPT/DeepSeek/GLM/Gemini free quota) — text only, $0" },
   "$routes": {
    "$comment": "Keyword and MCP → lane (2026-11-15). resolve.mjs matches a prompt's words against these (whole words, case-insensitive, longest phrase first) and adds one `lane` line to <kun-route>; resolve.mjs --lane \"<task>\" prints the lane for Hermes (default build; captain and escalate never come back from --lane — they cap at judge). An MCP call runs on whatever model makes it: the route says WHO should make it — a lookup batch goes to the haiku Explore agent, not the Opus main loop.",

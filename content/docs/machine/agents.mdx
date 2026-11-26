@@ -29,8 +29,8 @@ Try in order. State of the Pool today: ready; Nous 100% ok, Cloudflare 90% ok, o
 
 | # | Agent | What you get |
 | --- | --- | --- |
-| 1 | **`o`** opencode | DeepSeek v4.1 Flash, free, no key. The best free coder right now. `o -m omniroute/kun-code` runs it on the Pool instead |
-| 2 | **`f`** Claude Code on the Pool | The same skills and agents on LongCat 2.5, then Hunyuan Flash, then Cloudflare gpt-oss-120b, then GLM and Qwen coder. `f --pool kun-long` for long context |
+| 1 | **`o`** opencode | DeepSeek v4.1 Flash, free, no key. The best free coder right now. `o -m omniroute/code` runs it on the Pool instead |
+| 2 | **`f`** Claude Code on the Pool | The same skills and agents on LongCat 2.5, then Hunyuan Flash, then Cloudflare gpt-oss-120b, then GLM and Qwen coder. `f --pool long` for long context |
 | 3 | **`a`** Antigravity | Gemini 3.8 Flash on your Google account. Needs a one-time sign-in |
 | 4 | **Strengthen the Pool** | Add NVIDIA (Nemotron 550B), Groq and Gemini keys, two minutes each. They are `needs-key` today. See [Pool](/docs/machine/pool#add-a-source) |
 
@@ -45,7 +45,7 @@ In a Machine chat the switch is automatic: when Claude hits its limit and the Po
 | `lane <c\|x\|a\|o\|h\|f\|d> "prompt"` | One prompt through any agent, answer printed, no session |
 | `lane models` | Which model each agent is set to |
 | `lane pool` | Every Pool source and combo: status, requests, success rate |
-| `lane --pool [combo] <f\|o> "prompt"` | One prompt on a named Pool combo (`kun-code` default) |
+| `lane --pool [combo] <f\|o> "prompt"` | One prompt on a named Pool combo (`code` default) |
 | `lane test [c a o h f]` | The same bug-fix task through each agent, PASS/FAIL and seconds. **Spends tokens**: run it on purpose |
 | `f --print-env` | Show what `f` would export (token hidden) and stop |
 

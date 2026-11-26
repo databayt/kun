@@ -44,7 +44,7 @@
       "bypassNote": "config-level: no flag exists; the step opencode.allow sets \"permission\": \"allow\" in ~/.config/opencode/opencode.json",
       "agent": "opencode",
       "needs": "opencode.cli",
-      "note": "opencode on the token pool (omniroute/kun-long): the Keychain pool key is exported, then opencode runs; a capped provider hands over to the next (.claude/bin/kun-oc.sh)"
+      "note": "opencode on the token pool (omniroute/long): the Keychain pool key is exported, then opencode runs; a capped provider hands over to the next (.claude/bin/kun-oc.sh)"
     },
     {
       "id": "h",

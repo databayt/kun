@@ -109,7 +109,7 @@ if [ "$MODEL" = "default" ] && [ "$LANE" = free ] && [ "${LANE_RUNNER:--}" != "-
     # model from the pool combo. No --model or --effort goes to claude; the lane stays `free`.
     RUNNER=free; MODEL=free; EFFORT=default
     FREE_BIN="${KUN_FREE_BIN:-$(dirname "$0")/$LANE_RUNNER}"
-    [ "${FREE_COMBO:--}" = "-" ] && FREE_COMBO=kun-code
+    [ "${FREE_COMBO:--}" = "-" ] && FREE_COMBO=code
     if [ "${FB_MODEL:--}" = "-" ]; then FB_LANE=mechanical; FB_MODEL=haiku; FB_EFFORT=low; fi
     [ "${FB_EFFORT:--}" = "-" ] && FB_EFFORT=""
 elif [ "$MODEL" = "default" ]; then

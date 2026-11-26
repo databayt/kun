@@ -4,7 +4,7 @@
 //   node combos.mjs            create/replace every combo in providers.json `combos`
 //   node combos.mjs --dry-run  print what each combo would hold
 //
-// A combo is one class of work (kun-code, kun-fast, kun-vision, kun-long, kun-thrifty). Its
+// A combo is one class of work (code, fast, vision, long, thrifty). Its
 // members are the `roles[<role>]` models of every enabled provider that is CONNECTED in
 // OmniRoute in providers.json order — so the catalog
 // order is the quality ranking. Strategy `priority`: the first healthy member serves; when it
