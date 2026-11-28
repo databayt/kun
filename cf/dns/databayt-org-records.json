@@ -49,6 +49,14 @@
  },
  {
   "type": "AAAA",
+  "name": "law.databayt.org",
+  "ttl": 1,
+  "content": "100::",
+  "proxied": true,
+  "comment": "law — proxied; served by the law Worker route law.databayt.org/* (static assets, no container)"
+ },
+ {
+  "type": "AAAA",
   "name": "thmanyah.databayt.org",
   "ttl": 1,
   "content": "100::",
