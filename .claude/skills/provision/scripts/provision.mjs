@@ -287,6 +287,7 @@ async function execute(args, catalog, out) {
 
   async function onboardingDelta(res) {
     if (Object.keys(optout).length) return; // the onboarding script would reinstall what was removed
+    if (os === "win32" && !process.env.PROVISION_ONBOARD_CMD) return; // onboarding-mac.sh is macOS; Windows steps carry their own fixes
     const failing = steps.filter((s) => ["foundation", "agents", "repos"].includes(s.stage) && res.get(s.id)?.status === "fail" && s.fix?.kind === "auto");
     if (!failing.length) return;
     const missing = AGENT_LANES.filter((l) => failing.some((s) => s.stage === "agents" && (s.id.includes(l) || s.check?.probe?.includes(l))));

@@ -1,0 +1,35 @@
+{
+  "login": "aseel",
+  "name": "Ali Aseel",
+  "os": "windows",
+  "driver": "claude",
+  "department": "sales",
+  "departments": [
+    "sales",
+    "business",
+    "support"
+  ],
+  "repos": [
+    "kun",
+    "hogwarts",
+    "codebase"
+  ],
+  "access": {
+    "code": "read",
+    "workspace": "write",
+    "catalog": "profile",
+    "engine": false
+  },
+  "secrets": [
+    "TWENTY_API_KEY",
+    "TWENTY_API_URL",
+    "OPENROUTER_API_KEY"
+  ],
+  "hidden": [
+    "skill:funnel",
+    "skill:social",
+    "skill:measure",
+    "skill:record",
+    "skill:edit"
+  ]
+}

@@ -264,6 +264,13 @@ p_engine_browser_mcp() {
     has claude || return 2
     claude mcp list 2>/dev/null | grep -qE '^browser:' && ok "browser MCP registered" || bad "no browser MCP (run /mcp-doctor)"
 }
+# the company brain — org memory in the kun clone (.claude/memory), pulled within a week
+p_memory_org() {
+    local m="$KUN_ROOT/.claude/memory" age
+    [ -f "$m/team.json" ] || { bad "no org memory at $m"; return; }
+    age=$(( ( $(date +%s) - $(git -C "$KUN_ROOT" log -1 --format=%ct 2>/dev/null || echo 0) ) / 86400 ))
+    [ "$age" -le 7 ] && ok "$(ls "$m"/facts 2>/dev/null | wc -l | tr -d ' ') facts · pulled ${age}d ago" || bad "memory ${age}d old — sync"
+}
 p_engine_mirror() {
     has node || return 2
     node "$SCRIPT_DIR/mirror-agents.mjs" --check >/dev/null 2>&1 && ok "mirrors in sync" || bad "agent mirrors drifted"

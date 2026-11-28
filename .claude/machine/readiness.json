@@ -3130,6 +3130,584 @@
         "kind": "auto",
         "cmd": "brew uninstall --cask visual-studio-code"
       }
+    },
+    {
+      "id": "win.git",
+      "stage": "foundation",
+      "title": {
+        "ar": "git مثبت",
+        "en": "git installed"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "git",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "winget install --id Git.Git -e --silent --accept-package-agreements --accept-source-agreements"
+      },
+      "update": {
+        "cmd": "winget upgrade --id Git.Git -e --silent --accept-package-agreements --accept-source-agreements",
+        "cadence": "weekly",
+        "auto": true
+      }
+    },
+    {
+      "id": "win.node",
+      "stage": "foundation",
+      "title": {
+        "ar": "Node.js مثبت",
+        "en": "Node.js 24+ installed"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "node",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "winget install --id OpenJS.NodeJS.LTS -e --silent --accept-package-agreements --accept-source-agreements"
+      }
+    },
+    {
+      "id": "win.pnpm",
+      "stage": "foundation",
+      "title": {
+        "ar": "pnpm مثبت",
+        "en": "pnpm installed"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "win.node"
+      ],
+      "human": false,
+      "check": {
+        "probe": "pnpm",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "npm i -g pnpm"
+      }
+    },
+    {
+      "id": "win.jq",
+      "stage": "foundation",
+      "title": {
+        "ar": "jq مثبت (يحتاجه الطبيب)",
+        "en": "jq installed (the doctor needs it)"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "jq",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "winget install --id jqlang.jq -e --silent --accept-package-agreements --accept-source-agreements"
+      }
+    },
+    {
+      "id": "win.gh.installed",
+      "stage": "identity",
+      "title": {
+        "ar": "أداة GitHub مثبتة",
+        "en": "GitHub CLI installed"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "gh.installed",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "winget install --id GitHub.cli -e --silent --accept-package-agreements --accept-source-agreements"
+      }
+    },
+    {
+      "id": "win.gh.auth",
+      "stage": "identity",
+      "title": {
+        "ar": "تسجيل الدخول إلى GitHub",
+        "en": "Signed in to GitHub"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [
+        "win.gh.installed"
+      ],
+      "human": true,
+      "check": {
+        "probe": "gh.auth",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "gh auth login",
+        "message": "Sign in to GitHub in the terminal"
+      }
+    },
+    {
+      "id": "win.anthropic.login",
+      "stage": "accounts",
+      "title": {
+        "ar": "تسجيل الدخول إلى Claude",
+        "en": "Signed in to Claude"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [
+        "win.claude.cli",
+        "win.jq"
+      ],
+      "human": true,
+      "check": {
+        "probe": "anthropic.login",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "claude auth login",
+        "message": "Run claude and sign in with your own account"
+      }
+    },
+    {
+      "id": "win.repo.kun",
+      "stage": "repos",
+      "title": {
+        "ar": "مستودع kun (عقل الشركة)",
+        "en": "kun repo cloned (the company brain)"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [
+        "win.gh.auth"
+      ],
+      "human": false,
+      "check": {
+        "probe": "repo.kun",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "gh repo clone databayt/kun \"$(bash .claude/scripts/kun-ready --repo-path kun)\""
+      },
+      "update": {
+        "cmd": "git -C \"$(bash .claude/scripts/kun-ready --repo-path kun)\" pull --ff-only",
+        "cadence": "daily",
+        "auto": true
+      }
+    },
+    {
+      "id": "win.memory.org",
+      "stage": "repos",
+      "title": {
+        "ar": "ذاكرة الشركة محدّثة",
+        "en": "Company memory up to date"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [
+        "win.repo.kun"
+      ],
+      "human": false,
+      "check": {
+        "probe": "memory.org",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/memory/memory.mjs sync --no-push"
+      }
+    },
+    {
+      "id": "win.claude.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "Claude Code",
+        "en": "Claude Code installed"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "claude.cli",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"irm https://claude.ai/install.ps1 | iex\""
+      },
+      "update": {
+        "cmd": "claude update",
+        "cadence": "daily",
+        "auto": true
+      }
+    },
+    {
+      "id": "win.codex.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "Codex مثبت",
+        "en": "Codex installed"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "win.node"
+      ],
+      "human": false,
+      "check": {
+        "probe": "codex.cli",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "npm i -g @openai/codex"
+      }
+    },
+    {
+      "id": "win.opencode.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "opencode مثبت",
+        "en": "opencode installed"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "win.node"
+      ],
+      "human": false,
+      "check": {
+        "probe": "opencode.cli",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "npm i -g opencode-ai"
+      }
+    },
+    {
+      "id": "win.hermes.cli",
+      "stage": "agents",
+      "title": {
+        "ar": "Hermes مثبت",
+        "en": "Hermes installed"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [],
+      "human": false,
+      "check": {
+        "probe": "hermes.cli",
+        "timeoutS": 20
+      },
+      "fix": {
+        "kind": "link",
+        "url": "https://github.com/NousResearch/hermes-agent",
+        "message": "Install Hermes from its README"
+      }
+    },
+    {
+      "id": "win.engine.mirror",
+      "stage": "engine",
+      "title": {
+        "ar": "مرآة الوكلاء (الذكاء المشترك)",
+        "en": "Agent mirrors in sync (shared intelligence)"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [
+        "win.repo.kun"
+      ],
+      "human": false,
+      "check": {
+        "probe": "engine.mirror",
+        "timeoutS": 40
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/mirror-agents.mjs"
+      }
+    },
+    {
+      "id": "win.compile.claude",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد claude من kun",
+        "en": "claude config compiled from kun"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": "core",
+      "after": [
+        "win.engine.mirror"
+      ],
+      "human": false,
+      "check": {
+        "probe": "compile.claude",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/compile/index.mjs --only claude"
+      }
+    },
+    {
+      "id": "win.compile.codex",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد codex من kun",
+        "en": "codex config compiled from kun"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "win.engine.mirror"
+      ],
+      "human": false,
+      "check": {
+        "probe": "compile.codex",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/compile/index.mjs --only codex"
+      }
+    },
+    {
+      "id": "win.compile.opencode",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد opencode من kun",
+        "en": "opencode config compiled from kun"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "win.engine.mirror"
+      ],
+      "human": false,
+      "check": {
+        "probe": "compile.opencode",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/compile/index.mjs --only opencode"
+      }
+    },
+    {
+      "id": "win.compile.agy",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد agy من kun",
+        "en": "agy config compiled from kun"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "win.engine.mirror"
+      ],
+      "human": false,
+      "check": {
+        "probe": "compile.agy",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "auto",
+        "cmd": "node .claude/scripts/compile/index.mjs --only agy"
+      }
+    },
+    {
+      "id": "win.compile.hermes",
+      "stage": "engine",
+      "title": {
+        "ar": "إعداد hermes من kun",
+        "en": "hermes config compiled from kun"
+      },
+      "os": [
+        "windows"
+      ],
+      "departments": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "gate": false,
+      "after": [
+        "win.engine.mirror"
+      ],
+      "human": true,
+      "check": {
+        "probe": "compile.hermes",
+        "timeoutS": 60
+      },
+      "fix": {
+        "kind": "terminal",
+        "cmd": "node .claude/scripts/compile/index.mjs --only hermes --write",
+        "message": "Review the dry-run, then write Hermes SOUL.md"
+      }
     }
   ]
 }
